@@ -57,6 +57,18 @@ main .sub{color:#555;margin-bottom:18px}
 .gestion button{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
 .gestion button.dorado{background:var(--dorado);color:#12233a}
 .gestion button.secundario{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+.supabase-auth{background:#eef6f9;border:1px solid #c9d4dc;border-radius:14px;padding:16px;margin-bottom:18px}
+.supabase-auth h2{font-size:20px;margin-bottom:6px;color:var(--azul)}
+.supabase-auth p{font-size:14px;color:#444;line-height:1.5;margin-bottom:10px}
+.supabase-auth form{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+.supabase-auth label{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px}
+.supabase-auth input{border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px}
+.supabase-auth button{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
+.supabase-auth button.dorado{background:var(--dorado);color:#12233a}
+.supabase-auth button.secundario{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+.supabase-auth .msg{margin-top:10px;font-weight:700;font-size:14px;min-height:18px}
+.supabase-auth .msg.ok{color:#0f6a4d}
+.supabase-auth .msg.error{color:#b3261e}
 .tabla{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .tabla th{background:var(--azul);color:#fff;text-align:left;padding:12px;font-size:13px}
 .tabla td{padding:12px;border-top:1px solid #eef2f6;font-size:14px;vertical-align:top}
@@ -139,6 +151,7 @@ main .sub{color:#555;margin-bottom:18px}
  <div class="sp"></div>
  <div class="user"><b>José Alcocer</b><span>Administrador</span></div>
  <span class="pill">● Conectado</span>
+  <span class="pill" id="pillSupabase" style="background:#5a6b7a;border-color:#7a8a99">☁️ Sin sesión</span>
  <button class="menu-btn" onclick="salirAdmin()" title="Salir" style="font-size:18px">Salir</button>
 </header>
 <div class="fondo" id="fondoMenu" onclick="toggleMenu()"></div>
@@ -169,8 +182,23 @@ main .sub{color:#555;margin-bottom:18px}
    <div class="tarjeta"><small>LICENCIAS ACTIVAS</small><b id="resActivas">0</b></div>
    <div class="tarjeta"><small>RESERVAS DISPONIBLES</small><b id="resReservas">0</b></div>
   </div>
-  <div class="gestion">
-   <h2>Crear licencia</h2>
+   <div class="supabase-auth" id="panelSupabaseAuth">
+    <h2>☁️ Sincronización con Supabase</h2>
+    <p id="textoEstadoSupabase">⚠️ Se requiere inicio de sesión Supabase para sincronizar a la nube. Sin sesión, Admin trabaja solo en local.</p>
+    <form id="formSupabaseAuth" onsubmit="event.preventDefault();entrarSupabase()">
+     <div><label>Correo de Supabase</label><input id="correoSupabase" type="email" placeholder="tu correo de Supabase" autocomplete="email" required></div>
+     <div><label>Contraseña de Supabase</label><input id="claveSupabase" type="password" placeholder="Tu contraseña de Supabase" autocomplete="current-password" required></div>
+     <button type="submit" class="dorado">Entrar con Supabase</button>
+    </form>
+    <div id="zonaSesionSupabase" class="oculto">
+     <p style="margin-bottom:8px">✅ Sesión Supabase activa: <b id="correoSesionSupabase"></b></p>
+     <button type="button" class="secundario" onclick="salirSupabase()">Cerrar sesión Supabase</button>
+    </div>
+    <div class="msg" id="msgSupabase"></div>
+    <p style="font-size:12px;color:#666;margin-top:8px">El PIN 123456 abre Admin en este dispositivo. El inicio de sesión Supabase es aparte y solo sirve para sincronizar licencias a la nube. Tu contraseña de Supabase nunca se guarda en el código ni en localStorage.</p>
+   </div>
+   <div class="gestion">
+    <h2>Crear licencia</h2>
    <form onsubmit="event.preventDefault();crearLicencia()">
     <div><label>Negocio</label><input id="licNegocio" type="text" placeholder="Nombre del negocio" required></div>
     <div><label>Tipo</label><select id="licTipo" onchange="toggleMesesLic()"><option value="Por vida">Por vida</option><option value="Renta">Renta</option></select></div>
@@ -225,17 +253,67 @@ main .sub{color:#555;margin-bottom:18px}
 </div>
 
 <script>
-/* KUPO Admin · Supabase (nube) — al listar/crear/activar/pausar/eliminar licencias se intenta
-   sincronizar con la tabla licencias en Supabase (insert/update/delete por clave). Sin
-   internet o si Supabase falla, todo se guarda solo en localStorage y la app sigue
-   funcionando igual; la sincronización se reintenta en el siguiente listado. */
+/* KUPO Admin · Supabase (nube) — escritura autenticada.
+   Solo lectura con la clave anon: el POS valida licencias con anon (solo lectura).
+   En Admin, Crear/Activar/Pausar/Eliminar licencias solo se sincronizan a la nube
+   cuando hay una sesión de Supabase Auth (signInWithPassword). Sin sesión,
+   Admin trabaja solo en localStorage y muestra el aviso
+   "Se requiere inicio de sesión Supabase para sincronizar a la nube."
+   La contraseña de Supabase nunca se guarda en el código ni en localStorage;
+   la sesión la guarda el cliente de Supabase. Nunca se usa la service_role key. */
 const SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 let kupoSupabase=null;
 try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
+let sesionSupabase=false;
+let correoSesionSupabase='';
+function actualizarEstadoSupabase(){
+ let t=document.getElementById('textoEstadoSupabase');let p=document.getElementById('pillSupabase');
+ let f=document.getElementById('formSupabaseAuth');let z=document.getElementById('zonaSesionSupabase');
+ if(!t)return;
+ if(sesionSupabase){
+  t.textContent='✅ Sesión Supabase activa ('+correoSesionSupabase+'). Crear, activar, pausar y eliminar licencias se sincronizan a la nube.';
+  if(p){p.textContent='☁️ Sesión activa';p.style.background='#0f6a4d';p.style.borderColor='#2ea37c';}
+  if(f)f.classList.add('oculto');if(z)z.classList.remove('oculto');
+  let c=document.getElementById('correoSesionSupabase');if(c)c.textContent=correoSesionSupabase;
+ }else{
+  t.textContent='⚠️ Se requiere inicio de sesión Supabase para sincronizar a la nube. Sin sesión, Admin trabaja solo en local.';
+  if(p){p.textContent='☁️ Sin sesión';p.style.background='#5a6b7a';p.style.borderColor='#7a8a99';}
+  if(f)f.classList.remove('oculto');if(z)z.classList.add('oculto');
+ }
+}
+async function entrarSupabase(){
+ let m=document.getElementById('msgSupabase');
+ let correo=(document.getElementById('correoSupabase').value||'').trim();
+ let clave=document.getElementById('claveSupabase').value||'';
+ if(!kupoSupabase){m.textContent='Sin conexión a Supabase. Revisa tu internet.';m.className='msg error';return;}
+ if(!correo||!clave){m.textContent='Escribe tu correo y tu contraseña de Supabase.';m.className='msg error';return;}
+ m.textContent='Entrando a Supabase…';m.className='msg';
+ try{
+  let r=await kupoSupabase.auth.signInWithPassword({email:correo,password:clave});
+  if(r.error)throw r.error;
+  sesionSupabase=true;correoSesionSupabase=correo;
+  document.getElementById('claveSupabase').value='';
+  m.textContent='✅ Sesión Supabase activa.';m.className='msg ok';
+  actualizarEstadoSupabase();toast('Sesión Supabase activa');
+  sincronizarTodasLicenciasNube();
+ }catch(e){sesionSupabase=false;actualizarEstadoSupabase();m.textContent='No se pudo entrar a Supabase: '+(e.message||'revisa tu correo y contraseña');m.className='msg error';}
+}
+async function salirSupabase(){
+ try{if(kupoSupabase)await kupoSupabase.auth.signOut();}catch(e){}
+ sesionSupabase=false;correoSesionSupabase='';
+ let m=document.getElementById('msgSupabase');if(m){m.textContent='Sesión Supabase cerrada. Admin trabaja solo en local.';m.className='msg';}
+ actualizarEstadoSupabase();
+}
+async function revisarSesionSupabase(){
+ if(!kupoSupabase)return;
+ try{let r=await kupoSupabase.auth.getSession();if(r.data&&r.data.session&&r.data.session.user){sesionSupabase=true;correoSesionSupabase=r.data.session.user.email||'';sincronizarTodasLicenciasNube();}}catch(e){sesionSupabase=false;}
+ actualizarEstadoSupabase();
+}
 function datosLicenciaNube(l){return{clave:l.clave,negocio:l.negocio,tipo:l.tipo,estado:l.estado,fecha_alta:l.alta||null,fecha_vencimiento:l.vencimiento||null};}
 async function sincronizarLicenciaNube(l){
  if(!kupoSupabase||!l||!l.clave)return false;
+ if(!sesionSupabase){console.log("KUPO Admin: se requiere inicio de sesión Supabase para sincronizar a la nube.");return false;}
  try{
   let ex=await kupoSupabase.from("licencias").select("id").eq("clave",l.clave).maybeSingle();
   if(ex.error)throw ex.error;
@@ -248,10 +326,11 @@ async function sincronizarLicenciaNube(l){
 }
 async function eliminarLicenciaNube(clave){
  if(!kupoSupabase||!clave)return false;
+ if(!sesionSupabase){console.log("KUPO Admin: se requiere inicio de sesión Supabase para sincronizar a la nube.");return false;}
  try{let r=await kupoSupabase.from("licencias").delete().eq("clave",clave);if(r.error)throw r.error;return true;}
  catch(e){console.log("KUPO Admin: sin conexión a Supabase, licencia eliminada solo local.",e);return false;}
 }
-async function sincronizarTodasLicenciasNube(){if(!kupoSupabase)return;for(let l of licencias){await sincronizarLicenciaNube(l);}}
+async function sincronizarTodasLicenciasNube(){if(!kupoSupabase||!sesionSupabase)return;for(let l of licencias){await sincronizarLicenciaNube(l);}}
 let ultimaSincNube=0;
 function sincronizarTodasLicenciasNubeLimitado(){let ahora=Date.now();if(ahora-ultimaSincNube<30000)return;ultimaSincNube=ahora;sincronizarTodasLicenciasNube();}
 let licencias=JSON.parse(localStorage.getItem('kupoLicenciasCompartidas')||'null');
@@ -300,6 +379,7 @@ function renderResumen(){
  document.getElementById('resReservasTot').textContent=reservas.length;
 }
 function renderLicencias(){
+ actualizarEstadoSupabase();
  sincronizarTodasLicenciasNubeLimitado();
  renderResumen();
  let q=(document.getElementById('buscarLic').value||'').toLowerCase();
@@ -315,13 +395,13 @@ function crearLicencia(){
  let licSinc=null;
  if(editandoLic){let l=licencias.find(x=>x.id===editandoLic);l.negocio=neg;l.tipo=tipo;l.vencimiento=venc;licSinc=l;toast('Licencia actualizada');}
  else{let clave=generarClave();licSinc={id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc};licencias.push(licSinc);toast('Licencia creada: '+clave);}
- editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();if(licSinc)sincronizarLicenciaNube(licSinc);
+ editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();if(licSinc)sincronizarLicenciaNube(licSinc);if(!sesionSupabase)toast('Guardado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.');
 }
 function toggleMesesLic(){document.getElementById('campoMeses').style.display=document.getElementById('licTipo').value==='Renta'?'':'none'}
 function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;toggleMesesLic();window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}
 function cancelarEdicionLic(){editandoLic=null;document.getElementById('licNegocio').value=''}
-function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.estado=l.estado==='Pausada'?'Activa':'Pausada';guardar();renderLicencias();sincronizarLicenciaNube(l);toast(l.negocio+' ahora está '+l.estado)}
-function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;let claveBorrada=l.clave;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();eliminarLicenciaNube(claveBorrada);toast('Licencia eliminada')}
+function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.estado=l.estado==='Pausada'?'Activa':'Pausada';guardar();renderLicencias();sincronizarLicenciaNube(l);toast(l.negocio+' ahora está '+l.estado);if(!sesionSupabase)toast('Guardado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.')}
+function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;let claveBorrada=l.clave;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();eliminarLicenciaNube(claveBorrada);toast('Licencia eliminada');if(!sesionSupabase)toast('Eliminado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.')}
 function renderReservas(){
  renderResumen();
  document.getElementById('listaReservas').innerHTML=!reservas.length?'<tr><td colspan="5" style="text-align:center;color:#666;padding:16px">Aún no hay reservas registradas. Crea una reserva para tener un código KUPO-XXXX-XXXX listo para asignar a un negocio.</td></tr>':reservas.map((r,i)=>'<tr><td><b>'+r.codigo+'</b></td><td><span class="estado '+(r.estado==='Disponible'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+(r.negocio||'Sin negocio')+'</td><td>'+fechaBonita(r.fecha)+'</td><td><button onclick="copiarReserva('+i+')">Copiar</button> <button class="peligro" onclick="eliminarReserva('+i+')">Eliminar</button></td></tr>').join('');
@@ -357,6 +437,7 @@ function salirAdmin(){localStorage.removeItem('kupoAdminSesion');limpiarPin();do
   tec.appendChild(b);
  });
  semilla();
+ revisarSesionSupabase();
  if(localStorage.getItem('kupoAdminSesion')==='1'){document.getElementById('pantallaAdminLogin').classList.add('oculto');document.getElementById('appAdmin').classList.remove('oculto');renderLicencias();renderReservas();renderTerminales();renderRespaldos();}
 })();
 </script>
