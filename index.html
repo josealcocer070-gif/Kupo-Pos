@@ -229,6 +229,7 @@ main h1{font-size:34px;margin-bottom:14px}
 .caj-fila-botones button:hover{background:#eef6fb}
 @media(max-width:760px){.caj-fila-botones button{flex:1 1 40%}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1625,7 +1626,75 @@ function mostrarPasoLogin(){document.getElementById("pantallaLogin").classList.r
 const CLAVES_PRUEBA=["KUPO-7F2A-91BC","KUPO-3D8E-44F1","KUPO-9A1C-77D2"];
 function leerLicenciasCompartidas(){try{let l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"null");return Array.isArray(l)?l:[]}catch(e){return[]}}
 function estadoLicencia(l){if(l.estado==="Pausada")return "Pausada";if(l.estado==="Vencida")return "Vencida";if(l.vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.vencimiento+"T00:00:00")<hoy)return "Vencida"}return "Activa"}
-function validarLicencia(){const c=document.getElementById("claveLicencia").value.trim().toUpperCase();const m=document.getElementById("msgLicencia");if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return}if(CLAVES_PRUEBA.indexOf(c)!==-1){m.textContent="Esa clave era de prueba y ya no existe. Crea una licencia nueva en KUPO Admin.";m.className="msg error";return}let lista=leerLicenciasCompartidas();if(!lista.length){m.textContent="Aún no hay licencias en KUPO Admin. Crea y activa una licencia en Admin para entrar.";m.className="msg error";return}let lic=lista.find(x=>x.clave===c);if(!lic){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return}let est=estadoLicencia(lic);if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return}if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return}localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SUCURSAL PRINCIPAL · V1.4.6";let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();}
+/* KUPO POS · Supabase (nube) — licencias en la nube, localStorage como respaldo sin internet.
+   La anon key es pública por diseño de Supabase (va en el cliente); si no hay internet o
+   Supabase falla, se valida contra kupoLicenciasCompartidas local como antes. Si hay
+   internet y la nube dice Pausada/Vencida/no existe, la nube manda. */
+const SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
+let kupoSupabase=null;
+try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
+async function consultarLicenciaNube(clave){
+ if(!kupoSupabase)return{disponible:false};
+ try{
+  const r=await kupoSupabase.from("licencias").select("clave,estado,negocio,tipo,fecha_alta,fecha_vencimiento").eq("clave",clave).maybeSingle();
+  if(r.error)return{disponible:false,error:r.error};
+  if(!r.data)return{disponible:true,existe:false};
+  return{disponible:true,existe:true,lic:r.data};
+ }catch(e){return{disponible:false,error:e};}
+}
+function estadoLicenciaNube(l){
+ if(!l)return"Activa";
+ if(l.estado==="Pausada")return"Pausada";
+ if(l.estado==="Vencida")return"Vencida";
+ if(l.fecha_vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.fecha_vencimiento+"T00:00:00")<hoy)return"Vencida";}
+ if(l.estado==="Activa")return"Activa";
+ return l.estado||"Activa";
+}
+function guardarLicenciaLocalDesdeNube(nube){
+ try{
+  let lista=leerLicenciasCompartidas();
+  let i=lista.findIndex(x=>x.clave===nube.clave);
+  let loc={clave:nube.clave,negocio:nube.negocio||"",tipo:nube.tipo||"Renta",estado:nube.estado||"Activa",vencimiento:nube.fecha_vencimiento||""};
+  if(nube.fecha_alta)loc.alta=nube.fecha_alta;
+  if(i>=0){let prev=lista[i];lista[i]=Object.assign({},prev,loc);if(!nube.fecha_alta&&prev.alta)lista[i].alta=prev.alta;}
+  else{lista.push(Object.assign({id:Date.now(),alta:nube.fecha_alta||""},loc));}
+  localStorage.setItem("kupoLicenciasCompartidas",JSON.stringify(lista));
+ }catch(e){}
+}
+function entrarConLicencia(c,lic){
+ localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();
+ if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SUCURSAL PRINCIPAL · V1.4.6";let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
+ const m=document.getElementById("msgLicencia");m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();
+}
+function validarLicenciaLocal(c){
+ const m=document.getElementById("msgLicencia");
+ let lista=leerLicenciasCompartidas();
+ if(!lista.length){m.textContent="Aún no hay licencias en KUPO Admin. Crea y activa una licencia en Admin para entrar.";m.className="msg error";return false;}
+ let lic=lista.find(x=>x.clave===c);
+ if(!lic){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return false;}
+ let est=estadoLicencia(lic);
+ if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return false;}
+ if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return false;}
+ entrarConLicencia(c,lic);return true;
+}
+async function validarLicencia(){
+ const c=document.getElementById("claveLicencia").value.trim().toUpperCase();
+ const m=document.getElementById("msgLicencia");
+ if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return;}
+ if(CLAVES_PRUEBA.indexOf(c)!==-1){m.textContent="Esa clave era de prueba y ya no existe. Crea una licencia nueva en KUPO Admin.";m.className="msg error";return;}
+ const nube=await consultarLicenciaNube(c);
+ if(nube.disponible){
+  if(!nube.existe){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return;}
+  let est=estadoLicenciaNube(nube.lic);
+  if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return;}
+  if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return;}
+  if(est!=="Activa"){m.textContent="Licencia no activa en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return;}
+  guardarLicenciaLocalDesdeNube(nube.lic);
+  entrarConLicencia(c,nube.lic);return;
+ }
+ validarLicenciaLocal(c);
+}
 function actualizarPuntosPin(){const v=document.getElementById("pinLogin").value;document.getElementById("pinPuntos").textContent="●".repeat(v.length)+"○".repeat(Math.max(0,6-v.length));}
 function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
 function teclaPin(d){vibrarPin();const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
@@ -1657,8 +1726,18 @@ document.getElementById("eProducto").addEventListener("change",mostrarStockActua
 const ea0=document.getElementById("eAlmacen");if(ea0)ea0.addEventListener("change",mostrarStockActual);
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-const licGuardada=localStorage.getItem("kupoPosV146Licencia");
-if(licGuardada){let listaGuardada=leerLicenciasCompartidas();let licOk=false;if(CLAVES_PRUEBA.indexOf(licGuardada)!==-1){licOk=false}else{let lg=listaGuardada.find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa"}if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}}
+/* Licencia guardada: si hay internet, manda la nube; sin internet, el respaldo local. */
+(async function validarLicenciaGuardada(){
+ const licGuardada=localStorage.getItem("kupoPosV146Licencia");
+ if(!licGuardada)return;
+ if(CLAVES_PRUEBA.indexOf(licGuardada)!==-1){localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";return;}
+ const nube=await consultarLicenciaNube(licGuardada);
+ let licOk=false;
+ if(nube.disponible){licOk=!!nube.existe&&estadoLicenciaNube(nube.lic)==="Activa";if(licOk)guardarLicenciaLocalDesdeNube(nube.lic);}
+ else{let lg=leerLicenciasCompartidas().find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa";}
+ if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}
+ else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}
+})();
 const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
 /* Migración 3.2: si ya había un PIN guardado, es el PIN del Administrador */
 const pinGuardado=localStorage.getItem("kupoPosV146Pin");

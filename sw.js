@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.4.6: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v1';
+const CACHE = 'kupo-pos-v2'; /* v2: nueva versión con conexión Supabase en index.html y admin.html */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {

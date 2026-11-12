@@ -103,6 +103,7 @@ main .sub{color:#555;margin-bottom:18px}
  .inicio-tarjeta{padding:22px 16px}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -224,6 +225,35 @@ main .sub{color:#555;margin-bottom:18px}
 </div>
 
 <script>
+/* KUPO Admin · Supabase (nube) — al listar/crear/activar/pausar/eliminar licencias se intenta
+   sincronizar con la tabla licencias en Supabase (insert/update/delete por clave). Sin
+   internet o si Supabase falla, todo se guarda solo en localStorage y la app sigue
+   funcionando igual; la sincronización se reintenta en el siguiente listado. */
+const SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
+let kupoSupabase=null;
+try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
+function datosLicenciaNube(l){return{clave:l.clave,negocio:l.negocio,tipo:l.tipo,estado:l.estado,fecha_alta:l.alta||null,fecha_vencimiento:l.vencimiento||null};}
+async function sincronizarLicenciaNube(l){
+ if(!kupoSupabase||!l||!l.clave)return false;
+ try{
+  let ex=await kupoSupabase.from("licencias").select("id").eq("clave",l.clave).maybeSingle();
+  if(ex.error)throw ex.error;
+  let r;
+  if(ex.data&&ex.data.id){r=await kupoSupabase.from("licencias").update(datosLicenciaNube(l)).eq("id",ex.data.id);}
+  else{r=await kupoSupabase.from("licencias").insert(datosLicenciaNube(l));}
+  if(r.error)throw r.error;
+  return true;
+ }catch(e){console.log("KUPO Admin: sin conexión a Supabase, licencia guardada solo local.",e);return false;}
+}
+async function eliminarLicenciaNube(clave){
+ if(!kupoSupabase||!clave)return false;
+ try{let r=await kupoSupabase.from("licencias").delete().eq("clave",clave);if(r.error)throw r.error;return true;}
+ catch(e){console.log("KUPO Admin: sin conexión a Supabase, licencia eliminada solo local.",e);return false;}
+}
+async function sincronizarTodasLicenciasNube(){if(!kupoSupabase)return;for(let l of licencias){await sincronizarLicenciaNube(l);}}
+let ultimaSincNube=0;
+function sincronizarTodasLicenciasNubeLimitado(){let ahora=Date.now();if(ahora-ultimaSincNube<30000)return;ultimaSincNube=ahora;sincronizarTodasLicenciasNube();}
 let licencias=JSON.parse(localStorage.getItem('kupoLicenciasCompartidas')||'null');
 let reservas=JSON.parse(localStorage.getItem('kupoAdminReservas')||'null');
 let pinAdmin='';
@@ -243,6 +273,7 @@ function semilla(){
  reservas=reservas.filter(r=>!(r.fecha==='2026-08-18'&&!r.negocio&&r.estado==='Disponible'));
  if(!localStorage.getItem('kupoAdminPruebaCreada')&&!licencias.some(l=>l.negocio==='Mi negocio - PRUEBA')){licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:'Mi negocio - PRUEBA',clave:'KUPO-MNEG-PRUE',tipo:'Renta',estado:'Pausada',alta:'2026-11-12',vencimiento:'2026-12-12'});localStorage.setItem('kupoAdminPruebaCreada','1');}
  guardar();
+ sincronizarTodasLicenciasNube();
 }
 const TERMINALES=[]; // En cero: se registran cuando un negocio activa su licencia y conecta su terminal.
 const RESPALDOS=[]; // En cero: aún no hay respaldos registrados en este Admin.
@@ -269,6 +300,7 @@ function renderResumen(){
  document.getElementById('resReservasTot').textContent=reservas.length;
 }
 function renderLicencias(){
+ sincronizarTodasLicenciasNubeLimitado();
  renderResumen();
  let q=(document.getElementById('buscarLic').value||'').toLowerCase();
  let f=document.getElementById('filtroLic').value;
@@ -280,15 +312,16 @@ function crearLicencia(){
  let neg=document.getElementById('licNegocio').value.trim();if(!neg){toast('Escribe el nombre del negocio');return}
  let tipo=document.getElementById('licTipo').value;let meses=parseInt(document.getElementById('licMeses').value)||12;
  let venc='';if(tipo==='Renta'){let d=new Date();d.setMonth(d.getMonth()+meses);venc=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
- if(editandoLic){let l=licencias.find(x=>x.id===editandoLic);l.negocio=neg;l.tipo=tipo;l.vencimiento=venc;toast('Licencia actualizada');}
- else{let clave=generarClave();licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc});toast('Licencia creada: '+clave);}
- editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();
+ let licSinc=null;
+ if(editandoLic){let l=licencias.find(x=>x.id===editandoLic);l.negocio=neg;l.tipo=tipo;l.vencimiento=venc;licSinc=l;toast('Licencia actualizada');}
+ else{let clave=generarClave();licSinc={id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc};licencias.push(licSinc);toast('Licencia creada: '+clave);}
+ editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();if(licSinc)sincronizarLicenciaNube(licSinc);
 }
 function toggleMesesLic(){document.getElementById('campoMeses').style.display=document.getElementById('licTipo').value==='Renta'?'':'none'}
 function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;toggleMesesLic();window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}
 function cancelarEdicionLic(){editandoLic=null;document.getElementById('licNegocio').value=''}
-function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.estado=l.estado==='Pausada'?'Activa':'Pausada';guardar();renderLicencias();toast(l.negocio+' ahora está '+l.estado)}
-function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();toast('Licencia eliminada')}
+function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.estado=l.estado==='Pausada'?'Activa':'Pausada';guardar();renderLicencias();sincronizarLicenciaNube(l);toast(l.negocio+' ahora está '+l.estado)}
+function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;let claveBorrada=l.clave;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();eliminarLicenciaNube(claveBorrada);toast('Licencia eliminada')}
 function renderReservas(){
  renderResumen();
  document.getElementById('listaReservas').innerHTML=!reservas.length?'<tr><td colspan="5" style="text-align:center;color:#666;padding:16px">Aún no hay reservas registradas. Crea una reserva para tener un código KUPO-XXXX-XXXX listo para asignar a un negocio.</td></tr>':reservas.map((r,i)=>'<tr><td><b>'+r.codigo+'</b></td><td><span class="estado '+(r.estado==='Disponible'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+(r.negocio||'Sin negocio')+'</td><td>'+fechaBonita(r.fecha)+'</td><td><button onclick="copiarReserva('+i+')">Copiar</button> <button class="peligro" onclick="eliminarReserva('+i+')">Eliminar</button></td></tr>').join('');
