@@ -96,6 +96,40 @@ main h1{font-size:34px;margin-bottom:14px}
  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
  .card .foto{height:110px;font-size:52px}
 }
+
+/* Paso 2 · Productos / Inventario */
+.resumen{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.resumen .tarjeta{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:14px}
+.resumen .tarjeta small{display:block;color:#666;font-size:12px;font-weight:700;letter-spacing:.5px}
+.resumen .tarjeta b{font-size:24px;color:var(--azul)}
+.resumen .tarjeta b.alerta{color:#d97706}
+.form-prod{background:#fff;border:1px solid #dfe5ea;border-radius:14px;padding:16px;margin-bottom:18px}
+.form-prod h2{font-size:20px;margin-bottom:10px}
+.form-prod form{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+.form-prod label{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px}
+.form-prod input,.form-prod select{border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px}
+.form-prod button{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
+.form-prod button.secundario{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+.prod-lista{display:flex;flex-direction:column;gap:12px}
+.prod-row{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:14px;display:flex;gap:14px;align-items:center}
+.prod-row .foto{width:64px;height:64px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(135deg,#fde8d8,#ffe9c2)}
+.prod-row .info{flex:1;min-width:0}
+.prod-row .info h3{font-size:17px}
+.prod-row .info p{font-size:13px;color:#555;margin-top:2px}
+.prod-row .precio{font-size:20px;font-weight:800;white-space:nowrap}
+.estado{font-size:12px;font-weight:800;border-radius:16px;padding:4px 10px;white-space:nowrap}
+.estado.disponible{background:#d1fae5;color:#065f46}
+.estado.agotado{background:#fee2e2;color:#991b1b}
+.estado.pausado{background:#e5e7eb;color:#374151}
+.prod-row .acciones-prod{display:flex;flex-direction:column;gap:6px}
+.prod-row .acciones-prod button{border:1px solid #c9d4dc;background:#fff;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.prod-row .acciones-prod button.peligro{color:#b3261e;border-color:#e5b6b3}
+@media(max-width:760px){.resumen{grid-template-columns:repeat(2,1fr)}.prod-row{flex-wrap:wrap}.prod-row .acciones-prod{flex-direction:row;width:100%}}
+
+/* Productos a todo el ancho: sin panel de venta */
+.layout.sin-panel{grid-template-columns:230px 1fr}
+@media(max-width:1150px){.layout.sin-panel{grid-template-columns:200px 1fr}.layout.sin-panel .panel{display:none}}
+@media(max-width:760px){.layout.sin-panel{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -114,17 +148,17 @@ main h1{font-size:34px;margin-bottom:14px}
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
 <button class="acc" onclick="toast('Registrar gasto de efectivo: se define en el siguiente paso.')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" onclick="corteCaja()">💳 Realizar corte de caja</button>
-<button class="acc" onclick="toggleGestion()">🕐 Gestionar productos</button>
+<button class="acc" onclick="mostrarVista('productos')">🕐 Gestionar productos</button>
 <button class="acc" onclick="toast('KUPO POS ya está actualizado a la versión V1.4.6.')">🔄 Actualizar de KUPO POS</button>
 <button class="acc" onclick="toast('Instalar KUPO POS: agrega esta página a tu pantalla de inicio desde el menú del navegador.')">🔑 Instalar KUPO POS</button>
 <button class="acc cerrar" onclick="cerrarTurno()">⇤ Cerrar turno</button>
 </div>
 
-<div class="layout">
+<div class="layout" id="layout">
 <aside>
 <nav>
-<a class="activo" onclick="toast('Estás en Ventas.')">🧾 Ventas</a>
-<a onclick="toggleGestion()">📦 Productos</a>
+<a class="activo" id="navVentas" onclick="mostrarVista('ventas')">🧾 Ventas</a>
+<a id="navProductos" onclick="mostrarVista('productos')">📦 Productos</a>
 <a onclick="toast('Entradas: se define en el siguiente paso.')">➕ Entradas</a>
 <a onclick="toast('Gastos: se define en el siguiente paso.')">💲 Gastos</a>
 <a onclick="corteCaja()">📊 Corte diario</a>
@@ -143,6 +177,7 @@ main h1{font-size:34px;margin-bottom:14px}
 </aside>
 
 <main>
+<div id="vistaVentas">
 <h1>Menú</h1>
 <div class="gestion oculto" id="gestion">
 <h2>Gestionar productos</h2>
@@ -161,9 +196,41 @@ main h1{font-size:34px;margin-bottom:14px}
 <select id="filtro" onchange="render()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option></select>
 </div>
 <div class="grid" id="grid"></div>
+</div>
+
+<div id="vistaProductos" class="oculto">
+<h1>Productos</h1>
+<p style="color:#555;margin-bottom:14px">Inventario del negocio. Lo que cambies aquí se refleja en Ventas: si el stock llega a 0, el producto ya no se puede agregar a la venta, y al cobrar baja el stock.</p>
+<div class="resumen">
+<div class="tarjeta"><small>TOTAL PRODUCTOS</small><b id="resTotal">0</b></div>
+<div class="tarjeta"><small>DISPONIBLES</small><b id="resDisp">0</b></div>
+<div class="tarjeta"><small>AGOTADOS / PAUSADOS</small><b class="alerta" id="resAgot">0</b></div>
+<div class="tarjeta"><small>VALOR EN INVENTARIO</small><b id="resValor">$0.00</b></div>
+</div>
+<div class="form-prod">
+<h2 id="tituloFormProd">+ Nuevo producto</h2>
+<form onsubmit="guardarProducto(event)">
+<input type="hidden" id="pId">
+<div><label>Nombre del producto</label><input id="pNombre" placeholder="Ej. Pan Bolillo" required></div>
+<div><label>Precio $</label><input id="pPrecio" type="number" min="0" step="0.01" placeholder="0.00" required></div>
+<div><label>Stock (pzas)</label><input id="pStock" type="number" min="0" step="1" placeholder="0" required></div>
+<div><label>Categoría</label><select id="pCategoria"><option>Panadería</option><option>Comida</option><option>Bebida</option><option>Postres</option><option>General</option></select></div>
+<div><label>Foto</label><select id="pEmoji"><option>🍞</option><option>🥐</option><option>🥪</option><option>🍩</option><option>🧃</option><option>☕</option><option>📦</option></select></div>
+<div><label>Estado</label><select id="pEstado"><option value="disponible">Disponible</option><option value="pausado">Pausado</option></select></div>
+<button type="submit">💾 Guardar producto</button>
+<button type="button" class="secundario" onclick="cancelarEdicion()">Cancelar</button>
+<button type="button" class="secundario" onclick="restablecerEjemplo()">Restablecer ejemplo</button>
+</form>
+</div>
+<div class="buscar">
+<input id="buscarProd" placeholder="🔍 Buscar producto..." oninput="renderProductos()">
+<select id="filtroProd" onchange="renderProductos()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option><option value="pausados">Pausados</option></select>
+</div>
+<div class="prod-lista" id="listaProductos"></div>
+</div>
 </main>
 
-<section class="panel">
+<section class="panel" id="panelVenta">
 <h2>🛒 Venta en curso <span class="badge" id="nArticulos">0 artículos</span></h2>
 <p class="sub">Folio se asigna al cobrar · Cliente general</p>
 <p class="fecha">📅 <span id="fecha"></span></p>
@@ -190,18 +257,18 @@ main h1{font-size:34px;margin-bottom:14px}
 <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
 <button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 1: ventas, catálogo editable y cobrar. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos / Inventario sincronizado con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
 </section>
 </div>
 
 <script>
 const EJEMPLO=[
- {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞"},
- {id:2,nombre:"Club Sandwich con papas (pausado)",precio:75,stock:0,emoji:"🥪",pausado:true},
- {id:3,nombre:"Pan Bolillo",precio:15,stock:30,emoji:"🍞"},
- {id:4,nombre:"Combo Yanay",precio:110,stock:4,emoji:"🍩"},
- {id:5,nombre:"Croissant Artesanal",precio:40,stock:12,emoji:"🥐"},
- {id:6,nombre:"Cuernito J/Q",precio:35,stock:5,emoji:"🥐"}
+ {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"Panadería"},
+ {id:2,nombre:"Club Sandwich con papas (pausado)",precio:75,stock:0,emoji:"🥪",pausado:true,categoria:"Comida"},
+ {id:3,nombre:"Pan Bolillo",precio:15,stock:30,emoji:"🍞",categoria:"Panadería"},
+ {id:4,nombre:"Combo Yanay",precio:110,stock:4,emoji:"🍩",categoria:"Comida"},
+ {id:5,nombre:"Croissant Artesanal",precio:40,stock:12,emoji:"🥐",categoria:"Panadería"},
+ {id:6,nombre:"Cuernito J/Q",precio:35,stock:5,emoji:"🥐",categoria:"Panadería"}
 ];
 let catalogo=JSON.parse(localStorage.getItem("kupoPosV146Catalogo")||"null")||EJEMPLO;
 let ticket=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"[]");
@@ -223,6 +290,7 @@ function render(){
   grid.appendChild(d);
  });
  renderTicket();
+ if(vistaActual==="productos")renderProductos();
 }
 function renderTicket(){
  const box=document.getElementById("ticket");
@@ -255,8 +323,66 @@ function cobrar(){
 }
 function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=parseInt(document.getElementById("nuevoStock").value);const emoji=document.getElementById("nuevoEmoji").value;if(!nombre||isNaN(precio)||isNaN(stock))return;catalogo.push({id:Date.now()+uid++,nombre,precio,stock,emoji});e.target.reset();guardar();render();toast("Producto agregado: "+nombre);}
 function editar(id){const p=catalogo.find(x=>x.id===id);if(!p)return;const n=prompt("Nombre del producto:",p.nombre);if(n===null)return;const pr=prompt("Precio:",p.precio);const st=prompt("Stock (pzas):",p.stock);if(pr!==null&&!isNaN(parseFloat(pr)))p.precio=parseFloat(pr);if(st!==null&&!isNaN(parseInt(st)))p.stock=parseInt(st);if(n.trim())p.nombre=n.trim();guardar();render();}
-function eliminar(id){const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){catalogo=catalogo.filter(x=>x.id!==id);ticket=ticket.filter(x=>x.id!==id);guardar();render();}}
-function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo?")){catalogo=JSON.parse(JSON.stringify(EJEMPLO));guardar();render();}}
+function eliminar(id){const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){catalogo=catalogo.filter(x=>x.id!==id);ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();}}
+function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo?")){catalogo=JSON.parse(JSON.stringify(EJEMPLO));guardar();render();renderProductos();}}
+
+let vistaActual="ventas";
+function mostrarVista(v){vistaActual=v;
+ document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
+ document.getElementById("vistaProductos").classList.toggle("oculto",v!=="productos");
+ document.getElementById("panelVenta").classList.toggle("oculto",v==="productos");
+ document.getElementById("layout").classList.toggle("sin-panel",v==="productos");
+ document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
+ document.getElementById("navProductos").classList.toggle("activo",v==="productos");
+ document.querySelector("aside").classList.remove("abierto");
+ if(v==="productos")renderProductos(); else render();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function estadoDe(p){if(p.stock<=0)return "agotado";if(p.pausado)return "pausado";return "disponible"}
+function renderProductos(){
+ const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
+ const f=(document.getElementById("filtroProd")||{}).value||"todos";
+ const lista=document.getElementById("listaProductos");if(!lista)return;lista.innerHTML="";
+ const disp=catalogo.filter(p=>estadoDe(p)==="disponible").length;
+ const agot=catalogo.filter(p=>estadoDe(p)!=="disponible").length;
+ document.getElementById("resTotal").textContent=catalogo.length;
+ document.getElementById("resDisp").textContent=disp;
+ document.getElementById("resAgot").textContent=agot;
+ document.getElementById("resValor").textContent=dinero(catalogo.reduce((a,p)=>a+p.precio*p.stock,0));
+ const estFiltro=f==="disponibles"?"disponible":f==="agotados"?"agotado":f==="pausados"?"pausado":"todos";
+ const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>estFiltro==="todos"||estadoDe(p)===estFiltro);
+ if(!items.length){lista.innerHTML='<div class="ticket-vacio">📦<br><b>No hay productos con ese filtro</b><br>Agrega uno nuevo con el formulario de arriba.</div>';return}
+ items.forEach(p=>{
+  const est=estadoDe(p);
+  const d=document.createElement("div");d.className="prod-row";
+  d.innerHTML=`<div class="foto">${p.emoji||"📦"}</div><div class="info"><h3>${p.nombre}</h3><p>${p.categoria||"General"} · ${p.stock<=0?"Quedan 0 pzas":p.stock<=5?"Quedan "+p.stock+" pzas":"Stock: "+p.stock+" pzas"}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
+  lista.appendChild(d);
+ });
+}
+function guardarProducto(e){e.preventDefault();
+ const id=document.getElementById("pId").value;
+ const nombre=document.getElementById("pNombre").value.trim();
+ const precio=parseFloat(document.getElementById("pPrecio").value);
+ const stock=parseInt(document.getElementById("pStock").value);
+ const categoria=document.getElementById("pCategoria").value;
+ const emoji=document.getElementById("pEmoji").value;
+ const pausado=document.getElementById("pEstado").value==="pausado";
+ if(!nombre||isNaN(precio)||isNaN(stock))return;
+ if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;p.stock=stock;p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;toast("Producto actualizado: "+nombre);}}
+ else{catalogo.push({id:Date.now()+uid++,nombre,precio,stock,emoji,categoria,pausado});toast("Producto agregado: "+nombre);}
+ e.target.reset();document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";
+ guardar();render();renderProductos();
+}
+function editarProducto(id){const p=catalogo.find(x=>x.id===id);if(!p)return;
+ document.getElementById("pId").value=p.id;document.getElementById("pNombre").value=p.nombre;
+ document.getElementById("pPrecio").value=p.precio;document.getElementById("pStock").value=p.stock;
+ document.getElementById("pCategoria").value=p.categoria||"General";document.getElementById("pEmoji").value=p.emoji||"📦";
+ document.getElementById("pEstado").value=p.pausado?"pausado":"disponible";
+ document.getElementById("tituloFormProd").textContent="✏️ Editando: "+p.nombre;
+ document.getElementById("vistaProductos").scrollIntoView({behavior:"smooth"});
+}
+function cancelarEdicion(){document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();}
+function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo.");}
 function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}
