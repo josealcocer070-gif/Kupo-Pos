@@ -340,18 +340,30 @@ main h1{font-size:34px;margin-bottom:14px}
 <button type="button" onclick="realizarCorte()">💾 Realizar corte de caja / Cerrar turno</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar</button>
 </div>
-<div id="historialCortes">
-<h2 style="margin:18px 0 10px">🕐 Historial de cortes</h2>
+<div style="margin-top:16px">
+<button type="button" class="secundario" onclick="irHistorialCortes()">🕐 Ver historial completo de cortes →</button>
+</div>
+</div>
+
+<div id="vistaHistorial" class="oculto">
+<h1>🕐 Historial de cortes</h1>
+<p style="color:#555;margin-bottom:14px">Todos los cortes de caja cerrados, con su detalle completo. Los cortes se guardan en este dispositivo.</p>
+<div class="resumen">
+<div class="tarjeta"><small>TOTAL DE CORTES</small><b id="resHistTotal">0 cortes</b></div>
+<div class="tarjeta"><small>TOTAL VENDIDO EN CORTES</small><b id="resHistVentas">$0.00</b></div>
+<div class="tarjeta"><small>TOTAL EN CAJA ACUMULADO</small><b id="resHistCaja">$0.00</b></div>
+<div class="tarjeta"><small>DIFERENCIA ACUMULADA</small><b id="resHistDif">$0.00</b></div>
+</div>
 <div class="buscar">
-<input id="buscarCorte" placeholder="🔍 Buscar por folio o fecha..." oninput="renderCortes()">
-<input id="filtroCorteFecha" type="date" onchange="renderCortes()" aria-label="Filtrar por fecha">
+<input id="buscarHist" placeholder="🔍 Buscar por folio o fecha..." oninput="renderHistorial()">
+<input id="filtroHistFecha" type="date" onchange="renderHistorial()" aria-label="Filtrar por fecha">
+<select id="filtroHistEstado" onchange="renderHistorial()" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="Cerrado">Cerrado</option></select>
 </div>
 <div class="tabla-wrap"><table class="tabla">
-<thead><tr><th>Fecha</th><th>Folio</th><th class="num">Ventas</th><th class="num">Gastos</th><th class="num">Total en caja</th><th class="num">Diferencia</th><th></th></tr></thead>
-<tbody id="listaCortes"></tbody>
+<thead><tr><th>Fecha y hora</th><th>Folio</th><th class="num">Ventas</th><th class="num">Gastos</th><th class="num">Entradas</th><th class="num">Total en caja</th><th class="num">Diferencia</th><th>Estado</th><th></th></tr></thead>
+<tbody id="listaHistCortes"></tbody>
 </table></div>
-<div id="detalleCorte" style="margin-top:12px"></div>
-</div>
+<div id="detalleHistCorte" style="margin-top:12px"></div>
 </div>
 </main>
 
@@ -382,7 +394,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
 <button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos, Entradas, Gastos e Inventario sincronizados con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos, Entradas, Gastos, Corte diario e Historial de cortes sincronizados con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
 </section>
 </div>
 
@@ -467,6 +479,7 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("vistaEntradas").classList.toggle("oculto",v!=="entradas");
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
  document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
+ document.getElementById("vistaHistorial").classList.toggle("oculto",v!=="historial");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
@@ -474,9 +487,9 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
  document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
  document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
- document.getElementById("navHistCortes").classList.toggle("activo",v==="cortes");
+ document.getElementById("navHistCortes").classList.toggle("activo",v==="historial");
  document.querySelector("aside").classList.remove("abierto");
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function llenarSelectEntradas(){
@@ -673,12 +686,19 @@ function renderCortes(){
  document.getElementById("resPagoMixto").textContent=dinero(r.porPago.Mixto||0);
  document.getElementById("resEfectivoEsperado").value=dinero(r.efectivoEsperado);
  actualizarCuadre();
- const q=((document.getElementById("buscarCorte")||{}).value||"").toLowerCase();
- const ff=(document.getElementById("filtroCorteFecha")||{}).value||"";
- const lista=document.getElementById("listaCortes"); if(!lista)return;
- const items=cortes.slice().sort((a,b)=>b.id-a.id).filter(c=>(String(c.folio).padStart(4,"0")+" "+c.fecha).toLowerCase().includes(q)).filter(c=>!ff||c.fecha===ff);
- if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de caja.</td></tr>';return}
- lista.innerHTML=items.map(c=>'<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+dinero(c.gastos)+'</td><td class="num"><b>'+dinero(c.totalCaja)+'</b></td><td class="num">'+dinero(c.diferencia)+'</td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>').join("");
+}
+function renderHistorial(){
+ const q=((document.getElementById("buscarHist")||{}).value||"").toLowerCase();
+ const ff=(document.getElementById("filtroHistFecha")||{}).value||"";
+ const fe=(document.getElementById("filtroHistEstado")||{}).value||"";
+ const items=cortes.slice().sort((a,b)=>b.id-a.id).filter(c=>(String(c.folio).padStart(4,"0")+" "+c.fecha).toLowerCase().includes(q)).filter(c=>!ff||c.fecha===ff).filter(c=>!fe||"Cerrado"===fe);
+ const elT=document.getElementById("resHistTotal"); if(elT)elT.textContent=items.length+" cortes";
+ const elV=document.getElementById("resHistVentas"); if(elV)elV.textContent=dinero(items.reduce((s,c)=>s+(c.ventasTotal||0),0));
+ const elC=document.getElementById("resHistCaja"); if(elC)elC.textContent=dinero(items.reduce((s,c)=>s+(c.totalCaja||0),0));
+ const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(items.reduce((s,c)=>s+(c.diferencia||0),0));
+ const lista=document.getElementById("listaHistCortes"); if(!lista)return;
+ if(!items.length){lista.innerHTML='<tr><td colspan="9" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de caja en Corte diario.</td></tr>';return}
+ lista.innerHTML=items.map(c=>'<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+dinero(c.gastos)+'</td><td class="num">'+dinero(c.entradasCosto||0)+' ('+(c.entradasPiezas||0)+' pzas)</td><td class="num"><b>'+dinero(c.totalCaja)+'</b></td><td class="num">'+dinero(c.diferencia)+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>').join("");
 }
 function realizarCorte(){
  const r=resumenCorte();
@@ -689,19 +709,19 @@ function realizarCorte(){
  const c={id:Date.now()+uid++,folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoCaja,efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
  cortes.unshift(c);
  ticket=[];document.getElementById("efectivoContado").value="";
- guardar();render();renderCortes();
+ guardar();render();renderCortes();renderHistorial();
  toast("Corte #"+String(c.folio).padStart(4,"0")+" realizado · Total en caja "+dinero(c.totalCaja)+(c.diferencia!==0?" · Diferencia "+dinero(c.diferencia):" · Caja cuadrada ✅"));
 }
 function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
- document.getElementById("detalleCorte").innerHTML="<b>Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+ var det=document.getElementById("detalleHistCorte")||document.getElementById("detalleCorte"); if(det)det.innerHTML="<b>Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
  "Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (Efectivo "+dinero(c.efectivo)+" · Tarjeta "+dinero(c.tarjeta)+" · Transf. "+dinero(c.transf)+" · Mixto "+dinero(c.mixto)+")<br>"+
  "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+c.entradasPiezas+" pzas)<br>"+
  "Ganancia: "+dinero(c.ganancia)+" · Fondo: "+dinero(c.fondo)+" · Efectivo esperado: "+dinero(c.efectivoEsperado)+" · Contado: "+dinero(c.efectivoContado)+" · Diferencia: "+dinero(c.diferencia)+"<br>"+
  "<b>Total en caja: "+dinero(c.totalCaja)+"</b>";
- document.getElementById("detalleCorte").scrollIntoView({behavior:"smooth",block:"nearest"});
+ if(det)det.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;toast("Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
-function irHistorialCortes(){mostrarVista("cortes");setTimeout(()=>{const el=document.getElementById("historialCortes");if(el)el.scrollIntoView({behavior:"smooth"})},80);}
+function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){mostrarVista("cortes");toast("Cuenta el efectivo y presiona Realizar corte de caja para cerrar el turno.");}
 document.getElementById("nombreNegocio").addEventListener("input",e=>{document.getElementById("negocioBox").textContent=(e.target.value||"Mi negocio").toUpperCase();localStorage.setItem("kupoPosV146Negocio",e.target.value)});
 const savedNegocio=localStorage.getItem("kupoPosV146Negocio");if(savedNegocio){document.getElementById("nombreNegocio").value=savedNegocio;document.getElementById("negocioBox").textContent=savedNegocio.toUpperCase();}
