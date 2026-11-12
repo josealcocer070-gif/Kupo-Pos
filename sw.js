@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v9'; /* v9: Cotizaciones (COT-0001, convertir en venta, IVA incluido) */
+const CACHE = 'kupo-pos-v10'; /* v10: Sincronización de ventas, cajeros y productos a Supabase (cola offline) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {
