@@ -422,7 +422,9 @@ main h1{font-size:34px;margin-bottom:14px}
 
 <div id="vistaCortes" class="oculto">
 <h1>Corte diario</h1>
-<p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · Revisa el día, cuenta el efectivo y realiza el corte para cerrar el turno.</p>
+<p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.</p>
+<div class="form-prod" id="secCorteDinero">
+<h2>💰 Corte de dinero</h2>
 <div class="resumen">
 <div class="tarjeta"><small>VENTAS DE HOY</small><b id="resCorVentas">$0.00 · 0 ventas</b></div>
 <div class="tarjeta"><small>GASTOS DE HOY (SE RESTAN)</small><b id="resCorGastos">$0.00</b></div>
@@ -435,9 +437,8 @@ main h1{font-size:34px;margin-bottom:14px}
 <div class="tarjeta"><small>TRANSFERENCIA</small><b id="resPagoTransf">$0.00</b></div>
 <div class="tarjeta"><small>MIXTO</small><b id="resPagoMixto">$0.00</b></div>
 </div>
-<div class="form-prod">
 <h2>💰 Cuadre de caja</h2>
-<form onsubmit="event.preventDefault();realizarCorte();">
+<form onsubmit="event.preventDefault();realizarCorteDinero();">
 <div><label>Fondo inicial de caja $</label><input id="fondoCaja" type="number" min="0" step="0.01" placeholder="0.00" oninput="guardarFondo()"></div>
 <div><label>Efectivo esperado $</label><input id="resEfectivoEsperado" type="text" value="$0.00" readonly></div>
 <div><label>Efectivo contado $</label><input id="efectivoContado" type="number" min="0" step="0.01" placeholder="0.00" oninput="actualizarCuadre()"></div>
@@ -445,7 +446,24 @@ main h1{font-size:34px;margin-bottom:14px}
 </form>
 <p style="margin-top:10px;font-size:13px;color:#555">Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.</p>
 <p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
-<button type="button" onclick="realizarCorte()">💾 Realizar corte de caja / Cerrar turno</button>
+<button type="button" onclick="realizarCorteDinero()">💾 Realizar corte de dinero</button>
+<button type="button" class="secundario" onclick="renderCortes()">Actualizar</button>
+</div>
+<div class="form-prod" id="secCorteProductos" style="margin-top:16px">
+<h2>📦 Corte de productos</h2>
+<p style="color:#555;margin-bottom:14px">Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.</p>
+<div class="resumen">
+<div class="tarjeta"><small>PRODUCTOS VENDIDOS HOY</small><b id="resProdTipos">0 productos</b></div>
+<div class="tarjeta"><small>TOTAL DE PIEZAS VENDIDAS</small><b id="resProdPiezas">0 pzas</b></div>
+<div class="tarjeta"><small>MONTO DE PRODUCTOS VENDIDOS</small><b id="resProdMonto">$0.00</b></div>
+<div class="tarjeta"><small>STOCK RESTANTE TOTAL</small><b id="resProdStock">0 pzas</b></div>
+</div>
+<div class="tabla-wrap"><table class="tabla">
+<thead><tr><th>Producto</th><th class="num">Vendidas</th><th class="num">Monto</th><th class="num">Stock inicial</th><th class="num">Stock vendido</th><th class="num">Stock restante</th></tr></thead>
+<tbody id="listaCorteProductos"></tbody>
+</table></div>
+<p style="margin-top:10px;font-size:13px;color:#555">Las Entradas siguen en su propia sección para los negocios que sí las manejan; aquí solo se usan para calcular el stock inicial del día.</p>
+<button type="button" onclick="realizarCorteProductos()">📦 Realizar corte de productos</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar</button>
 </div>
 <div style="margin-top:16px">
@@ -455,7 +473,7 @@ main h1{font-size:34px;margin-bottom:14px}
 
 <div id="vistaHistorial" class="oculto">
 <h1>🕐 Historial de cortes</h1>
-<p style="color:#555;margin-bottom:14px">Todos los cortes de caja cerrados, con su detalle completo. Los cortes se guardan en este dispositivo.</p>
+<p style="color:#555;margin-bottom:14px">Todos los cortes cerrados, con su detalle completo: de dinero y de productos, cada uno con su folio. Los cortes se guardan en este dispositivo.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL DE CORTES</small><b id="resHistTotal">0 cortes</b></div>
 <div class="tarjeta"><small>TOTAL VENDIDO EN CORTES</small><b id="resHistVentas">$0.00</b></div>
@@ -466,9 +484,10 @@ main h1{font-size:34px;margin-bottom:14px}
 <input id="buscarHist" placeholder="🔍 Buscar por folio o fecha..." oninput="renderHistorial()">
 <input id="filtroHistFecha" type="date" onchange="renderHistorial()" aria-label="Filtrar por fecha">
 <select id="filtroHistEstado" onchange="renderHistorial()" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option value="Cerrado">Cerrado</option></select>
+<select id="filtroHistTipo" onchange="renderHistorial()" aria-label="Filtrar por tipo de corte"><option value="">Todos los tipos</option><option value="dinero">💰 Dinero</option><option value="productos">📦 Productos</option></select>
 </div>
 <div class="tabla-wrap"><table class="tabla">
-<thead><tr><th>Fecha y hora</th><th>Folio</th><th class="num">Ventas</th><th class="num">Gastos</th><th class="num">Entradas</th><th class="num">Total en caja</th><th class="num">Diferencia</th><th>Estado</th><th></th></tr></thead>
+<thead><tr><th>Fecha y hora</th><th>Folio</th><th>Tipo</th><th class="num">Ventas</th><th class="num">Gastos</th><th class="num">Entradas</th><th class="num">Total en caja</th><th class="num">Diferencia</th><th>Estado</th><th></th></tr></thead>
 <tbody id="listaHistCortes"></tbody>
 </table></div>
 <div id="detalleHistCorte" style="margin-top:12px"></div>
@@ -510,6 +529,15 @@ main h1{font-size:34px;margin-bottom:14px}
 <button type="submit">💾 Guardar personalización</button>
 <button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
 </form>
+</div>
+<div class="form-prod"><h2>⚙️ Panel de administrador de esta licencia</h2>
+<p style="color:#555;font-size:14px">Licencia: <b id="optLicencia">—</b> · Negocio: <b id="optNegocio">—</b></p>
+<p style="color:#555;font-size:14px">Estas opciones son solo para esta licencia/negocio. Al entrar con otra licencia, se aplican las opciones de esa licencia. Solo el Administrador de este negocio puede cambiarlas.</p>
+<div class="checks">
+<label><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"> 📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></label>
+<label><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"> 🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></label>
+</div>
+<p style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de esta vista también son por licencia.</p>
 </div>
 <div class="form-prod"><h2>🖨 Configurar terminales térmicas</h2>
 <p style="color:#555;font-size:14px">Impresoras térmicas compatibles con KUPO POS: Epson, Xprinter, Nextep, Bixolon, Qian y otra térmica ESC/POS que Windows o Android reconozca. Protocolo ESC/POS · Bluetooth y USB · corte automático. El ancho del ticket (58 mm o 80 mm) se elige arriba en Personalizar ticket; cada terminal registra su papel (80 mm: ~72 mm imprimible · 58 mm: ~48 mm imprimible).</p>
@@ -748,7 +776,7 @@ function almacenVenta(){let a=almacenActivo(ventaAlmacen);if(a)return a;a=almace
 if(!stockAlmacen){stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0})}
 catalogo.forEach(p=>{if(!stockAlmacen[p.id]){stockAlmacen[p.id]={};const pr=almacenPrincipal();if(pr)stockAlmacen[p.id][pr.id]=p.stock||0}});
 sincronizarStock();
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146TicketConfig",JSON.stringify(ticketConfig));localStorage.setItem("kupoPosV146Terminales",JSON.stringify(terminales));localStorage.setItem("kupoPosV146Cajeros",JSON.stringify(cajeros));localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -805,11 +833,62 @@ function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo
 
 
 /* Interfaz 3.1 · Personalizar ticket + terminales térmicas */
-let ticketConfig=JSON.parse(localStorage.getItem("kupoPosV146TicketConfig")||"null")||{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"};
-let terminales=JSON.parse(localStorage.getItem("kupoPosV146Terminales")||"null")||[
- {id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},
- {id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}
-];
+/* Datos por licencia: cada licencia/negocio tiene su propio panel de administrador
+   (opciones, ticket, cajeros y terminales), guardado en localStorage por clave KUPO.
+   Al entrar con una licencia solo se aplican los datos de ESA licencia. */
+function licenciaActual(){return localStorage.getItem("kupoPosV146Licencia")||"SIN-LICENCIA"}
+function clavePorLicencia(base){return base+"__"+licenciaActual()}
+function leerPorLicencia(base,defecto){try{const v=JSON.parse(localStorage.getItem(clavePorLicencia(base))||"null");return (v===null||v===undefined)?defecto:v}catch(e){return defecto}}
+function guardarPorLicencia(base,valor){localStorage.setItem(clavePorLicencia(base),JSON.stringify(valor))}
+function cargarDatoLicencia(base,defecto){
+ const propio=leerPorLicencia(base,null);
+ if(propio!==null&&propio!==undefined)return propio;
+ if(licenciaActual()!=="SIN-LICENCIA"&&!localStorage.getItem("kupoPosV146MigracionLicencia")){
+  try{const g=JSON.parse(localStorage.getItem(base)||"null");if(g!==null&&g!==undefined){guardarPorLicencia(base,g);localStorage.setItem("kupoPosV146MigracionLicencia",licenciaActual());return g}}catch(e){}
+ }
+ return defecto;
+}
+let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false});
+if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false};
+opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true};
+function guardarOpcionesSistema(){guardarPorLicencia("kupoPosV146Opciones",opcionesSistema);}
+function aplicarOpcionesSistema(){
+ const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
+ const navM=document.getElementById("navMulti"); if(navM)navM.style.display=(esAdmin&&opcionesSistema.multiAlmacen)?"":"none";
+ const secP=document.getElementById("secCorteProductos"); if(secP)secP.style.display=opcionesSistema.corteProductos?"":"none";
+ const o1=document.getElementById("optCorteProductos"); if(o1)o1.checked=opcionesSistema.corteProductos;
+ const o2=document.getElementById("optMultiAlmacen"); if(o2)o2.checked=opcionesSistema.multiAlmacen;
+ const e1=document.getElementById("estCorteProductos"); if(e1)e1.textContent=opcionesSistema.corteProductos?"· Activado":"· Desactivado";
+ const e2=document.getElementById("estMultiAlmacen"); if(e2)e2.textContent=opcionesSistema.multiAlmacen?"· Activado":"· Desactivado";
+ const ol=document.getElementById("optLicencia"); if(ol)ol.textContent=licenciaActual();
+ const on=document.getElementById("optNegocio"); if(on)on.textContent=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
+}
+function cambiarOpcionSistema(clave,valor){
+ if(!((sesionActual&&sesionActual.rol)==="Administrador")){toast("⛔ Sin permiso: solo el Administrador puede cambiar las opciones de esta licencia.");aplicarOpcionesSistema();return}
+ if(clave!=="corteProductos"&&clave!=="multiAlmacen")return;
+ opcionesSistema[clave]=!!valor;
+ guardarOpcionesSistema();
+ aplicarOpcionesSistema();
+ if(clave==="multiAlmacen"&&!valor&&vistaActual==="multi")mostrarVista("ventas");
+ toast((clave==="corteProductos"?"Corte por productos":"Multi-almacén")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
+}
+function cargarDatosLicencia(){
+ const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
+ const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
+ ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"});
+ terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
+ cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
+ opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false});
+ if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false};
+ opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true};
+ const nb=(ticketConfig&&ticketConfig.negocio)||negDef;
+ localStorage.setItem("kupoPosV146Negocio",nb);
+ const nbEl=document.getElementById("nombreNegocio"); if(nbEl)nbEl.value=nb;
+ const boxEl=document.getElementById("negocioBox"); if(boxEl)boxEl.textContent=nb.toUpperCase();
+ aplicarOpcionesSistema();
+}
+let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"});
+let terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
 function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function cargarTicketConfig(){
  const g=function(id){return document.getElementById(id)}; if(!g("tNegocio"))return;
@@ -826,7 +905,7 @@ function cargarTicketConfig(){
  const nb=g("negocioBox"); if(nb)nb.textContent=(ticketConfig.negocio||"Mi negocio").toUpperCase();
  const dn=g("direccionNegocio"); if(dn)dn.value=ticketConfig.direccion||"";
  const tn=g("telefonoNegocio"); if(tn)tn.value=ticketConfig.telefono||"";
- mostrarLogoPreview(); renderTicketPreview(); renderTerminales();
+ mostrarLogoPreview(); renderTicketPreview(); renderTerminales(); aplicarOpcionesSistema();
 }
 function renderTicketPreview(){
  const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
@@ -976,19 +1055,20 @@ function probarImpresion(){
 
 /* Interfaz 3.2 · Cajeros y permisos */
 const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi"],Cajero:["ventas"]};
-let cajeros=JSON.parse(localStorage.getItem("kupoPosV146Cajeros")||"null")||[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}];
+let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
 let sesionActual=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null")||{nombre:"Eduardo Benitez",usuario:"Administrador",rol:"Administrador"};
-function guardarCajeros(){localStorage.setItem("kupoPosV146Cajeros",JSON.stringify(cajeros));localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
+function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navMulti",esAdmin);
+ mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);
  mostrar("accGasto",esAdmin);mostrar("accCorte",esAdmin);mostrar("accProductos",esAdmin);
  const u=document.getElementById("usuarioActual");if(u)u.textContent=sesionActual.nombre||sesionActual.usuario;
  const r=document.getElementById("rolActual");if(r)r.textContent=sesionActual.rol||"";
  const p=document.getElementById("pieUsuario");if(p)p.textContent=(sesionActual.nombre||sesionActual.usuario)+" · "+(sesionActual.rol||"");
  const m=document.getElementById("miSesion");if(m)m.textContent=(sesionActual.nombre||sesionActual.usuario)+" ("+sesionActual.usuario+" · "+sesionActual.rol+")";
+ aplicarOpcionesSistema();
 }
 function renderCajeros(){
  const q=((document.getElementById("buscarCaj")||{}).value||"").toLowerCase();
@@ -1180,6 +1260,7 @@ let vistaActual="ventas";
 function toggleMenu(){const a=document.querySelector("aside");const f=document.getElementById("fondoMenu");const abierto=a.classList.toggle("abierto");if(f)f.classList.toggle("visible",abierto);}
 function mostrarVista(v){
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas y Reimprimir.");return}
+ if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Personalizar ticket → Panel de administrador de esta licencia.");return}
  vistaActual=v;
  document.getElementById("fondoMenu").classList.remove("visible");
  document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
@@ -1382,6 +1463,30 @@ function resumenCorte(){
  const ganancia=ventasTotal-gastosHoy-costoEntradas;
  return {ventasNum:vHoy.length,ventasTotal,porPago,gastosHoy,costoEntradas,piezasEntradas,efectivoEsperado,totalCaja,ganancia};
 }
+function resumenCorteProductos(){
+ const hoy=hoyLocal();
+ const vHoy=ventas.filter(esHoyVenta);
+ const eHoy=entradas.filter(e=>e.fecha===hoy);
+ const porProd={};
+ vHoy.forEach(v=>{(v.items||[]).forEach(l=>{const p=catalogo.find(x=>x.id===l.id);const key=l.id;if(!porProd[key])porProd[key]={productoId:l.id,nombre:p?p.nombre:"Producto",emoji:p?p.emoji:"📦",precio:l.precio||(p?p.precio:0),cantidad:0,monto:0};porProd[key].cantidad+=l.cant;porProd[key].monto+=l.cant*(l.precio||0)})});
+ const filas=Object.values(porProd).map(r=>{const p=catalogo.find(x=>x.id===r.productoId);const entHoy=eHoy.filter(e=>String(e.productoId)===String(r.productoId)).reduce((a,e)=>a+(e.cantidad||0),0);const restante=p?p.stock:0;const inicial=restante+r.cantidad-entHoy;return {productoId:r.productoId,nombre:r.nombre,emoji:r.emoji,precio:r.precio,cantidad:r.cantidad,monto:r.monto,entradasHoy:entHoy,stockInicial:inicial,stockVendido:r.cantidad,stockRestante:restante}});
+ filas.sort((a,b)=>b.monto-a.monto);
+ const totalPiezas=filas.reduce((a,f)=>a+f.cantidad,0);
+ const totalMonto=filas.reduce((a,f)=>a+f.monto,0);
+ const stockRestante=filas.reduce((a,f)=>a+f.stockRestante,0);
+ return {filas,totalPiezas,totalMonto,stockRestante,ventasNum:vHoy.length};
+}
+function renderCorteProductos(){
+ const r=resumenCorteProductos();
+ const elT=document.getElementById("resProdTipos"); if(elT)elT.textContent=r.filas.length+" productos";
+ const elP=document.getElementById("resProdPiezas"); if(elP)elP.textContent=r.totalPiezas+" pzas";
+ const elM=document.getElementById("resProdMonto"); if(elM)elM.textContent=dinero(r.totalMonto);
+ const elS=document.getElementById("resProdStock"); if(elS)elS.textContent=r.stockRestante+" pzas";
+ const lista=document.getElementById("listaCorteProductos"); if(!lista)return;
+ if(!r.filas.length){lista.innerHTML='<tr><td colspan="6" style="text-align:center;color:#555">📦<br><b>Aún no hay productos vendidos hoy</b><br>Vende algo en Ventas y aparecerá aquí.</td></tr>';return}
+ lista.innerHTML=r.filas.map(f=>'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+f.cantidad+' pzas</td><td class="num"><b>'+dinero(f.monto)+'</b></td><td class="num">'+f.stockInicial+' pzas</td><td class="num">'+f.stockVendido+' pzas</td><td class="num"><b>'+f.stockRestante+' pzas</b></td></tr>').join("")+
+ '<tr><td><b>Total</b></td><td class="num"><b>'+r.totalPiezas+' pzas</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td><td class="num">—</td><td class="num"><b>'+r.totalPiezas+' pzas</b></td><td class="num"><b>'+r.stockRestante+' pzas</b></td></tr>';
+}
 function actualizarCuadre(){
  const r=resumenCorte();
  const contado=Number(document.getElementById("efectivoContado").value)||0;
@@ -1392,6 +1497,7 @@ function actualizarCuadre(){
 }
 function guardarFondo(){fondoCaja=Number(document.getElementById("fondoCaja").value)||0;guardar();renderCortes();}
 function renderCortes(){
+ aplicarOpcionesSistema();
  const r=resumenCorte();
  document.getElementById("fechaCorte").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
  document.getElementById("resCorVentas").textContent=dinero(r.ventasTotal)+" · "+r.ventasNum+" ventas";
@@ -1405,41 +1511,64 @@ function renderCortes(){
  document.getElementById("resPagoMixto").textContent=dinero(r.porPago.Mixto||0);
  document.getElementById("resEfectivoEsperado").value=dinero(r.efectivoEsperado);
  actualizarCuadre();
+ renderCorteProductos();
 }
 function renderHistorial(){
  const q=((document.getElementById("buscarHist")||{}).value||"").toLowerCase();
  const ff=(document.getElementById("filtroHistFecha")||{}).value||"";
  const fe=(document.getElementById("filtroHistEstado")||{}).value||"";
- const items=cortes.slice().sort((a,b)=>b.id-a.id).filter(c=>(String(c.folio).padStart(4,"0")+" "+c.fecha).toLowerCase().includes(q)).filter(c=>!ff||c.fecha===ff).filter(c=>!fe||"Cerrado"===fe);
+ const ft=(document.getElementById("filtroHistTipo")||{}).value||"";
+ const tipoDe=function(c){return c.tipo||"dinero"};
+ const items=cortes.slice().sort((a,b)=>b.id-a.id).filter(c=>(String(c.folio).padStart(4,"0")+" "+c.fecha+" "+tipoDe(c)).toLowerCase().includes(q)).filter(c=>!ff||c.fecha===ff).filter(c=>!fe||"Cerrado"===fe).filter(c=>!ft||tipoDe(c)===ft);
  const elT=document.getElementById("resHistTotal"); if(elT)elT.textContent=items.length+" cortes";
- const elV=document.getElementById("resHistVentas"); if(elV)elV.textContent=dinero(items.reduce((s,c)=>s+(c.ventasTotal||0),0));
- const elC=document.getElementById("resHistCaja"); if(elC)elC.textContent=dinero(items.reduce((s,c)=>s+(c.totalCaja||0),0));
- const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(items.reduce((s,c)=>s+(c.diferencia||0),0));
+ const soloDinero=items.filter(c=>tipoDe(c)==="dinero");
+ const elV=document.getElementById("resHistVentas"); if(elV)elV.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.ventasTotal||0),0));
+ const elC=document.getElementById("resHistCaja"); if(elC)elC.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.totalCaja||0),0));
+ const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
- if(!items.length){lista.innerHTML='<tr><td colspan="9" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de caja en Corte diario.</td></tr>';return}
- lista.innerHTML=items.map(c=>'<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+dinero(c.gastos)+'</td><td class="num">'+dinero(c.entradasCosto||0)+' ('+(c.entradasPiezas||0)+' pzas)</td><td class="num"><b>'+dinero(c.totalCaja)+'</b></td><td class="num">'+dinero(c.diferencia)+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>').join("");
+ if(!items.length){lista.innerHTML='<tr><td colspan="10" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de dinero o de productos en Corte diario.</td></tr>';return}
+ lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?((c.totalPiezas||0)+" pzas"):dinero(c.entradasCosto||0)+' ('+(c.entradasPiezas||0)+' pzas)')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>'}).join("");
 }
-function realizarCorte(){
+function realizarCorteDinero(){
  const r=resumenCorte();
  if(!r.ventasNum&&r.gastosHoy===0&&r.piezasEntradas===0){toast("Aún no hay movimientos hoy para cortar.");return}
  const contado=Number(document.getElementById("efectivoContado").value)||0;
  corteFolio++;
  const ahora=new Date();
- const c={id:Date.now()+uid++,folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoCaja,efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
+ const c={id:Date.now()+uid++,tipo:"dinero",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoCaja,efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
  cortes.unshift(c);
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
- toast("Corte #"+String(c.folio).padStart(4,"0")+" realizado · Total en caja "+dinero(c.totalCaja)+(c.diferencia!==0?" · Diferencia "+dinero(c.diferencia):" · Caja cuadrada ✅"));
+ toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" realizado · Total en caja "+dinero(c.totalCaja)+(c.diferencia!==0?" · Diferencia "+dinero(c.diferencia):" · Caja cuadrada ✅"));
+}
+function realizarCorte(){realizarCorteDinero();}
+function realizarCorteProductos(){
+ if(!opcionesSistema.corteProductos){toast("El corte por productos está desactivado para esta licencia. Actívalo en Personalizar ticket → Panel de administrador de esta licencia.");return}
+ const r=resumenCorteProductos();
+ if(!r.filas.length){toast("Aún no hay productos vendidos hoy para cortar.");return}
+ corteFolio++;
+ const ahora=new Date();
+ const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoCaja,efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
+ cortes.unshift(c);
+ guardar();render();renderCortes();renderHistorial();
+ toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" realizado · "+r.totalPiezas+" pzas · "+dinero(r.totalMonto));
 }
 function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
- var det=document.getElementById("detalleHistCorte")||document.getElementById("detalleCorte"); if(det)det.innerHTML="<b>Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
- "Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (Efectivo "+dinero(c.efectivo)+" · Tarjeta "+dinero(c.tarjeta)+" · Transf. "+dinero(c.transf)+" · Mixto "+dinero(c.mixto)+")<br>"+
- "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+c.entradasPiezas+" pzas)<br>"+
- "Ganancia: "+dinero(c.ganancia)+" · Fondo: "+dinero(c.fondo)+" · Efectivo esperado: "+dinero(c.efectivoEsperado)+" · Contado: "+dinero(c.efectivoContado)+" · Diferencia: "+dinero(c.diferencia)+"<br>"+
- "<b>Total en caja: "+dinero(c.totalCaja)+"</b>";
+ var det=document.getElementById("detalleHistCorte")||document.getElementById("detalleCorte"); if(!det)return;
+ if((c.tipo||"dinero")==="productos"){
+  det.innerHTML="<b>📦 Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+p.cantidad+" pzas · "+dinero(p.monto)+" · Stock inicial "+p.stockInicial+" · Vendido "+p.stockVendido+" · Restante "+p.stockRestante).join("<br>")+
+  "<br><b>Total: "+(c.totalPiezas||0)+" pzas · "+dinero(c.ventasTotal)+"</b>";
+ } else {
+  det.innerHTML="<b>💰 Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+  "Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (Efectivo "+dinero(c.efectivo)+" · Tarjeta "+dinero(c.tarjeta)+" · Transf. "+dinero(c.transf)+" · Mixto "+dinero(c.mixto)+")<br>"+
+  "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+c.entradasPiezas+" pzas)<br>"+
+  "Ganancia: "+dinero(c.ganancia)+" · Fondo: "+dinero(c.fondo)+" · Efectivo esperado: "+dinero(c.efectivoEsperado)+" · Contado: "+dinero(c.efectivoContado)+" · Diferencia: "+dinero(c.diferencia)+"<br>"+
+  "<b>Total en caja: "+dinero(c.totalCaja)+"</b>";
+ }
  if(det)det.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;toast("Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
+function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;if((c.tipo||"dinero")==="productos"){toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · "+(c.totalPiezas||0)+" pzas · "+dinero(c.ventasTotal));return}toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
 function mostrarPasoLicencia(){document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");}
@@ -1447,7 +1576,7 @@ function mostrarPasoLogin(){document.getElementById("pantallaLogin").classList.r
 const CLAVES_PRUEBA=["KUPO-7F2A-91BC","KUPO-3D8E-44F1","KUPO-9A1C-77D2"];
 function leerLicenciasCompartidas(){try{let l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"null");return Array.isArray(l)?l:[]}catch(e){return[]}}
 function estadoLicencia(l){if(l.estado==="Pausada")return "Pausada";if(l.estado==="Vencida")return "Vencida";if(l.vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.vencimiento+"T00:00:00")<hoy)return "Vencida"}return "Activa"}
-function validarLicencia(){const c=document.getElementById("claveLicencia").value.trim().toUpperCase();const m=document.getElementById("msgLicencia");if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return}if(CLAVES_PRUEBA.indexOf(c)!==-1){m.textContent="Esa clave era de prueba y ya no existe. Crea una licencia nueva en KUPO Admin.";m.className="msg error";return}let lista=leerLicenciasCompartidas();if(!lista.length){m.textContent="Aún no hay licencias en KUPO Admin. Crea y activa una licencia en Admin para entrar.";m.className="msg error";return}let lic=lista.find(x=>x.clave===c);if(!lic){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return}let est=estadoLicencia(lic);if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return}if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return}localStorage.setItem("kupoPosV146Licencia",c);if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();}
+function validarLicencia(){const c=document.getElementById("claveLicencia").value.trim().toUpperCase();const m=document.getElementById("msgLicencia");if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return}if(CLAVES_PRUEBA.indexOf(c)!==-1){m.textContent="Esa clave era de prueba y ya no existe. Crea una licencia nueva en KUPO Admin.";m.className="msg error";return}let lista=leerLicenciasCompartidas();if(!lista.length){m.textContent="Aún no hay licencias en KUPO Admin. Crea y activa una licencia en Admin para entrar.";m.className="msg error";return}let lic=lista.find(x=>x.clave===c);if(!lic){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return}let est=estadoLicencia(lic);if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return}if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return}localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();}
 function actualizarPuntosPin(){const v=document.getElementById("pinLogin").value;document.getElementById("pinPuntos").textContent="●".repeat(v.length)+"○".repeat(Math.max(0,6-v.length));}
 function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
 function teclaPin(d){vibrarPin();const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
@@ -1480,7 +1609,7 @@ const ea0=document.getElementById("eAlmacen");if(ea0)ea0.addEventListener("chang
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 const licGuardada=localStorage.getItem("kupoPosV146Licencia");
-if(licGuardada){let listaGuardada=leerLicenciasCompartidas();let licOk=false;if(CLAVES_PRUEBA.indexOf(licGuardada)!==-1){licOk=false}else{let lg=listaGuardada.find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa"}if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}else{localStorage.removeItem("kupoPosV146Licencia");document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}}
+if(licGuardada){let listaGuardada=leerLicenciasCompartidas();let licOk=false;if(CLAVES_PRUEBA.indexOf(licGuardada)!==-1){licOk=false}else{let lg=listaGuardada.find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa"}if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}}
 const negInicio=document.getElementById("inicioNegocio");if(negInicio&&savedNegocio)negInicio.textContent=savedNegocio;const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
 /* Migración 3.2: si ya había un PIN guardado, es el PIN del Administrador */
 const pinGuardado=localStorage.getItem("kupoPosV146Pin");
