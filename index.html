@@ -56,6 +56,7 @@ main h1{font-size:34px;margin-bottom:14px}
 .card h3{font-size:17px;margin:12px 10px 4px;min-height:42px}
 .card .precio{font-size:24px;font-weight:800}
 .card .stock{font-size:14px;margin:6px 0 10px;color:#333}
+.cant input{width:64px;text-align:center;padding:2px 4px;font-size:14px;border:1px solid #cbd5e1;border-radius:6px}
 .card .stock.bajo{color:#d97706;font-weight:700}
 .btn-agregar{background:#0d6cb5;color:#fff;border:0;border-radius:22px;padding:10px 22px;font-size:15px;font-weight:700;cursor:pointer}
 .btn-agregar:disabled{background:#b9bec4;cursor:not-allowed}
@@ -356,7 +357,8 @@ main h1{font-size:34px;margin-bottom:14px}
 <form onsubmit="agregarProducto(event)">
 <input id="nuevoNombre" placeholder="Nombre del producto" required>
 <input id="nuevoPrecio" type="number" min="0" step="0.01" placeholder="Precio $" required>
-<input id="nuevoStock" type="number" min="0" step="1" placeholder="Stock (pzas)" required>
+<input id="nuevoStock" type="number" min="0" step="0.01" placeholder="Stock" required>
+ <select id="nuevoUnidad"><option value="pieza">Pieza</option><option value="kilo">Kilo</option><option value="metro">Metro</option><option value="litro">Litro</option></select>
 <select id="nuevoEmoji"><option>🍞</option><option>🥐</option><option>🥪</option><option>🍩</option><option>🧃</option><option>☕</option><option>📦</option></select>
 <button type="submit">+ Agregar producto</button>
 <button type="button" onclick="restablecerEjemplo()">Restablecer ejemplo</button>
@@ -385,7 +387,8 @@ main h1{font-size:34px;margin-bottom:14px}
 <input type="hidden" id="pId">
 <div><label>Nombre del producto</label><input id="pNombre" placeholder="Ej. Pan Bolillo" required></div>
 <div><label>Precio $</label><input id="pPrecio" type="number" min="0" step="0.01" placeholder="0.00" required></div>
-<div><label>Stock (pzas)</label><input id="pStock" type="number" min="0" step="1" placeholder="0" required></div>
+<div><label>Stock</label><input id="pStock" type="number" min="0" step="0.01" placeholder="0" required></div>
+ <div><label>Unidad de venta</label><select id="pUnidad"><option value="pieza">Pieza</option><option value="kilo">Kilo</option><option value="metro">Metro</option><option value="litro">Litro</option></select></div>
 <div><label>Categoría</label><select id="pCategoria"><option>Panadería</option><option>Comida</option><option>Bebida</option><option>Postres</option><option>General</option></select></div>
 <div><label>Foto</label><select id="pEmoji"><option>🍞</option><option>🥐</option><option>🥪</option><option>🍩</option><option>🧃</option><option>☕</option><option>📦</option></select></div>
 <div><label>Estado</label><select id="pEstado"><option value="disponible">Disponible</option><option value="pausado">Pausado</option></select></div>
@@ -406,7 +409,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <p style="color:#555;margin-bottom:14px">Registra la mercancía que entra al negocio. Al guardar, el stock del producto sube en Productos y en Ventas.</p>
 <div class="resumen">
 <div class="tarjeta"><small>ENTRADAS DE HOY</small><b id="resEntHoy">0</b></div>
-<div class="tarjeta"><small>PIEZAS QUE ENTRARON HOY</small><b id="resPiezasHoy">0</b></div>
+<div class="tarjeta"><small>CANTIDAD QUE ENTRÓ HOY</small><b id="resPiezasHoy">0</b></div>
 <div class="tarjeta"><small>COSTO TOTAL DE HOY</small><b id="resCostoHoy">$0.00</b></div>
 <div class="tarjeta"><small>TOTAL DE ENTRADAS</small><b id="resEntTotal">0</b></div>
 </div>
@@ -415,7 +418,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <form onsubmit="guardarEntrada(event)">
 <div><label>Producto</label><select id="eProducto" required></select></div>
 <div><label>Almacén donde entra</label><select id="eAlmacen"></select></div>
-<div><label>Cantidad que entra (pzas)</label><input id="eCantidad" type="number" min="1" step="1" placeholder="0" required></div>
+<div><label>Cantidad que entra</label><input id="eCantidad" type="number" min="0.01" step="0.01" placeholder="0" required></div>
 <div><label>Costo unitario $ (opcional)</label><input id="eCosto" type="number" min="0" step="0.01" placeholder="0.00"></div>
 <div><label>Proveedor (opcional)</label><input id="eProveedor" type="text" placeholder="Ej. Panadería Central"></div>
 <div><label>Fecha</label><input id="eFecha" type="date" required></div>
@@ -478,7 +481,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <div class="resumen">
 <div class="tarjeta"><small>VENTAS DE HOY</small><b id="resCorVentas">$0.00 · 0 ventas</b></div>
 <div class="tarjeta"><small>GASTOS DE HOY (SE RESTAN)</small><b id="resCorGastos">$0.00</b></div>
-<div class="tarjeta"><small>COSTO DE ENTRADAS DE HOY</small><b id="resCorEntradas">$0.00 · 0 pzas</b></div>
+<div class="tarjeta"><small>COSTO DE ENTRADAS DE HOY</small><b id="resCorEntradas">$0.00 · 0</b></div>
 <div class="tarjeta"><small>GANANCIA DEL DÍA</small><b id="resCorGanancia">$0.00</b></div>
 </div>
 <div class="resumen">
@@ -504,9 +507,9 @@ main h1{font-size:34px;margin-bottom:14px}
 <p style="color:#555;margin-bottom:14px">Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.</p>
 <div class="resumen">
 <div class="tarjeta"><small>PRODUCTOS VENDIDOS HOY</small><b id="resProdTipos">0 productos</b></div>
-<div class="tarjeta"><small>TOTAL DE PIEZAS VENDIDAS</small><b id="resProdPiezas">0 pzas</b></div>
+<div class="tarjeta"><small>TOTAL VENDIDO (CANTIDAD)</small><b id="resProdPiezas">0</b></div>
 <div class="tarjeta"><small>MONTO DE PRODUCTOS VENDIDOS</small><b id="resProdMonto">$0.00</b></div>
-<div class="tarjeta"><small>STOCK RESTANTE TOTAL</small><b id="resProdStock">0 pzas</b></div>
+<div class="tarjeta"><small>STOCK RESTANTE TOTAL</small><b id="resProdStock">0</b></div>
 </div>
 <div class="tabla-wrap"><table class="tabla">
 <thead><tr><th>Producto</th><th class="num">Vendidas</th><th class="num">Monto</th><th class="num">Stock inicial</th><th class="num">Stock vendido</th><th class="num">Stock restante</th></tr></thead>
@@ -696,7 +699,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <div class="resumen">
 <div class="tarjeta"><small>ALMACENES</small><b id="resAlmTotal">0</b></div>
 <div class="tarjeta"><small>ACTIVOS</small><b id="resAlmActivos">0</b></div>
-<div class="tarjeta"><small>PIEZAS EN ALMACENES ACTIVOS</small><b id="resAlmPiezas">0</b></div>
+<div class="tarjeta"><small>CANTIDAD EN ALMACENES ACTIVOS</small><b id="resAlmPiezas">0</b></div>
 <div class="tarjeta"><small>TRASPASOS REGISTRADOS</small><b id="resAlmTraspasos">0</b></div>
 </div>
 <div class="form-prod">
@@ -736,7 +739,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <div><label>Producto</label><select id="trProducto" required></select></div>
 <div><label>Almacén origen</label><select id="trOrigen" required></select></div>
 <div><label>Almacén destino</label><select id="trDestino" required></select></div>
-<div><label>Cantidad (pzas)</label><input id="trCantidad" type="number" min="1" step="1" placeholder="0" required></div>
+<div><label>Cantidad</label><input id="trCantidad" type="number" min="0.01" step="0.01" placeholder="0" required></div>
 <button type="submit">🔀 Traspasar</button>
 <button type="button" class="secundario" onclick="limpiarTraspaso()">Limpiar</button>
 </form>
@@ -789,12 +792,12 @@ main h1{font-size:34px;margin-bottom:14px}
 
 <script>
 const EJEMPLO=[
- {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"Panadería"},
- {id:2,nombre:"Club Sandwich con papas (pausado)",precio:75,stock:0,emoji:"🥪",pausado:true,categoria:"Comida"},
- {id:3,nombre:"Pan Bolillo",precio:15,stock:30,emoji:"🍞",categoria:"Panadería"},
- {id:4,nombre:"Combo Especial",precio:110,stock:4,emoji:"🍩",categoria:"Comida"},
- {id:5,nombre:"Croissant Artesanal",precio:40,stock:12,emoji:"🥐",categoria:"Panadería"},
- {id:6,nombre:"Cuernito J/Q",precio:35,stock:5,emoji:"🥐",categoria:"Panadería"}
+ {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"Panadería",unidad:"pieza"},
+ {id:2,nombre:"Club Sandwich con papas (pausado)",precio:75,stock:0,emoji:"🥪",pausado:true,categoria:"Comida",unidad:"pieza"},
+ {id:3,nombre:"Pan Bolillo",precio:15,stock:30,emoji:"🍞",categoria:"Panadería",unidad:"pieza"},
+ {id:4,nombre:"Combo Especial",precio:110,stock:4,emoji:"🍩",categoria:"Comida",unidad:"pieza"},
+ {id:5,nombre:"Croissant Artesanal",precio:40,stock:12,emoji:"🥐",categoria:"Panadería",unidad:"pieza"},
+ {id:6,nombre:"Cuernito J/Q",precio:35,stock:5,emoji:"🥐",categoria:"Panadería",unidad:"pieza"}
 ];
 let catalogo=JSON.parse(localStorage.getItem("kupoPosV146Catalogo")||"null")||JSON.parse(JSON.stringify(EJEMPLO));
 let ticket=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"[]");
@@ -819,9 +822,9 @@ function almacenActivo(id){const a=almacenes.find(x=>x.id===Number(id));return a
 function stockEn(pid,aid){return (stockAlmacen[pid]&&stockAlmacen[pid][aid])||0}
 function stockTotal(pid){return almacenes.filter(a=>a.estado==="Activo").reduce((s,a)=>s+stockEn(pid,a.id),0)}
 function sincronizarStock(){catalogo.forEach(p=>{p.stock=stockTotal(p.id)})}
-function ajustarStock(pid,aid,delta){if(!stockAlmacen[pid])stockAlmacen[pid]={};stockAlmacen[pid][aid]=Math.max(0,((stockAlmacen[pid][aid])||0)+delta);sincronizarStock()}
+function ajustarStock(pid,aid,delta){if(!stockAlmacen[pid])stockAlmacen[pid]={};stockAlmacen[pid][aid]=redondearCant(Math.max(0,((stockAlmacen[pid][aid])||0)+delta));sincronizarStock()}
 function fijarStockEn(pid,aid,nuevo){ajustarStock(pid,aid,Math.max(0,Number(nuevo)||0)-stockEn(pid,aid))}
-function fijarStockTotal(pid,nuevo){nuevo=Math.max(0,Number(nuevo)||0);let falta=nuevo-stockTotal(pid);if(falta===0)return;if(falta>0){const pr=almacenPrincipal();const dest=(pr&&pr.estado==="Activo")?pr:almacenes.find(a=>a.estado==="Activo");if(dest)ajustarStock(pid,dest.id,falta);return}let quitar=-falta;const orden=[almacenPrincipal()].concat(almacenes.filter(a=>!(almacenPrincipal()&&a.id===almacenPrincipal().id)));orden.forEach(a=>{if(!a||quitar<=0)return;const q=Math.min(stockEn(pid,a.id),quitar);if(q>0){ajustarStock(pid,a.id,-q);quitar-=q}})}
+function fijarStockTotal(pid,nuevo){nuevo=redondearCant(Math.max(0,Number(nuevo)||0));let falta=nuevo-stockTotal(pid);if(falta===0)return;if(falta>0){const pr=almacenPrincipal();const dest=(pr&&pr.estado==="Activo")?pr:almacenes.find(a=>a.estado==="Activo");if(dest)ajustarStock(pid,dest.id,falta);return}let quitar=-falta;const orden=[almacenPrincipal()].concat(almacenes.filter(a=>!(almacenPrincipal()&&a.id===almacenPrincipal().id)));orden.forEach(a=>{if(!a||quitar<=0)return;const q=Math.min(stockEn(pid,a.id),quitar);if(q>0){ajustarStock(pid,a.id,-q);quitar-=q}})}
 function almacenVenta(){let a=almacenActivo(ventaAlmacen);if(a)return a;a=almacenPrincipal();if(a&&a.estado==="Activo")return a;return almacenes.find(x=>x.estado==="Activo")||null}
 if(!stockAlmacen){stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0})}
 catalogo.forEach(p=>{if(!stockAlmacen[p.id]){stockAlmacen[p.id]={};const pr=almacenPrincipal();if(pr)stockAlmacen[p.id][pr.id]=p.stock||0}});
@@ -830,6 +833,20 @@ function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(cat
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
+/* Unidades de venta: Pieza / Kilo / Metro / Litro. El precio es por unidad.
+   Pieza solo admite enteros; kilo, metro y litro admiten decimales (ej. 0.5 kg, 1.25 m). */
+const UNIDADES_VENTA={pieza:{nombre:"Pieza",corta:"pza",plural:"pzas",paso:1,decimal:false},kilo:{nombre:"Kilo",corta:"kg",plural:"kg",paso:0.5,decimal:true},metro:{nombre:"Metro",corta:"m",plural:"m",paso:0.5,decimal:true},litro:{nombre:"Litro",corta:"L",plural:"L",paso:0.5,decimal:true}};
+function unidadDe(p){const u=p&&p.unidad;return UNIDADES_VENTA[u]?u:"pieza"}
+function esDecimalUnidad(p){return UNIDADES_VENTA[unidadDe(p)].decimal}
+function pasoUnidad(p){return UNIDADES_VENTA[unidadDe(p)].paso}
+function redondearCant(n){return Math.round((Number(n)||0)*1000)/1000}
+function fmtCant(n,u){n=redondearCant(n);if(u==="pieza")return String(Math.round(n));let t=String(n);return t}
+function etiquetaUnidad(p,cant){const u=unidadDe(p);if(u==="pieza")return (Number(cant)===1?"pza":"pzas");return UNIDADES_VENTA[u].corta}
+function textoCantidadU(cant,u){return fmtCant(cant,u)+" "+(u==="pieza"?(Number(cant)===1?"pza":"pzas"):UNIDADES_VENTA[u].corta)}
+function textoCantidad(p,cant){return textoCantidadU(cant,unidadDe(p))}
+function normalizarCant(p,cant){cant=redondearCant(cant);if(!esDecimalUnidad(p))cant=Math.round(cant);return Math.max(0,cant)}
+catalogo.forEach(p=>{if(!UNIDADES_VENTA[p.unidad])p.unidad="pieza";p.stock=redondearCant(p.stock||0)});
+ticket.forEach(l=>{l.cant=redondearCant(l.cant||0)});
 function toast(m){let t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
 function render(){
  llenarSelectVentaAlmacen();
@@ -839,7 +856,7 @@ function render(){
  catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
-  d.innerHTML=`<div class="foto">${p.emoji}</div><h3>${p.nombre}</h3><div class="precio">${dinero(p.precio)}</div><div class="stock ${bajo?"bajo":""}">${p.stock<=0?"Quedan 0 pzas":bajo?"Quedan "+p.stock+" pzas":"Stock: "+p.stock+" pzas"}</div><button class="btn-agregar" ${p.stock<=0||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
+  d.innerHTML=`<div class="foto">${p.emoji}</div><h3>${p.nombre}</h3><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="stock ${bajo?"bajo":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${p.stock<=0||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
   grid.appendChild(d);
  });
  renderTicket();
@@ -847,10 +864,10 @@ function render(){
 }
 function renderTicket(){
  const box=document.getElementById("ticket");
- const n=ticket.reduce((a,l)=>a+l.cant,0);
- document.getElementById("nArticulos").textContent=n+" artículo"+(n===1?"":"s");
+ const n=ticket.length;
+ document.getElementById("nArticulos").textContent=n+" producto"+(n===1?"":"s");
  if(!ticket.length){box.innerHTML=`<div class="ticket-vacio">🛒<br><b>Aún no hay productos</b><br>Toca un producto para agregarlo.</div>`;}
- else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id);return `<div class="linea"><span>${p?p.nombre:"Producto"}<br><span class="cant"><button onclick="cambiarCant(${l.id},-1)">−</button> ${l.cant} <button onclick="cambiarCant(${l.id},1)">+</button></span></span><span>${dinero(l.cant*l.precio)}</span></div>`}).join("")}
+ else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id)||{unidad:"pieza",nombre:"Producto"};const paso=pasoUnidad(p);return `<div class="linea"><span>${p?p.nombre:"Producto"}<br><span class="cant"><button onclick="cambiarCant(${l.id},-${paso})">−</button> <input type="number" min="${esDecimalUnidad(p)?"0.01":"1"}" step="${esDecimalUnidad(p)?"0.01":"1"}" value="${fmtCant(l.cant,unidadDe(p))}" onchange="fijarCant(${l.id},this.value)" aria-label="Cantidad"> <span>${etiquetaUnidad(p,l.cant)}</span> <button onclick="cambiarCant(${l.id},${paso})">+</button></span></span><span>${dinero(l.cant*l.precio)}</span></div>`}).join("")}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  const sub=total/1.16, iva=total-sub;
  document.getElementById("subtotal").textContent=dinero(sub);
@@ -860,8 +877,9 @@ function renderTicket(){
  const cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
  document.getElementById("cambio").textContent=dinero(cambio);
 }
-function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;if(enTicket>=disp){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant++;else ticket.push({id,cant:1,precio:p.precio});guardar();render();}
-function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&l.cant>=stockEn(id,av.id)){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant+=d;if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
+function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();}
+function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
+function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll(".pagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();}
 function cobrar(){
  if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
@@ -869,14 +887,14 @@ function cobrar(){
  const rec=parseFloat(document.getElementById("recibido").value)||0;
  if(pago==="Efectivo"&&rec>0&&rec<total){toast("Efectivo insuficiente. Faltan "+dinero(total-rec));return}
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
- for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
+ for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
  ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre});
  const cambio=pago==="Efectivo"&&rec>0?rec-total:0;
  ticket=[];document.getElementById("recibido").value="";guardar();render();
  toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
 }
-function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=parseInt(document.getElementById("nuevoStock").value);const emoji=document.getElementById("nuevoEmoji").value;if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();toast("Producto agregado: "+nombre);}
+function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji=document.getElementById("nuevoEmoji").value;if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();toast("Producto agregado: "+nombre);}
 function editar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede editar productos.");return}mostrarVista("productos");editarProducto(id);}
 function eliminar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){catalogo=catalogo.filter(x=>x.id!==id);delete stockAlmacen[id];ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();}}
 function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo?")){catalogo=JSON.parse(JSON.stringify(EJEMPLO));stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0});sincronizarStock();guardar();render();renderProductos();}}
@@ -1048,7 +1066,7 @@ function ticketImpresoHTML(v){
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio" style="max-width:130px"><br>':"";
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(v.folio).padStart(4,"0")+"<br>"):"";
  const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
- const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-line"><span>'+l.cant+' × '+escHtml(p?p.nombre:"Producto")+'</span><span>'+dinero(l.cant*l.precio)+'</span></div>'}).join("");
+ const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-line"><span>'+(p?textoCantidad(p,l.cant):l.cant)+' × '+escHtml(p?p.nombre:"Producto")+'</span><span>'+dinero(l.cant*l.precio)+'</span></div>'}).join("");
  const fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
  return logo
   +'<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div>'
@@ -1198,7 +1216,7 @@ function cambiarMiPin(ev){
 /* Interfaz 3.3 · Multi-almacén */
 function llenarSelectVentaAlmacen(){
  const sel=document.getElementById("ventaAlmacenSel");if(!sel)return;
- sel.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}${a.principal?" (Principal)":""} · ${catalogo.reduce((s,p)=>s+stockEn(p.id,a.id),0)} pzas</option>`).join("")||'<option value="">Sin almacén activo</option>';
+ sel.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}${a.principal?" (Principal)":""} · ${redondearCant(catalogo.reduce((s,p)=>s+stockEn(p.id,a.id),0))}</option>`).join("")||'<option value="">Sin almacén activo</option>';
  const a=almacenVenta();
  if(a){sel.value=a.id;ventaAlmacen=a.id;}
  else{sel.value="";ventaAlmacen=0;}
@@ -1213,12 +1231,12 @@ function renderMulti(){
  if(!tienePermiso("multi"))return;
  document.getElementById("resAlmTotal").textContent=almacenes.length;
  document.getElementById("resAlmActivos").textContent=almacenes.filter(a=>a.estado==="Activo").length;
- document.getElementById("resAlmPiezas").textContent=catalogo.reduce((s,p)=>s+stockTotal(p.id),0);
+ document.getElementById("resAlmPiezas").textContent=redondearCant(catalogo.reduce((s,p)=>s+stockTotal(p.id),0));
  document.getElementById("resAlmTraspasos").textContent=traspasos.length;
  const lista=document.getElementById("listaAlmacenes");if(lista){
   lista.innerHTML=almacenes.map(a=>{
    const tot=catalogo.reduce((s,p)=>s+stockEn(p.id,a.id),0);
-   return '<tr><td><b>'+escHtml(a.nombre)+'</b>'+(a.principal?' <span class="estado disponible">🏬 Principal</span>':'')+'</td><td>'+escHtml(a.ubicacion||"—")+'</td><td>'+escHtml(a.responsable||"—")+'</td><td><span class="estado '+(a.estado==="Activo"?"disponible":"pausado")+'">'+(a.estado==="Activo"?"● Activo":"⏸ Pausado")+'</span></td><td class="num"><b>'+tot+' pzas</b></td><td><div class="caj-fila-botones"><button type="button" onclick="verStockAlmacen('+a.id+')">📦 Stock</button>'+(a.principal?"":'<button type="button" onclick="hacerPrincipal('+a.id+')">⭐ Principal</button><button type="button" onclick="toggleAlmacen('+a.id+')">'+(a.estado==="Activo"?"⏸ Pausar":"▶️ Activar")+'</button><button type="button" class="peligro" onclick="eliminarAlmacen('+a.id+')">🗑 Eliminar</button>')+'</div></td></tr>';
+   return '<tr><td><b>'+escHtml(a.nombre)+'</b>'+(a.principal?' <span class="estado disponible">🏬 Principal</span>':'')+'</td><td>'+escHtml(a.ubicacion||"—")+'</td><td>'+escHtml(a.responsable||"—")+'</td><td><span class="estado '+(a.estado==="Activo"?"disponible":"pausado")+'">'+(a.estado==="Activo"?"● Activo":"⏸ Pausado")+'</span></td><td class="num"><b>'+redondearCant(tot)+'</b></td><td><div class="caj-fila-botones"><button type="button" onclick="verStockAlmacen('+a.id+')">📦 Stock</button>'+(a.principal?"":'<button type="button" onclick="hacerPrincipal('+a.id+')">⭐ Principal</button><button type="button" onclick="toggleAlmacen('+a.id+')">'+(a.estado==="Activo"?"⏸ Pausar":"▶️ Activar")+'</button><button type="button" class="peligro" onclick="eliminarAlmacen('+a.id+')">🗑 Eliminar</button>')+'</div></td></tr>';
   }).join("");
  }
  const selS=document.getElementById("selAlmacenStock");if(selS){const av=selS.value;selS.innerHTML=almacenes.map(a=>`<option value="${a.id}">${escHtml(a.nombre)}${a.principal?" (Principal)":""}</option>`).join("");if(av)selS.value=av;if(!selS.value)selS.value=almacenSel;almacenSel=Number(selS.value)||1;}
@@ -1226,14 +1244,14 @@ function renderMulti(){
  const ls=document.getElementById("listaStockAlmacen");if(ls){
   const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q));
   if(!items.length){ls.innerHTML='<tr><td colspan="5" style="text-align:center;color:#555">📦<br><b>No hay productos con ese filtro</b></td></tr>';}
-  else ls.innerHTML=items.map(p=>`<tr><td>${p.emoji||"📦"} <b>${escHtml(p.nombre)}</b></td><td class="num">${dinero(p.precio)}</td><td class="num"><b>${stockEn(p.id,almacenSel)} pzas</b></td><td class="num">${stockTotal(p.id)} pzas</td><td><button onclick="editarStockAlmacen(${p.id})">✏️ Editar stock</button></td></tr>`).join("");
+  else ls.innerHTML=items.map(p=>`<tr><td>${p.emoji||"📦"} <b>${escHtml(p.nombre)}</b></td><td class="num">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</td><td class="num"><b>${textoCantidad(p,stockEn(p.id,almacenSel))}</b></td><td class="num">${textoCantidad(p,stockTotal(p.id))}</td><td><button onclick="editarStockAlmacen(${p.id})">✏️ Editar stock</button></td></tr>`).join("");
  }
- const tp=document.getElementById("trProducto");if(tp){const av=tp.value;tp.innerHTML=catalogo.map(p=>`<option value="${p.id}">${p.emoji||"📦"} ${escHtml(p.nombre)} · Total: ${stockTotal(p.id)} pzas</option>`).join("");if(av)tp.value=av;}
+ const tp=document.getElementById("trProducto");if(tp){const av=tp.value;tp.innerHTML=catalogo.map(p=>`<option value="${p.id}">${p.emoji||"📦"} ${escHtml(p.nombre)} · Total: ${textoCantidad(p,stockTotal(p.id))}</option>`).join("");if(av)tp.value=av;}
  const to=document.getElementById("trOrigen");if(to){const av=to.value;to.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}</option>`).join("");if(av)to.value=av;if(!to.value&&almacenPrincipal())to.value=almacenPrincipal().id;}
  const td=document.getElementById("trDestino");if(td){const av=td.value;td.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}</option>`).join("");if(av)td.value=av;}
  const lt=document.getElementById("listaTraspasos");if(lt){
   if(!traspasos.length){lt.innerHTML='<tr><td colspan="5" style="text-align:center;color:#555">🔀<br><b>Aún no hay traspasos</b><br>Usa el formulario de arriba para mover stock entre almacenes.</td></tr>';}
-  else lt.innerHTML=traspasos.map(t=>`<tr><td>${t.fechaTxt||fechaBonita((t.fecha||"").slice(0,10))}</td><td>${escHtml(t.nombre)}</td><td>${escHtml(t.origen)}</td><td>${escHtml(t.destino)}</td><td class="num"><b>${t.cantidad} pzas</b></td></tr>`).join("");
+  else lt.innerHTML=traspasos.map(t=>{const pp=catalogo.find(x=>x.id===t.productoId);return `<tr><td>${t.fechaTxt||fechaBonita((t.fecha||"").slice(0,10))}</td><td>${escHtml(t.nombre)}</td><td>${escHtml(t.origen)}</td><td>${escHtml(t.destino)}</td><td class="num"><b>${pp?textoCantidad(pp,t.cantidad):t.cantidad}</b></td></tr>`}).join("");
  }
 }
 function guardarAlmacen(ev){
@@ -1246,7 +1264,7 @@ function guardarAlmacen(ev){
  almacenes.push({id:Date.now()+uid++,nombre:nombre,ubicacion:ubicacion,responsable:responsable,principal:false,estado:"Activo"});
  guardar();renderMulti();
  ev.target.reset();
- toast("Almacén creado: "+nombre+". Empieza con 0 pzas; mueve stock con un traspaso.");
+ toast("Almacén creado: "+nombre+". Empieza en 0; mueve stock con un traspaso.");
 }
 function limpiarAlmacen(){const f=document.querySelector("#vistaMulti form");if(f)f.reset();}
 function limpiarTraspaso(){const fs=document.querySelectorAll("#vistaMulti form");if(fs[1])fs[1].reset();}
@@ -1270,7 +1288,7 @@ function eliminarAlmacen(id){
  const a=almacenes.find(x=>x.id===id);if(!a)return;
  if(a.principal){toast("El almacén Principal no se puede eliminar.");return}
  const conStock=catalogo.reduce((s,p)=>s+stockEn(p.id,id),0);
- if(conStock>0){toast("No se puede eliminar: "+a.nombre+" aún tiene "+conStock+" pzas. Traspasa su stock a otro almacén primero.");return}
+ if(conStock>0){toast("No se puede eliminar: "+a.nombre+" aún tiene "+redondearCant(conStock)+". Traspasa su stock a otro almacén primero.");return}
  if(!confirm("¿Eliminar el almacén "+a.nombre+"?"))return;
  almacenes=almacenes.filter(x=>x.id!==id);
  catalogo.forEach(p=>{if(stockAlmacen[p.id])delete stockAlmacen[p.id][id]});
@@ -1282,11 +1300,11 @@ function editarStockAlmacen(pid){
  if(!tienePermiso("multi")){toast("⛔ Sin permiso: solo el Administrador puede editar el stock por almacén.");return}
  const p=catalogo.find(x=>x.id===pid);if(!p)return;
  const a=almacenes.find(x=>x.id===almacenSel)||almacenPrincipal();if(!a)return;
- const n=prompt("Stock de "+p.nombre+" en "+a.nombre+" (pzas):",stockEn(pid,a.id));
+ const n=prompt("Stock de "+p.nombre+" en "+a.nombre+" ("+UNIDADES_VENTA[unidadDe(p)].corta+"):",fmtCant(stockEn(pid,a.id),unidadDe(p)));
  if(n===null)return;
- if(isNaN(parseInt(n))||parseInt(n)<0){toast("El stock debe ser 0 o más.");return}
- fijarStockEn(pid,a.id,parseInt(n));guardar();renderMulti();render();
- toast("Stock de "+p.nombre+" en "+a.nombre+": "+stockEn(pid,a.id)+" pzas · Total: "+p.stock+" pzas.");
+ if(isNaN(parseFloat(n))||parseFloat(n)<0){toast("El stock debe ser 0 o más.");return}
+ fijarStockEn(pid,a.id,redondearCant(parseFloat(n)));guardar();renderMulti();render();
+ toast("Stock de "+p.nombre+" en "+a.nombre+": "+textoCantidad(p,stockEn(pid,a.id))+" · Total: "+textoCantidad(p,p.stock)+".");
 }
 function guardarTraspaso(ev){
  if(ev)ev.preventDefault();
@@ -1294,18 +1312,18 @@ function guardarTraspaso(ev){
  const pid=Number(document.getElementById("trProducto").value);
  const origen=Number(document.getElementById("trOrigen").value);
  const destino=Number(document.getElementById("trDestino").value);
- const cant=Math.floor(Number(document.getElementById("trCantidad").value)||0);
+ const cant=redondearCant(Number(document.getElementById("trCantidad").value)||0);
  const p=catalogo.find(x=>x.id===pid);
  if(!p){toast("Elige un producto.");return}
  if(origen===destino){toast("El origen y el destino deben ser diferentes.");return}
  const ao=almacenActivo(origen),ad=almacenActivo(destino);
  if(!ao||!ad){toast("El origen y el destino deben estar activos.");return}
  if(cant<=0){toast("La cantidad debe ser mayor a 0.");return}
- if(stockEn(pid,origen)<cant){toast("No hay suficiente stock de "+p.nombre+" en "+ao.nombre+" ("+stockEn(pid,origen)+" pzas).");return}
+ if(stockEn(pid,origen)+0.000001<cant){toast("No hay suficiente stock de "+p.nombre+" en "+ao.nombre+" ("+textoCantidad(p,stockEn(pid,origen))+").");return}
  ajustarStock(pid,origen,-cant);ajustarStock(pid,destino,cant);
  traspasos.unshift({id:Date.now()+uid++,fecha:new Date().toISOString(),fechaTxt:new Date().toLocaleString("es-MX"),productoId:pid,nombre:p.nombre,origenId:origen,origen:ao.nombre,destinoId:destino,destino:ad.nombre,cantidad:cant});
  guardar();renderMulti();render();
- toast("Traspaso: "+cant+" pzas de "+p.nombre+" de "+ao.nombre+" a "+ad.nombre+".");
+ toast("Traspaso: "+textoCantidad(p,cant)+" de "+p.nombre+" de "+ao.nombre+" a "+ad.nombre+".");
 }
 
 let vistaActual="ventas";
@@ -1344,7 +1362,7 @@ function llenarSelectEntradas(){
  const ea=document.getElementById("eAlmacen"); if(ea){const av=ea.value;ea.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}${a.principal?" (Principal)":""}</option>`).join("");if(av)ea.value=av;if(!ea.value&&almacenPrincipal())ea.value=almacenPrincipal().id;}
  const sel=document.getElementById("eProducto"); if(!sel)return;
  const actual=sel.value;
- sel.innerHTML='<option value="">Elige un producto...</option>'+catalogo.map(p=>`<option value="${p.id}">${p.emoji||"📦"} ${p.nombre} · Stock: ${p.stock} pzas</option>`).join("");
+ sel.innerHTML='<option value="">Elige un producto...</option>'+catalogo.map(p=>`<option value="${p.id}">${p.emoji||"📦"} ${p.nombre} · Stock: ${textoCantidad(p,p.stock)}</option>`).join("");
  if(actual)sel.value=actual;
  const fs=document.getElementById("filtroEntProd"); if(fs){const f=fs.value; fs.innerHTML='<option value="todos">Todos los productos</option>'+catalogo.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join(""); if(f)fs.value=f;}
  mostrarStockActual();
@@ -1353,14 +1371,14 @@ function mostrarStockActual(){
  const el=document.getElementById("stockActual"); if(!el)return;
  const p=catalogo.find(x=>String(x.id)===document.getElementById("eProducto").value);
  const a=almacenActivo(Number((document.getElementById("eAlmacen")||{}).value))||almacenPrincipal();
- el.textContent=p?("Stock de "+p.nombre+" en "+(a?a.nombre:"—")+": "+(a?stockEn(p.id,a.id):0)+" pzas · Total en almacenes activos: "+p.stock+" pzas. Al guardar la entrada, el stock sube en ese almacén."):"";
+ el.textContent=p?("Stock de "+p.nombre+" en "+(a?a.nombre:"—")+": "+(a?textoCantidad(p,stockEn(p.id,a.id)):"0")+" · Total en almacenes activos: "+textoCantidad(p,p.stock)+". Al guardar la entrada, el stock sube en ese almacén."):"";
 }
 function guardarEntrada(ev){
  ev.preventDefault();
  const id=Number(document.getElementById("eProducto").value);
  const p=catalogo.find(x=>x.id===id);
  if(!p){toast("Elige un producto del inventario.");return}
- const cant=Math.floor(Number(document.getElementById("eCantidad").value)||0);
+ const cant=redondearCant(Number(document.getElementById("eCantidad").value)||0);
  if(cant<=0){toast("La cantidad debe ser mayor a 0.");return}
  const costo=Number(document.getElementById("eCosto").value)||0;
  const proveedor=(document.getElementById("eProveedor").value||"").trim();
@@ -1370,7 +1388,7 @@ function guardarEntrada(ev){
  ajustarStock(p.id,alm.id,cant);
  entradas.unshift({id:Date.now()+ (uid++),fecha:fecha,productoId:p.id,nombre:p.nombre,emoji:p.emoji||"📦",cantidad:cant,costo:costo,proveedor:proveedor,nota:nota,total:cant*costo,almacenId:alm.id,almacen:alm.nombre});
  guardar(); llenarSelectEntradas();llenarSelectVentaAlmacen(); renderEntradas(); render();
- toast("Entrada registrada: +"+cant+" pzas de "+p.nombre+". Stock ahora: "+p.stock+" pzas.");
+ toast("Entrada registrada: +"+textoCantidad(p,cant)+" de "+p.nombre+". Stock ahora: "+textoCantidad(p,p.stock)+".");
  limpiarEntrada();
 }
 function limpiarEntrada(){
@@ -1382,19 +1400,19 @@ function eliminarEntrada(id){
  const e=entradas.find(x=>x.id===id); if(!e)return;
  const p=catalogo.find(x=>x.id===e.productoId);
  const aid=e.almacenId||(almacenPrincipal()||{}).id;
- if(p && stockEn(p.id,aid) < e.cantidad){toast("No se puede eliminar: el stock de "+p.nombre+" en "+((almacenes.find(a=>a.id===aid)||{}).nombre||"ese almacén")+" ("+stockEn(p.id,aid)+" pzas) es menor que la entrada ("+e.cantidad+" pzas).");return}
- if(!confirm("¿Eliminar esta entrada de "+e.cantidad+" pzas de "+e.nombre+"? El stock se descuenta de nuevo."))return;
+ if(p && stockEn(p.id,aid)+0.000001 < e.cantidad){toast("No se puede eliminar: el stock de "+p.nombre+" en "+((almacenes.find(a=>a.id===aid)||{}).nombre||"ese almacén")+" ("+textoCantidad(p,stockEn(p.id,aid))+") es menor que la entrada ("+textoCantidad(p,e.cantidad)+").");return}
+ if(!confirm("¿Eliminar esta entrada de "+e.cantidad+" de "+e.nombre+"? El stock se descuenta de nuevo."))return;
  if(p)ajustarStock(p.id,aid,-e.cantidad);
  entradas=entradas.filter(x=>x.id!==id);
  guardar(); llenarSelectEntradas(); renderEntradas(); render();
- toast("Entrada eliminada. Stock de "+(p?p.nombre:e.nombre)+" ahora: "+(p?p.stock:0)+" pzas.");
+ toast("Entrada eliminada. Stock de "+(p?p.nombre:e.nombre)+" ahora: "+(p?textoCantidad(p,p.stock):"0")+"." );
 }
 function renderEntradas(){
  llenarSelectEntradas();
  const hoy=hoyLocal();
  const deHoy=entradas.filter(e=>e.fecha===hoy);
  document.getElementById("resEntHoy").textContent=deHoy.length;
- document.getElementById("resPiezasHoy").textContent=deHoy.reduce((a,e)=>a+e.cantidad,0);
+ document.getElementById("resPiezasHoy").textContent=redondearCant(deHoy.reduce((a,e)=>a+e.cantidad,0));
  document.getElementById("resCostoHoy").textContent=dinero(deHoy.reduce((a,e)=>a+e.total,0));
  document.getElementById("resEntTotal").textContent=entradas.length;
  const q=((document.getElementById("buscarEnt")||{}).value||"").toLowerCase();
@@ -1403,7 +1421,7 @@ function renderEntradas(){
  const lista=document.getElementById("listaEntradas"); if(!lista)return;
  const items=entradas.filter(e=>(e.nombre+" "+(e.proveedor||"")+" "+(e.nota||"")).toLowerCase().includes(q)).filter(e=>fp==="todos"||String(e.productoId)===fp).filter(e=>!ff||e.fecha===ff);
  if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">📥<br><b>Aún no hay entradas</b><br>Registra tu primera entrada arriba.</td></tr>';return}
- lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${e.cantidad} pzas</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
+ lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
 }
 
 function guardarGasto(ev){
@@ -1466,7 +1484,7 @@ function renderProductos(){
  items.forEach(p=>{
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";
-  d.innerHTML=`<div class="foto">${p.emoji||"📦"}</div><div class="info"><h3>${p.nombre}</h3><p>${p.categoria||"General"} · ${p.stock<=0?"Quedan 0 pzas":p.stock<=5?"Quedan "+p.stock+" pzas":"Stock: "+p.stock+" pzas"}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
+  d.innerHTML=`<div class="foto">${p.emoji||"📦"}</div><div class="info"><h3>${p.nombre}</h3><p>${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre} · ${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
   lista.appendChild(d);
  });
 }
@@ -1474,19 +1492,20 @@ function guardarProducto(e){e.preventDefault();
  const id=document.getElementById("pId").value;
  const nombre=document.getElementById("pNombre").value.trim();
  const precio=parseFloat(document.getElementById("pPrecio").value);
- const stock=parseInt(document.getElementById("pStock").value);
+ const stock=redondearCant(parseFloat(document.getElementById("pStock").value));
+  const unidad=document.getElementById("pUnidad").value||"pieza";
  const categoria=document.getElementById("pCategoria").value;
  const emoji=document.getElementById("pEmoji").value;
  const pausado=document.getElementById("pEstado").value==="pausado";
  if(!nombre||isNaN(precio)||isNaN(stock))return;
- if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;fijarStockTotal(p.id,stock);p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;toast("Producto actualizado: "+nombre+" · Stock total "+p.stock+" pzas");}}
- else{const nid2=Date.now()+uid++;catalogo.push({id:nid2,nombre,precio,stock,emoji,categoria,pausado});stockAlmacen[nid2]={};const pr2=almacenPrincipal();if(pr2)stockAlmacen[nid2][pr2.id]=stock;sincronizarStock();toast("Producto agregado: "+nombre);}
+ if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;p.unidad=unidad;fijarStockTotal(p.id,stock);p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;toast("Producto actualizado: "+nombre+" · Stock total "+textoCantidad(p,p.stock));}}
+ else{const nid2=Date.now()+uid++;catalogo.push({id:nid2,nombre,precio,stock,emoji,categoria,pausado,unidad});stockAlmacen[nid2]={};const pr2=almacenPrincipal();if(pr2)stockAlmacen[nid2][pr2.id]=stock;sincronizarStock();toast("Producto agregado: "+nombre);}
  e.target.reset();document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";
  guardar();render();renderProductos();
 }
 function editarProducto(id){const p=catalogo.find(x=>x.id===id);if(!p)return;
  document.getElementById("pId").value=p.id;document.getElementById("pNombre").value=p.nombre;
- document.getElementById("pPrecio").value=p.precio;document.getElementById("pStock").value=p.stock;
+ document.getElementById("pPrecio").value=p.precio;document.getElementById("pStock").value=p.stock;document.getElementById("pUnidad").value=unidadDe(p);
  document.getElementById("pCategoria").value=p.categoria||"General";document.getElementById("pEmoji").value=p.emoji||"📦";
  document.getElementById("pEstado").value=p.pausado?"pausado":"disponible";
  document.getElementById("tituloFormProd").textContent="✏️ Editando: "+p.nombre;
@@ -1520,8 +1539,8 @@ function resumenCorteProductos(){
  const vHoy=ventas.filter(esHoyVenta);
  const eHoy=entradas.filter(e=>e.fecha===hoy);
  const porProd={};
- vHoy.forEach(v=>{(v.items||[]).forEach(l=>{const p=catalogo.find(x=>x.id===l.id);const key=l.id;if(!porProd[key])porProd[key]={productoId:l.id,nombre:p?p.nombre:"Producto",emoji:p?p.emoji:"📦",precio:l.precio||(p?p.precio:0),cantidad:0,monto:0};porProd[key].cantidad+=l.cant;porProd[key].monto+=l.cant*(l.precio||0)})});
- const filas=Object.values(porProd).map(r=>{const p=catalogo.find(x=>x.id===r.productoId);const entHoy=eHoy.filter(e=>String(e.productoId)===String(r.productoId)).reduce((a,e)=>a+(e.cantidad||0),0);const restante=p?p.stock:0;const inicial=restante+r.cantidad-entHoy;return {productoId:r.productoId,nombre:r.nombre,emoji:r.emoji,precio:r.precio,cantidad:r.cantidad,monto:r.monto,entradasHoy:entHoy,stockInicial:inicial,stockVendido:r.cantidad,stockRestante:restante}});
+ vHoy.forEach(v=>{(v.items||[]).forEach(l=>{const p=catalogo.find(x=>x.id===l.id);const key=l.id;if(!porProd[key])porProd[key]={productoId:l.id,nombre:p?p.nombre:"Producto",emoji:p?p.emoji:"📦",precio:l.precio||(p?p.precio:0),cantidad:0,monto:0,unidad:unidadDe(p)};porProd[key].cantidad+=l.cant;porProd[key].monto+=l.cant*(l.precio||0)})});
+ const filas=Object.values(porProd).map(r=>{const p=catalogo.find(x=>x.id===r.productoId);const entHoy=eHoy.filter(e=>String(e.productoId)===String(r.productoId)).reduce((a,e)=>a+(e.cantidad||0),0);const restante=p?p.stock:0;const inicial=redondearCant(restante+r.cantidad-entHoy);return {productoId:r.productoId,nombre:r.nombre,emoji:r.emoji,precio:r.precio,cantidad:r.cantidad,monto:r.monto,unidad:r.unidad||"pieza",entradasHoy:entHoy,stockInicial:inicial,stockVendido:r.cantidad,stockRestante:restante}});
  filas.sort((a,b)=>b.monto-a.monto);
  const totalPiezas=filas.reduce((a,f)=>a+f.cantidad,0);
  const totalMonto=filas.reduce((a,f)=>a+f.monto,0);
@@ -1531,13 +1550,13 @@ function resumenCorteProductos(){
 function renderCorteProductos(){
  const r=resumenCorteProductos();
  const elT=document.getElementById("resProdTipos"); if(elT)elT.textContent=r.filas.length+" productos";
- const elP=document.getElementById("resProdPiezas"); if(elP)elP.textContent=r.totalPiezas+" pzas";
+ const elP=document.getElementById("resProdPiezas"); if(elP)elP.textContent=redondearCant(r.totalPiezas);
  const elM=document.getElementById("resProdMonto"); if(elM)elM.textContent=dinero(r.totalMonto);
- const elS=document.getElementById("resProdStock"); if(elS)elS.textContent=r.stockRestante+" pzas";
+ const elS=document.getElementById("resProdStock"); if(elS)elS.textContent=redondearCant(r.stockRestante);
  const lista=document.getElementById("listaCorteProductos"); if(!lista)return;
  if(!r.filas.length){lista.innerHTML='<tr><td colspan="6" style="text-align:center;color:#555">📦<br><b>Aún no hay productos vendidos hoy</b><br>Vende algo en Ventas y aparecerá aquí.</td></tr>';return}
- lista.innerHTML=r.filas.map(f=>'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+f.cantidad+' pzas</td><td class="num"><b>'+dinero(f.monto)+'</b></td><td class="num">'+f.stockInicial+' pzas</td><td class="num">'+f.stockVendido+' pzas</td><td class="num"><b>'+f.stockRestante+' pzas</b></td></tr>').join("")+
- '<tr><td><b>Total</b></td><td class="num"><b>'+r.totalPiezas+' pzas</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td><td class="num">—</td><td class="num"><b>'+r.totalPiezas+' pzas</b></td><td class="num"><b>'+r.stockRestante+' pzas</b></td></tr>';
+ lista.innerHTML=r.filas.map(f=>'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+textoCantidadU(f.cantidad,f.unidad||"pieza")+'</td><td class="num"><b>'+dinero(f.monto)+'</b></td><td class="num">'+textoCantidadU(f.stockInicial,f.unidad||"pieza")+'</td><td class="num">'+textoCantidadU(f.stockVendido,f.unidad||"pieza")+'</td><td class="num"><b>'+textoCantidadU(f.stockRestante,f.unidad||"pieza")+'</b></td></tr>').join("")+
+ '<tr><td><b>Total</b></td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td><td class="num">—</td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+redondearCant(r.stockRestante)+'</b></td></tr>';
 }
 function actualizarCuadre(){
  const r=resumenCorte();
@@ -1554,7 +1573,7 @@ function renderCortes(){
  document.getElementById("fechaCorte").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
  document.getElementById("resCorVentas").textContent=dinero(r.ventasTotal)+" · "+r.ventasNum+" ventas";
  document.getElementById("resCorGastos").textContent=dinero(r.gastosHoy);
- document.getElementById("resCorEntradas").textContent=dinero(r.costoEntradas)+" · "+r.piezasEntradas+" pzas";
+ document.getElementById("resCorEntradas").textContent=dinero(r.costoEntradas)+" · "+redondearCant(r.piezasEntradas);
  document.getElementById("resCorGanancia").textContent=dinero(r.ganancia);
  document.getElementById("resCorCaja").textContent=dinero(r.totalCaja);
  document.getElementById("resPagoEfectivo").textContent=dinero(r.porPago.Efectivo||0);
@@ -1579,7 +1598,7 @@ function renderHistorial(){
  const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
  if(!items.length){lista.innerHTML='<tr><td colspan="10" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de dinero o de productos en Corte diario.</td></tr>';return}
- lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?((c.totalPiezas||0)+" pzas"):dinero(c.entradasCosto||0)+' ('+(c.entradasPiezas||0)+' pzas)')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>'}).join("");
+ lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>'}).join("");
 }
 function realizarCorteDinero(){
  const r=resumenCorte();
@@ -1603,24 +1622,24 @@ function realizarCorteProductos(){
  const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoCaja,efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
- toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" realizado · "+r.totalPiezas+" pzas · "+dinero(r.totalMonto));
+ toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" realizado · "+redondearCant(r.totalPiezas)+" · "+dinero(r.totalMonto));
 }
 function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
  var det=document.getElementById("detalleHistCorte")||document.getElementById("detalleCorte"); if(!det)return;
  if((c.tipo||"dinero")==="productos"){
   det.innerHTML="<b>📦 Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
-  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+p.cantidad+" pzas · "+dinero(p.monto)+" · Stock inicial "+p.stockInicial+" · Vendido "+p.stockVendido+" · Restante "+p.stockRestante).join("<br>")+
-  "<br><b>Total: "+(c.totalPiezas||0)+" pzas · "+dinero(c.ventasTotal)+"</b>";
+  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+" · Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza")).join("<br>")+
+  "<br><b>Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
  } else {
   det.innerHTML="<b>💰 Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
   "Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (Efectivo "+dinero(c.efectivo)+" · Tarjeta "+dinero(c.tarjeta)+" · Transf. "+dinero(c.transf)+" · Mixto "+dinero(c.mixto)+")<br>"+
-  "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+c.entradasPiezas+" pzas)<br>"+
+  "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+redondearCant(c.entradasPiezas||0)+")<br>"+
   "Ganancia: "+dinero(c.ganancia)+" · Fondo: "+dinero(c.fondo)+" · Efectivo esperado: "+dinero(c.efectivoEsperado)+" · Contado: "+dinero(c.efectivoContado)+" · Diferencia: "+dinero(c.diferencia)+"<br>"+
   "<b>Total en caja: "+dinero(c.totalCaja)+"</b>";
  }
  if(det)det.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;if((c.tipo||"dinero")==="productos"){toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · "+(c.totalPiezas||0)+" pzas · "+dinero(c.ventasTotal));return}toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
+function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;if((c.tipo||"dinero")==="productos"){toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal));return}toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
 function mostrarPasoLicencia(){document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent="KUPO POS";let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.4.6";}
