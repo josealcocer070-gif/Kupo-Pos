@@ -182,6 +182,10 @@ main h1{font-size:34px;margin-bottom:14px}
 .ticket-80 .t-line{display:flex;justify-content:space-between;gap:8px;text-align:left}
 .ticket-80 .t-total{font-weight:700;font-size:15px}
 .ticket-80 .t-titulo{font-weight:700;font-size:16px}
+.ticket-80.papel58{width:218px;font-size:12px;padding:12px 8px}
+.ticket-80.papel58 img{max-width:100px}
+.ticket-80.papel58 .t-titulo{font-size:14px}
+.ticket-80.papel58 .t-total{font-size:14px}
 .marcas{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .marcas span{background:#eef4f8;border:1px solid #c9d4dc;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--azul)}
 .term-row{background:#fff;border:1px solid #dfe5ea;border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center;margin-top:10px}
@@ -471,10 +475,23 @@ main h1{font-size:34px;margin-bottom:14px}
 <input id="tDireccion" value="Palizada, Campeche">
 <label>Teléfono / WhatsApp</label>
 <input id="tTelefono" value="951 943 3938">
+<label>Ancho de papel del ticket</label>
+<select id="tPapel" onchange="cambiarPapelTicket()"><option>80 mm</option><option>58 mm</option></select>
 <label>Mensaje de pie de ticket</label>
 <input id="tMensaje" value="¡Gracias por su compra!">
+<label>Logo del negocio en el ticket</label>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<img id="tLogoPreview" alt="Logo del negocio" style="max-width:120px;max-height:80px;display:none;background:#fff;border:1px solid #dfe5ea;border-radius:10px;padding:6px">
+<span id="tLogoVacio" style="font-size:13px;color:#666">Sin logo — el ticket solo muestra el nombre del negocio en texto.</span>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+<button type="button" onclick="document.getElementById('tLogoArchivo').click()">📷 Subir logo (JPG/PNG)</button>
+<button type="button" class="secundario" onclick="quitarLogoNegocio()">Quitar logo</button>
+</div>
+<input type="file" id="tLogoArchivo" accept="image/jpeg,image/png,image/*" style="display:none" onchange="subirLogoNegocio(event)">
+<p style="font-size:12px;color:#666">El logo se guarda solo en este dispositivo (localStorage, base64). No se sube a ningún servidor. Se ajusta automáticamente para el ticket de 80 mm.</p>
 <div class="checks">
-<label><input type="checkbox" id="tMostrarLogo" checked> Mostrar logo en el ticket</label>
+<label><input type="checkbox" id="tMostrarLogo" checked> Mostrar logo del negocio en el ticket</label>
 <label><input type="checkbox" id="tMostrarIva" checked> Mostrar IVA (16%)</label>
 <label><input type="checkbox" id="tMostrarFolio" checked> Mostrar folio</label>
 </div>
@@ -483,10 +500,10 @@ main h1{font-size:34px;margin-bottom:14px}
 </form>
 </div>
 <div class="form-prod"><h2>🖨 Configurar terminales térmicas</h2>
-<p style="color:#555;font-size:14px">Impresoras térmicas compatibles con KUPO POS: Epson, Xprinter, Nextep, Bixolon, Qian y otra térmica ESC/POS que Windows o Android reconozca. Papel 80 mm · ancho imprimible ~72 mm · protocolo ESC/POS · Bluetooth y USB · corte automático.</p>
+<p style="color:#555;font-size:14px">Impresoras térmicas compatibles con KUPO POS: Epson, Xprinter, Nextep, Bixolon, Qian y otra térmica ESC/POS que Windows o Android reconozca. Protocolo ESC/POS · Bluetooth y USB · corte automático. El ancho del ticket (58 mm o 80 mm) se elige arriba en Personalizar ticket; cada terminal registra su papel (80 mm: ~72 mm imprimible · 58 mm: ~48 mm imprimible).</p>
 <div class="marcas"><span>Epson</span><span>Xprinter</span><span>Nextep</span><span>Bixolon</span><span>Qian</span><span>Otra ESC/POS</span></div>
 <div class="resumen" style="grid-template-columns:repeat(3,1fr)">
-<div class="tarjeta"><small>PAPEL</small><b>80 mm</b></div>
+<div class="tarjeta"><small>PAPEL DEL TICKET</small><b id="resPapelTerm">80 mm</b></div>
 <div class="tarjeta"><small>PROTOCOLO</small><b>ESC/POS</b></div>
 <div class="tarjeta"><small>CONEXIÓN</small><b>Bluetooth + USB</b></div>
 </div>
@@ -625,7 +642,7 @@ function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo
 
 
 /* Interfaz 3.1 · Personalizar ticket + terminales térmicas */
-let ticketConfig=JSON.parse(localStorage.getItem("kupoPosV146TicketConfig")||"null")||{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true};
+let ticketConfig=JSON.parse(localStorage.getItem("kupoPosV146TicketConfig")||"null")||{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"};
 let terminales=JSON.parse(localStorage.getItem("kupoPosV146Terminales")||"null")||[
  {id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},
  {id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}
@@ -640,15 +657,18 @@ function cargarTicketConfig(){
  g("tMostrarLogo").checked=ticketConfig.mostrarLogo!==false;
  g("tMostrarIva").checked=ticketConfig.mostrarIva!==false;
  g("tMostrarFolio").checked=ticketConfig.mostrarFolio!==false;
+ if(g("tPapel"))g("tPapel").value=ticketConfig.papel||"80 mm";
+ const rp=g("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel||"80 mm";
+ const tp=g("termPapel"); if(tp)tp.value=ticketConfig.papel||"80 mm";
  const nb=g("negocioBox"); if(nb)nb.textContent=(ticketConfig.negocio||"Mi negocio").toUpperCase();
  const dn=g("direccionNegocio"); if(dn)dn.value=ticketConfig.direccion||"";
  const tn=g("telefonoNegocio"); if(tn)tn.value=ticketConfig.telefono||"";
- renderTicketPreview(); renderTerminales();
+ mostrarLogoPreview(); renderTicketPreview(); renderTerminales();
 }
 function renderTicketPreview(){
  const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
- const logoImg=document.querySelector("aside .pie img");
- const logo=ticketConfig.mostrarLogo!==false&&logoImg?'<img src="'+logoImg.src+'" alt="KUPO POS"><br>':"";
+ box.classList.toggle("papel58",(ticketConfig.papel||"80 mm")==="58 mm");
+ const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio"><br>':"";
  const total=70, sub=total/1.16, iva=total-sub;
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(folio+1).padStart(4,"0")+"<br>"):"";
  const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
@@ -668,7 +688,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:(document.getElementById("tNegocio").value||"Mi negocio").trim(),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked};
+ ticketConfig={negocio:(document.getElementById("tNegocio").value||"Mi negocio").trim(),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm"};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.value=ticketConfig.negocio;
  guardar(); cargarTicketConfig();
@@ -676,9 +696,88 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(){
  if(!confirm("¿Restablecer los datos del ticket a los valores de ejemplo?"))return;
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
+
+
+function cambiarPapelTicket(){
+ const sel=document.getElementById("tPapel"); if(!sel)return;
+ ticketConfig.papel=sel.value||"80 mm";
+ const rp=document.getElementById("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel;
+ const tp=document.getElementById("termPapel"); if(tp)tp.value=ticketConfig.papel;
+ guardar(); renderTicketPreview();
+ toast("Ancho del ticket: "+ticketConfig.papel+". La vista previa y la impresión usan ese ancho.");
+}
+function mostrarLogoPreview(){
+ const img=document.getElementById("tLogoPreview"); const vacio=document.getElementById("tLogoVacio");
+ if(!img||!vacio)return;
+ if(ticketConfig.logo){img.src=ticketConfig.logo; img.style.display=""; vacio.style.display="none";}
+ else{img.removeAttribute("src"); img.style.display="none"; vacio.style.display="";}
+}
+function subirLogoNegocio(ev){
+ const f=ev&&ev.target&&ev.target.files&&ev.target.files[0]; if(!f)return;
+ if(!f.type||f.type.indexOf("image/")!==0){toast("Elige una imagen JPG o PNG.");return}
+ const rd=new FileReader();
+ rd.onload=function(){
+  const dataUrl=rd.result; let done=false;
+  const usar=function(url){
+   if(done)return; done=true;
+   ticketConfig.logo=url; guardar(); mostrarLogoPreview(); renderTicketPreview();
+   toast("Logo del negocio guardado. Ya sale arriba en el ticket.");
+  };
+  const img=new Image();
+  img.onload=function(){
+   try{
+    const c=document.createElement("canvas"); const ctx=c.getContext&&c.getContext("2d");
+    if(!ctx||!img.naturalWidth){usar(dataUrl);return}
+    const max=300, w=Math.min(max,img.naturalWidth), h=Math.max(1,Math.round(img.naturalHeight*w/img.naturalWidth));
+    c.width=w; c.height=h; ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+    usar(c.toDataURL("image/jpeg",0.85));
+   }catch(e){usar(dataUrl)}
+  };
+  img.onerror=function(){usar(dataUrl)};
+  img.src=dataUrl;
+  setTimeout(function(){usar(dataUrl)},800);
+ };
+ rd.readAsDataURL(f);
+ if(ev.target)ev.target.value="";
+}
+function quitarLogoNegocio(){
+ if(!ticketConfig.logo){toast("No hay logo que quitar.");return}
+ if(!confirm("¿Quitar el logo del negocio del ticket?"))return;
+ ticketConfig.logo=""; guardar(); mostrarLogoPreview(); renderTicketPreview();
+ toast("Logo quitado. El ticket solo muestra el nombre del negocio.");
+}
+function ticketImpresoHTML(v){
+ const total=v.total||0, sub=total/1.16, iva=total-sub;
+ const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio" style="max-width:130px"><br>':"";
+ const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(v.folio).padStart(4,"0")+"<br>"):"";
+ const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
+ const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-line"><span>'+l.cant+' × '+escHtml(p?p.nombre:"Producto")+'</span><span>'+dinero(l.cant*l.precio)+'</span></div>'}).join("");
+ const fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ return logo
+  +'<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div>'
+  +escHtml(ticketConfig.direccion||"")+'<br>'+escHtml(ticketConfig.telefono||"")+'<br>'
+  +fechaTxt+'<br>'+folioTxt
+  +'<hr>'+lineas+'<hr>'
+  +'<div class="t-line"><span>Subtotal</span><span>'+dinero(sub)+'</span></div>'
+  +ivaTxt
+  +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
+  +'<div class="t-line"><span>'+escHtml(v.pago||"Efectivo")+'</span><span>'+dinero(total)+'</span></div>'
+  +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez · V1.4.6</small>';
+}
+function imprimirTicketVenta(v){
+ if(!v)return false;
+ if(typeof window==="undefined"||typeof window.open!=="function")return false;
+ try{
+  const w=window.open("","_blank","width=340,height=600");
+  if(!w)return false;
+  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket #'+String(v.folio).padStart(4,"0")+'</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px;color:#111}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}hr{border-top:1px dashed #999}</style></head><body><div class="ticket-80">'+ticketImpresoHTML(v)+'</div></body></html>');
+  w.document.close(); w.focus(); w.print(); return true;
+ }catch(e){return false}
+}
+
 function renderTerminales(){
  const box=document.getElementById("listaTerminales"); if(!box)return;
  if(!terminales.length){box.innerHTML='<p style="color:#555;margin-top:10px">🖨<br><b>Aún no hay terminales</b><br>Agrega la primera terminal térmica.</p>';return}
@@ -704,7 +803,7 @@ function probarImpresion(){
  if(typeof window!=="undefined"&&typeof window.open==="function"){
   try{
    const w=window.open("","_blank","width=340,height=600");
-   if(w){w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket de prueba</title><style>body{font-family:monospace;text-align:center;width:80mm}hr{border-top:1px dashed #999}</style></head><body>'+document.getElementById("vistaPreviaTicket").innerHTML+'<hr><small>Terminal: '+escHtml(activa.nombre)+' · '+escHtml(activa.marca)+' · '+escHtml(activa.papel)+' · ESC/POS</small></body></html>');w.document.close();w.focus();w.print();}
+   if(w){w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket de prueba</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px}hr{border-top:1px dashed #999}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}</style></head><body>'+document.getElementById("vistaPreviaTicket").innerHTML+'<hr><small>Terminal: '+escHtml(activa.nombre)+' · '+escHtml(activa.marca)+' · '+escHtml(activa.papel)+' · ESC/POS · Papel '+(ticketConfig.papel||"80 mm")+'</small></body></html>');w.document.close();w.focus();w.print();}
   }catch(e){/* si el navegador bloquea la ventana, el aviso de arriba ya confirma la prueba */}
  }
  toast("Ticket de prueba enviado a "+activa.nombre+" ("+activa.marca+", "+activa.papel+").");
@@ -888,7 +987,7 @@ function cancelarEdicion(){document.getElementById("pId").value="";document.getE
 function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo.");}
-function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}
+function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
 function corteCaja(){mostrarVista("cortes");}
 function esHoyVenta(v){return new Date(v.fecha).toDateString()===new Date().toDateString()}
 function resumenCorte(){
