@@ -68,7 +68,7 @@ main .sub{color:#555;margin-bottom:18px}
 /* Pantalla de inicio Admin */
 .inicio{min-height:100vh;background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#f2f4f7 52%);display:flex;align-items:center;justify-content:center;padding:24px 14px}
 .inicio-tarjeta{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:480px;width:100%;padding:28px 24px;text-align:center}
-.inicio-icono{width:72px;height:72px;border-radius:18px;object-fit:cover}
+.inicio-icono{width:72px;height:72px;border-radius:18px;object-fit:cover}@keyframes kupoCarga{0%{opacity:0;transform:scale(.85) rotate(-4deg)}55%{opacity:1;transform:scale(1.06) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}.inicio .inicio-icono,.inicio .inicio-logo{animation:kupoCarga 1s ease both}
 .inicio-logo{width:100%;max-width:340px;margin:14px auto 4px;display:block}
 .inicio-sub{color:#555;font-size:14px}
 .inicio h2{font-size:20px;color:var(--azul);margin:18px 0 6px;text-align:left}
@@ -304,10 +304,12 @@ function renderRespaldos(){
 }
 /* Inicio de sesión Admin */
 function actualizarPuntosPin(){document.getElementById('pinPuntosAdmin').textContent='●'.repeat(pinAdmin.length)+'○'.repeat(6-pinAdmin.length);document.getElementById('pinAdmin').value='•'.repeat(pinAdmin.length)}
-function teclaPin(n){if(pinAdmin.length>=6)return;pinAdmin+=n;actualizarPuntosPin()}
-function borrarPin(){pinAdmin=pinAdmin.slice(0,-1);actualizarPuntosPin()}
-function limpiarPin(){pinAdmin='';actualizarPuntosPin()}
+function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
+function teclaPin(n){vibrarPin();if(pinAdmin.length>=6)return;pinAdmin+=n;actualizarPuntosPin()}
+function borrarPin(){vibrarPin();pinAdmin=pinAdmin.slice(0,-1);actualizarPuntosPin()}
+function limpiarPin(){vibrarPin();pinAdmin='';actualizarPuntosPin()}
 function entrarAdmin(){
+ vibrarPin();
  let u=document.getElementById('usuarioAdmin').value.trim();
  let m=document.getElementById('msgAdmin');
  if(pinAdmin!==PIN_DEMO){m.textContent='PIN incorrecto';m.className='msg error';limpiarPin();return}

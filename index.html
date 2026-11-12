@@ -147,7 +147,7 @@ main h1{font-size:34px;margin-bottom:14px}
 /* Pantalla de inicio · Activación por licencia e inicio de sesión */
 .inicio{min-height:100vh;background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#f2f4f7 52%);display:flex;align-items:center;justify-content:center;padding:24px 14px}
 .inicio-tarjeta{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:480px;width:100%;padding:28px 24px;text-align:center}
-.inicio-icono{width:72px;height:72px;border-radius:18px;object-fit:cover}
+.inicio-icono{width:72px;height:72px;border-radius:18px;object-fit:cover}@keyframes kupoCarga{0%{opacity:0;transform:scale(.85) rotate(-4deg)}55%{opacity:1;transform:scale(1.06) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}.inicio .inicio-icono,.inicio .inicio-logo{animation:kupoCarga 1s ease both}
 .inicio-logo{width:100%;max-width:340px;margin:14px auto 4px;display:block}
 .inicio-sub{color:#555;font-size:14px}
 .inicio-negocio{margin:14px 0 4px}
@@ -239,7 +239,7 @@ main h1{font-size:34px;margin-bottom:14px}
   <input id="usuarioLogin" type="text" value="Administrador" autocomplete="off">
   <label for="pinLogin">PIN de 6 dígitos</label>
   <div class="pin-puntos" id="pinPuntos">○○○○○○</div>
-  <input id="pinLogin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" oninput="actualizarPuntosPin()" autocomplete="off">
+  <input id="pinLogin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" oninput="actualizarPuntosPin();vibrarPin()" autocomplete="off">
   <div class="teclado">
    <button type="button" onclick="teclaPin('1')">1</button><button type="button" onclick="teclaPin('2')">2</button><button type="button" onclick="teclaPin('3')">3</button>
    <button type="button" onclick="teclaPin('4')">4</button><button type="button" onclick="teclaPin('5')">5</button><button type="button" onclick="teclaPin('6')">6</button>
@@ -1242,10 +1242,12 @@ function leerLicenciasCompartidas(){try{let l=JSON.parse(localStorage.getItem("k
 function estadoLicencia(l){if(l.estado==="Pausada")return "Pausada";if(l.estado==="Vencida")return "Vencida";if(l.vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.vencimiento+"T00:00:00")<hoy)return "Vencida"}return "Activa"}
 function validarLicencia(){const c=document.getElementById("claveLicencia").value.trim().toUpperCase();const m=document.getElementById("msgLicencia");if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return}if(CLAVES_PRUEBA.indexOf(c)!==-1){m.textContent="Esa clave era de prueba y ya no existe. Crea una licencia nueva en KUPO Admin.";m.className="msg error";return}let lista=leerLicenciasCompartidas();if(!lista.length){m.textContent="Aún no hay licencias en KUPO Admin. Crea y activa una licencia en Admin para entrar.";m.className="msg error";return}let lic=lista.find(x=>x.clave===c);if(!lic){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return}let est=estadoLicencia(lic);if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return}if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return}localStorage.setItem("kupoPosV146Licencia",c);if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();}
 function actualizarPuntosPin(){const v=document.getElementById("pinLogin").value;document.getElementById("pinPuntos").textContent="●".repeat(v.length)+"○".repeat(Math.max(0,6-v.length));}
-function teclaPin(d){const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
-function borrarPin(){const i=document.getElementById("pinLogin");i.value=i.value.slice(0,-1);actualizarPuntosPin();}
-function limpiarPin(){document.getElementById("pinLogin").value="";actualizarPuntosPin();}
+function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
+function teclaPin(d){vibrarPin();const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
+function borrarPin(){vibrarPin();const i=document.getElementById("pinLogin");i.value=i.value.slice(0,-1);actualizarPuntosPin();}
+function limpiarPin(){vibrarPin();document.getElementById("pinLogin").value="";actualizarPuntosPin();}
 function entrar(){
+ vibrarPin();
  const usuario=(document.getElementById("usuarioLogin").value||"").trim();
  const pin=document.getElementById("pinLogin").value;
  const m=document.getElementById("msgLogin");
