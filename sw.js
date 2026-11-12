@@ -1,5 +1,5 @@
-/* KUPO POS - Service Worker (PWA) V1.4.6: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v7'; /* v7: Giro / Tipo de negocio en Crear licencia de Admin */
+/* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
+const CACHE = 'kupo-pos-v8'; /* v8: Versión V1.5.0 */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {
