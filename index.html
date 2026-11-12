@@ -341,6 +341,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <nav>
 <a id="navTicket" onclick="mostrarVista('ticket')">🎟 Personalizar ticket</a>
 <a id="navCajeros" onclick="mostrarVista('cajeros')">🛡 Cajeros y permisos</a>
+<a id="navAdminLic" onclick="mostrarVista('adminlic')">⚙️ Administrador de licencia</a>
 <a id="navMulti" onclick="mostrarVista('multi')">🏬 Multi-almacén</a>
 </nav>
 <div class="pie">
@@ -475,7 +476,7 @@ main h1{font-size:34px;margin-bottom:14px}
 
 <div id="vistaCortes" class="oculto">
 <h1>Corte diario</h1>
-<p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · <span id="textoCorteDiario">Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Personalizar ticket → Panel de administrador de esta licencia.</span></p>
+<p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · <span id="textoCorteDiario">Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.</span></p>
 <div class="form-prod" id="secCorteDinero">
 <h2>💰 Corte de dinero</h2>
 <div class="resumen">
@@ -583,15 +584,6 @@ main h1{font-size:34px;margin-bottom:14px}
 <button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
 </form>
 </div>
-<div class="form-prod"><h2>⚙️ Panel de administrador de esta licencia</h2>
-<p style="color:#555;font-size:14px">Licencia: <b id="optLicencia">—</b> · Negocio: <b id="optNegocio">—</b></p>
-<p style="color:#555;font-size:14px">Estas opciones son solo para esta licencia/negocio. Al entrar con otra licencia, se aplican las opciones de esa licencia. Solo el Administrador de este negocio puede cambiarlas.</p>
-<div class="checks">
-<label><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"> 📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></label>
-<label><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"> 🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></label>
-</div>
-<p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de esta vista también son por licencia.</p>
-</div>
 <div class="form-prod"><h2>🖨 Configurar terminales térmicas</h2>
 <p style="color:#555;font-size:14px">Impresoras térmicas compatibles con KUPO POS: Epson, Xprinter, Nextep, Bixolon, Qian y otra térmica ESC/POS que Windows o Android reconozca. Protocolo ESC/POS · Bluetooth y USB · corte automático. El ancho del ticket (58 mm o 80 mm) se elige arriba en Personalizar ticket; cada terminal registra su papel (80 mm: ~72 mm imprimible · 58 mm: ~48 mm imprimible).</p>
 <div class="marcas"><span>Epson</span><span>Xprinter</span><span>Nextep</span><span>Bixolon</span><span>Qian</span><span>Otra ESC/POS</span></div>
@@ -625,6 +617,26 @@ main h1{font-size:34px;margin-bottom:14px}
 <p style="font-size:12px;color:#666;margin-top:10px;text-align:center">Imprime un ticket de prueba con los datos personalizados en la terminal activa.</p>
 <div id="msgTermica"></div>
 </div>
+</div>
+</div>
+
+<div id="vistaAdminLic" class="oculto">
+<h1>⚙️ Administrador de licencia</h1>
+<p style="color:#555;margin-bottom:14px">Opciones de esta licencia, solo para el Administrador de este negocio. Al entrar con otra licencia, se aplican las opciones de esa licencia.</p>
+<div class="form-prod"><h2>⚙️ Opciones de esta licencia</h2>
+<p style="color:#555;font-size:14px">Licencia: <b id="optLicencia">—</b> · Negocio: <b id="optNegocio">—</b></p>
+<p style="color:#555;font-size:14px">Estas opciones son solo para esta licencia/negocio. Solo el Administrador de este negocio puede cambiarlas.</p>
+<div class="checks">
+<label><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"> 📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></label>
+<label><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"> 🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></label>
+</div>
+<p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
+</div>
+<div class="form-prod"><h2>📦 Corte por productos</h2>
+<p style="font-size:14px;color:#555">Activado: en Corte diario se hacen 2 cortes por separado, uno de dinero y uno de productos, cada uno con su propio botón, folio y lugar en el historial. Es para negocios como la pollería, que no manejan entradas y llevan 2 cortes.</p>
+</div>
+<div class="form-prod"><h2>🏬 Multi-almacén</h2>
+<p style="font-size:14px;color:#555">Activado: aparece Multi-almacén en el menú. Es para negocios con bodega aparte, como un expendio de cerveza: el stock se lleva por almacén y se mueve con traspasos.</p>
 </div>
 </div>
 
@@ -677,6 +689,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <tr><td>🎟 Personalizar ticket</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
 <tr><td>🛡 Cajeros y permisos</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
 <tr><td>🏬 Multi-almacén</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
+<tr><td>⚙️ Administrador de licencia</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
 </tbody>
 </table></div>
 <p style="margin-top:10px;font-size:13px;color:#555">Si un Cajero intenta abrir algo sin permiso, ve el aviso “⛔ Sin permiso” y se queda en Ventas. Su menú solo muestra Ventas.</p>
@@ -785,7 +798,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
 <button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.4.6: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.4.6: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 </section>
 </div>
 </div>
@@ -928,8 +941,8 @@ function aplicarOpcionesSistema(){
  const o2=document.getElementById("optMultiAlmacen"); if(o2)o2.checked=opcionesSistema.multiAlmacen;
  const e1=document.getElementById("estCorteProductos"); if(e1)e1.textContent=opcionesSistema.corteProductos?"· Activado":"· Desactivado";
  const e2=document.getElementById("estMultiAlmacen"); if(e2)e2.textContent=opcionesSistema.multiAlmacen?"· Activado":"· Desactivado";
- const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Personalizar ticket → Panel de administrador de esta licencia.";
- const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+"Los datos de ticket, cajeros y terminales de esta vista también son por licencia.";
+ const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
+ const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
  const ol=document.getElementById("optLicencia"); if(ol)ol.textContent=licenciaActual();
  const on=document.getElementById("optNegocio"); if(on)on.textContent=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
 }
@@ -1124,7 +1137,7 @@ function probarImpresion(){
 
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi"],Cajero:["ventas"]};
+const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi","adminlic"],Cajero:["ventas"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
 let sesionActual=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null")||{nombre:"Eduardo Benitez",usuario:"Administrador",rol:"Administrador"};
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
@@ -1132,7 +1145,7 @@ function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Admini
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);
+ mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);
  mostrar("accGasto",esAdmin);mostrar("accCorte",esAdmin);mostrar("accProductos",esAdmin);
  const u=document.getElementById("usuarioActual");if(u)u.textContent=sesionActual.nombre||sesionActual.usuario;
  const r=document.getElementById("rolActual");if(r)r.textContent=sesionActual.rol||"";
@@ -1330,7 +1343,7 @@ let vistaActual="ventas";
 function toggleMenu(){const a=document.querySelector("aside");const f=document.getElementById("fondoMenu");const abierto=a.classList.toggle("abierto");if(f)f.classList.toggle("visible",abierto);document.body.classList.toggle("menu-abierto",abierto);}
 function mostrarVista(v){
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas y Reimprimir.");return}
- if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Personalizar ticket → Panel de administrador de esta licencia.");return}
+ if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  vistaActual=v;
  document.getElementById("fondoMenu").classList.remove("visible");
  document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
@@ -1342,6 +1355,7 @@ function mostrarVista(v){
  document.getElementById("vistaTicket").classList.toggle("oculto",v!=="ticket");
  document.getElementById("vistaCajeros").classList.toggle("oculto",v!=="cajeros");
  document.getElementById("vistaMulti").classList.toggle("oculto",v!=="multi");
+ document.getElementById("vistaAdminLic").classList.toggle("oculto",v!=="adminlic");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("accionesRapidas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
@@ -1354,8 +1368,9 @@ function mostrarVista(v){
  document.getElementById("navTicket").classList.toggle("activo",v==="ticket");
  document.getElementById("navCajeros").classList.toggle("activo",v==="cajeros");
  document.getElementById("navMulti").classList.toggle("activo",v==="multi");
+ document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function llenarSelectEntradas(){
@@ -1614,7 +1629,7 @@ function realizarCorteDinero(){
 }
 function realizarCorte(){realizarCorteDinero();}
 function realizarCorteProductos(){
- if(!opcionesSistema.corteProductos){toast("El corte por productos está desactivado para esta licencia. Actívalo en Personalizar ticket → Panel de administrador de esta licencia.");return}
+ if(!opcionesSistema.corteProductos){toast("El corte por productos está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  const r=resumenCorteProductos();
  if(!r.filas.length){toast("Aún no hay productos vendidos hoy para cortar.");return}
  corteFolio++;
