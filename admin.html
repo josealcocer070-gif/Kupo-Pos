@@ -283,7 +283,7 @@ function mostrarVista(v){
   document.getElementById('vista'+x[0].toUpperCase()+x.slice(1)).classList.toggle('oculto',x!==v);
   document.getElementById('nav'+x[0].toUpperCase()+x.slice(1)).classList.toggle('activo',x===v);
  });
- document.getElementById('menuLateral').classList.remove('abierto');document.getElementById('fondoMenu').classList.remove('visible');document.body.classList.remove('menu-abierto');
+ if(window.innerWidth<=760){document.getElementById('menuLateral').classList.remove('abierto');document.getElementById('fondoMenu').classList.remove('visible');document.body.classList.remove('menu-abierto');}
  if(v==='licencias')renderLicencias(); if(v==='reservas')renderReservas(); if(v==='terminales')renderTerminales(); if(v==='respaldos')renderRespaldos();
 }
 function renderResumen(){
