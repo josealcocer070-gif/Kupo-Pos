@@ -171,6 +171,29 @@ main h1{font-size:34px;margin-bottom:14px}
 .teclado button{border:1px solid #c9d4dc;background:#f7fafc;border-radius:12px;padding:14px;font-size:20px;font-weight:800;cursor:pointer}
 .teclado button:hover{background:#eef6fb}
 @media(max-width:760px){.inicio-tarjeta{padding:22px 16px}}
+
+/* Interfaz 3.1 · Personalizar ticket + terminales térmicas */
+.ticket-config{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+.ticket-preview{background:#fff;border:1px solid #dfe5ea;border-radius:14px;padding:16px;position:sticky;top:80px}
+.ticket-preview h2{font-size:19px;color:var(--azul);margin-bottom:10px}
+.ticket-80{width:300px;max-width:100%;margin:0 auto;background:#fff;border:1px dashed #9aa7b1;padding:14px 12px;font-family:'Courier New',monospace;font-size:13px;color:#111;text-align:center}
+.ticket-80 img{max-width:130px;background:#fff}
+.ticket-80 hr{border:0;border-top:1px dashed #999;margin:8px 0}
+.ticket-80 .t-line{display:flex;justify-content:space-between;gap:8px;text-align:left}
+.ticket-80 .t-total{font-weight:700;font-size:15px}
+.ticket-80 .t-titulo{font-weight:700;font-size:16px}
+.marcas{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.marcas span{background:#eef4f8;border:1px solid #c9d4dc;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--azul)}
+.term-row{background:#fff;border:1px solid #dfe5ea;border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center;margin-top:10px}
+.term-row .info{flex:1;min-width:0}
+.term-row .info b{font-size:15px}
+.term-row .info small{display:block;color:#555}
+.term-row .estado{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:#e6f4ea;color:#0a7d4f}
+.term-row .estado.pausada{background:#fde8e8;color:#c0392b}
+.term-row button{background:#fff;color:var(--azul);border:1px solid var(--azul);border-radius:10px;padding:8px 10px;font-weight:700;cursor:pointer}
+.checks label{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700;color:#333;margin:6px 0}
+.checks input{width:auto}
+@media(max-width:900px){.ticket-config{grid-template-columns:1fr}.ticket-preview{position:static}}
 </style>
 </head>
 <body>
@@ -250,7 +273,7 @@ main h1{font-size:34px;margin-bottom:14px}
 </nav>
 <div class="sec">SISTEMA</div>
 <nav>
-<a onclick="toast('Personalizar ticket: se define en el siguiente paso.')">🎟 Personalizar ticket</a>
+<a id="navTicket" onclick="mostrarVista('ticket')">🎟 Personalizar ticket</a>
 <a onclick="toast('Cajeros y permisos: se define en el siguiente paso.')">🛡 Cajeros y permisos</a>
 <a onclick="toast('Multi-almacén: se define en el siguiente paso.')">🏬 Multi-almacén</a>
 </nav>
@@ -434,6 +457,66 @@ main h1{font-size:34px;margin-bottom:14px}
 </table></div>
 <div id="detalleHistCorte" style="margin-top:12px"></div>
 </div>
+
+<div id="vistaTicket" class="oculto">
+<h1>🎟 Personalizar ticket</h1>
+<p style="color:#555;margin-bottom:14px">Lo que configures aquí se usa en el ticket de Ventas y en la vista previa. Los datos se guardan en este dispositivo.</p>
+<div class="ticket-config">
+<div>
+<div class="form-prod"><h2>Datos del ticket</h2>
+<form onsubmit="guardarTicketConfig(event)">
+<label>Nombre del negocio</label>
+<input id="tNegocio" value="Mi negocio">
+<label>Dirección</label>
+<input id="tDireccion" value="Palizada, Campeche">
+<label>Teléfono / WhatsApp</label>
+<input id="tTelefono" value="951 943 3938">
+<label>Mensaje de pie de ticket</label>
+<input id="tMensaje" value="¡Gracias por su compra!">
+<div class="checks">
+<label><input type="checkbox" id="tMostrarLogo" checked> Mostrar logo en el ticket</label>
+<label><input type="checkbox" id="tMostrarIva" checked> Mostrar IVA (16%)</label>
+<label><input type="checkbox" id="tMostrarFolio" checked> Mostrar folio</label>
+</div>
+<button type="submit">💾 Guardar personalización</button>
+<button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
+</form>
+</div>
+<div class="form-prod"><h2>🖨 Configurar terminales térmicas</h2>
+<p style="color:#555;font-size:14px">Impresoras térmicas compatibles con KUPO POS: Epson, Xprinter, Nextep, Bixolon, Qian y otra térmica ESC/POS que Windows o Android reconozca. Papel 80 mm · ancho imprimible ~72 mm · protocolo ESC/POS · Bluetooth y USB · corte automático.</p>
+<div class="marcas"><span>Epson</span><span>Xprinter</span><span>Nextep</span><span>Bixolon</span><span>Qian</span><span>Otra ESC/POS</span></div>
+<div class="resumen" style="grid-template-columns:repeat(3,1fr)">
+<div class="tarjeta"><small>PAPEL</small><b>80 mm</b></div>
+<div class="tarjeta"><small>PROTOCOLO</small><b>ESC/POS</b></div>
+<div class="tarjeta"><small>CONEXIÓN</small><b>Bluetooth + USB</b></div>
+</div>
+<form onsubmit="agregarTerminal(event)" style="margin-top:12px">
+<label>Nombre de la terminal</label>
+<input id="termNombre" placeholder="Ej. Impresora mostrador" required>
+<label>Marca / modelo</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<select id="termMarca"><option>Epson</option><option>Xprinter</option><option>Nextep</option><option>Bixolon</option><option>Qian</option><option>Otra ESC/POS</option></select>
+<input id="termModelo" placeholder="Modelo (ej. TM-T20III, QTP-BTWF-01)" style="flex:1;min-width:180px">
+</div>
+<label>Conexión</label>
+<select id="termConexion"><option>Bluetooth + USB</option><option>Bluetooth</option><option>USB</option></select>
+<label>Papel</label>
+<select id="termPapel"><option>80 mm</option><option>58 mm</option></select>
+<button type="submit">➕ Agregar terminal</button>
+</form>
+<div id="listaTerminales"></div>
+<p style="font-size:12px;color:#666;margin-top:10px">Prueba la terminal exacta con un ticket real antes de comprar más. Si una impresora no agarra, se corrige en el sistema.</p>
+</div>
+</div>
+<div class="ticket-preview">
+<h2>Vista previa · 80 mm</h2>
+<div class="ticket-80" id="vistaPreviaTicket"></div>
+<button class="btn-cobrar" style="margin-top:12px" onclick="probarImpresion()">🖨 Probar impresión</button>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">Imprime un ticket de prueba con los datos personalizados en la terminal activa.</p>
+<div id="msgTermica"></div>
+</div>
+</div>
+</div>
 </main>
 
 <section class="panel" id="panelVenta">
@@ -463,7 +546,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
 <button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos, Entradas, Gastos, Corte diario e Historial de cortes sincronizados con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos, Entradas, Gastos, Corte diario, Historial de cortes y Personalizar ticket sincronizados con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
 </section>
 </div>
 </div>
@@ -488,7 +571,7 @@ let fondoCaja=Number(localStorage.getItem("kupoPosV146Fondo")||"0")||0;
 let corteFolio=(JSON.parse(localStorage.getItem("kupoPosV146CorteFolio")||"0"))||0;
 let pago="Efectivo";
 let uid=100;
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146TicketConfig",JSON.stringify(ticketConfig));localStorage.setItem("kupoPosV146Terminales",JSON.stringify(terminales));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -540,6 +623,94 @@ function editar(id){const p=catalogo.find(x=>x.id===id);if(!p)return;const n=pro
 function eliminar(id){const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){catalogo=catalogo.filter(x=>x.id!==id);ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();}}
 function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo?")){catalogo=JSON.parse(JSON.stringify(EJEMPLO));guardar();render();renderProductos();}}
 
+
+/* Interfaz 3.1 · Personalizar ticket + terminales térmicas */
+let ticketConfig=JSON.parse(localStorage.getItem("kupoPosV146TicketConfig")||"null")||{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true};
+let terminales=JSON.parse(localStorage.getItem("kupoPosV146Terminales")||"null")||[
+ {id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},
+ {id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}
+];
+function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function cargarTicketConfig(){
+ const g=function(id){return document.getElementById(id)}; if(!g("tNegocio"))return;
+ g("tNegocio").value=ticketConfig.negocio||"Mi negocio";
+ g("tDireccion").value=ticketConfig.direccion||"";
+ g("tTelefono").value=ticketConfig.telefono||"";
+ g("tMensaje").value=ticketConfig.mensaje||"";
+ g("tMostrarLogo").checked=ticketConfig.mostrarLogo!==false;
+ g("tMostrarIva").checked=ticketConfig.mostrarIva!==false;
+ g("tMostrarFolio").checked=ticketConfig.mostrarFolio!==false;
+ const nb=g("negocioBox"); if(nb)nb.textContent=(ticketConfig.negocio||"Mi negocio").toUpperCase();
+ const dn=g("direccionNegocio"); if(dn)dn.value=ticketConfig.direccion||"";
+ const tn=g("telefonoNegocio"); if(tn)tn.value=ticketConfig.telefono||"";
+ renderTicketPreview(); renderTerminales();
+}
+function renderTicketPreview(){
+ const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
+ const logoImg=document.querySelector("aside .pie img");
+ const logo=ticketConfig.mostrarLogo!==false&&logoImg?'<img src="'+logoImg.src+'" alt="KUPO POS"><br>':"";
+ const total=70, sub=total/1.16, iva=total-sub;
+ const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(folio+1).padStart(4,"0")+"<br>"):"";
+ const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
+ box.innerHTML=logo
+  +'<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div>'
+  +escHtml(ticketConfig.direccion||"")+'<br>'+escHtml(ticketConfig.telefono||"")+'<br>'
+  +new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"})+'<br>'+folioTxt
+  +'<hr>'
+  +'<div class="t-line"><span>2 × Pan Bolillo</span><span>$30.00</span></div>'
+  +'<div class="t-line"><span>1 × Croissant Artesanal</span><span>$40.00</span></div>'
+  +'<hr>'
+  +'<div class="t-line"><span>Subtotal</span><span>'+dinero(sub)+'</span></div>'
+  +ivaTxt
+  +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
+  +'<div class="t-line"><span>Efectivo</span><span>'+dinero(total)+'</span></div>'
+  +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez · V1.4.6</small>';
+}
+function guardarTicketConfig(ev){
+ if(ev)ev.preventDefault();
+ ticketConfig={negocio:(document.getElementById("tNegocio").value||"Mi negocio").trim(),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked};
+ localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
+ const nn=document.getElementById("nombreNegocio"); if(nn)nn.value=ticketConfig.negocio;
+ guardar(); cargarTicketConfig();
+ toast("Personalización del ticket guardada. El ticket de Ventas ya usa estos datos.");
+}
+function restablecerTicketConfig(){
+ if(!confirm("¿Restablecer los datos del ticket a los valores de ejemplo?"))return;
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true};
+ guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
+}
+function renderTerminales(){
+ const box=document.getElementById("listaTerminales"); if(!box)return;
+ if(!terminales.length){box.innerHTML='<p style="color:#555;margin-top:10px">🖨<br><b>Aún no hay terminales</b><br>Agrega la primera terminal térmica.</p>';return}
+ box.innerHTML=terminales.map(function(t){
+  return '<div class="term-row"><div class="info"><b>'+escHtml(t.nombre)+'</b><small>'+escHtml(t.marca)+' '+escHtml(t.modelo||"")+' · '+escHtml(t.conexion)+' · Papel '+escHtml(t.papel)+' · ESC/POS · Corte automático</small></div><span class="estado'+(t.estado==="Activa"?"":" pausada")+'">'+escHtml(t.estado)+'</span><button type="button" onclick="toggleTerminal('+t.id+')">'+(t.estado==="Activa"?"Pausar":"Activar")+'</button><button type="button" onclick="eliminarTerminal('+t.id+')">Eliminar</button></div>';
+ }).join("");
+}
+function agregarTerminal(ev){
+ if(ev)ev.preventDefault();
+ const nombre=document.getElementById("termNombre").value.trim(); if(!nombre)return;
+ terminales.push({id:Date.now()+uid++,nombre:nombre,marca:document.getElementById("termMarca").value,modelo:document.getElementById("termModelo").value.trim(),conexion:document.getElementById("termConexion").value,papel:document.getElementById("termPapel").value,estado:"Activa"});
+ guardar(); renderTerminales(); ev.target.reset(); document.getElementById("termPapel").value="80 mm";
+ toast("Terminal agregada: "+nombre+" · 80 mm · ESC/POS.");
+}
+function toggleTerminal(id){const t=terminales.find(function(x){return x.id===id}); if(!t)return; t.estado=t.estado==="Activa"?"Pausada":"Activa"; guardar(); renderTerminales(); toast(t.nombre+" ahora está "+t.estado+".");}
+function eliminarTerminal(id){const t=terminales.find(function(x){return x.id===id}); if(!t)return; if(!confirm("¿Eliminar la terminal "+t.nombre+"?"))return; terminales=terminales.filter(function(x){return x.id!==id}); guardar(); renderTerminales(); toast("Terminal eliminada: "+t.nombre);}
+function probarImpresion(){
+ const activa=terminales.find(function(t){return t.estado==="Activa"});
+ const m=document.getElementById("msgTermica");
+ if(!activa){toast("Agrega y activa una terminal térmica primero."); return}
+ const texto="Ticket de prueba · "+(ticketConfig.negocio||"Mi negocio")+" · Folio #"+String(folio+1).padStart(4,"0")+" · Total $70.00 · Terminal: "+activa.nombre+" ("+activa.marca+" "+(activa.modelo||"")+ ", "+activa.conexion+", papel "+activa.papel+", ESC/POS)";
+ if(m){m.innerHTML='<p style="color:#0a7d4f;font-weight:700;margin-top:10px">✅ '+escHtml(texto)+'</p>'}
+ if(typeof window!=="undefined"&&typeof window.open==="function"){
+  try{
+   const w=window.open("","_blank","width=340,height=600");
+   if(w){w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket de prueba</title><style>body{font-family:monospace;text-align:center;width:80mm}hr{border-top:1px dashed #999}</style></head><body>'+document.getElementById("vistaPreviaTicket").innerHTML+'<hr><small>Terminal: '+escHtml(activa.nombre)+' · '+escHtml(activa.marca)+' · '+escHtml(activa.papel)+' · ESC/POS</small></body></html>');w.document.close();w.focus();w.print();}
+  }catch(e){/* si el navegador bloquea la ventana, el aviso de arriba ya confirma la prueba */}
+ }
+ toast("Ticket de prueba enviado a "+activa.nombre+" ("+activa.marca+", "+activa.papel+").");
+}
+
+
 let vistaActual="ventas";
 function toggleMenu(){const a=document.querySelector("aside");const f=document.getElementById("fondoMenu");const abierto=a.classList.toggle("abierto");if(f)f.classList.toggle("visible",abierto);}
 function mostrarVista(v){vistaActual=v;
@@ -550,6 +721,7 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
  document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
  document.getElementById("vistaHistorial").classList.toggle("oculto",v!=="historial");
+ document.getElementById("vistaTicket").classList.toggle("oculto",v!=="ticket");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("accionesRapidas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
@@ -559,8 +731,9 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
  document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
  document.getElementById("navHistCortes").classList.toggle("activo",v==="historial");
+ document.getElementById("navTicket").classList.toggle("activo",v==="ticket");
  document.querySelector("aside").classList.remove("abierto");
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function llenarSelectEntradas(){
@@ -818,6 +991,7 @@ const licGuardada=localStorage.getItem("kupoPosV146Licencia");
 if(licGuardada){let listaGuardada=leerLicenciasCompartidas();let licOk=false;if(CLAVES_PRUEBA.indexOf(licGuardada)!==-1){licOk=false}else{let lg=listaGuardada.find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa"}if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}else{localStorage.removeItem("kupoPosV146Licencia");document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}}
 const negInicio=document.getElementById("inicioNegocio");if(negInicio&&savedNegocio)negInicio.textContent=savedNegocio;const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
 render();
+cargarTicketConfig();
 </script>
 </body>
 </html>
