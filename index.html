@@ -60,6 +60,19 @@ main h1{font-size:34px;margin-bottom:14px}
 .card .stock.bajo{color:#d97706;font-weight:700}
 .btn-agregar{background:#0d6cb5;color:#fff;border:0;border-radius:22px;padding:10px 22px;font-size:15px;font-weight:700;cursor:pointer}
 .btn-agregar:disabled{background:#b9bec4;cursor:not-allowed}
+/* Ventas estilo SICAR X, adaptado a KUPO azul oscuro V1.5.0 (sin verde SICAR) */
+.categorias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin-bottom:4px;scrollbar-width:thin}
+.categorias button{flex:0 0 auto;border:2px solid #0b4a6e;background:#fff;color:#0b4a6e;border-radius:22px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
+.categorias button.activo{background:#0b4a6e;color:#fff}
+.categorias button small{font-weight:700;opacity:.75}
+/* Barra de totales azul oscuro: en SICAR es verde; en KUPO es azul, con botón amarillo Cobrar */
+.totales{background:#0b4a6e;color:#fff;border-radius:14px;padding:12px 14px}
+.totales .row{color:#dcebf3}
+.totales .row.total{color:#fff;border-top:1px solid rgba(255,255,255,.35);margin-top:6px;padding-top:8px}
+.totales .total b{color:#f5b800}
+/* Panel derecho fijo en PC: solo el catálogo se mueve; la lista de la venta hace scroll dentro del panel y Subtotal/TOTAL/Cobrar quedan siempre visibles abajo */
+@media(min-width:1151px){.panel{max-height:calc(100vh - 72px);display:flex;flex-direction:column;overflow:hidden}.panel #ticket{flex:1 1 auto;overflow-y:auto;min-height:60px}}
+
 .card .mini{margin-top:8px}
 .card .mini button{background:none;border:0;color:#0d6cb5;cursor:pointer;font-size:13px;text-decoration:underline}
 .panel{background:#fff;border-left:1px solid #dfe5ea;padding:18px;position:sticky;top:72px;min-height:calc(100vh - 72px)}
@@ -453,6 +466,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <input id="buscar" placeholder="🔍 Buscar producto..." oninput="render()">
 <select id="filtro" onchange="render()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option></select>
 </div>
+<div class="categorias" id="categoriasTabs" role="tablist" aria-label="Categorías de productos"></div>
 <div class="grid" id="grid"></div>
 </div>
 
@@ -1024,12 +1038,17 @@ catalogo.forEach(p=>{if(!UNIDADES_VENTA[p.unidad])p.unidad="pieza";p.stock=redon
 let fotoProductoActual="";
 ticket.forEach(l=>{l.cant=redondearCant(l.cant||0)});
 function toast(m){let t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
+
+let categoriaActual="todas";
+function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c=p.categoria||"General";if(seen.indexOf(c)===-1)seen.push(c)});return seen}
+function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
+function elegirCategoria(c){categoriaActual=c;render()}
 function render(){
- llenarSelectVentaAlmacen();
+ llenarSelectVentaAlmacen();renderCategorias();
  const q=(document.getElementById("buscar").value||"").toLowerCase();
  const f=document.getElementById("filtro").value;
  const grid=document.getElementById("grid");grid.innerHTML="";
- catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
+ catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>categoriaActual==="todas"||(p.categoria||"General")===categoriaActual).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
   const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
