@@ -161,7 +161,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <span class="titulo">⚡ Acciones rápidas</span>
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
-<button class="acc" onclick="toast('Registrar gasto de efectivo: se define en el siguiente paso.')">🧾 Registrar gasto de efectivo</button>
+<button class="acc" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" onclick="corteCaja()">💳 Realizar corte de caja</button>
 <button class="acc" onclick="mostrarVista('productos')">🕐 Gestionar productos</button>
 <button class="acc" onclick="toast('KUPO POS ya está actualizado a la versión V1.4.6.')">🔄 Actualizar de KUPO POS</button>
@@ -175,7 +175,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <a class="activo" id="navVentas" onclick="mostrarVista('ventas')">🧾 Ventas</a>
 <a id="navProductos" onclick="mostrarVista('productos')">📦 Productos</a>
 <a id="navEntradas" onclick="mostrarVista('entradas')">➕ Entradas</a>
-<a onclick="toast('Gastos: se define en el siguiente paso.')">💲 Gastos</a>
+<a id="navGastos" onclick="mostrarVista('gastos')">💲 Gastos</a>
 <a onclick="corteCaja()">📊 Corte diario</a>
 <a onclick="toast('Historial de cortes: se define en el siguiente paso.')">🕐 Historial de cortes</a>
 </nav>
@@ -278,6 +278,39 @@ main h1{font-size:34px;margin-bottom:14px}
 </table></div>
 <p style="margin-top:10px;font-size:13px;color:#555">Para quitar una entrada, toca Eliminar: el stock se descuenta de nuevo. Solo se puede eliminar si hay stock suficiente.</p>
 </div>
+
+<div id="vistaGastos" class="oculto">
+<h1>Gastos</h1>
+<p style="color:#555;margin-bottom:14px">Registra los gastos del negocio. Se guardan por fecha y categoría, y se restan en el Corte diario / Caja.</p>
+<div class="resumen">
+<div class="tarjeta"><small>GASTOS DE HOY</small><b id="resGasHoy">$0.00</b></div>
+<div class="tarjeta"><small>TOTAL DEL MES</small><b id="resGasMes">$0.00</b></div>
+<div class="tarjeta"><small>GASTO MÁS GRANDE DE HOY</small><b id="resGasMayor">$0.00</b></div>
+<div class="tarjeta"><small>TOTAL DE GASTOS</small><b id="resGasTotal">0</b></div>
+</div>
+<div class="form-prod">
+<h2>💲 Registrar gasto</h2>
+<form onsubmit="guardarGasto(event)">
+<div><label>Concepto / descripción</label><input id="gConcepto" type="text" placeholder="Ej. Pago de luz" required></div>
+<div><label>Monto $</label><input id="gMonto" type="number" min="0.01" step="0.01" placeholder="0.00" required></div>
+<div><label>Categoría</label><select id="gCategoria"><option>Renta</option><option>Luz</option><option>Agua</option><option>Insumos</option><option>Transporte</option><option>Sueldos</option><option>Otros</option></select></div>
+<div><label>Fecha</label><input id="gFecha" type="date" required></div>
+<div><label>Nota (opcional)</label><input id="gNota" type="text" placeholder="Ej. Recibo de CFE"></div>
+<button type="submit">💾 Guardar gasto</button>
+<button type="button" class="secundario" onclick="limpiarGasto()">Limpiar</button>
+</form>
+</div>
+<div class="buscar">
+<input id="buscarGas" placeholder="🔍 Buscar por concepto o nota..." oninput="renderGastos()">
+<select id="filtroGasCat" onchange="renderGastos()"><option value="todos">Todas las categorías</option><option>Renta</option><option>Luz</option><option>Agua</option><option>Insumos</option><option>Transporte</option><option>Sueldos</option><option>Otros</option></select>
+<input id="filtroGasFecha" type="date" onchange="renderGastos()" aria-label="Filtrar por fecha">
+</div>
+<div class="tabla-wrap"><table class="tabla">
+<thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th class="num">Monto</th><th></th></tr></thead>
+<tbody id="listaGastos"></tbody>
+</table></div>
+<p style="margin-top:10px;font-size:13px;color:#555">Los gastos de hoy se restan en el Corte diario / Caja, que se define en el siguiente paso.</p>
+</div>
 </main>
 
 <section class="panel" id="panelVenta">
@@ -307,7 +340,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
 <button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos, Entradas e Inventario sincronizados con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS — Paso 2: Productos, Entradas, Gastos e Inventario sincronizados con Ventas. Los datos se guardan en este dispositivo, sin cuenta y sin internet.</p>
 </section>
 </div>
 
@@ -325,9 +358,10 @@ let ticket=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"[]");
 let ventas=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"[]");
 let folio=(JSON.parse(localStorage.getItem("kupoPosV146Folio")||"0"))||0;
 let entradas=JSON.parse(localStorage.getItem("kupoPosV146Entradas")||"[]");
+let gastos=JSON.parse(localStorage.getItem("kupoPosV146Gastos")||"[]");
 let pago="Efectivo";
 let uid=100;
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -386,13 +420,15 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("vistaProductos").classList.toggle("oculto",v!=="productos");
  document.getElementById("vistaEntradas").classList.toggle("oculto",v!=="entradas");
+ document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
+ document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
  document.querySelector("aside").classList.remove("abierto");
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function llenarSelectEntradas(){
@@ -456,6 +492,50 @@ function renderEntradas(){
  if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">📥<br><b>Aún no hay entradas</b><br>Registra tu primera entrada arriba.</td></tr>';return}
  lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${e.cantidad} pzas</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
 }
+
+function guardarGasto(ev){
+ ev.preventDefault();
+ const concepto=(document.getElementById("gConcepto").value||"").trim();
+ const monto=Number(document.getElementById("gMonto").value)||0;
+ if(!concepto){toast("Escribe el concepto del gasto.");return}
+ if(monto<=0){toast("El monto debe ser mayor a $0.");return}
+ const categoria=document.getElementById("gCategoria").value;
+ const fecha=document.getElementById("gFecha").value||hoyLocal();
+ const nota=(document.getElementById("gNota").value||"").trim();
+ gastos.unshift({id:Date.now()+(uid++),fecha:fecha,concepto:concepto,monto:monto,categoria:categoria,nota:nota});
+ guardar(); renderGastos();
+ toast("Gasto registrado: "+concepto+" · "+dinero(monto)+".");
+ limpiarGasto();
+}
+function limpiarGasto(){
+ const f=document.querySelector("#vistaGastos form"); if(f)f.reset();
+ const gf=document.getElementById("gFecha"); if(gf)gf.value=hoyLocal();
+}
+function eliminarGasto(id){
+ const g=gastos.find(x=>x.id===id); if(!g)return;
+ if(!confirm("¿Eliminar el gasto \""+g.concepto+"\" de "+dinero(g.monto)+"?"))return;
+ gastos=gastos.filter(x=>x.id!==id);
+ guardar(); renderGastos();
+ toast("Gasto eliminado: "+g.concepto+".");
+}
+function renderGastos(){
+ const hoy=hoyLocal();
+ const deHoy=gastos.filter(g=>g.fecha===hoy);
+ const mes=hoy.slice(0,7);
+ const delMes=gastos.filter(g=>(g.fecha||"").slice(0,7)===mes);
+ document.getElementById("resGasHoy").textContent=dinero(deHoy.reduce((a,g)=>a+g.monto,0));
+ document.getElementById("resGasMes").textContent=dinero(delMes.reduce((a,g)=>a+g.monto,0));
+ const mayor=deHoy.length?deHoy.reduce((a,g)=>g.monto>a.monto?g:a):null;
+ document.getElementById("resGasMayor").textContent=mayor?dinero(mayor.monto):"$0.00";
+ document.getElementById("resGasTotal").textContent=String(gastos.length);
+ const q=((document.getElementById("buscarGas")||{}).value||"").toLowerCase();
+ const fc=(document.getElementById("filtroGasCat")||{}).value||"todos";
+ const ff=(document.getElementById("filtroGasFecha")||{}).value||"";
+ const lista=document.getElementById("listaGastos"); if(!lista)return;
+ const items=gastos.filter(g=>(g.concepto+" "+(g.nota||"")).toLowerCase().includes(q)).filter(g=>fc==="todos"||g.categoria===fc).filter(g=>!ff||g.fecha===ff);
+ if(!items.length){lista.innerHTML='<tr><td colspan="5" style="text-align:center;color:#555">💲<br><b>Aún no hay gastos</b><br>Registra tu primer gasto arriba.</td></tr>';return}
+ lista.innerHTML=items.map(g=>`<tr><td>${fechaBonita(g.fecha)}${g.nota?`<br><span style="color:#666;font-size:12px">${g.nota}</span>`:""}</td><td>${g.concepto}</td><td>${g.categoria}</td><td class="num"><b>${dinero(g.monto)}</b></td><td><button onclick="eliminarGasto(${g.id})">Eliminar</button></td></tr>`).join("");
+}
 function estadoDe(p){if(p.stock<=0)return "agotado";if(p.pausado)return "pausado";return "disponible"}
 function renderProductos(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
@@ -509,6 +589,7 @@ function cerrarTurno(){if(confirm("¿Cerrar turno? Se limpiará la venta en curs
 document.getElementById("nombreNegocio").addEventListener("input",e=>{document.getElementById("negocioBox").textContent=(e.target.value||"Mi negocio").toUpperCase();localStorage.setItem("kupoPosV146Negocio",e.target.value)});
 const savedNegocio=localStorage.getItem("kupoPosV146Negocio");if(savedNegocio){document.getElementById("nombreNegocio").value=savedNegocio;document.getElementById("negocioBox").textContent=savedNegocio.toUpperCase();}
 document.getElementById("eFecha").value=hoyLocal();
+document.getElementById("gFecha").value=hoyLocal();
 document.getElementById("eProducto").addEventListener("change",mostrarStockActual);
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
