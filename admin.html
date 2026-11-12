@@ -32,7 +32,8 @@ aside .sec{margin:18px 14px 8px;font-size:12px;letter-spacing:1.5px;color:#9dc0d
 aside .pie{margin-top:22px;background:rgba(255,255,255,.08);border-radius:12px;padding:12px}
 aside .pie img{width:100%;background:#fff;border-radius:10px;padding:8px}
 aside .pie small{display:block;margin-top:8px;color:#bcd7e6;line-height:1.4}
-main{padding:18px 22px}
+main{padding:18px 22px;transition:margin-left .35s ease}
+@media(min-width:761px){body.menu-abierto main{margin-left:260px}body.menu-abierto .fondo{display:none}}
 main h1{font-size:34px;margin-bottom:6px}
 main .sub{color:#555;margin-bottom:18px}
 .oculto{display:none!important}
@@ -165,8 +166,8 @@ main .sub{color:#555;margin-bottom:18px}
    <h2>Crear licencia</h2>
    <form onsubmit="event.preventDefault();crearLicencia()">
     <div><label>Negocio</label><input id="licNegocio" type="text" placeholder="Nombre del negocio" required></div>
-    <div><label>Tipo</label><select id="licTipo"><option value="Por vida">Por vida</option><option value="Renta">Renta</option></select></div>
-    <div><label>Meses (solo renta)</label><input id="licMeses" type="number" min="1" max="12" value="12"></div>
+    <div><label>Tipo</label><select id="licTipo" onchange="toggleMesesLic()"><option value="Por vida">Por vida</option><option value="Renta">Renta</option></select></div>
+    <div id="campoMeses" style="display:none"><label>Meses (solo renta)</label><input id="licMeses" type="number" min="1" max="12" value="12"></div>
     <button type="submit" class="dorado">+ Crear licencia</button>
     <button type="button" class="secundario" onclick="cancelarEdicionLic()">Cancelar</button>
    </form>
@@ -239,13 +240,13 @@ function semilla(){
 }
 const TERMINALES=[]; // En cero: se registran cuando un negocio activa su licencia y conecta su terminal.
 const RESPALDOS=[]; // En cero: aún no hay respaldos registrados en este Admin.
-function toggleMenu(){document.getElementById('menuLateral').classList.toggle('abierto');document.getElementById('fondoMenu').classList.toggle('visible')}
+function toggleMenu(){document.getElementById('menuLateral').classList.toggle('abierto');document.getElementById('fondoMenu').classList.toggle('visible');document.body.classList.toggle('menu-abierto')}
 function mostrarVista(v){
  ['licencias','reservas','terminales','respaldos'].forEach(x=>{
   document.getElementById('vista'+x[0].toUpperCase()+x.slice(1)).classList.toggle('oculto',x!==v);
   document.getElementById('nav'+x[0].toUpperCase()+x.slice(1)).classList.toggle('activo',x===v);
  });
- document.getElementById('menuLateral').classList.remove('abierto');document.getElementById('fondoMenu').classList.remove('visible');
+ document.getElementById('menuLateral').classList.remove('abierto');document.getElementById('fondoMenu').classList.remove('visible');document.body.classList.remove('menu-abierto');
  if(v==='licencias')renderLicencias(); if(v==='reservas')renderReservas(); if(v==='terminales')renderTerminales(); if(v==='respaldos')renderRespaldos();
 }
 function renderResumen(){
@@ -277,13 +278,14 @@ function crearLicencia(){
  else{let clave=generarClave();licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc});toast('Licencia creada: '+clave);}
  editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();
 }
-function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}
+function toggleMesesLic(){document.getElementById('campoMeses').style.display=document.getElementById('licTipo').value==='Renta'?'':'none'}
+function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;toggleMesesLic();window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}
 function cancelarEdicionLic(){editandoLic=null;document.getElementById('licNegocio').value=''}
 function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.estado=l.estado==='Pausada'?'Activa':'Pausada';guardar();renderLicencias();toast(l.negocio+' ahora está '+l.estado)}
 function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();toast('Licencia eliminada')}
 function renderReservas(){
  renderResumen();
- document.getElementById('listaReservas').innerHTML=reservas.map((r,i)=>'<tr><td><b>'+r.codigo+'</b></td><td><span class="estado '+(r.estado==='Disponible'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+(r.negocio||'Sin negocio')+'</td><td>'+fechaBonita(r.fecha)+'</td><td><button onclick="copiarReserva('+i+')">Copiar</button> <button class="peligro" onclick="eliminarReserva('+i+')">Eliminar</button></td></tr>').join('');
+ document.getElementById('listaReservas').innerHTML=!reservas.length?'<tr><td colspan="5" style="text-align:center;color:#666;padding:16px">Aún no hay reservas registradas. Crea una reserva para tener un código KUPO-XXXX-XXXX listo para asignar a un negocio.</td></tr>':reservas.map((r,i)=>'<tr><td><b>'+r.codigo+'</b></td><td><span class="estado '+(r.estado==='Disponible'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+(r.negocio||'Sin negocio')+'</td><td>'+fechaBonita(r.fecha)+'</td><td><button onclick="copiarReserva('+i+')">Copiar</button> <button class="peligro" onclick="eliminarReserva('+i+')">Eliminar</button></td></tr>').join('');
 }
 function crearReserva(){let c=generarClave();reservas.push({codigo:c,estado:'Disponible',negocio:'',fecha:hoyLocal()});guardar();renderReservas();toast('Reserva creada: '+c)}
 function copiarReserva(i){let c=reservas[i].codigo;if(navigator.clipboard)navigator.clipboard.writeText(c);toast('Copiado: '+c)}
