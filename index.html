@@ -332,6 +332,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <nav>
 <a class="activo" id="navVentas" onclick="mostrarVista('ventas')">🧾 Ventas</a>
 <a id="navProductos" onclick="mostrarVista('productos')">📦 Productos</a>
+<a id="navCotizaciones" onclick="mostrarVista('cotizaciones')">📋 Cotizaciones</a>
 <a id="navEntradas" onclick="mostrarVista('entradas')">➕ Entradas</a>
 <a id="navGastos" onclick="mostrarVista('gastos')">💲 Gastos</a>
 <a id="navCorte" onclick="mostrarVista('cortes')">📊 Corte diario</a>
@@ -620,6 +621,54 @@ main h1{font-size:34px;margin-bottom:14px}
 </div>
 </div>
 
+
+<div id="vistaCotizaciones" class="oculto">
+<h1>📋 Cotizaciones</h1>
+<p style="color:#555;margin-bottom:14px">Arma una cotización con los productos del catálogo y su unidad (pieza, kilo, metro o litro). La cotización <b>no descuenta stock</b>: el stock solo baja cuando la cotización se convierte en venta y se cobra. IVA 16% incluido, igual que en Ventas.</p>
+<div class="resumen">
+<div class="tarjeta"><small>PENDIENTES</small><b id="resCotPendientes">0</b></div>
+<div class="tarjeta"><small>CONVERTIDAS</small><b id="resCotConvertidas">0</b></div>
+<div class="tarjeta"><small>VENCIDAS</small><b class="alerta" id="resCotVencidas">0</b></div>
+<div class="tarjeta"><small>TOTAL</small><b id="resCotTotal">0</b></div>
+</div>
+<div class="form-prod">
+<h2>➕ Crear cotización</h2>
+<form onsubmit="guardarCotizacion(event)">
+<div><label>Cliente</label><input id="cotCliente" placeholder="Ej. María López" required></div>
+<div><label>Vigencia (días)</label><input id="cotVigencia" type="number" min="1" value="15" required></div>
+<button type="submit">💾 Guardar cotización</button>
+<button type="button" class="secundario" onclick="limpiarBorradorCotizacion()">Limpiar</button>
+</form>
+<div style="margin-top:12px">
+<label>Producto</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<select id="cotProducto" style="flex:1;min-width:180px"></select>
+<input id="cotCantidad" type="number" step="0.5" min="0" value="1" style="width:110px">
+<button type="button" onclick="agregarLineaCotizacion()">➕ Agregar</button>
+</div>
+<p style="font-size:12px;color:#666;margin-top:6px">Pieza solo admite enteros; kilo, metro y litro admiten decimales (ej. 0.5 kg, 1.25 m).</p>
+</div>
+<div class="tabla-wrap"><table class="tabla">
+<thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+<tbody id="cotLineas"></tbody>
+</table></div>
+<p style="margin-top:10px;font-size:15px">Subtotal: <b id="cotSubtotal">$0.00</b> · IVA 16% incluido: <b id="cotIva">$0.00</b> · TOTAL: <b id="cotTotal">$0.00</b></p>
+</div>
+<div class="form-prod">
+<h2>📋 Lista de cotizaciones</h2>
+<div class="buscar">
+<input id="buscarCot" placeholder="🔍 Buscar por folio o cliente..." oninput="renderCotizaciones()">
+<select id="filtroCotEstado" onchange="renderCotizaciones()"><option value="todos">Todos los estados</option><option value="Pendiente">Pendientes</option><option value="Convertida">Convertidas</option><option value="Vencida">Vencidas</option></select>
+</div>
+<div class="tabla-wrap"><table class="tabla">
+<thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Productos</th><th class="num">Total</th><th>Vence</th><th>Estado</th><th>Acciones</th></tr></thead>
+<tbody id="listaCotizaciones"></tbody>
+</table></div>
+<div id="detalleCotizacion" style="margin-top:12px"></div>
+<p style="margin-top:10px;font-size:13px;color:#555">Convertir en venta pasa los productos a la Venta en curso y marca la cotización como Convertida. El stock se descuenta solo al cobrar, como en una venta normal.</p>
+</div>
+</div>
+
 <div id="vistaAdminLic" class="oculto">
 <h1>⚙️ Administrador de licencia</h1>
 <p style="color:#555;margin-bottom:14px">Opciones de esta licencia, solo para el Administrador de este negocio. Al entrar con otra licencia, se aplican las opciones de esa licencia.</p>
@@ -680,6 +729,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <thead><tr><th>Lo que puede hacer</th><th>Administrador</th><th>Cajero</th></tr></thead>
 <tbody>
 <tr><td>🧾 Ventas</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-si">✓</span></td></tr>
+<tr><td>📋 Cotizaciones</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-si">✓</span></td></tr>
 <tr><td>🖨 Reimprimir último ticket</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-si">✓</span></td></tr>
 <tr><td>📦 Productos</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
 <tr><td>➕ Entradas</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
@@ -692,7 +742,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <tr><td>⚙️ Administrador de licencia</td><td><span class="perm-check perm-si">✓</span></td><td><span class="perm-check perm-no">✕</span></td></tr>
 </tbody>
 </table></div>
-<p style="margin-top:10px;font-size:13px;color:#555">Si un Cajero intenta abrir algo sin permiso, ve el aviso “⛔ Sin permiso” y se queda en Ventas. Su menú solo muestra Ventas.</p>
+<p style="margin-top:10px;font-size:13px;color:#555">Si un Cajero intenta abrir algo sin permiso, ve el aviso “⛔ Sin permiso” y se queda en Ventas. Su menú solo muestra Ventas y Cotizaciones.</p>
 </div>
 <div class="form-prod">
 <h2>🔐 Mi PIN</h2>
@@ -821,6 +871,10 @@ let gastos=JSON.parse(localStorage.getItem("kupoPosV146Gastos")||"[]");
 let cortes=JSON.parse(localStorage.getItem("kupoPosV146Cortes")||"[]");
 let fondoCaja=Number(localStorage.getItem("kupoPosV146Fondo")||"0")||0;
 let corteFolio=(JSON.parse(localStorage.getItem("kupoPosV146CorteFolio")||"0"))||0;
+/* Cotizaciones: se guardan en localStorage, no descuentan stock al crearlas. */
+let cotizaciones=JSON.parse(localStorage.getItem("kupoPosV146Cotizaciones")||"[]");
+let cotFolio=(JSON.parse(localStorage.getItem("kupoPosV146CotFolio")||"0"))||0;
+let cotBorrador=[];
 let pago="Efectivo";
 let uid=100;
 
@@ -842,7 +896,7 @@ function almacenVenta(){let a=almacenActivo(ventaAlmacen);if(a)return a;a=almace
 if(!stockAlmacen){stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0})}
 catalogo.forEach(p=>{if(!stockAlmacen[p.id]){stockAlmacen[p.id]={};const pr=almacenPrincipal();if(pr)stockAlmacen[p.id][pr.id]=p.stock||0}});
 sincronizarStock();
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146Cotizaciones",JSON.stringify(cotizaciones));localStorage.setItem("kupoPosV146CotFolio",JSON.stringify(cotFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -907,6 +961,25 @@ function cobrar(){
  ticket=[];document.getElementById("recibido").value="";guardar();render();
  toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
 }
+
+/* Cotizaciones: folio COT-0001, vigencia en días, IVA 16% incluido.
+   Crear una cotización NO descuenta stock. Convertirla pasa sus productos
+   a la Venta en curso y la marca Convertida; el stock baja al cobrar. */
+function fechaVencimientoCot(c){const d=new Date(c.fecha+"T12:00:00");d.setDate(d.getDate()+(Number(c.vigenciaDias)||15));return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function estadoCot(c){if(c.estado==="Convertida")return "Convertida";return hoyLocal()>fechaVencimientoCot(c)?"Vencida":"Pendiente"}
+function totalesCot(lineas){const total=lineas.reduce((a,l)=>a+l.cant*l.precio,0);const subtotal=total/1.16;return{total:total,subtotal:subtotal,iva:total-subtotal}}
+function llenarSelectCot(){const sel=document.getElementById("cotProducto");if(!sel)return;const actual=sel.value;sel.innerHTML=catalogo.filter(p=>!p.pausado).map(p=>'<option value="'+p.id+'">'+(p.emoji||"📦")+" "+escHtml(p.nombre)+" · "+dinero(p.precio)+" / "+UNIDADES_VENTA[unidadDe(p)].corta+" · Stock: "+textoCantidad(p,p.stock)+"</option>").join("");if(actual)sel.value=actual}
+function renderBorradorCot(){llenarSelectCot();const tb=document.getElementById("cotLineas");if(!tb)return;if(!cotBorrador.length){tb.innerHTML='<tr><td colspan="5" style="color:#888">Sin productos. Agrega un producto del catálogo.</td></tr>'}else{tb.innerHTML=cotBorrador.map(function(l){const p=catalogo.find(x=>x.id===l.id)||{nombre:"Producto eliminado",unidad:"pieza"};return "<tr><td>"+escHtml(p.nombre)+"</td><td>"+textoCantidad(p,l.cant)+"</td><td>"+dinero(l.precio)+"</td><td>"+dinero(l.cant*l.precio)+'</td><td><button type="button" onclick="quitarLineaCotizacion('+l.id+')">✕</button></td></tr>'}).join("")}const t=totalesCot(cotBorrador);document.getElementById("cotSubtotal").textContent=dinero(t.subtotal);document.getElementById("cotIva").textContent=dinero(t.iva);document.getElementById("cotTotal").textContent=dinero(t.total)}
+function agregarLineaCotizacion(){const sel=document.getElementById("cotProducto");if(!sel||!sel.value){toast("Elige un producto del catálogo.");return}const p=catalogo.find(x=>x.id===Number(sel.value));if(!p){toast("Ese producto ya no está en el catálogo.");return}let cant=normalizarCant(p,Number(document.getElementById("cotCantidad").value));if(cant<=0){toast("La cantidad debe ser mayor a 0.");return}const l=cotBorrador.find(x=>x.id===p.id);if(l)l.cant=redondearCant(l.cant+cant);else cotBorrador.push({id:p.id,cant:cant,precio:p.precio});renderBorradorCot()}
+function quitarLineaCotizacion(id){cotBorrador=cotBorrador.filter(x=>x.id!==id);renderBorradorCot()}
+function limpiarBorradorCotizacion(){cotBorrador=[];const f=document.querySelector("#vistaCotizaciones form");if(f)f.reset();document.getElementById("cotVigencia").value="15";renderBorradorCot()}
+function guardarCotizacion(e){e.preventDefault();if(!cotBorrador.length){toast("Agrega al menos un producto a la cotización.");return}const cliente=document.getElementById("cotCliente").value.trim();const vigencia=Math.max(1,parseInt(document.getElementById("cotVigencia").value)||15);cotFolio++;const folioStr="COT-"+String(cotFolio).padStart(4,"0");const t=totalesCot(cotBorrador);cotizaciones.push({folio:folioStr,numero:cotFolio,cliente:cliente,vigenciaDias:vigencia,fecha:hoyLocal(),lineas:cotBorrador.map(function(l){const p=catalogo.find(x=>x.id===l.id)||{nombre:"Producto eliminado",unidad:"pieza",emoji:"📦"};return{id:l.id,nombre:p.nombre,unidad:unidadDe(p),emoji:p.emoji||"📦",cant:l.cant,precio:l.precio}}),total:t.total,estado:"Pendiente"});cotBorrador=[];guardar();limpiarBorradorCotizacion();renderCotizaciones();toast("Cotización guardada: "+folioStr+" · Total "+dinero(t.total)+" · Vigencia "+vigencia+" días. No se descontó stock.")}
+function renderCotizaciones(){const q=((document.getElementById("buscarCot")||{}).value||"").toLowerCase();const fe=(document.getElementById("filtroCotEstado")||{}).value||"todos";const conEstado=cotizaciones.map(c=>({c:c,estado:estadoCot(c)}));document.getElementById("resCotPendientes").textContent=conEstado.filter(x=>x.estado==="Pendiente").length;document.getElementById("resCotConvertidas").textContent=conEstado.filter(x=>x.estado==="Convertida").length;document.getElementById("resCotVencidas").textContent=conEstado.filter(x=>x.estado==="Vencida").length;document.getElementById("resCotTotal").textContent=cotizaciones.length;const lista=conEstado.filter(function(x){if(fe!=="todos"&&x.estado!==fe)return false;if(q&&(x.c.folio.toLowerCase().indexOf(q)===-1&&x.c.cliente.toLowerCase().indexOf(q)===-1))return false;return true});const tb=document.getElementById("listaCotizaciones");if(!tb)return;if(!lista.length){tb.innerHTML='<tr><td colspan="8" style="color:#888">Sin cotizaciones.</td></tr>'}else{tb.innerHTML=lista.slice().reverse().map(function(x){const c=x.c;const puedeConvertir=x.estado==="Pendiente";return "<tr><td><b>"+escHtml(c.folio)+"</b></td><td>"+fechaBonita(c.fecha)+"</td><td>"+escHtml(c.cliente)+"</td><td>"+c.lineas.length+"</td><td class=\"num\">"+dinero(c.total)+"</td><td>"+fechaBonita(fechaVencimientoCot(c))+"</td><td>"+x.estado+"</td><td><button type=\"button\" onclick=\"verCotizacion('"+c.folio+"')\">Ver</button> "+(puedeConvertir?'<button type="button" onclick="convertirCotizacion(\''+c.folio+'\')">Convertir en venta</button> ':"")+'<button type="button" onclick="imprimirCotizacion(\''+c.folio+'\')">Imprimir</button> <button type="button" onclick="eliminarCotizacion(\''+c.folio+'\')">Eliminar</button></td></tr>'}).join("")}renderBorradorCot()}
+function verCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);const box=document.getElementById("detalleCotizacion");if(!c||!box)return;const t=totalesCot(c.lineas);box.innerHTML='<div class="form-prod"><h2>📋 '+escHtml(c.folio)+' · '+escHtml(c.cliente)+'</h2><p style="font-size:14px;color:#555">Fecha: '+fechaBonita(c.fecha)+' · Vigencia: '+c.vigenciaDias+' días · Vence: '+fechaBonita(fechaVencimientoCot(c))+' · Estado: <b>'+estadoCot(c)+'</b></p><div class="tabla-wrap"><table class="tabla"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>'+c.lineas.map(l=>"<tr><td>"+escHtml(l.nombre)+"</td><td>"+textoCantidadU(l.cant,l.unidad)+"</td><td>"+dinero(l.precio)+"</td><td>"+dinero(l.cant*l.precio)+"</td></tr>").join("")+'</tbody></table></div><p style="margin-top:10px;font-size:15px">Subtotal: <b>'+dinero(t.subtotal)+'</b> · IVA 16% incluido: <b>'+dinero(t.iva)+'</b> · TOTAL: <b>'+dinero(t.total)+'</b></p></div>'}
+function convertirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return;if(estadoCot(c)!=="Pendiente"){toast("Solo se pueden convertir cotizaciones pendientes.");return}const faltan=c.lineas.filter(l=>!catalogo.find(p=>p.id===l.id));if(faltan.length){toast("No se puede convertir: un producto de la cotización ya no está en el catálogo.");return}if(ticket.length&&!confirm("Ya hay una venta en curso. ¿Reemplazarla con los productos de "+folio+"?"))return;ticket=c.lineas.map(l=>({id:l.id,cant:l.cant,precio:l.precio}));c.estado="Convertida";guardar();mostrarVista("ventas");render();toast("Cotización "+folio+" convertida en venta. El stock se descuenta al cobrar.")}
+function imprimirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return false;if(typeof window==="undefined"||typeof window.open!=="function")return false;try{const t=totalesCot(c.lineas);const w=window.open("","_blank","width=340,height=600");if(!w)return false;const filas=c.lineas.map(l=>"<div class=\"t-line\"><span>"+escHtml(l.nombre)+" · "+textoCantidadU(l.cant,l.unidad)+"</span><span>"+dinero(l.cant*l.precio)+"</span></div>").join("");w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotización '+escHtml(c.folio)+'</title><style>body{font-family:monospace;text-align:center;width:80mm;margin:0 auto;font-size:13px;color:#111}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}hr{border-top:1px dashed #999}</style></head><body><div class="t-titulo">'+escHtml((typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||"Mi negocio")+'</div><div>COTIZACIÓN '+escHtml(c.folio)+'</div><hr><div>Cliente: '+escHtml(c.cliente)+'</div><div>Fecha: '+fechaBonita(c.fecha)+' · Vigencia: '+c.vigenciaDias+' días</div><div>Válida hasta: '+fechaBonita(fechaVencimientoCot(c))+' · Estado: '+estadoCot(c)+'</div><hr>'+filas+'<hr><div>Subtotal: '+dinero(t.subtotal)+'</div><div>IVA 16% incluido: '+dinero(t.iva)+'</div><div class="t-total">TOTAL: '+dinero(t.total)+'</div><hr><div>Esta cotización no es un ticket de venta. El stock se descuenta al cobrar.</div></body></html>');w.document.close();w.focus();w.print();return true}catch(e){return false}}
+function eliminarCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return;if(!confirm("¿Eliminar la cotización "+folio+" de "+c.cliente+"?"))return;cotizaciones=cotizaciones.filter(x=>x.folio!==folio);guardar();renderCotizaciones();const box=document.getElementById("detalleCotizacion");if(box)box.innerHTML="";toast("Cotización eliminada: "+folio)}
+
 function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji=document.getElementById("nuevoEmoji").value;if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();toast("Producto agregado: "+nombre);}
 function editar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede editar productos.");return}mostrarVista("productos");editarProducto(id);}
 function eliminar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){catalogo=catalogo.filter(x=>x.id!==id);delete stockAlmacen[id];ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();}}
@@ -1137,7 +1210,7 @@ function probarImpresion(){
 
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi","adminlic"],Cajero:["ventas"]};
+const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
 let sesionActual=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null")||{nombre:"Eduardo Benitez",usuario:"Administrador",rol:"Administrador"};
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
@@ -1145,7 +1218,7 @@ function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Admini
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);
+ mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
  mostrar("accGasto",esAdmin);mostrar("accCorte",esAdmin);mostrar("accProductos",esAdmin);
  const u=document.getElementById("usuarioActual");if(u)u.textContent=sesionActual.nombre||sesionActual.usuario;
  const r=document.getElementById("rolActual");if(r)r.textContent=sesionActual.rol||"";
@@ -1342,7 +1415,7 @@ function guardarTraspaso(ev){
 let vistaActual="ventas";
 function toggleMenu(){const a=document.querySelector("aside");const f=document.getElementById("fondoMenu");const abierto=a.classList.toggle("abierto");if(f)f.classList.toggle("visible",abierto);document.body.classList.toggle("menu-abierto",abierto);}
 function mostrarVista(v){
- if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas y Reimprimir.");return}
+ if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas, Cotizaciones y Reimprimir.");return}
  if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  vistaActual=v;
  document.getElementById("fondoMenu").classList.remove("visible");
@@ -1356,6 +1429,7 @@ function mostrarVista(v){
  document.getElementById("vistaCajeros").classList.toggle("oculto",v!=="cajeros");
  document.getElementById("vistaMulti").classList.toggle("oculto",v!=="multi");
  document.getElementById("vistaAdminLic").classList.toggle("oculto",v!=="adminlic");
+ document.getElementById("vistaCotizaciones").classList.toggle("oculto",v!=="cotizaciones");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("accionesRapidas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
@@ -1369,8 +1443,9 @@ function mostrarVista(v){
  document.getElementById("navCajeros").classList.toggle("activo",v==="cajeros");
  document.getElementById("navMulti").classList.toggle("activo",v==="multi");
  document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
+ document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function llenarSelectEntradas(){
