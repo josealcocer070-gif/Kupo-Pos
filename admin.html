@@ -158,8 +158,8 @@ main .sub{color:#555;margin-bottom:18px}
    <div class="tarjeta"><small>RENTAS ACTIVAS</small><b id="resRentas">0</b></div>
    <div class="tarjeta"><small>VENCEN EN 7 DÍAS</small><b id="resVencen" class="alerta">0</b></div>
    <div class="tarjeta"><small>PLAN</small><b>$300/mes</b></div>
-   <div class="tarjeta"><small>LICENCIAS ACTIVAS</small><b id="resActivas">3</b></div>
-   <div class="tarjeta"><small>RESERVAS DISPONIBLES</small><b id="resReservas">47</b></div>
+   <div class="tarjeta"><small>LICENCIAS ACTIVAS</small><b id="resActivas">0</b></div>
+   <div class="tarjeta"><small>RESERVAS DISPONIBLES</small><b id="resReservas">0</b></div>
   </div>
   <div class="gestion">
    <h2>Crear licencia</h2>
@@ -184,9 +184,9 @@ main .sub{color:#555;margin-bottom:18px}
   <h1>Reservas</h1>
   <p class="sub">Códigos de licencia reservados, listos para asignar a un negocio</p>
   <div class="resumen">
-   <div class="tarjeta"><small>RESERVAS DISPONIBLES</small><b id="resReservas2">47</b></div>
+   <div class="tarjeta"><small>RESERVAS DISPONIBLES</small><b id="resReservas2">0</b></div>
    <div class="tarjeta"><small>ASIGNADAS</small><b id="resReservasAsig">0</b></div>
-   <div class="tarjeta"><small>TOTAL DE CÓDIGOS</small><b id="resReservasTot">47</b></div>
+   <div class="tarjeta"><small>TOTAL DE CÓDIGOS</small><b id="resReservasTot">0</b></div>
   </div>
   <div class="gestion">
    <h2>Crear reserva</h2>
@@ -217,23 +217,24 @@ main .sub{color:#555;margin-bottom:18px}
 </div>
 
 <script>
-let licencias=JSON.parse(localStorage.getItem('kupoAdminLicencias')||'null');
+let licencias=JSON.parse(localStorage.getItem('kupoLicenciasCompartidas')||'null');
 let reservas=JSON.parse(localStorage.getItem('kupoAdminReservas')||'null');
 let pinAdmin='';
 const PIN_DEMO='123456';
-function guardar(){localStorage.setItem('kupoAdminLicencias',JSON.stringify(licencias));localStorage.setItem('kupoAdminReservas',JSON.stringify(reservas))}
+function guardar(){localStorage.setItem('kupoLicenciasCompartidas',JSON.stringify(licencias));localStorage.setItem('kupoAdminReservas',JSON.stringify(reservas))}
 function dinero(n){return '$'+Number(n).toFixed(2)}
 function toast(m){let t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 function hoyLocal(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function fechaBonita(f){if(!f)return '—';let p=f.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
 function generarClave(){let c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';let s='';for(let i=0;i<8;i++)s+=c[Math.floor(Math.random()*c.length)];return 'KUPO-'+s.slice(0,4)+'-'+s.slice(4)}
 function semilla(){
- if(!licencias){licencias=[
-  {id:1,negocio:'Pollos Rancheros El Pollón',clave:'KUPO-7F2A-91BC',tipo:'Por vida',estado:'Activa',alta:'2026-08-19',vencimiento:''},
-  {id:2,negocio:'Pollos Rancheros El Pollón',clave:'KUPO-3D8E-44F1',tipo:'Por vida',estado:'Activa',alta:'2026-08-20',vencimiento:''},
-  {id:3,negocio:'Mi negocio',clave:'KUPO-9A1C-77D2',tipo:'Por vida',estado:'Activa',alta:'2026-08-18',vencimiento:''}
- ];}
- if(!reservas){reservas=[];let c='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';for(let i=0;i<47;i++){let s='';for(let j=0;j<8;j++)s+=c[(i*7+j*3)%36];reservas.push({codigo:'KUPO-'+s.slice(0,4)+'-'+s.slice(4),estado:'Disponible',negocio:'',fecha:'2026-08-18'});}}
+ if(!licencias){licencias=[];}
+ if(!reservas){reservas=[];}
+ try{localStorage.removeItem('kupoAdminLicencias')}catch(e){}
+ let clavesPrueba=['KUPO-7F2A-91BC','KUPO-3D8E-44F1','KUPO-9A1C-77D2'];
+ licencias=licencias.filter(l=>clavesPrueba.indexOf(l.clave)===-1);
+ reservas=reservas.filter(r=>!(r.fecha==='2026-08-18'&&!r.negocio&&r.estado==='Disponible'));
+ if(!localStorage.getItem('kupoAdminPruebaCreada')&&!licencias.some(l=>l.negocio==='Mi negocio - PRUEBA')){licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:'Mi negocio - PRUEBA',clave:'KUPO-MNEG-PRUE',tipo:'Renta',estado:'Pausada',alta:'2026-11-12',vencimiento:'2026-12-12'});localStorage.setItem('kupoAdminPruebaCreada','1');}
  guardar();
 }
 const TERMINALES=[
@@ -281,7 +282,7 @@ function crearLicencia(){
  let tipo=document.getElementById('licTipo').value;let meses=parseInt(document.getElementById('licMeses').value)||12;
  let venc='';if(tipo==='Renta'){let d=new Date();d.setMonth(d.getMonth()+meses);venc=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
  if(editandoLic){let l=licencias.find(x=>x.id===editandoLic);l.negocio=neg;l.tipo=tipo;l.vencimiento=venc;toast('Licencia actualizada');}
- else{let clave=generarClave();licencias.push({id:Date.now(),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc});toast('Licencia creada: '+clave);}
+ else{let clave=generarClave();licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc});toast('Licencia creada: '+clave);}
  editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();
 }
 function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}

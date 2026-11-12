@@ -186,7 +186,7 @@ main h1{font-size:34px;margin-bottom:14px}
   <input id="claveLicencia" type="text" placeholder="KUPO-XXXX-XXXX" autocomplete="off">
   <button class="btn-inicio azul" type="button" onclick="validarLicencia()">Validar licencia</button>
   <p class="msg" id="msgLicencia"></p>
-  <p class="aviso-demo">Demo: cualquier clave con el formato KUPO-XXXX-XXXX es válida. La licencia se guarda solo en este dispositivo.</p>
+  <p class="aviso-demo">Sin una licencia creada y Activa en KUPO Admin no se puede entrar. La activación en Admin es la llave.</p>
   <p class="inicio-pie">KUPO POS V1.4.6 · Punto de venta inteligente</p>
  </div>
 </div>
@@ -796,7 +796,10 @@ function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
 function mostrarPasoLicencia(){document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");}
 function mostrarPasoLogin(){document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");}
-function validarLicencia(){const c=document.getElementById("claveLicencia").value.trim().toUpperCase();const m=document.getElementById("msgLicencia");if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return}localStorage.setItem("kupoPosV146Licencia",c);m.textContent="✅ Licencia validada";m.className="msg ok";mostrarPasoLogin();}
+const CLAVES_PRUEBA=["KUPO-7F2A-91BC","KUPO-3D8E-44F1","KUPO-9A1C-77D2"];
+function leerLicenciasCompartidas(){try{let l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"null");return Array.isArray(l)?l:[]}catch(e){return[]}}
+function estadoLicencia(l){if(l.estado==="Pausada")return "Pausada";if(l.estado==="Vencida")return "Vencida";if(l.vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.vencimiento+"T00:00:00")<hoy)return "Vencida"}return "Activa"}
+function validarLicencia(){const c=document.getElementById("claveLicencia").value.trim().toUpperCase();const m=document.getElementById("msgLicencia");if(!/^KUPO-[A-Z0-9]{4}(-[A-Z0-9]{4}){1,3}$/.test(c)){m.textContent="Clave no válida. Usa el formato KUPO-XXXX-XXXX.";m.className="msg error";return}if(CLAVES_PRUEBA.indexOf(c)!==-1){m.textContent="Esa clave era de prueba y ya no existe. Crea una licencia nueva en KUPO Admin.";m.className="msg error";return}let lista=leerLicenciasCompartidas();if(!lista.length){m.textContent="Aún no hay licencias en KUPO Admin. Crea y activa una licencia en Admin para entrar.";m.className="msg error";return}let lic=lista.find(x=>x.clave===c);if(!lic){m.textContent="Clave no válida. Esta clave no está en KUPO Admin.";m.className="msg error";return}let est=estadoLicencia(lic);if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return}if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return}localStorage.setItem("kupoPosV146Licencia",c);if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();}
 function actualizarPuntosPin(){const v=document.getElementById("pinLogin").value;document.getElementById("pinPuntos").textContent="●".repeat(v.length)+"○".repeat(Math.max(0,6-v.length));}
 function teclaPin(d){const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
 function borrarPin(){const i=document.getElementById("pinLogin");i.value=i.value.slice(0,-1);actualizarPuntosPin();}
@@ -812,7 +815,7 @@ document.getElementById("eProducto").addEventListener("change",mostrarStockActua
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 const licGuardada=localStorage.getItem("kupoPosV146Licencia");
-if(licGuardada){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}
+if(licGuardada){let listaGuardada=leerLicenciasCompartidas();let licOk=false;if(CLAVES_PRUEBA.indexOf(licGuardada)!==-1){licOk=false}else{let lg=listaGuardada.find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa"}if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}else{localStorage.removeItem("kupoPosV146Licencia");document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}}
 const negInicio=document.getElementById("inicioNegocio");if(negInicio&&savedNegocio)negInicio.textContent=savedNegocio;const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
 render();
 </script>
