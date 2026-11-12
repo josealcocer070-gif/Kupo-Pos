@@ -317,6 +317,16 @@ main h1{font-size:34px;margin-bottom:14px}
 .prod-row .acciones-prod{flex-direction:row;flex-wrap:wrap}
 .prod-row .foto{overflow:hidden}
 header .negocio input{width:420px;max-width:62vw;font-size:19px}
+/* Ticket fijo en escritorio (también en modo escritorio del celular, desde 761px): solo el catálogo se mueve; el panel derecho queda fijo, la lista de la venta hace scroll dentro y TOTAL/Cobrar siempre visibles abajo. En móvil real no se toca la barra inferior ya hecha. */
+@media(min-width:761px){
+ body.vista-ventas #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+ body.vista-ventas #app header,body.vista-ventas #app .acciones{flex:0 0 auto}
+ body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 350px;flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
+ body.vista-ventas .layout:not(.sin-panel) main{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+ body.vista-ventas .layout:not(.sin-panel) .panel{position:static;top:auto;min-height:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
+ .panel-cuerpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:2px}
+ .panel-pie{flex:0 0 auto;background:#fff;border-top:2px solid #dfe5ea;padding-top:10px}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -929,6 +939,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 </main>
 
 <section class="panel" id="panelVenta">
+<div class="panel-cuerpo">
 <h2>🛒 Venta en curso <span class="badge" id="nArticulos">0 artículos</span></h2>
 <p class="sub">Folio se asigna al cobrar · Cliente general</p>
 <p class="fecha">📅 <span id="fecha"></span></p>
@@ -942,6 +953,8 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <p style="font-size:12px;color:#666;margin:0 0 6px">El stock se descuenta de este almacén al cobrar.</p>
 <div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>ARTÍCULOS DE ESTA VENTA</span><span>Cantidad · Importe</span></div>
 <div id="ticket" style="margin-top:10px"></div>
+</div>
+<div class="panel-pie">
 <div class="totales">
 <div class="row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
 <div class="row"><span>IVA (16%)</span><span id="iva">$0.00</span></div>
@@ -959,6 +972,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
 <button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
 <p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.5.0: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
+</div>
 </section>
 </div>
 <nav id="menuMovil" aria-label="Menú móvil">
@@ -1571,6 +1585,7 @@ function mostrarVista(v){
  if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  vistaActual=v;
  document.body.classList.toggle("movil-ventas",v==="ventas");
+ document.body.classList.toggle("vista-ventas",v==="ventas");
  document.body.classList.remove("venta-movil-abierta");
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.classList.toggle("activo",b.getAttribute("data-nav")===v||(v==="historial"&&b.getAttribute("data-nav")==="cortes"));});
  actualizarBarraMovil();
