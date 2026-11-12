@@ -157,7 +157,7 @@ main h1{font-size:34px;margin-bottom:14px}
 
 <div class="fondo" id="fondoMenu" onclick="toggleMenu()"></div>
 
-<div class="acciones">
+<div class="acciones" id="accionesRapidas">
 <span class="titulo">⚡ Acciones rápidas</span>
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
@@ -481,6 +481,7 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
  document.getElementById("vistaHistorial").classList.toggle("oculto",v!=="historial");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
+ document.getElementById("accionesRapidas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
