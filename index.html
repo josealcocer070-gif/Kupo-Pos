@@ -3,26 +3,196 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KUPO POS - Ventas</title>
+<title>KUPO POS - Punto de venta</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f2f2f2;margin:0;padding:20px;text-align:center}
-h1{color:#1d5f5e}
-button{background:#e6714c;color:white;border:none;padding:12px 20px;font-size:18px;border-radius:10px;margin:5px}
-#total{font-size:28px;font-weight:bold;color:#1d5f5e}
+:root{--teal:#1d5f5e;--coral:#e6714c;--bg:#f2f4f3;--card:#fff;--ink:#222}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);margin:0;color:var(--ink)}
+header{background:var(--teal);color:#fff;padding:18px 14px;text-align:center}
+header h1{margin:0;font-size:30px;letter-spacing:1px}
+header h1 span{color:#ffd166}
+header p{margin:4px 0 0;opacity:.92}
+main{max-width:1024px;margin:0 auto;padding:14px 12px 40px}
+/* En PC: catálogo a la izquierda, ticket a la derecha. En celular: uno abajo del otro. */
+.layout{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:760px){.layout{grid-template-columns:1.4fr 1fr;align-items:start}}
+section{background:var(--card);border-radius:12px;padding:16px}
+h2{color:var(--teal);margin:0 0 8px}
+input,select{width:100%;padding:12px;font-size:16px;border:1px solid #ccc;border-radius:8px;margin:6px 0}
+button{cursor:pointer}
+.btn{background:var(--coral);color:#fff;border:none;padding:12px 16px;font-size:16px;font-weight:bold;border-radius:10px;margin:4px 2px}
+.btn.teal{background:var(--teal)}
+.btn.ghost{background:#eee;color:#333}
+.btn.chico{padding:6px 10px;font-size:14px;margin:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:10px}
+.prod{border:1px solid #ddd;border-radius:10px;padding:12px;text-align:center}
+.prod b{display:block;font-size:17px;word-break:break-word}
+.prod .precio{color:var(--teal);font-weight:bold;font-size:18px;margin:6px 0}
+.prod .btn{width:100%}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{border-bottom:1px solid #eee;padding:8px;text-align:left;font-size:15px}
+.total{font-size:26px;font-weight:bold;color:var(--teal);text-align:right;margin:10px 0}
+.mensaje{background:#e6f4ea;border:1px solid #9ccc9f;padding:10px;border-radius:8px;margin:0 0 14px;display:none}
+.vacio{color:#666;text-align:center;padding:18px 8px}
+footer{text-align:center;color:#666;padding:16px}
+label{font-weight:bold;font-size:14px}
 </style>
 </head>
 <body>
-<h1>KUPO POS</h1>
-<p>Punto de venta inteligente</p>
-<button onclick="agregar(25)">Pan $25</button>
-<button onclick="agregar(15)">Refresco $15</button>
-<button onclick="agregar(40)">Pollo $40</button>
-<p>Total: $<span id="total">0</span></p>
-<button onclick="cobrar()">Cobrar</button>
+<header>
+  <h1>KUPO <span>POS</span></h1>
+  <p id="subtitulo">Punto de venta para cualquier negocio</p>
+</header>
+
+<main>
+  <div class="mensaje" id="mensaje"></div>
+
+  <div class="layout">
+    <!-- CATÁLOGO EDITABLE -->
+    <section>
+      <h2>🛍️ Catálogo</h2>
+      <label for="negocio">Nombre de tu negocio (opcional)</label>
+      <input id="negocio" placeholder="Ej. Mi tienda" oninput="guardarNegocio()">
+      <input id="buscar" type="search" placeholder="🔍 Buscar producto…" oninput="renderCatalogo()">
+      <div class="grid" id="productos"></div>
+
+      <h2 style="margin-top:18px">➕ Agregar producto</h2>
+      <input id="nuevo-nombre" placeholder="Nombre del producto">
+      <input id="nuevo-precio" type="number" min="1" step="1" placeholder="Precio en $">
+      <button class="btn" onclick="agregarProducto()">Agregar al catálogo</button>
+
+      <h2 style="margin-top:18px">✏️ Editar producto</h2>
+      <p><small>Para cambiar el nombre o el precio, toca “Editar” en el producto. Para quitarlo, toca “Eliminar”.</small></p>
+      <div id="editor" style="display:none">
+        <input id="edit-nombre" placeholder="Nombre del producto">
+        <input id="edit-precio" type="number" min="1" step="1" placeholder="Precio en $">
+        <button class="btn teal" onclick="guardarEdicion()">Guardar cambios</button>
+        <button class="btn ghost" onclick="cancelarEdicion()">Cancelar</button>
+      </div>
+    </section>
+
+    <!-- VENTAS / TICKET -->
+    <section>
+      <h2>🧾 Ticket actual</h2>
+      <table id="ticket"><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th></th></tr></thead><tbody></tbody></table>
+      <p class="total">Total: $<span id="total">0</span></p>
+      <label for="pago">Forma de pago</label>
+      <select id="pago" onchange="mostrarCambio()">
+        <option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option>
+      </select>
+      <div id="bloque-cambio">
+        <label for="recibido">¿Con cuánto paga? (solo efectivo, opcional)</label>
+        <input id="recibido" type="number" min="0" step="1" placeholder="Ej. 100" oninput="mostrarCambio()">
+        <p id="cambio-texto"></p>
+      </div>
+      <button class="btn" onclick="cobrar()">✅ Cobrar</button>
+      <button class="btn ghost" onclick="limpiarTicket()">Limpiar ticket</button>
+      <p><small>El catálogo y las ventas se guardan en este dispositivo (sin cuenta, sin internet). Funciona en PC, celular y tablet.</small></p>
+      <p id="ultima-venta"></p>
+    </section>
+  </div>
+</main>
+<footer>KUPO POS — Paso 1: ventas, catálogo editable y cobrar.</footer>
+
 <script>
-let total=0;
-function agregar(p){total+=p;document.getElementById('total').textContent=total;}
-function cobrar(){alert('Total a cobrar: $'+total);total=0;document.getElementById('total').textContent=total;}
+const LS_CAT='kupoPosCatalogo', LS_NEG='kupoPosNegocio', LS_VENTAS='kupoPosVentas';
+let catalogo=JSON.parse(localStorage.getItem(LS_CAT)||'[]');
+let ventas=JSON.parse(localStorage.getItem(LS_VENTAS)||'[]');
+let ticket=[]; // {id,nombre,precio,cant}
+let nextId=Date.now(); // IDs únicos aunque se agreguen productos seguidos
+let editandoId=null;
+function guardar(){localStorage.setItem(LS_CAT,JSON.stringify(catalogo));localStorage.setItem(LS_VENTAS,JSON.stringify(ventas));}
+function avisar(t){const m=document.getElementById('mensaje');m.style.display='block';m.textContent=t;setTimeout(()=>{m.style.display='none';},4000);}
+function guardarNegocio(){
+  const n=document.getElementById('negocio').value.trim();
+  localStorage.setItem(LS_NEG,n);
+  document.getElementById('subtitulo').textContent=n?('Punto de venta — '+n):'Punto de venta para cualquier negocio';
+}
+function renderCatalogo(){
+  const q=(document.getElementById('buscar').value||'').toLowerCase();
+  const lista=catalogo.filter(p=>p.nombre.toLowerCase().includes(q));
+  document.getElementById('productos').innerHTML=lista.length?lista.map(p=>
+    `<div class="prod"><b>${p.nombre}</b><div class="precio">$${p.precio}</div><button class="btn" onclick="agregarAlTicket(${p.id})">Agregar</button><br><button class="btn chico ghost" onclick="editarProducto(${p.id})">Editar</button> <button class="btn chico ghost" onclick="eliminarProducto(${p.id})">Eliminar</button></div>`
+  ).join(''):'<p class="vacio">Tu catálogo está vacío.<br>Agrega tu primer producto abajo para empezar a vender.</p>';
+}
+function agregarProducto(){
+  const nombre=document.getElementById('nuevo-nombre').value.trim();
+  const precio=parseInt(document.getElementById('nuevo-precio').value,10);
+  if(!nombre||!precio||precio<=0){avisar('Escribe el nombre y un precio válido.');return;}
+  catalogo.push({id:nextId++,nombre,precio});
+  document.getElementById('nuevo-nombre').value='';document.getElementById('nuevo-precio').value='';
+  guardar(); renderCatalogo(); avisar('Producto agregado: '+nombre+' $'+precio);
+}
+function editarProducto(id){
+  const p=catalogo.find(x=>x.id===id); if(!p)return;
+  editandoId=id;
+  document.getElementById('edit-nombre').value=p.nombre;
+  document.getElementById('edit-precio').value=p.precio;
+  document.getElementById('editor').style.display='block';
+  document.getElementById('editor').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function guardarEdicion(){
+  const nombre=document.getElementById('edit-nombre').value.trim();
+  const precio=parseInt(document.getElementById('edit-precio').value,10);
+  if(!nombre||!precio||precio<=0){avisar('Escribe el nombre y un precio válido.');return;}
+  const p=catalogo.find(x=>x.id===editandoId); if(!p)return;
+  p.nombre=nombre; p.precio=precio;
+  // Si el producto ya está en el ticket, actualiza su precio ahí también.
+  ticket.forEach(t=>{if(t.id===editandoId){t.nombre=nombre;t.precio=precio;}});
+  editandoId=null; document.getElementById('editor').style.display='none';
+  guardar(); renderCatalogo(); renderTicket(); avisar('Producto actualizado.');
+}
+function cancelarEdicion(){editandoId=null;document.getElementById('editor').style.display='none';}
+function eliminarProducto(id){
+  if(!confirm('¿Eliminar este producto del catálogo?'))return;
+  catalogo=catalogo.filter(p=>p.id!==id);
+  ticket=ticket.filter(t=>t.id!==id);
+  guardar(); renderCatalogo(); renderTicket();
+}
+function agregarAlTicket(id){
+  const p=catalogo.find(x=>x.id===id); if(!p)return;
+  const item=ticket.find(x=>x.id===id);
+  if(item)item.cant++; else ticket.push({id:p.id,nombre:p.nombre,precio:p.precio,cant:1});
+  renderTicket();
+}
+function renderTicket(){
+  document.querySelector('#ticket tbody').innerHTML=ticket.map((t,i)=>
+    `<tr><td>${t.nombre}</td><td><button onclick="cambiarCant(${i},-1)">−</button> ${t.cant} <button onclick="cambiarCant(${i},1)">+</button></td><td>$${t.precio*t.cant}</td><td><button onclick="quitarItem(${i})">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="4">Ticket vacío. Agrega productos del catálogo.</td></tr>';
+  document.getElementById('total').textContent=ticket.reduce((s,t)=>s+t.precio*t.cant,0);
+  mostrarCambio();
+}
+function cambiarCant(i,d){ticket[i].cant+=d; if(ticket[i].cant<=0)ticket.splice(i,1); renderTicket();}
+function quitarItem(i){ticket.splice(i,1); renderTicket();}
+function limpiarTicket(){ticket=[]; document.getElementById('recibido').value=''; renderTicket();}
+function mostrarCambio(){
+  const total=ticket.reduce((s,t)=>s+t.precio*t.cant,0);
+  const pago=document.getElementById('pago').value;
+  document.getElementById('bloque-cambio').style.display=pago==='Efectivo'?'block':'none';
+  const rec=parseInt(document.getElementById('recibido').value,10);
+  document.getElementById('cambio-texto').textContent=(pago==='Efectivo'&&rec&&rec>=total)?('Cambio: $'+(rec-total)):'';
+}
+function cobrar(){
+  if(!ticket.length){avisar('El ticket está vacío. Agrega un producto primero.');return;}
+  const total=ticket.reduce((s,t)=>s+t.precio*t.cant,0);
+  const pago=document.getElementById('pago').value;
+  if(pago==='Efectivo'){
+    const rec=parseInt(document.getElementById('recibido').value,10);
+    if(rec&&rec<total){avisar('Lo recibido ($'+rec+') es menos que el total ($'+total+').');return;}
+  }
+  ventas.push({fecha:new Date().toISOString().slice(0,10),hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),pago,total,items:ticket.map(t=>t.cant+' × '+t.nombre).join(', ')});
+  guardar();
+  document.getElementById('ultima-venta').textContent='Última venta cobrada: $'+total+' ('+pago+'). ¡Gracias!';
+  limpiarTicket();
+  avisar('Venta cobrada: $'+total+' ('+pago+').');
+}
+// Restaurar nombre del negocio guardado
+(function init(){
+  const n=localStorage.getItem(LS_NEG)||'';
+  document.getElementById('negocio').value=n;
+  if(n)document.getElementById('subtitulo').textContent='Punto de venta — '+n;
+  renderCatalogo(); renderTicket();
+})();
 </script>
 </body>
 </html>
