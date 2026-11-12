@@ -234,8 +234,8 @@ main h1{font-size:34px;margin-bottom:14px}
    PC: 3 columnas, menú hamburguesa, ticket a la derecha.
    Móvil: una sola columna, tarjetas y botones grandes,
    menú inferior fijo y Venta en curso abajo fijo.
-   Corrección de Lalo: SIN gráfica en móvil; el tablero
-   (si existe en PC) es solo números simples. */
+   Corrección de Lalo: SIN gráfica; el tablero
+   es solo números simples. */
 #menuMovil,#barraVentaMovil{display:none}
 @media(max-width:760px){
  header{padding:8px 10px;gap:8px}
@@ -272,8 +272,6 @@ main h1{font-size:34px;margin-bottom:14px}
  .caj-fila-botones button{flex:1 1 45%;padding:12px;font-size:15px}
  .teclado button{padding:18px;font-size:22px}
  .inicio-tarjeta{padding:22px 16px}
- /* Sin gráfica en móvil: solo números simples */
- .grafica,.grafico,.tablero-grafica{display:none!important}
  /* Panel de venta: oculto en móvil; se abre como hoja inferior */
  .panel{display:none}
  body.venta-movil-abierta .panel{display:block;position:fixed;left:0;right:0;bottom:136px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
@@ -293,6 +291,19 @@ main h1{font-size:34px;margin-bottom:14px}
  #menuMovil button span{font-size:21px;line-height:1}
  #menuMovil button.activo{background:rgba(255,255,255,.22)}
 }
+
+/* V1.5.0 · Mejoras anti-demo: tablero, foto real, vacíos con acción */
+.tablero .tarjeta b{font-size:22px}
+.vacio-accion{border:2px dashed #c9d4dc;border-radius:12px;text-align:center;padding:22px 12px;color:#555;background:#f7fafc}
+.vacio-accion b{display:block;color:#0b4a6e;font-size:16px;margin:6px 0}
+.vacio-accion button{margin-top:12px;background:#0b4a6e;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+.vacio-accion button.dorado{background:#f5b301;color:#12233a}
+.card .foto img,.prod-row .foto img{width:100%;height:100%;object-fit:cover;display:block}
+.etiqueta-pausado{display:inline-block;background:#fde8e8;color:#b3261e;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;margin-top:4px}
+.stock.alerta-stock,.alerta-stock{color:#b3261e;font-weight:800}
+.prod-row .acciones-prod{flex-direction:row;flex-wrap:wrap}
+.prod-row .foto{overflow:hidden}
+header .negocio input{width:420px;max-width:62vw;font-size:19px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -418,6 +429,13 @@ main h1{font-size:34px;margin-bottom:14px}
 <main>
 <div id="vistaVentas">
 <h1>Menú</h1>
+<p style="font-size:13px;color:#555;margin:4px 0 8px">📊 Tablero del día: solo para ver rápido cuánto vendiste hoy, sin complicar.</p>
+<div class="resumen tablero" id="tableroVentas">
+<div class="tarjeta"><small>VENTAS DE HOY</small><b id="tabVentasHoy">$0.00</b></div>
+<div class="tarjeta"><small>TICKETS DE HOY</small><b id="tabTicketsHoy">0</b></div>
+<div class="tarjeta"><small>TOTAL EN CAJA HOY</small><b id="tabCajaHoy">$0.00</b></div>
+<div class="tarjeta"><small>PRODUCTO MÁS VENDIDO HOY</small><b id="tabTopProducto" style="font-size:16px">Sin ventas hoy</b></div>
+</div>
 <div class="gestion oculto" id="gestion">
 <h2>Gestionar productos</h2>
 <form onsubmit="agregarProducto(event)">
@@ -446,6 +464,8 @@ main h1{font-size:34px;margin-bottom:14px}
 <div class="tarjeta"><small>DISPONIBLES</small><b id="resDisp">0</b></div>
 <div class="tarjeta"><small>AGOTADOS / PAUSADOS</small><b class="alerta" id="resAgot">0</b></div>
 <div class="tarjeta"><small>VALOR EN INVENTARIO</small><b id="resValor">$0.00</b></div>
+<div class="tarjeta"><small>STOCK BAJO</small><b class="alerta" id="resStockBajo">0</b></div>
+<div class="tarjeta"><small>MARGEN PROMEDIO</small><b id="resMargen">0%</b></div>
 </div>
 <div class="form-prod">
 <h2 id="tituloFormProd">+ Nuevo producto</h2>
@@ -455,8 +475,12 @@ main h1{font-size:34px;margin-bottom:14px}
 <div><label>Precio $</label><input id="pPrecio" type="number" min="0" step="0.01" placeholder="0.00" required></div>
 <div><label>Stock</label><input id="pStock" type="number" min="0" step="0.01" placeholder="0" required></div>
  <div><label>Unidad de venta</label><select id="pUnidad"><option value="pieza">Pieza</option><option value="kilo">Kilo</option><option value="metro">Metro</option><option value="litro">Litro</option></select></div>
-<div><label>Categoría</label><select id="pCategoria"><option>Panadería</option><option>Comida</option><option>Bebida</option><option>Postres</option><option>General</option></select></div>
-<div><label>Foto</label><select id="pEmoji"><option>🍞</option><option>🥐</option><option>🥪</option><option>🍩</option><option>🧃</option><option>☕</option><option>📦</option></select></div>
+<div><label>Categoría</label><input id="pCategoria" list="listaCategorias" value="General"><datalist id="listaCategorias"><option value="Panadería"></option><option value="Comida"></option><option value="Bebida"></option><option value="Postres"></option><option value="General"></option></datalist></div>
+<div><label>Código / SKU</label><input id="pSku" placeholder="Ej. SKU-001"></div>
+<div><label>Costo $</label><input id="pCosto" type="number" min="0" step="0.01" placeholder="0.00"></div>
+<div><label>Stock mínimo (alerta)</label><input id="pStockMin" type="number" min="0" step="0.01" placeholder="5"></div>
+<div><label>Foto real del producto</label><input id="pFotoArchivo" type="file" accept="image/*" onchange="subirFotoProducto(event)"><img id="pFotoPreview" alt="Foto del producto" style="max-width:120px;max-height:90px;display:none;border-radius:10px;margin-top:8px"><button type="button" class="secundario" onclick="quitarFotoProducto()">Quitar foto</button></div>
+<div><label>Icono (si no hay foto)</label><select id="pEmoji"><option>🍞</option><option>🥐</option><option>🥪</option><option>🍩</option><option>🧃</option><option>☕</option><option>📦</option></select></div>
 <div><label>Estado</label><select id="pEstado"><option value="disponible">Disponible</option><option value="pausado">Pausado</option></select></div>
 <button type="submit">💾 Guardar producto</button>
 <button type="button" class="secundario" onclick="cancelarEdicion()">Cancelar</button>
@@ -542,6 +566,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <div id="vistaCortes" class="oculto">
 <h1>Corte diario</h1>
 <p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · <span id="textoCorteDiario">Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.</span></p>
+<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px">📦<b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.<br><button type="button" onclick="mostrarVista('adminlic')">⚙️ Activarlo en Administrador de licencia</button></div>
 <div class="form-prod" id="secCorteDinero">
 <h2>💰 Corte de dinero</h2>
 <div class="resumen">
@@ -744,6 +769,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <label><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"> 🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></label>
 </div>
 <p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button><button type="button" id="btnIrMulti" class="secundario" onclick="mostrarVista('multi')">🏬 Ir a Multi-almacén</button></div>
 </div>
 <div class="form-prod"><h2>📦 Corte por productos</h2>
 <p style="font-size:14px;color:#555">Activado: en Corte diario se hacen 2 cortes por separado, uno de dinero y uno de productos, cada uno con su propio botón, folio y lugar en el historial. Es para negocios como la pollería, que no manejan entradas y llevan 2 cortes.</p>
@@ -807,6 +833,12 @@ main h1{font-size:34px;margin-bottom:14px}
 </tbody>
 </table></div>
 <p style="margin-top:10px;font-size:13px;color:#555">Si un Cajero intenta abrir algo sin permiso, ve el aviso “⛔ Sin permiso” y se queda en Ventas. Su menú solo muestra Ventas y Cotizaciones.</p>
+</div>
+<div class="form-prod">
+<h2>🔑 Permisos por cajero</h2>
+<p style="font-size:14px;color:#555">Elige un cajero y marca lo que puede usar. Por defecto el cajero solo tiene Ventas y Cotizaciones.</p>
+<div><label>Cajero</label><select id="selPermCajero" onchange="renderPermisosCajero()"></select></div>
+<div class="checks" id="listaPermisosCajero" style="margin-top:10px"></div>
 </div>
 <div class="form-prod">
 <h2>🔐 Mi PIN</h2>
@@ -931,12 +963,12 @@ main h1{font-size:34px;margin-bottom:14px}
 
 <script>
 const EJEMPLO=[
- {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"Panadería",unidad:"pieza"},
- {id:2,nombre:"Club Sandwich con papas (pausado)",precio:75,stock:0,emoji:"🥪",pausado:true,categoria:"Comida",unidad:"pieza"},
- {id:3,nombre:"Pan Bolillo",precio:15,stock:30,emoji:"🍞",categoria:"Panadería",unidad:"pieza"},
- {id:4,nombre:"Combo Especial",precio:110,stock:4,emoji:"🍩",categoria:"Comida",unidad:"pieza"},
- {id:5,nombre:"Croissant Artesanal",precio:40,stock:12,emoji:"🥐",categoria:"Panadería",unidad:"pieza"},
- {id:6,nombre:"Cuernito J/Q",precio:35,stock:5,emoji:"🥐",categoria:"Panadería",unidad:"pieza"}
+ {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"General",unidad:"pieza",sku:"SKU-001",costo:15,stockMin:5,foto:""},
+ {id:2,nombre:"Club Sandwich con papas",precio:75,stock:0,emoji:"🥪",pausado:true,categoria:"Comida",unidad:"pieza",sku:"SKU-002",costo:45,stockMin:3,foto:""},
+ {id:3,nombre:"Pan Bolillo",precio:15,stock:30,emoji:"🍞",categoria:"Panadería",unidad:"pieza",sku:"SKU-003",costo:9,stockMin:10,foto:""},
+ {id:4,nombre:"Combo Especial",precio:110,stock:4,emoji:"🍩",categoria:"Comida",unidad:"pieza",sku:"SKU-004",costo:66,stockMin:2,foto:""},
+ {id:5,nombre:"Croissant Artesanal",precio:40,stock:12,emoji:"🥐",categoria:"Panadería",unidad:"pieza",sku:"SKU-005",costo:24,stockMin:4,foto:""},
+ {id:6,nombre:"Cuernito J/Q",precio:35,stock:5,emoji:"🥐",categoria:"Panadería",unidad:"pieza",sku:"SKU-006",costo:21,stockMin:3,foto:""}
 ];
 let catalogo=JSON.parse(localStorage.getItem("kupoPosV146Catalogo")||"null")||JSON.parse(JSON.stringify(EJEMPLO));
 let ticket=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"[]");
@@ -988,7 +1020,8 @@ function etiquetaUnidad(p,cant){const u=unidadDe(p);if(u==="pieza")return (Numbe
 function textoCantidadU(cant,u){return fmtCant(cant,u)+" "+(u==="pieza"?(Number(cant)===1?"pza":"pzas"):UNIDADES_VENTA[u].corta)}
 function textoCantidad(p,cant){return textoCantidadU(cant,unidadDe(p))}
 function normalizarCant(p,cant){cant=redondearCant(cant);if(!esDecimalUnidad(p))cant=Math.round(cant);return Math.max(0,cant)}
-catalogo.forEach(p=>{if(!UNIDADES_VENTA[p.unidad])p.unidad="pieza";p.stock=redondearCant(p.stock||0)});
+catalogo.forEach(p=>{if(!UNIDADES_VENTA[p.unidad])p.unidad="pieza";p.stock=redondearCant(p.stock||0);if(!p.sku)p.sku="SKU-"+String(p.id).padStart(3,"0");if(p.costo==null||isNaN(Number(p.costo)))p.costo=Math.round((Number(p.precio)||0)*0.6*100)/100;if(p.stockMin==null||isNaN(Number(p.stockMin)))p.stockMin=5;if(!p.foto)p.foto="";});
+let fotoProductoActual="";
 ticket.forEach(l=>{l.cant=redondearCant(l.cant||0)});
 function toast(m){let t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
 function render(){
@@ -999,11 +1032,26 @@ function render(){
  catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
-  d.innerHTML=`<div class="foto">${p.emoji}</div><h3>${p.nombre}</h3><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="stock ${bajo?"bajo":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${p.stock<=0||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
+  const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${p.stock<=0||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
   grid.appendChild(d);
  });
- renderTicket();
+ renderTicket();renderTableroVentas();
  if(vistaActual==="productos")renderProductos();
+}
+
+function renderTableroVentas(){
+ const el=function(id){return document.getElementById(id)};
+ if(!el("tabVentasHoy"))return;
+ let r={ventasTotal:0,ventasNum:0,totalCaja:0};
+ try{r=resumenCorte()}catch(e){}
+ el("tabVentasHoy").textContent=dinero(r.ventasTotal||0);
+ el("tabTicketsHoy").textContent=String(r.ventasNum||0);
+ el("tabCajaHoy").textContent=dinero(r.totalCaja||0);
+ const hoy=ventas.filter(esHoyVenta);const porProd={};
+ hoy.forEach(function(v){(v.items||[]).forEach(function(l){const p=catalogo.find(function(x){return x.id===l.id});const k=l.id;if(!porProd[k])porProd[k]={nombre:p?p.nombre:"Producto",cant:0,monto:0};porProd[k].cant+=l.cant;porProd[k].monto+=l.cant*(l.precio||0)})});
+ const top=Object.values(porProd).sort(function(a,b){return b.cant-a.cant})[0];
+ el("tabTopProducto").textContent=top?top.nombre+" · "+top.cant+" · "+dinero(top.monto):"Sin ventas hoy";
 }
 function renderTicket(){
  const box=document.getElementById("ticket");
@@ -1058,7 +1106,7 @@ function convertirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio
 function imprimirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return false;if(typeof window==="undefined"||typeof window.open!=="function")return false;try{const t=totalesCot(c.lineas);const w=window.open("","_blank","width=340,height=600");if(!w)return false;const filas=c.lineas.map(l=>"<div class=\"t-line\"><span>"+escHtml(l.nombre)+" · "+textoCantidadU(l.cant,l.unidad)+"</span><span>"+dinero(l.cant*l.precio)+"</span></div>").join("");w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotización '+escHtml(c.folio)+'</title><style>body{font-family:monospace;text-align:center;width:80mm;margin:0 auto;font-size:13px;color:#111}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}hr{border-top:1px dashed #999}</style></head><body><div class="t-titulo">'+escHtml((typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||"Mi negocio")+'</div><div>COTIZACIÓN '+escHtml(c.folio)+'</div><hr><div>Cliente: '+escHtml(c.cliente)+'</div><div>Fecha: '+fechaBonita(c.fecha)+' · Vigencia: '+c.vigenciaDias+' días</div><div>Válida hasta: '+fechaBonita(fechaVencimientoCot(c))+' · Estado: '+estadoCot(c)+'</div><hr>'+filas+'<hr><div>Subtotal: '+dinero(t.subtotal)+'</div><div>IVA 16% incluido: '+dinero(t.iva)+'</div><div class="t-total">TOTAL: '+dinero(t.total)+'</div><hr><div>Esta cotización no es un ticket de venta. El stock se descuenta al cobrar.</div></body></html>');w.document.close();w.focus();w.print();return true}catch(e){return false}}
 function eliminarCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return;if(!confirm("¿Eliminar la cotización "+folio+" de "+c.cliente+"?"))return;cotizaciones=cotizaciones.filter(x=>x.folio!==folio);guardar();renderCotizaciones();const box=document.getElementById("detalleCotizacion");if(box)box.innerHTML="";toast("Cotización eliminada: "+folio)}
 
-function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji=document.getElementById("nuevoEmoji").value;if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();if(typeof encolarProductoNube==="function")encolarProductoNube(catalogo[catalogo.length-1]);toast("Producto agregado: "+nombre);}
+function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji=document.getElementById("nuevoEmoji").value;if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad,sku:"SKU-"+String(nid).slice(-3),costo:Math.round(precio*0.6*100)/100,stockMin:5,foto:""});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();if(typeof encolarProductoNube==="function")encolarProductoNube(catalogo[catalogo.length-1]);toast("Producto agregado: "+nombre);}
 function editar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede editar productos.");return}mostrarVista("productos");editarProducto(id);}
 function eliminar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){if(typeof encolarBorradoNube==="function")encolarBorradoNube("productos",p);catalogo=catalogo.filter(x=>x.id!==id);delete stockAlmacen[id];ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();}}
 function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo?")){catalogo=JSON.parse(JSON.stringify(EJEMPLO));stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0});sincronizarStock();guardar();render();renderProductos();if(typeof encolarTodosProductosNube==="function")encolarTodosProductosNube();}}
@@ -1094,6 +1142,8 @@ function aplicarOpcionesSistema(){
  const e2=document.getElementById("estMultiAlmacen"); if(e2)e2.textContent=opcionesSistema.multiAlmacen?"· Activado":"· Desactivado";
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
  const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
+ const av=document.getElementById("avisoCorteProductos"); if(av)av.style.display=opcionesSistema.corteProductos?"none":"";
+ const bM=document.getElementById("btnIrMulti"); if(bM)bM.disabled=!opcionesSistema.multiAlmacen;
  const ol=document.getElementById("optLicencia"); if(ol)ol.textContent=licenciaActual();
  const on=document.getElementById("optNegocio"); if(on)on.textContent=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
 }
@@ -1292,7 +1342,10 @@ const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes"
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
 let sesionActual=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null")||{nombre:"Eduardo Benitez",usuario:"Administrador",rol:"Administrador"};
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
-function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
+function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
+const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
+function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+' onchange="guardarPermisosCajero()"> '+v[1]+'</label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se guardan solo en este dispositivo, por licencia.</p>'}
+function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
@@ -1305,6 +1358,7 @@ function aplicarPermisosMenu(){
  aplicarOpcionesSistema();
 }
 function renderCajeros(){
+ renderPermisosCajero();
  const q=((document.getElementById("buscarCaj")||{}).value||"").toLowerCase();
  const fr=(document.getElementById("filtroCajRol")||{}).value||"todos";
  const fe=(document.getElementById("filtroCajEstado")||{}).value||"todos";
@@ -1644,6 +1698,11 @@ function renderGastos(){
  lista.innerHTML=items.map(g=>`<tr><td>${fechaBonita(g.fecha)}${g.nota?`<br><span style="color:#666;font-size:12px">${g.nota}</span>`:""}</td><td>${g.concepto}</td><td>${g.categoria}</td><td class="num"><b>${dinero(g.monto)}</b></td><td><button onclick="eliminarGasto(${g.id})">Eliminar</button></td></tr>`).join("");
 }
 function estadoDe(p){if(p.stock<=0)return "agotado";if(p.pausado)return "pausado";return "disponible"}
+
+function fotoHtml(p){return p.foto?'<img src="'+p.foto+'" alt="'+escHtml(p.nombre)+'">':(p.emoji||"📦")}
+function margenProducto(p){const c=Number(p.costo)||0;const pr=Number(p.precio)||0;if(pr<=0)return 0;return Math.round((pr-c)/pr*100)}
+function subirFotoProducto(ev){const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=function(){const img=new Image();img.onload=function(){const max=400;let w=img.width,h=img.height;if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s)}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);fotoProductoActual=cv.toDataURL("image/jpeg",0.82);const pv=document.getElementById("pFotoPreview");if(pv){pv.src=fotoProductoActual;pv.style.display=""}};img.src=rd.result};rd.readAsDataURL(f)}
+function quitarFotoProducto(){fotoProductoActual="__SIN_FOTO__";const pv=document.getElementById("pFotoPreview");if(pv){pv.src="";pv.style.display="none"}const inp=document.getElementById("pFotoArchivo");if(inp)inp.value=""}
 function renderProductos(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
  const f=(document.getElementById("filtroProd")||{}).value||"todos";
@@ -1654,13 +1713,16 @@ function renderProductos(){
  document.getElementById("resDisp").textContent=disp;
  document.getElementById("resAgot").textContent=agot;
  document.getElementById("resValor").textContent=dinero(catalogo.reduce((a,p)=>a+p.precio*p.stock,0));
+ const _sb=document.getElementById("resStockBajo");if(_sb)_sb.textContent=catalogo.filter(function(p){return !p.pausado&&p.stock>0&&p.stock<=(p.stockMin==null?5:p.stockMin)}).length;
+ const _mg=document.getElementById("resMargen");if(_mg)_mg.textContent=catalogo.length?Math.round(catalogo.reduce(function(a,p){return a+margenProducto(p)},0)/catalogo.length)+"%":"0%";
  const estFiltro=f==="disponibles"?"disponible":f==="agotados"?"agotado":f==="pausados"?"pausado":"todos";
  const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>estFiltro==="todos"||estadoDe(p)===estFiltro);
  if(!items.length){lista.innerHTML='<div class="ticket-vacio">📦<br><b>No hay productos con ese filtro</b><br>Agrega uno nuevo con el formulario de arriba.</div>';return}
  items.forEach(p=>{
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";
-  d.innerHTML=`<div class="foto">${p.emoji||"📦"}</div><div class="info"><h3>${p.nombre}</h3><p>${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre} · ${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
+  const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p>${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre} · Costo ${dinero(p.costo||0)} · Margen ${margenProducto(p)}%</p><p class="${_bajo||p.stock<=0?"alerta-stock":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
   lista.appendChild(d);
  });
 }
@@ -1670,25 +1732,29 @@ function guardarProducto(e){e.preventDefault();
  const precio=parseFloat(document.getElementById("pPrecio").value);
  const stock=redondearCant(parseFloat(document.getElementById("pStock").value));
   const unidad=document.getElementById("pUnidad").value||"pieza";
- const categoria=document.getElementById("pCategoria").value;
+ const categoria=document.getElementById("pCategoria").value||"General";
  const emoji=document.getElementById("pEmoji").value;
+ const sku=(document.getElementById("pSku").value||"").trim();
+ const costo=parseFloat(document.getElementById("pCosto").value);
+ const stockMin=parseFloat(document.getElementById("pStockMin").value);
+ const foto=fotoProductoActual==="__SIN_FOTO__"?"":(fotoProductoActual||"");
  const pausado=document.getElementById("pEstado").value==="pausado";
  if(!nombre||isNaN(precio)||isNaN(stock))return;
- if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;p.unidad=unidad;fijarStockTotal(p.id,stock);p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;toast("Producto actualizado: "+nombre+" · Stock total "+textoCantidad(p,p.stock));}}
- else{const nid2=Date.now()+uid++;catalogo.push({id:nid2,nombre,precio,stock,emoji,categoria,pausado,unidad});stockAlmacen[nid2]={};const pr2=almacenPrincipal();if(pr2)stockAlmacen[nid2][pr2.id]=stock;sincronizarStock();toast("Producto agregado: "+nombre);}
+ if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;p.unidad=unidad;fijarStockTotal(p.id,stock);p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;p.sku=sku||p.sku||("SKU-"+String(p.id).padStart(3,"0"));p.costo=isNaN(costo)?(p.costo||0):costo;p.stockMin=isNaN(stockMin)?(p.stockMin==null?5:p.stockMin):stockMin;p.foto=foto;toast("Producto actualizado: "+nombre+" · Stock total "+textoCantidad(p,p.stock));}}
+ else{const nid2=Date.now()+uid++;catalogo.push({id:nid2,nombre,precio,stock,emoji,categoria,pausado,unidad,sku:sku||("SKU-"+String(nid2).slice(-3)),costo:isNaN(costo)?Math.round(precio*0.6*100)/100:costo,stockMin:isNaN(stockMin)?5:stockMin,foto:foto});stockAlmacen[nid2]={};const pr2=almacenPrincipal();if(pr2)stockAlmacen[nid2][pr2.id]=stock;sincronizarStock();toast("Producto agregado: "+nombre);}
  if(typeof encolarProductoNube==="function"){const _pid=document.getElementById("pId").value;const _pr=_pid?catalogo.find(function(x){return x.id==_pid}):catalogo[catalogo.length-1];if(_pr)encolarProductoNube(_pr);}
- e.target.reset();document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";
+ e.target.reset();fotoProductoActual="";const _pv=document.getElementById("pFotoPreview");if(_pv){_pv.src="";_pv.style.display="none"}document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";
  guardar();render();renderProductos();
 }
 function editarProducto(id){const p=catalogo.find(x=>x.id===id);if(!p)return;
  document.getElementById("pId").value=p.id;document.getElementById("pNombre").value=p.nombre;
  document.getElementById("pPrecio").value=p.precio;document.getElementById("pStock").value=p.stock;document.getElementById("pUnidad").value=unidadDe(p);
- document.getElementById("pCategoria").value=p.categoria||"General";document.getElementById("pEmoji").value=p.emoji||"📦";
+ document.getElementById("pCategoria").value=p.categoria||"General";document.getElementById("pEmoji").value=p.emoji||"📦";document.getElementById("pSku").value=p.sku||"";document.getElementById("pCosto").value=(p.costo==null?"":p.costo);document.getElementById("pStockMin").value=(p.stockMin==null?5:p.stockMin);fotoProductoActual=p.foto||"";const _pv2=document.getElementById("pFotoPreview");if(_pv2){if(p.foto){_pv2.src=p.foto;_pv2.style.display=""}else{_pv2.src="";_pv2.style.display="none"}}
  document.getElementById("pEstado").value=p.pausado?"pausado":"disponible";
  document.getElementById("tituloFormProd").textContent="✏️ Editando: "+p.nombre;
  document.getElementById("vistaProductos").scrollIntoView({behavior:"smooth"});
 }
-function cancelarEdicion(){document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();}
+function cancelarEdicion(){document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();quitarFotoProducto();}
 function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();if(typeof encolarProductoNube==="function")encolarProductoNube(p);toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
@@ -1731,7 +1797,7 @@ function renderCorteProductos(){
  const elM=document.getElementById("resProdMonto"); if(elM)elM.textContent=dinero(r.totalMonto);
  const elS=document.getElementById("resProdStock"); if(elS)elS.textContent=redondearCant(r.stockRestante);
  const lista=document.getElementById("listaCorteProductos"); if(!lista)return;
- if(!r.filas.length){lista.innerHTML='<tr><td colspan="6" style="text-align:center;color:#555">📦<br><b>Aún no hay productos vendidos hoy</b><br>Vende algo en Ventas y aparecerá aquí.</td></tr>';return}
+ if(!r.filas.length){lista.innerHTML='<tr><td colspan="6"><div class="vacio-accion">📦<b>Aún no hay productos vendidos hoy</b>Vende algo en Ventas y aparecerá aquí.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div></td></tr>';return}
  lista.innerHTML=r.filas.map(f=>'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+textoCantidadU(f.cantidad,f.unidad||"pieza")+'</td><td class="num"><b>'+dinero(f.monto)+'</b></td><td class="num">'+textoCantidadU(f.stockInicial,f.unidad||"pieza")+'</td><td class="num">'+textoCantidadU(f.stockVendido,f.unidad||"pieza")+'</td><td class="num"><b>'+textoCantidadU(f.stockRestante,f.unidad||"pieza")+'</b></td></tr>').join("")+
  '<tr><td><b>Total</b></td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td><td class="num">—</td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+redondearCant(r.stockRestante)+'</b></td></tr>';
 }
@@ -1774,7 +1840,7 @@ function renderHistorial(){
  const elC=document.getElementById("resHistCaja"); if(elC)elC.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.totalCaja||0),0));
  const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
- if(!items.length){lista.innerHTML='<tr><td colspan="10" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de dinero o de productos en Corte diario.</td></tr>';return}
+ if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">🕐<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">📊 Ir a Corte diario</button></div></td></tr>';return}
  lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>'}).join("");
 }
 function realizarCorteDinero(){
@@ -1913,7 +1979,7 @@ function guardarLicenciaLocalDesdeNube(nube){
 }
 function entrarConLicencia(c,lic){
  localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();
- if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SUCURSAL PRINCIPAL · V1.5.0";let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
+ if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent=(lic.vencimiento?"✅ LICENCIA ACTIVA · VENCE "+fechaBonita(lic.vencimiento):"✅ LICENCIA ACTIVA · V1.5.0");let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
  const m=document.getElementById("msgLicencia");m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();
 }
 function validarLicenciaLocal(c){

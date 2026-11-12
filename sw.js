@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v11'; /* v11: Interfaz móvil diferente a PC (menú inferior, venta fija abajo) */
+const CACHE = 'kupo-pos-v12'; /* v12: Tablero en Ventas (solo números, sin gráfica), productos profesionales (foto/SKU/costo/stock mínimo), permisos por cajero, vacíos con acción */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {

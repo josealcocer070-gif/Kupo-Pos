@@ -118,7 +118,7 @@ main .sub{color:#555;margin-bottom:18px}
 /* ===== Interfaz móvil Admin (<=760px), diferente a PC =====
    PC: menú hamburguesa lateral. Móvil: una sola columna,
    tarjetas y botones grandes, menú inferior fijo.
-   Sin gráfica en móvil; solo números simples. */
+   Sin gráfica; el tablero es solo números simples. */
 #menuMovilAdmin{display:none}
 @media(max-width:760px){
  header{padding:8px 10px;gap:8px}
@@ -133,13 +133,18 @@ main .sub{color:#555;margin-bottom:18px}
  .gestion input,.gestion select,.gestion button,.supabase-auth input,.supabase-auth button{width:100%;padding:13px;font-size:16px}
  .tabla-wrap{overflow-x:auto}
  .tabla th,.tabla td{padding:10px;font-size:14px}
- .grafica,.grafico,.tablero-grafica{display:none!important}
  .toast{bottom:84px}
  #menuMovilAdmin{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
  #menuMovilAdmin button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
  #menuMovilAdmin button span{font-size:21px;line-height:1}
  #menuMovilAdmin button.activo{background:rgba(255,255,255,.22)}
 }
+
+/* V1.5.0 · Vacíos con acción, no gris plano */
+.vacio-accion{border:2px dashed #c9d4dc;border-radius:12px;text-align:center;padding:22px 12px;color:#555;background:#f7fafc}
+.vacio-accion b{display:block;color:#0b4a6e;font-size:16px;margin:6px 0}
+.vacio-accion button{margin-top:12px;background:#0b4a6e;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+.vacio-accion button.dorado{background:#f5b301;color:#12233a}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -419,7 +424,7 @@ function renderLicencias(){
  let q=(document.getElementById('buscarLic').value||'').toLowerCase();
  let f=document.getElementById('filtroLic').value;
  let lista=licencias.filter(l=>(f==='todas'||l.estado===f)&&(!q||l.negocio.toLowerCase().includes(q)||l.clave.toLowerCase().includes(q)||(l.giro||'').toLowerCase().includes(q)));
- document.getElementById('listaLicencias').innerHTML=lista.length?lista.map(l=>'<tr><td><b>'+l.negocio+'</b></td><td>'+l.clave+'</td><td>'+l.tipo+'</td><td>'+(l.giro||'Abarrotes')+'</td><td><span class="estado '+(l.estado==='Activa'?'activa':l.estado==='Vencida'?'vencida':'pausada')+'">'+l.estado+'</span></td><td>'+fechaBonita(l.alta)+'</td><td>'+(l.vencimiento?fechaBonita(l.vencimiento):'Sin vencimiento')+'</td><td><button onclick="editarLicencia('+l.id+')">Editar</button> <button onclick="togglePausaLic('+l.id+')">'+(l.estado==='Pausada'?'Activar':'Pausar')+'</button> <button class="peligro" onclick="eliminarLicencia('+l.id+')">Eliminar</button></td></tr>').join(''):'<tr><td colspan="8">Aún no hay licencias con ese filtro.</td></tr>';
+ document.getElementById('listaLicencias').innerHTML=lista.length?lista.map(l=>'<tr><td><b>'+l.negocio+'</b></td><td>'+l.clave+'</td><td>'+l.tipo+'</td><td>'+(l.giro||'Abarrotes')+'</td><td><span class="estado '+(l.estado==='Activa'?'activa':l.estado==='Vencida'?'vencida':'pausada')+'">'+l.estado+'</span></td><td>'+fechaBonita(l.alta)+'</td><td>'+(l.vencimiento?fechaBonita(l.vencimiento):'Sin vencimiento')+'</td><td><button onclick="editarLicencia('+l.id+')">Editar</button> <button onclick="togglePausaLic('+l.id+')">'+(l.estado==='Pausada'?'Activar':'Pausar')+'</button> <button class="peligro" onclick="eliminarLicencia('+l.id+')">Eliminar</button></td></tr>').join(''):'<tr><td colspan="8"><div class="vacio-accion">📋<b>Aún no hay licencias con ese filtro</b>Crea la primera licencia arriba con su negocio, tipo y giro.<br><button type="button" class="dorado" onclick="document.getElementById(\'licNegocio\').focus()">+ Crear mi primera licencia</button></div></td></tr>';
 }
 let editandoLic=null;
 function crearLicencia(){
@@ -438,14 +443,14 @@ function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.es
 function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;let claveBorrada=l.clave;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();eliminarLicenciaNube(claveBorrada);toast('Licencia eliminada');if(!sesionSupabase)toast('Eliminado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.')}
 function renderReservas(){
  renderResumen();
- document.getElementById('listaReservas').innerHTML=!reservas.length?'<tr><td colspan="5" style="text-align:center;color:#666;padding:16px">Aún no hay reservas registradas. Crea una reserva para tener un código KUPO-XXXX-XXXX listo para asignar a un negocio.</td></tr>':reservas.map((r,i)=>'<tr><td><b>'+r.codigo+'</b></td><td><span class="estado '+(r.estado==='Disponible'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+(r.negocio||'Sin negocio')+'</td><td>'+fechaBonita(r.fecha)+'</td><td><button onclick="copiarReserva('+i+')">Copiar</button> <button class="peligro" onclick="eliminarReserva('+i+')">Eliminar</button></td></tr>').join('');
+ document.getElementById('listaReservas').innerHTML=!reservas.length?'<tr><td colspan="5"><div class="vacio-accion">🎫<b>Aún no hay reservas</b>Crea una reserva para tener un código KUPO-XXXX-XXXX listo para asignar a un negocio.<br><button type="button" class="dorado" onclick="crearReserva()">+ Crear mi primera reserva</button></div></td></tr>':reservas.map((r,i)=>'<tr><td><b>'+r.codigo+'</b></td><td><span class="estado '+(r.estado==='Disponible'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+(r.negocio||'Sin negocio')+'</td><td>'+fechaBonita(r.fecha)+'</td><td><button onclick="copiarReserva('+i+')">Copiar</button> <button class="peligro" onclick="eliminarReserva('+i+')">Eliminar</button></td></tr>').join('');
 }
 function crearReserva(){let c=generarClave();reservas.push({codigo:c,estado:'Disponible',negocio:'',fecha:hoyLocal()});guardar();renderReservas();toast('Reserva creada: '+c)}
 function copiarReserva(i){let c=reservas[i].codigo;if(navigator.clipboard)navigator.clipboard.writeText(c);toast('Copiado: '+c)}
 function eliminarReserva(i){if(!confirm('¿Eliminar la reserva '+reservas[i].codigo+'?'))return;reservas.splice(i,1);guardar();renderReservas()}
-function renderTerminales(){ if(!TERMINALES.length){document.getElementById('listaTerminales').innerHTML='<tr><td colspan="5" style="text-align:center;color:#666;padding:16px">Aún no hay terminales registradas. Se registran cuando un negocio activa su licencia y conecta su terminal.</td></tr>';return} document.getElementById('listaTerminales').innerHTML=TERMINALES.map(t=>'<tr><td><b>'+t.nombre+'</b></td><td>'+t.version+'</td><td><span class="estado '+(t.estado==='Actualizada'?'activa':'pendiente')+'">'+t.estado+'</span></td><td>'+t.conexion+'</td><td>'+t.impresora+'</td></tr>').join('');
+function renderTerminales(){ if(!TERMINALES.length){document.getElementById('listaTerminales').innerHTML='<tr><td colspan="5"><div class="vacio-accion">🖨<b>Aún no hay terminales registradas</b>Se registran cuando un negocio activa su licencia y conecta su terminal en KUPO POS.<br><button type="button" onclick="toast(\'En KUPO POS: Personalizar ticket &gt; Configurar terminales térmicas. Ahí se agrega la impresora Epson, Xprinter, Nextep, Bixolon o Qian.\')">🖨 Cómo conectar una terminal</button></div></td></tr>';return} document.getElementById('listaTerminales').innerHTML=TERMINALES.map(t=>'<tr><td><b>'+t.nombre+'</b></td><td>'+t.version+'</td><td><span class="estado '+(t.estado==='Actualizada'?'activa':'pendiente')+'">'+t.estado+'</span></td><td>'+t.conexion+'</td><td>'+t.impresora+'</td></tr>').join('');
 }
-function renderRespaldos(){ if(!RESPALDOS.length){document.getElementById('listaRespaldos').innerHTML='<tr><td colspan="5" style="text-align:center;color:#666;padding:16px">Aún no hay respaldos registrados. Aparecen cuando una terminal haga su primer respaldo.</td></tr>';return} document.getElementById('listaRespaldos').innerHTML=RESPALDOS.map(r=>'<tr><td><b>'+r.terminal+'</b></td><td><span class="estado '+(r.estado==='Activa'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+r.ultimo+'</td><td>'+r.tam+'</td><td>'+r.verificado+'</td></tr>').join('');
+function renderRespaldos(){ if(!RESPALDOS.length){document.getElementById('listaRespaldos').innerHTML='<tr><td colspan="5"><div class="vacio-accion">💾<b>Aún no hay respaldos registrados</b>Aparecen cuando una terminal haga su primer respaldo. El respaldo automático corre a la 01:30 a.m., hora de Campeche.<br><button type="button" onclick="toast(\'Respaldos: 01:30 a.m. hora de Campeche · Retención 14 diarias / 8 semanales / 12 mensuales · Cifrado AES-256-GCM.\')">💾 Ver horario de respaldos</button></div></td></tr>';return} document.getElementById('listaRespaldos').innerHTML=RESPALDOS.map(r=>'<tr><td><b>'+r.terminal+'</b></td><td><span class="estado '+(r.estado==='Activa'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+r.ultimo+'</td><td>'+r.tam+'</td><td>'+r.verificado+'</td></tr>').join('');
 }
 (function(){
  revisarSesionSupabase();
