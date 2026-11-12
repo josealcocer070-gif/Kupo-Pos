@@ -229,6 +229,70 @@ main h1{font-size:34px;margin-bottom:14px}
 .caj-fila-botones button.peligro{color:#b3261e;border-color:#e5b6b3}
 .caj-fila-botones button:hover{background:#eef6fb}
 @media(max-width:760px){.caj-fila-botones button{flex:1 1 40%}}
+
+/* ===== Interfaz móvil (<=760px), diferente a PC =====
+   PC: 3 columnas, menú hamburguesa, ticket a la derecha.
+   Móvil: una sola columna, tarjetas y botones grandes,
+   menú inferior fijo y Venta en curso abajo fijo.
+   Corrección de Lalo: SIN gráfica en móvil; el tablero
+   (si existe en PC) es solo números simples. */
+#menuMovil,#barraVentaMovil{display:none}
+@media(max-width:760px){
+ header{padding:8px 10px;gap:8px}
+ header .avatar{width:40px;height:40px}
+ header .negocio input{width:150px;max-width:48vw;font-size:17px}
+ header .pill{display:none}
+ header .sucursal{font-size:11px}
+ .acciones{display:none!important}
+ main{padding:12px 12px 180px}
+ main h1{font-size:26px}
+ .layout{grid-template-columns:1fr}
+ .buscar{flex-direction:column}
+ .buscar input,.buscar select{width:100%;padding:14px;font-size:16px}
+ .grid{grid-template-columns:1fr;gap:14px}
+ .card .foto{height:170px;font-size:84px}
+ .card h3{font-size:19px}
+ .card .precio{font-size:28px}
+ .card .stock{font-size:15px}
+ .btn-agregar{width:100%;padding:14px;font-size:17px}
+ .cant input{width:72px;padding:8px;font-size:16px}
+ .resumen{grid-template-columns:repeat(2,1fr)}
+ .resumen .tarjeta b{font-size:22px}
+ .gestion form,.form-prod form{flex-direction:column;align-items:stretch}
+ .gestion input,.gestion select,.gestion button,.form-prod input,.form-prod select,.form-prod button{width:100%;padding:13px;font-size:16px}
+ .prod-row{flex-direction:column;align-items:stretch}
+ .prod-row .foto{width:100%;height:90px}
+ .prod-row .acciones-prod{flex-direction:row;width:100%}
+ .prod-row .acciones-prod button{flex:1;padding:12px;font-size:15px}
+ .tabla-wrap{overflow-x:auto}
+ .tabla th,.tabla td{padding:10px;font-size:14px}
+ .ticket-config{grid-template-columns:1fr}
+ .ticket-preview{position:static}
+ .term-row{flex-wrap:wrap}
+ .caj-fila-botones button{flex:1 1 45%;padding:12px;font-size:15px}
+ .teclado button{padding:18px;font-size:22px}
+ .inicio-tarjeta{padding:22px 16px}
+ /* Sin gráfica en móvil: solo números simples */
+ .grafica,.grafico,.tablero-grafica{display:none!important}
+ /* Panel de venta: oculto en móvil; se abre como hoja inferior */
+ .panel{display:none}
+ body.venta-movil-abierta .panel{display:block;position:fixed;left:0;right:0;bottom:136px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
+ .toast{bottom:160px}
+ /* Barra fija de Venta en curso (solo en Ventas, solo móvil) */
+ body.movil-ventas #barraVentaMovil{display:flex}
+ #barraVentaMovil{position:fixed;left:0;right:0;bottom:64px;z-index:50;background:#fff;border-top:2px solid #dfe5ea;box-shadow:0 -4px 16px rgba(0,0,0,.12);align-items:center;gap:10px;padding:10px 12px}
+ #barraVentaMovil .barra-detalle{flex:1;min-width:0;background:#eef6fb;border:1px solid #c9d4dc;border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--azul);cursor:pointer;text-align:left}
+ #barraVentaMovil .barra-detalle small{display:block;font-size:11px;color:#555;font-weight:600}
+ #barraVentaMovil .barra-total{text-align:right}
+ #barraVentaMovil .barra-total small{display:block;font-size:11px;color:#666;font-weight:700;letter-spacing:1px}
+ #barraVentaMovil .barra-total b{font-size:26px;color:var(--dorado2);white-space:nowrap}
+ #barraVentaMovil .barra-cobrar{background:var(--dorado);border:0;border-radius:22px;padding:14px 20px;font-size:18px;font-weight:800;cursor:pointer;white-space:nowrap}
+ /* Menú inferior fijo: 5 accesos */
+ #menuMovil{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
+ #menuMovil button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
+ #menuMovil button span{font-size:21px;line-height:1}
+ #menuMovil button.activo{background:rgba(255,255,255,.22)}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -851,6 +915,18 @@ main h1{font-size:34px;margin-bottom:14px}
 <p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.5.0: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 </section>
 </div>
+<nav id="menuMovil" aria-label="Menú móvil">
+ <button type="button" data-nav="ventas" class="activo" onclick="mostrarVista('ventas')"><span>🧾</span>Ventas</button>
+ <button type="button" data-nav="productos" onclick="mostrarVista('productos')"><span>📦</span>Productos</button>
+ <button type="button" data-nav="cotizaciones" onclick="mostrarVista('cotizaciones')"><span>📋</span>Cotizaciones</button>
+ <button type="button" data-nav="cortes" onclick="mostrarVista('cortes')"><span>📊</span>Corte</button>
+ <button type="button" onclick="toggleMenu()"><span>☰</span>Más</button>
+</nav>
+<div id="barraVentaMovil">
+ <button type="button" class="barra-detalle" onclick="toggleVentaMovil()">🛒 <span id="barraArticulos">0 artículos</span><small>Ver detalle de la venta</small></button>
+ <div class="barra-total"><small>TOTAL</small><b id="barraTotal">$0.00</b></div>
+ <button type="button" class="barra-cobrar" onclick="cobrar()">Cobrar</button>
+</div>
 </div>
 
 <script>
@@ -1421,6 +1497,10 @@ function mostrarVista(v){
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas, Cotizaciones y Reimprimir.");return}
  if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  vistaActual=v;
+ document.body.classList.toggle("movil-ventas",v==="ventas");
+ document.body.classList.remove("venta-movil-abierta");
+ document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.classList.toggle("activo",b.getAttribute("data-nav")===v||(v==="historial"&&b.getAttribute("data-nav")==="cortes"));});
+ actualizarBarraMovil();
  document.getElementById("fondoMenu").classList.remove("visible");
  document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("vistaProductos").classList.toggle("oculto",v!=="productos");
@@ -1451,6 +1531,9 @@ function mostrarVista(v){
  if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
+function toggleVentaMovil(){document.body.classList.toggle("venta-movil-abierta");}
+function actualizarBarraMovil(){var t=document.getElementById("total");var b=document.getElementById("barraTotal");if(t&&b)b.textContent=t.textContent;var a=document.getElementById("nArticulos");var ba=document.getElementById("barraArticulos");if(a&&ba)ba.textContent=a.textContent;}
+(function(){var tot=document.getElementById("total");if(tot&&typeof MutationObserver!=="undefined"){new MutationObserver(actualizarBarraMovil).observe(tot,{childList:true,characterData:true,subtree:true});}actualizarBarraMovil();})();
 function llenarSelectEntradas(){
  const ea=document.getElementById("eAlmacen"); if(ea){const av=ea.value;ea.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}${a.principal?" (Principal)":""}</option>`).join("");if(av)ea.value=av;if(!ea.value&&almacenPrincipal())ea.value=almacenPrincipal().id;}
  const sel=document.getElementById("eProducto"); if(!sel)return;

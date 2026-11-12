@@ -114,6 +114,32 @@ main .sub{color:#555;margin-bottom:18px}
  .resumen{grid-template-columns:repeat(2,1fr)}
  .inicio-tarjeta{padding:22px 16px}
 }
+
+/* ===== Interfaz móvil Admin (<=760px), diferente a PC =====
+   PC: menú hamburguesa lateral. Móvil: una sola columna,
+   tarjetas y botones grandes, menú inferior fijo.
+   Sin gráfica en móvil; solo números simples. */
+#menuMovilAdmin{display:none}
+@media(max-width:760px){
+ header{padding:8px 10px;gap:8px}
+ header .avatar{width:40px;height:40px}
+ header .negocio{font-size:19px}
+ header .pill{display:none}
+ main{padding:12px 12px 92px}
+ main h1{font-size:26px}
+ .resumen{grid-template-columns:repeat(2,1fr)}
+ .resumen .tarjeta b{font-size:22px}
+ .gestion form,.supabase-auth form{flex-direction:column;align-items:stretch}
+ .gestion input,.gestion select,.gestion button,.supabase-auth input,.supabase-auth button{width:100%;padding:13px;font-size:16px}
+ .tabla-wrap{overflow-x:auto}
+ .tabla th,.tabla td{padding:10px;font-size:14px}
+ .grafica,.grafico,.tablero-grafica{display:none!important}
+ .toast{bottom:84px}
+ #menuMovilAdmin{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
+ #menuMovilAdmin button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
+ #menuMovilAdmin button span{font-size:21px;line-height:1}
+ #menuMovilAdmin button.activo{background:rgba(255,255,255,.22)}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -241,6 +267,13 @@ main .sub{color:#555;margin-bottom:18px}
   <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Terminal</th><th>Estado</th><th>Último éxito</th><th>Tamaño</th><th>Verificado</th></tr></thead><tbody id="listaRespaldos"></tbody></table></div>
  </section>
 </main>
+<nav id="menuMovilAdmin" aria-label="Menú móvil Admin">
+ <button type="button" data-nav="licencias" class="activo" onclick="mostrarVista('licencias')"><span>📋</span>Licencias</button>
+ <button type="button" data-nav="reservas" onclick="mostrarVista('reservas')"><span>🔑</span>Reservas</button>
+ <button type="button" data-nav="terminales" onclick="mostrarVista('terminales')"><span>🖥️</span>Terminales</button>
+ <button type="button" data-nav="respaldos" onclick="mostrarVista('respaldos')"><span>💾</span>Respaldos</button>
+ <button type="button" onclick="toggleMenu()"><span>☰</span>Más</button>
+</nav>
 </div>
 
 <script>
@@ -362,6 +395,7 @@ function mostrarVista(v){
   document.getElementById('vista'+x[0].toUpperCase()+x.slice(1)).classList.toggle('oculto',x!==v);
   document.getElementById('nav'+x[0].toUpperCase()+x.slice(1)).classList.toggle('activo',x===v);
  });
+ document.querySelectorAll('#menuMovilAdmin button[data-nav]').forEach(function(b){b.classList.toggle('activo',b.getAttribute('data-nav')===v);});
  if(window.innerWidth<=760){document.getElementById('menuLateral').classList.remove('abierto');document.getElementById('fondoMenu').classList.remove('visible');document.body.classList.remove('menu-abierto');}
  if(v==='licencias')renderLicencias(); if(v==='reservas')renderReservas(); if(v==='terminales')renderTerminales(); if(v==='respaldos')renderRespaldos();
 }
