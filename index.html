@@ -162,7 +162,7 @@ main h1{font-size:34px;margin-bottom:14px}
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
 <button class="acc" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
-<button class="acc" onclick="corteCaja()">💳 Realizar corte de caja</button>
+<button class="acc" onclick="mostrarVista('cortes')">💳 Realizar corte de caja</button>
 <button class="acc" onclick="mostrarVista('productos')">🕐 Gestionar productos</button>
 <button class="acc" onclick="toast('KUPO POS ya está actualizado a la versión V1.4.6.')">🔄 Actualizar de KUPO POS</button>
 <button class="acc" onclick="toast('Instalar KUPO POS: agrega esta página a tu pantalla de inicio desde el menú del navegador.')">🔑 Instalar KUPO POS</button>
@@ -176,8 +176,8 @@ main h1{font-size:34px;margin-bottom:14px}
 <a id="navProductos" onclick="mostrarVista('productos')">📦 Productos</a>
 <a id="navEntradas" onclick="mostrarVista('entradas')">➕ Entradas</a>
 <a id="navGastos" onclick="mostrarVista('gastos')">💲 Gastos</a>
-<a onclick="corteCaja()">📊 Corte diario</a>
-<a onclick="toast('Historial de cortes: se define en el siguiente paso.')">🕐 Historial de cortes</a>
+<a id="navCorte" onclick="mostrarVista('cortes')">📊 Corte diario</a>
+<a id="navHistCortes" onclick="irHistorialCortes()">🕐 Historial de cortes</a>
 </nav>
 <div class="sec">SISTEMA</div>
 <nav>
@@ -309,7 +309,49 @@ main h1{font-size:34px;margin-bottom:14px}
 <thead><tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th class="num">Monto</th><th></th></tr></thead>
 <tbody id="listaGastos"></tbody>
 </table></div>
-<p style="margin-top:10px;font-size:13px;color:#555">Los gastos de hoy se restan en el Corte diario / Caja, que se define en el siguiente paso.</p>
+<p style="margin-top:10px;font-size:13px;color:#555">Los gastos de hoy se restan en el Corte diario / Caja.</p>
+</div>
+
+<div id="vistaCortes" class="oculto">
+<h1>Corte diario</h1>
+<p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · Revisa el día, cuenta el efectivo y realiza el corte para cerrar el turno.</p>
+<div class="resumen">
+<div class="tarjeta"><small>VENTAS DE HOY</small><b id="resCorVentas">$0.00 · 0 ventas</b></div>
+<div class="tarjeta"><small>GASTOS DE HOY (SE RESTAN)</small><b id="resCorGastos">$0.00</b></div>
+<div class="tarjeta"><small>COSTO DE ENTRADAS DE HOY</small><b id="resCorEntradas">$0.00 · 0 pzas</b></div>
+<div class="tarjeta"><small>GANANCIA DEL DÍA</small><b id="resCorGanancia">$0.00</b></div>
+</div>
+<div class="resumen">
+<div class="tarjeta"><small>EFECTIVO</small><b id="resPagoEfectivo">$0.00</b></div>
+<div class="tarjeta"><small>TARJETA</small><b id="resPagoTarjeta">$0.00</b></div>
+<div class="tarjeta"><small>TRANSFERENCIA</small><b id="resPagoTransf">$0.00</b></div>
+<div class="tarjeta"><small>MIXTO</small><b id="resPagoMixto">$0.00</b></div>
+</div>
+<div class="form-prod">
+<h2>💰 Cuadre de caja</h2>
+<form onsubmit="event.preventDefault();realizarCorte();">
+<div><label>Fondo inicial de caja $</label><input id="fondoCaja" type="number" min="0" step="0.01" placeholder="0.00" oninput="guardarFondo()"></div>
+<div><label>Efectivo esperado $</label><input id="resEfectivoEsperado" type="text" value="$0.00" readonly></div>
+<div><label>Efectivo contado $</label><input id="efectivoContado" type="number" min="0" step="0.01" placeholder="0.00" oninput="actualizarCuadre()"></div>
+<div><label>Diferencia $</label><input id="resDiferencia" type="text" value="$0.00" readonly></div>
+</form>
+<p style="margin-top:10px;font-size:13px;color:#555">Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.</p>
+<p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
+<button type="button" onclick="realizarCorte()">💾 Realizar corte de caja / Cerrar turno</button>
+<button type="button" class="secundario" onclick="renderCortes()">Actualizar</button>
+</div>
+<div id="historialCortes">
+<h2 style="margin:18px 0 10px">🕐 Historial de cortes</h2>
+<div class="buscar">
+<input id="buscarCorte" placeholder="🔍 Buscar por folio o fecha..." oninput="renderCortes()">
+<input id="filtroCorteFecha" type="date" onchange="renderCortes()" aria-label="Filtrar por fecha">
+</div>
+<div class="tabla-wrap"><table class="tabla">
+<thead><tr><th>Fecha</th><th>Folio</th><th class="num">Ventas</th><th class="num">Gastos</th><th class="num">Total en caja</th><th class="num">Diferencia</th><th></th></tr></thead>
+<tbody id="listaCortes"></tbody>
+</table></div>
+<div id="detalleCorte" style="margin-top:12px"></div>
+</div>
 </div>
 </main>
 
@@ -359,9 +401,12 @@ let ventas=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"[]");
 let folio=(JSON.parse(localStorage.getItem("kupoPosV146Folio")||"0"))||0;
 let entradas=JSON.parse(localStorage.getItem("kupoPosV146Entradas")||"[]");
 let gastos=JSON.parse(localStorage.getItem("kupoPosV146Gastos")||"[]");
+let cortes=JSON.parse(localStorage.getItem("kupoPosV146Cortes")||"[]");
+let fondoCaja=Number(localStorage.getItem("kupoPosV146Fondo")||"0")||0;
+let corteFolio=(JSON.parse(localStorage.getItem("kupoPosV146CorteFolio")||"0"))||0;
 let pago="Efectivo";
 let uid=100;
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -421,14 +466,17 @@ function mostrarVista(v){vistaActual=v;
  document.getElementById("vistaProductos").classList.toggle("oculto",v!=="productos");
  document.getElementById("vistaEntradas").classList.toggle("oculto",v!=="entradas");
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
+ document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
  document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
+ document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
+ document.getElementById("navHistCortes").classList.toggle("activo",v==="cortes");
  document.querySelector("aside").classList.remove("abierto");
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else render();
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function llenarSelectEntradas(){
@@ -584,12 +632,82 @@ function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.paus
 function toggleGestion(){document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo.");}
 function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}
-function corteCaja(){const hoy=new Date().toDateString();const t=ventas.filter(v=>new Date(v.fecha).toDateString()===hoy).reduce((a,v)=>a+v.total,0);toast("Corte de caja de hoy: "+ventas.filter(v=>new Date(v.fecha).toDateString()===hoy).length+" ventas · Total "+dinero(t)+". El corte completo se define en el siguiente paso.");}
-function cerrarTurno(){if(confirm("¿Cerrar turno? Se limpiará la venta en curso.")){ticket=[];guardar();render();toast("Turno cerrado. ¡Hasta luego!");}}
+function corteCaja(){mostrarVista("cortes");}
+function esHoyVenta(v){return new Date(v.fecha).toDateString()===new Date().toDateString()}
+function resumenCorte(){
+ const hoy=hoyLocal();
+ const vHoy=ventas.filter(esHoyVenta);
+ const gHoy=gastos.filter(g=>g.fecha===hoy);
+ const eHoy=entradas.filter(e=>e.fecha===hoy);
+ const ventasTotal=vHoy.reduce((a,v)=>a+v.total,0);
+ const porPago={Efectivo:0,Tarjeta:0,"Transf.":0,Mixto:0};
+ vHoy.forEach(v=>{if(porPago[v.pago]===undefined)porPago[v.pago]=0;porPago[v.pago]+=v.total});
+ const gastosHoy=gHoy.reduce((a,g)=>a+g.monto,0);
+ const costoEntradas=eHoy.reduce((a,e)=>a+(e.total||0),0);
+ const piezasEntradas=eHoy.reduce((a,e)=>a+(e.cantidad||0),0);
+ const efectivoEsperado=fondoCaja+(porPago.Efectivo||0)-gastosHoy;
+ const totalCaja=fondoCaja+ventasTotal-gastosHoy;
+ const ganancia=ventasTotal-gastosHoy-costoEntradas;
+ return {ventasNum:vHoy.length,ventasTotal,porPago,gastosHoy,costoEntradas,piezasEntradas,efectivoEsperado,totalCaja,ganancia};
+}
+function actualizarCuadre(){
+ const r=resumenCorte();
+ const contado=Number(document.getElementById("efectivoContado").value)||0;
+ const dif=contado-r.efectivoEsperado;
+ const el=document.getElementById("resDiferencia");
+ el.value=dinero(dif);
+ el.style.color=dif===0?"#0a7d4f":(dif<0?"#c0392b":"#b7791f");
+}
+function guardarFondo(){fondoCaja=Number(document.getElementById("fondoCaja").value)||0;guardar();renderCortes();}
+function renderCortes(){
+ const r=resumenCorte();
+ document.getElementById("fechaCorte").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+ document.getElementById("resCorVentas").textContent=dinero(r.ventasTotal)+" · "+r.ventasNum+" ventas";
+ document.getElementById("resCorGastos").textContent=dinero(r.gastosHoy);
+ document.getElementById("resCorEntradas").textContent=dinero(r.costoEntradas)+" · "+r.piezasEntradas+" pzas";
+ document.getElementById("resCorGanancia").textContent=dinero(r.ganancia);
+ document.getElementById("resCorCaja").textContent=dinero(r.totalCaja);
+ document.getElementById("resPagoEfectivo").textContent=dinero(r.porPago.Efectivo||0);
+ document.getElementById("resPagoTarjeta").textContent=dinero(r.porPago.Tarjeta||0);
+ document.getElementById("resPagoTransf").textContent=dinero(r.porPago["Transf."]||0);
+ document.getElementById("resPagoMixto").textContent=dinero(r.porPago.Mixto||0);
+ document.getElementById("resEfectivoEsperado").value=dinero(r.efectivoEsperado);
+ actualizarCuadre();
+ const q=((document.getElementById("buscarCorte")||{}).value||"").toLowerCase();
+ const ff=(document.getElementById("filtroCorteFecha")||{}).value||"";
+ const lista=document.getElementById("listaCortes"); if(!lista)return;
+ const items=cortes.slice().sort((a,b)=>b.id-a.id).filter(c=>(String(c.folio).padStart(4,"0")+" "+c.fecha).toLowerCase().includes(q)).filter(c=>!ff||c.fecha===ff);
+ if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">🕐<br><b>Aún no hay cortes</b><br>Realiza tu primer corte de caja.</td></tr>';return}
+ lista.innerHTML=items.map(c=>'<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+dinero(c.gastos)+'</td><td class="num"><b>'+dinero(c.totalCaja)+'</b></td><td class="num">'+dinero(c.diferencia)+'</td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>').join("");
+}
+function realizarCorte(){
+ const r=resumenCorte();
+ if(!r.ventasNum&&r.gastosHoy===0&&r.piezasEntradas===0){toast("Aún no hay movimientos hoy para cortar.");return}
+ const contado=Number(document.getElementById("efectivoContado").value)||0;
+ corteFolio++;
+ const ahora=new Date();
+ const c={id:Date.now()+uid++,folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoCaja,efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
+ cortes.unshift(c);
+ ticket=[];document.getElementById("efectivoContado").value="";
+ guardar();render();renderCortes();
+ toast("Corte #"+String(c.folio).padStart(4,"0")+" realizado · Total en caja "+dinero(c.totalCaja)+(c.diferencia!==0?" · Diferencia "+dinero(c.diferencia):" · Caja cuadrada ✅"));
+}
+function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
+ document.getElementById("detalleCorte").innerHTML="<b>Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+ "Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (Efectivo "+dinero(c.efectivo)+" · Tarjeta "+dinero(c.tarjeta)+" · Transf. "+dinero(c.transf)+" · Mixto "+dinero(c.mixto)+")<br>"+
+ "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+c.entradasPiezas+" pzas)<br>"+
+ "Ganancia: "+dinero(c.ganancia)+" · Fondo: "+dinero(c.fondo)+" · Efectivo esperado: "+dinero(c.efectivoEsperado)+" · Contado: "+dinero(c.efectivoContado)+" · Diferencia: "+dinero(c.diferencia)+"<br>"+
+ "<b>Total en caja: "+dinero(c.totalCaja)+"</b>";
+ document.getElementById("detalleCorte").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;toast("Corte #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
+function irHistorialCortes(){mostrarVista("cortes");setTimeout(()=>{const el=document.getElementById("historialCortes");if(el)el.scrollIntoView({behavior:"smooth"})},80);}
+function cerrarTurno(){mostrarVista("cortes");toast("Cuenta el efectivo y presiona Realizar corte de caja para cerrar el turno.");}
 document.getElementById("nombreNegocio").addEventListener("input",e=>{document.getElementById("negocioBox").textContent=(e.target.value||"Mi negocio").toUpperCase();localStorage.setItem("kupoPosV146Negocio",e.target.value)});
 const savedNegocio=localStorage.getItem("kupoPosV146Negocio");if(savedNegocio){document.getElementById("nombreNegocio").value=savedNegocio;document.getElementById("negocioBox").textContent=savedNegocio.toUpperCase();}
 document.getElementById("eFecha").value=hoyLocal();
 document.getElementById("gFecha").value=hoyLocal();
+document.getElementById("fondoCaja").value=fondoCaja||"";
 document.getElementById("eProducto").addEventListener("change",mostrarStockActual);
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
