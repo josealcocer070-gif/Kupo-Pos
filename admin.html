@@ -192,6 +192,7 @@ main .sub{color:#555;margin-bottom:18px}
    <form onsubmit="event.preventDefault();crearLicencia()">
     <div><label>Negocio</label><input id="licNegocio" type="text" placeholder="Nombre del negocio" required></div>
     <div><label>Tipo</label><select id="licTipo" onchange="toggleMesesLic()"><option value="Por vida">Por vida</option><option value="Renta">Renta</option></select></div>
+    <div><label>Giro / Tipo de negocio</label><select id="licGiro"><option value="Abarrotes">Abarrotes</option><option value="Pollería">Pollería</option><option value="Farmacia">Farmacia</option><option value="Frutería">Frutería</option><option value="Ferretería">Ferretería</option><option value="Ropa">Ropa</option><option value="Restaurante">Restaurante</option><option value="Papelería">Papelería</option><option value="Otro">Otro</option></select></div>
     <div id="campoMeses" style="display:none"><label>Meses (solo renta)</label><input id="licMeses" type="number" min="1" max="12" value="12"></div>
     <button type="submit" class="dorado">+ Crear licencia</button>
     <button type="button" class="secundario" onclick="cancelarEdicionLic()">Cancelar</button>
@@ -202,7 +203,7 @@ main .sub{color:#555;margin-bottom:18px}
    <input id="buscarLic" type="text" placeholder="🔍 Buscar negocio o clave..." oninput="renderLicencias()" style="flex:1;border:1px solid #c9d4dc;border-radius:24px;padding:12px 18px;font-size:16px">
    <select id="filtroLic" onchange="renderLicencias()" style="border:1px solid #c9d4dc;border-radius:24px;padding:10px 14px;font-size:15px;background:#fff"><option value="todas">Todas</option><option value="Activa">Activas</option><option value="Pausada">Pausadas</option><option value="Vencida">Vencidas</option></select>
   </div>
-  <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Negocio</th><th>Clave</th><th>Tipo</th><th>Estado</th><th>Alta</th><th>Vencimiento</th><th>Acciones</th></tr></thead><tbody id="listaLicencias"></tbody></table></div>
+  <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Negocio</th><th>Clave</th><th>Tipo</th><th>Giro</th><th>Estado</th><th>Alta</th><th>Vencimiento</th><th>Acciones</th></tr></thead><tbody id="listaLicencias"></tbody></table></div>
  </section>
 
  <!-- RESERVAS -->
@@ -310,7 +311,7 @@ async function revisarSesionSupabase(){
  try{let r=await kupoSupabase.auth.getSession();if(r.data&&r.data.session&&r.data.session.user){sesionSupabase=true;correoSesionSupabase=r.data.session.user.email||'';actualizarEstadoSupabase();mostrarAppAdmin();sincronizarTodasLicenciasNube();return;}}catch(e){sesionSupabase=false;}
  actualizarEstadoSupabase();
 }
-function datosLicenciaNube(l){return{clave:l.clave,negocio:l.negocio,tipo:l.tipo,estado:l.estado,fecha_alta:l.alta||null,fecha_vencimiento:l.vencimiento||null};}
+function datosLicenciaNube(l){return{clave:l.clave,negocio:l.negocio,tipo:l.tipo,giro:l.giro||'Abarrotes',estado:l.estado,fecha_alta:l.alta||null,fecha_vencimiento:l.vencimiento||null};}
 async function sincronizarLicenciaNube(l){
  if(!kupoSupabase||!l||!l.clave)return false;
  if(!sesionSupabase){console.log("KUPO Admin: se requiere inicio de sesión Supabase para sincronizar a la nube.");return false;}
@@ -348,7 +349,8 @@ function semilla(){
  let clavesPrueba=['KUPO-7F2A-91BC','KUPO-3D8E-44F1','KUPO-9A1C-77D2'];
  licencias=licencias.filter(l=>clavesPrueba.indexOf(l.clave)===-1);
  reservas=reservas.filter(r=>!(r.fecha==='2026-08-18'&&!r.negocio&&r.estado==='Disponible'));
- if(!localStorage.getItem('kupoAdminPruebaCreada')&&!licencias.some(l=>l.negocio==='Mi negocio - PRUEBA')){licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:'Mi negocio - PRUEBA',clave:'KUPO-MNEG-PRUE',tipo:'Renta',estado:'Pausada',alta:'2026-11-12',vencimiento:'2026-12-12'});localStorage.setItem('kupoAdminPruebaCreada','1');}
+ if(!localStorage.getItem('kupoAdminPruebaCreada')&&!licencias.some(l=>l.negocio==='Mi negocio - PRUEBA')){licencias.push({id:Date.now()+Math.floor(Math.random()*1000),negocio:'Mi negocio - PRUEBA',clave:'KUPO-MNEG-PRUE',tipo:'Renta',giro:'Abarrotes',estado:'Pausada',alta:'2026-11-12',vencimiento:'2026-12-12'});localStorage.setItem('kupoAdminPruebaCreada','1');}
+ licencias.forEach(l=>{if(!l.giro)l.giro='Abarrotes';});
  guardar();
  sincronizarTodasLicenciasNube();
 }
@@ -382,22 +384,22 @@ function renderLicencias(){
  renderResumen();
  let q=(document.getElementById('buscarLic').value||'').toLowerCase();
  let f=document.getElementById('filtroLic').value;
- let lista=licencias.filter(l=>(f==='todas'||l.estado===f)&&(!q||l.negocio.toLowerCase().includes(q)||l.clave.toLowerCase().includes(q)));
- document.getElementById('listaLicencias').innerHTML=lista.length?lista.map(l=>'<tr><td><b>'+l.negocio+'</b></td><td>'+l.clave+'</td><td>'+l.tipo+'</td><td><span class="estado '+(l.estado==='Activa'?'activa':l.estado==='Vencida'?'vencida':'pausada')+'">'+l.estado+'</span></td><td>'+fechaBonita(l.alta)+'</td><td>'+(l.vencimiento?fechaBonita(l.vencimiento):'Sin vencimiento')+'</td><td><button onclick="editarLicencia('+l.id+')">Editar</button> <button onclick="togglePausaLic('+l.id+')">'+(l.estado==='Pausada'?'Activar':'Pausar')+'</button> <button class="peligro" onclick="eliminarLicencia('+l.id+')">Eliminar</button></td></tr>').join(''):'<tr><td colspan="7">Aún no hay licencias con ese filtro.</td></tr>';
+ let lista=licencias.filter(l=>(f==='todas'||l.estado===f)&&(!q||l.negocio.toLowerCase().includes(q)||l.clave.toLowerCase().includes(q)||(l.giro||'').toLowerCase().includes(q)));
+ document.getElementById('listaLicencias').innerHTML=lista.length?lista.map(l=>'<tr><td><b>'+l.negocio+'</b></td><td>'+l.clave+'</td><td>'+l.tipo+'</td><td>'+(l.giro||'Abarrotes')+'</td><td><span class="estado '+(l.estado==='Activa'?'activa':l.estado==='Vencida'?'vencida':'pausada')+'">'+l.estado+'</span></td><td>'+fechaBonita(l.alta)+'</td><td>'+(l.vencimiento?fechaBonita(l.vencimiento):'Sin vencimiento')+'</td><td><button onclick="editarLicencia('+l.id+')">Editar</button> <button onclick="togglePausaLic('+l.id+')">'+(l.estado==='Pausada'?'Activar':'Pausar')+'</button> <button class="peligro" onclick="eliminarLicencia('+l.id+')">Eliminar</button></td></tr>').join(''):'<tr><td colspan="8">Aún no hay licencias con ese filtro.</td></tr>';
 }
 let editandoLic=null;
 function crearLicencia(){
  let neg=document.getElementById('licNegocio').value.trim();if(!neg){toast('Escribe el nombre del negocio');return}
- let tipo=document.getElementById('licTipo').value;let meses=parseInt(document.getElementById('licMeses').value)||12;
+ let tipo=document.getElementById('licTipo').value;let giro=document.getElementById('licGiro').value||'Abarrotes';let meses=parseInt(document.getElementById('licMeses').value)||12;
  let venc='';if(tipo==='Renta'){let d=new Date();d.setMonth(d.getMonth()+meses);venc=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
  let licSinc=null;
- if(editandoLic){let l=licencias.find(x=>x.id===editandoLic);l.negocio=neg;l.tipo=tipo;l.vencimiento=venc;licSinc=l;toast('Licencia actualizada');}
- else{let clave=generarClave();licSinc={id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,estado:'Activa',alta:hoyLocal(),vencimiento:venc};licencias.push(licSinc);toast('Licencia creada: '+clave);}
- editandoLic=null;document.getElementById('licNegocio').value='';guardar();renderLicencias();if(licSinc)sincronizarLicenciaNube(licSinc);if(!sesionSupabase)toast('Guardado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.');
+ if(editandoLic){let l=licencias.find(x=>x.id===editandoLic);l.negocio=neg;l.tipo=tipo;l.giro=giro;l.vencimiento=venc;licSinc=l;toast('Licencia actualizada');}
+ else{let clave=generarClave();licSinc={id:Date.now()+Math.floor(Math.random()*1000),negocio:neg,clave:clave,tipo:tipo,giro:giro,estado:'Activa',alta:hoyLocal(),vencimiento:venc};licencias.push(licSinc);toast('Licencia creada: '+clave);}
+ editandoLic=null;document.getElementById('licNegocio').value='';document.getElementById('licGiro').value='Abarrotes';guardar();renderLicencias();if(licSinc)sincronizarLicenciaNube(licSinc);if(!sesionSupabase)toast('Guardado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.');
 }
 function toggleMesesLic(){document.getElementById('campoMeses').style.display=document.getElementById('licTipo').value==='Renta'?'':'none'}
-function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;toggleMesesLic();window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}
-function cancelarEdicionLic(){editandoLic=null;document.getElementById('licNegocio').value=''}
+function editarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;editandoLic=id;document.getElementById('licNegocio').value=l.negocio;document.getElementById('licTipo').value=l.tipo;document.getElementById('licGiro').value=l.giro||'Abarrotes';toggleMesesLic();window.scrollTo({top:0,behavior:'smooth'});toast('Editando: '+l.negocio)}
+function cancelarEdicionLic(){editandoLic=null;document.getElementById('licNegocio').value='';document.getElementById('licGiro').value='Abarrotes'}
 function togglePausaLic(id){let l=licencias.find(x=>x.id===id);if(!l)return;l.estado=l.estado==='Pausada'?'Activa':'Pausada';guardar();renderLicencias();sincronizarLicenciaNube(l);toast(l.negocio+' ahora está '+l.estado);if(!sesionSupabase)toast('Guardado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.')}
 function eliminarLicencia(id){let l=licencias.find(x=>x.id===id);if(!l)return;if(!confirm('¿Eliminar la licencia de '+l.negocio+' ('+l.clave+')?'))return;let claveBorrada=l.clave;licencias=licencias.filter(x=>x.id!==id);guardar();renderLicencias();eliminarLicenciaNube(claveBorrada);toast('Licencia eliminada');if(!sesionSupabase)toast('Eliminado solo en local: se requiere inicio de sesión Supabase para sincronizar a la nube.')}
 function renderReservas(){
