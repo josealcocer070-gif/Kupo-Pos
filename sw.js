@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v17'; /* v17: Confirmación antes de cobrar (CAMBIO A ENTREGAR en grande, Regresar sin cobrar); ticket ancho 440px, sesión persistente */
+const CACHE = 'kupo-pos-v18'; /* v18: Ticket 60% catálogo / 40% venta en PC; Confirmación antes de cobrar (CAMBIO A ENTREGAR en grande, Regresar sin cobrar); sesión persistente */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {

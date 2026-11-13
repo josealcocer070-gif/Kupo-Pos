@@ -33,7 +33,7 @@ header .user span{display:block;font-size:12px;color:#bcd7e6}
 .acc{border:1px solid #c9d4dc;background:#fff;border-radius:22px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 .acc:hover{background:#eef6fb}
 .acc.cerrar{color:#b3261e;border-color:#e5b6b3}
-.layout{display:grid;grid-template-columns:1fr 440px;gap:0;align-items:start;transition:margin-left .35s ease}
+.layout{display:grid;grid-template-columns:minmax(0,60%) minmax(0,40%);gap:0;align-items:start;transition:margin-left .35s ease}
 aside{background:var(--azul);color:#fff;min-height:calc(100vh - 72px);padding:14px 10px;position:fixed;left:0;top:72px;bottom:0;width:260px;max-width:85vw;z-index:30;overflow-y:auto;transform:translateX(-105%);transition:transform .35s ease;box-shadow:2px 0 16px rgba(0,0,0,.25)}
 aside.abierto{transform:translateX(0)}@media(min-width:761px){body.menu-abierto #layout{margin-left:260px}body.menu-abierto .fondo{display:none}}
 .fondo{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:25;opacity:0;pointer-events:none;transition:opacity .35s ease}
@@ -328,17 +328,17 @@ main h1{font-size:34px;margin-bottom:14px}
 .prod-row .acciones-prod{flex-direction:row;flex-wrap:wrap}
 .prod-row .foto{overflow:hidden}
 header .negocio input{width:420px;max-width:62vw;font-size:19px}
-/* Ticket fijo en escritorio (también en modo escritorio del celular, desde 761px): solo el catálogo se mueve; el panel derecho queda fijo, la lista de la venta hace scroll dentro y TOTAL/Cobrar siempre visibles abajo. En móvil real no se toca la barra inferior ya hecha. */
+/* Ticket 60% catálogo / 40% venta en PC (V1.5.0): horizontal en escritorio, también en modo escritorio del celular, desde 761px): solo el catálogo se mueve; el panel derecho queda fijo, la lista de la venta hace scroll dentro y TOTAL/Cobrar siempre visibles abajo. En móvil real no se toca la barra inferior ya hecha. */
 @media(min-width:761px){
  body.vista-ventas #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
  body.vista-ventas #app header,body.vista-ventas #app .acciones{flex:0 0 auto}
- body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 440px;flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
+ body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%);flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
  body.vista-ventas .layout:not(.sin-panel) main{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
  body.vista-ventas .layout:not(.sin-panel) .panel{position:static;top:auto;min-height:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
  .panel-cuerpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:2px}
  .panel-pie{flex:0 0 auto;background:#fff;border-top:2px solid #dfe5ea;padding-top:10px}
 }
-@media(min-width:761px) and (max-width:1020px){body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 420px}}
+@media(min-width:761px) and (max-width:1020px){body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%)}}
 
 /* Confirmación antes de cobrar (V1.5.0): al tocar Cobrar no se cobra
    directo; se abre esta pantalla para revisar y, si el cliente se
