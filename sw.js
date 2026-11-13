@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v21'; /* v21: confirmación simple, solo cantidad a cobrar en grande, detalle colapsado, pago mixto paso a paso y Confirmar bloqueado hasta completar el total */
+const CACHE = 'kupo-pos-v22'; /* v22: SCAN solo smartphone/tablet, en PC lector de códigos USB/Bluetooth que agrega solo */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {

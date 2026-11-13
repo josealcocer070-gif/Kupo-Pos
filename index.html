@@ -50,7 +50,16 @@ main h1{font-size:34px;margin-bottom:14px}
 .buscar{display:flex;gap:12px;margin-bottom:18px}
 .buscar input{flex:1;border:1px solid #c9d4dc;border-radius:24px;padding:12px 18px;font-size:16px}
 .buscar select{border:1px solid #c9d4dc;border-radius:24px;padding:10px 14px;font-size:15px;background:#fff}
-.btn-scan{flex:0 0 auto;border:2px solid #0b4a6e;background:#0b4a6e;color:#fff;border-radius:24px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap}
+.btn-scan{flex:0 0 auto;border:2px solid #0b4a6e;background:#0b4a6e;color:#fff;border-radius:24px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;display:none}
+/* SCAN solo smartphone/tablet (<=1020px), regla de Lalo: en PC no va el botón
+   SCAN de cámara, va el lector de códigos de barras USB/Bluetooth, que escribe
+   directo en el buscador. En móvil/tablet el SCAN sigue enfocando el buscador
+   para lector de códigos o teclear el código. */
+@media(max-width:1020px){.btn-scan{display:block}}
+/* Ayuda del lector en PC: solo visible en PC (>1020px), oculta en móvil/tablet */
+.ayuda-lector-pc{display:none;margin:-8px 0 18px;font-size:13px;color:#0b4a6e;font-weight:700}
+@media(min-width:1021px){.ayuda-lector-pc{display:block}}
+@media(max-width:1020px){.ayuda-lector-pc{display:none}}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .card{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow:hidden;text-align:center;padding-bottom:14px}
 .card .foto{height:150px;display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(135deg,#fde8d8,#ffe9c2)}
@@ -587,6 +596,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <input id="buscar" placeholder="🔍 Buscar producto o código..." oninput="render()" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarPrimeroBusqueda()}"><button type="button" class="btn-scan" onclick="escanearCodigo()" title="Escanear código de barras">📷 SCAN</button>
 <select id="filtro" onchange="render()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option></select>
 </div>
+<p class="ayuda-lector-pc">⌨️ Lector de códigos USB / Bluetooth: conecta el lector, escanea el producto y se agrega solo a la venta, sin tocar nada. El código del producto va en Productos → Código / SKU.</p>
 <div class="categorias" id="categoriasTabs" role="tablist" aria-label="Categorías de productos"></div>
 <div class="grid" id="grid"></div>
 </div>
@@ -611,7 +621,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <div><label>Stock</label><input id="pStock" type="number" min="0" step="0.01" placeholder="0" required></div>
  <div><label>Unidad de venta</label><select id="pUnidad"><option value="pieza">Pieza</option><option value="kilo">Kilo</option><option value="metro">Metro</option><option value="litro">Litro</option></select></div>
 <div><label>Categoría</label><input id="pCategoria" list="listaCategorias" value="General"><datalist id="listaCategorias"><option value="Panadería"></option><option value="Comida"></option><option value="Bebida"></option><option value="Postres"></option><option value="General"></option></datalist></div>
-<div><label>Código / SKU</label><input id="pSku" placeholder="Ej. SKU-001"></div>
+<div><label>Código / SKU (código de barras)</label><input id="pSku" placeholder="Ej. SKU-001 o código de barras EAN-13"></div>
 <div><label>Costo $</label><input id="pCosto" type="number" min="0" step="0.01" placeholder="0.00"></div>
 <div><label>Stock mínimo (alerta)</label><input id="pStockMin" type="number" min="0" step="0.01" placeholder="5"></div>
 <div><label>Foto real del producto</label><input id="pFotoArchivo" type="file" accept="image/*" onchange="subirFotoProducto(event)"><img id="pFotoPreview" alt="Foto del producto" style="max-width:120px;max-height:90px;display:none;border-radius:10px;margin-top:8px"><button type="button" class="secundario" onclick="quitarFotoProducto()">Quitar foto</button></div>
@@ -1206,7 +1216,13 @@ function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c
 function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
 function elegirCategoria(c){categoriaActual=c;render()}
 function escanearCodigo(){const b=document.getElementById("buscar");if(!b)return;b.focus();b.select();toast("Escanea el código con el lector, o escríbelo y presiona Enter.");}
-function agregarPrimeroBusqueda(){const q=(document.getElementById("buscar").value||"").trim().toLowerCase();if(!q)return;const p=catalogo.find(function(x){return !x.pausado&&x.stock>0&&((x.nombre||"").toLowerCase().includes(q)||(x.sku||"").toLowerCase()===q)})||catalogo.find(function(x){return !x.pausado&&x.stock>0&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
+/* Lector de códigos de barras USB/Bluetooth en PC: el lector actúa como teclado,
+   escribe el código en el buscador y termina con Enter; aquí se agrega solo el
+   producto, sin tocar nada. Prioridad: 1) SKU exacto (= código de barras del
+   producto), 2) nombre exacto, 3) SKU parcial, 4) nombre parcial. */
+function agregarPrimeroBusqueda(){const q=(document.getElementById("buscar").value||"").trim().toLowerCase();if(!q)return;const disp=function(x){return !x.pausado&&x.stock>0};const p=catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase().includes(q)})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
+function redirigirLectorABuscador(e){if(typeof vistaActual!=="undefined"&&vistaActual!=="ventas")return false;if(window.innerWidth<=1020)return false;var tg=e.target||{};if(tg.tagName==="INPUT"||tg.tagName==="SELECT"||tg.tagName==="TEXTAREA"||tg.isContentEditable)return false;var modal=document.getElementById("modalConfirmar");if(modal&&!modal.classList.contains("oculto"))return false;var app=document.getElementById("app");if(!app||app.classList.contains("oculto"))return false;if(!e.key||e.key.length!==1)return false;var b=document.getElementById("buscar");if(!b)return false;b.focus();b.value=(b.value||"")+e.key;try{b.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}if(e.preventDefault)e.preventDefault();return true;}
+if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",redirigirLectorABuscador);
 function render(){
  llenarSelectVentaAlmacen();renderCategorias();
  const q=(document.getElementById("buscar").value||"").toLowerCase();
@@ -1835,6 +1851,7 @@ function mostrarVista(v){
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
  if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else render();
+ if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function toggleVentaMovil(){document.body.classList.toggle("venta-movil-abierta");}
@@ -2325,7 +2342,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=21').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=22').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
