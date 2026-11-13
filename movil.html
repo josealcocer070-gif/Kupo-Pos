@@ -679,6 +679,26 @@ aside nav a{min-height:48px!important}
 .tabla button{min-height:48px!important;display:inline-flex!important;align-items:center!important}
 .card .mini button{min-height:48px!important}
 </style>
+<style id="apartados">
+/* ===== Cada apartado es su propia pantalla (Lalo, 2026-11-13) =====
+   CAUSA: #movil-imagen pone #vistaVentas{display:flex!important}.
+   Un selector con ID (1,0,0) gana a .oculto{display:none!important}
+   (0,1,0), asi que al tocar Productos, Cotizaciones o Corte, Ventas
+   seguia visible arriba y todo quedaba apilado en una sola pagina.
+   Aqui cada vista oculta usa ID+clase (1,1,0), que si gana a ese
+   display:flex. Solo se ve el apartado activo. No toca logica,
+   licencias, login PIN, confirmacion, SCAN, localStorage ni Supabase. */
+#vistaVentas.oculto,#vistaProductos.oculto,#vistaEntradas.oculto,#vistaGastos.oculto,#vistaCortes.oculto,#vistaHistorial.oculto,#vistaTicket.oculto,#vistaCotizaciones.oculto,#vistaAdminLic.oculto,#vistaCajeros.oculto,#vistaMulti.oculto{display:none!important}
+#vistaVentas:not(.oculto){display:flex!important;flex-direction:column!important}
+#panelVenta.oculto,#accionesRapidas.oculto{display:none!important}
+/* Barra TOTAL/Cobrar: solo en Ventas, nunca tapada por el menu inferior.
+   El menu mide 72px + safe-area; la barra queda a 96px + safe-area y
+   con z-index por encima del menu, para que el TOTAL se vea completo. */
+#barraVentaMovil{display:none!important;bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;z-index:65!important}
+body.movil-ventas #barraVentaMovil{display:flex!important}
+body.venta-movil-abierta .panel{bottom:calc(196px + env(safe-area-inset-bottom,0px))!important}
+main{padding-bottom:calc(280px + env(safe-area-inset-bottom,0px))!important}
+</style>
 </head>
 <body>
 
@@ -2109,7 +2129,7 @@ function mostrarVista(v){
  document.getElementById("navMulti").classList.toggle("activo",v==="multi");
  document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
- if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
+ document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");/* Apartados 2026-11-13: el menu lateral se cierra siempre al cambiar de apartado, tambien en modo escritorio del celular/tablet, para que no tape el apartado activo. */
  if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
  window.scrollTo({top:0,behavior:"smooth"});
@@ -2605,7 +2625,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=24').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=25').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });

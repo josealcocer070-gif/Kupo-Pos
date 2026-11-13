@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v24'; /* v24: adaptacion Android/iOS en movil.html (safe-area, svh/dvh, sin zoom iOS) + precache movil.html y manifest-movil.json */
+const CACHE = 'kupo-pos-v25'; /* v25: apartados separados en movil.html (cada vista es su propia pantalla; #vistaVentas.oculto ya oculta Ventas; barra TOTAL a 96px + safe-area) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {
