@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v20'; /* v20: sin Tablero en Ventas, ticket arriba y pago en la confirmación; layout horizontal 60/40 con tope de altura en modo escritorio del celular; NETWORK-FIRST para index.html/admin.html para que ninguna actualización se quede en caché viejo (v17/v18) */
+const CACHE = 'kupo-pos-v21'; /* v21: confirmación simple, solo cantidad a cobrar en grande, detalle colapsado, pago mixto paso a paso y Confirmar bloqueado hasta completar el total */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {

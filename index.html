@@ -420,9 +420,27 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 .conf-regresar{background:#fff;border:2px solid #c9d4dc;color:#12233a}
 .conf-confirmar{background:var(--dorado);border:0;color:#12233a}
 .conf-confirmar:hover{background:var(--dorado2)}
+.conf-total-grande{background:#0b4a6e;border-radius:14px;text-align:center;padding:16px 10px 12px;margin:6px 0 12px}
+.conf-total-grande span{display:block;font-size:14px;font-weight:800;letter-spacing:2px;color:#cfe6f2}
+.conf-total-grande b{display:block;font-size:64px;line-height:1.05;color:#f5c518}
+.conf-total-grande small{display:block;font-size:13px;color:#dbe9f0;margin-top:4px}
+.conf-estado{border-radius:12px;text-align:center;font-weight:800;font-size:16px;padding:10px;margin:10px 0}
+.conf-estado.ok{background:#eafaf1;color:#0f6a4d;border:2px solid #0f6a4d}
+.conf-estado.falta{background:#fdecea;color:#9b1c1c;border:2px solid #e0a3a3}
+.conf-mixto{border:2px solid #0b4a6e;border-radius:14px;padding:12px;margin:12px 0;text-align:left}
+.conf-mixto h3{font-size:17px;color:#0b4a6e;margin-bottom:4px}
+.conf-mixto-ayuda{font-size:13px;color:#555;margin-bottom:4px}
+.conf-mixto label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px}
+.conf-mixto input[type=number]{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:12px;font-size:18px;font-weight:700}
+.conf-mixto-fila{display:flex;justify-content:space-between;font-size:15px;padding:4px 0;font-weight:700}
+.conf-mixto-fila.falta{color:#9b1c1c}
+.conf-detalle{border-top:1px solid #eef2f6;margin-top:12px}
+.conf-detalle summary{cursor:pointer;font-weight:800;color:#0b4a6e;padding:10px 0;font-size:15px}
+.conf-confirmar:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:760px){
  .conf-tarjeta{padding:18px 14px}
  .conf-cambio b{font-size:44px}
+ .conf-total-grande b{font-size:52px}
  .conf-botones{flex-direction:column}
  .conf-botones button{width:100%;padding:16px;font-size:18px}
 }
@@ -1083,8 +1101,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
  <div class="conf-tarjeta">
   <h2 id="confTitulo">✅ Confirmar cobro</h2>
   <p class="conf-sub" id="confCliente">Cliente general</p>
-  <div id="confArticulos" class="conf-articulos"></div>
-  <div id="confTotales"></div>
+  <div class="conf-total-grande"><span>CANTIDAD A COBRAR</span><b id="confTotalGrande">$0.00</b><small id="confResumen"></small></div>
 <div class="conf-pago-titulo">FORMA DE PAGO</div>
 <div class="pagos" id="confPagos">
 <button type="button" class="activo" data-pago="Efectivo" onclick="elegirPago(this)">💵 Efectivo</button>
@@ -1092,18 +1109,33 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <button type="button" data-pago="Transf." onclick="elegirPago(this)">🏦 Transf.</button>
 <button type="button" data-pago="Mixto" onclick="elegirPago(this)">🧾 Mixto</button>
 </div>
-<label class="conf-recibido-label">Efectivo recibido (vacío = importe exacto)</label>
-<input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
-
-  <div class="conf-cambio"><span>CAMBIO A ENTREGAR</span><b id="confCambio">$0.00</b><small id="confCambioNota"></small></div>
+  <div id="confMixto" class="conf-mixto" hidden>
+   <h3>🧾 Pago mixto, paso a paso</h3>
+   <p class="conf-mixto-ayuda">1) Escribe cuánto paga en efectivo. 2) Escribe cuánto paga con tarjeta. 3) Cuando lo cubierto sea igual al total, se libera el cobro.</p>
+   <label for="mixtoEfectivo">1 · 💵 Efectivo</label>
+   <input type="number" id="mixtoEfectivo" min="0" step="0.01" placeholder="$0.00" oninput="actualizarConfirmacionCobro()">
+   <label for="mixtoTarjeta">2 · 💳 Tarjeta</label>
+   <input type="number" id="mixtoTarjeta" min="0" step="0.01" placeholder="$0.00" oninput="actualizarConfirmacionCobro()">
+   <div class="conf-mixto-fila"><span>3 · Total cubierto</span><b id="mixtoCubierto">$0.00</b></div>
+   <div class="conf-mixto-fila falta"><span>Falta por cubrir</span><b id="mixtoFalta">$0.00</b></div>
+   <div class="conf-mixto-fila" id="mixtoCambioFila" hidden><span>Cambio a entregar</span><b id="mixtoCambio">$0.00</b></div>
+  </div>
+  <div id="confEstado" class="conf-estado ok">✅ Total cubierto</div>
+  <details class="conf-detalle" id="confDetalle">
+   <summary>Ver detalle</summary>
+   <div id="confArticulos" class="conf-articulos"></div>
+   <div id="confTotales"></div>
+   <label class="conf-recibido-label">Efectivo recibido (vacío = importe exacto)</label>
+   <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
+   <div class="conf-cambio"><span>CAMBIO A ENTREGAR</span><b id="confCambio">$0.00</b><small id="confCambioNota"></small></div>
+  </details>
   <p class="conf-aviso">Revisa bien antes de cobrar. Si el cliente se arrepiente, toca Regresar: no se cobra nada, no se descuenta stock y no se registra la venta.</p>
   <div class="conf-botones">
    <button type="button" class="conf-regresar" onclick="cancelarConfirmacionCobro()">← Regresar</button>
-   <button type="button" class="conf-confirmar" onclick="confirmarCobro()">✅ Confirmar y cobrar</button>
+   <button type="button" class="conf-confirmar" id="confConfirmar" onclick="confirmarCobro()">✅ Confirmar y cobrar</button>
   </div>
  </div>
 </div>
-
 <script>
 const EJEMPLO=[
  {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"General",unidad:"pieza",sku:"SKU-001",costo:15,stockMin:5,foto:""},
@@ -1226,7 +1258,7 @@ function renderTicket(){
 function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();}
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
-function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll(".pagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();}
+function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll("#confPagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();}
 function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
 /* Confirmación antes de cobrar: tocar Cobrar solo abre la pantalla de
    confirmación. Nada se descuenta ni se registra hasta Confirmar y cobrar.
@@ -1234,14 +1266,17 @@ function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").
 function mostrarConfirmacionCobro(){
  if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
- const rec=parseFloat(document.getElementById("recibido").value)||0;
- if(pago==="Efectivo"&&rec>0&&rec<total){toast("Efectivo insuficiente. Faltan "+dinero(total-rec));return}
+ /* Lalo 2026-11-12 19:41: no bloquear la apertura del modal por efectivo
+    insuficiente: el modal muestra cuánto falta y el botón Confirmar queda
+    bloqueado hasta completar el total. */
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  const sub=total/1.16,iva=total-sub;
  document.getElementById("confCliente").textContent="👤 "+clienteVentaActual+" · 🏬 "+(av?av.nombre:"");
  document.getElementById("confArticulos").innerHTML=ticket.map(function(l){const p=catalogo.find(function(x){return x.id===l.id})||{unidad:"pieza",nombre:"Producto"};return '<div class="conf-linea"><span class="conf-foto">'+fotoHtml(p)+'</span><span class="conf-info"><b class="conf-nombre">'+escHtml(p.nombre||"Producto")+'</b><span class="conf-desc">'+escHtml(p.categoria||"General")+(p.sku?" · "+escHtml(p.sku):"")+" · "+dinero(l.precio)+" / "+UNIDADES_VENTA[unidadDe(p)].corta+'</span><span class="conf-cant">'+textoCantidad(p,l.cant)+'</span></span><span class="conf-importe">'+dinero(l.cant*l.precio)+"</span></div>"}).join("");
  document.querySelectorAll("#confPagos button").forEach(function(x){x.classList.toggle("activo",x.dataset.pago===pago)});
+ var _me=document.getElementById("mixtoEfectivo");if(_me)_me.value="";
+ var _mt=document.getElementById("mixtoTarjeta");if(_mt)_mt.value="";
  document.getElementById("modalConfirmar").classList.add("abierto");
  actualizarConfirmacionCobro();
 }
@@ -1254,25 +1289,52 @@ function actualizarConfirmacionCobro(){
  var total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  var sub=total/1.16,iva=total-sub;
  var rec=parseFloat(document.getElementById("recibido").value)||0;
- var cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
- document.getElementById("confTotales").innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div><div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):dinero(rec>0?rec:0))+'</span></div>';
- document.getElementById("confCambio").textContent=dinero(cambio);
- document.getElementById("confCambioNota").textContent=pago==="Efectivo"?(rec>0?"Recibido "+dinero(rec)+" − Total "+dinero(total):"Importe exacto, sin cambio"):"Sin cambio en "+pago;
+ var ef=parseFloat((document.getElementById("mixtoEfectivo")||{}).value)||0;
+ var tj=parseFloat((document.getElementById("mixtoTarjeta")||{}).value)||0;
+ /* Cubierto y bloqueo (Lalo 2026-11-12 19:41): en CUALQUIER forma de pago,
+    Confirmar queda bloqueado mientras lo cubierto sea menor al total. */
+ var cubierto,cambio=0,ok=true;
+ if(pago==="Mixto"){cubierto=ef+tj;cambio=Math.max(0,cubierto-total);ok=cubierto+0.009>=total;}
+ else if(pago==="Efectivo"){cubierto=rec>0?rec:total;cambio=rec>0?Math.max(0,rec-total):0;ok=cubierto+0.009>=total;}
+ else{cubierto=total;cambio=0;ok=true;}
+ var falta=Math.max(0,total-cubierto);
+ var tg=document.getElementById("confTotalGrande");if(tg)tg.textContent=dinero(total);
+ var rs=document.getElementById("confResumen");if(rs)rs.textContent=ticket.length+" producto"+(ticket.length===1?"":"s")+" · "+clienteVentaActual;
+ var mx=document.getElementById("confMixto");if(mx)mx.hidden=pago!=="Mixto";
+ if(pago==="Mixto"){
+  var mc=document.getElementById("mixtoCubierto");if(mc)mc.textContent=dinero(cubierto);
+  var mf=document.getElementById("mixtoFalta");if(mf)mf.textContent=dinero(falta);
+  var mcf=document.getElementById("mixtoCambioFila");if(mcf)mcf.hidden=cambio<=0;
+  var mcb=document.getElementById("mixtoCambio");if(mcb)mcb.textContent=dinero(cambio);
+ }
+ var est=document.getElementById("confEstado");
+ if(est){est.className="conf-estado "+(ok?"ok":"falta");est.textContent=ok?("✅ Total cubierto"+(cambio>0?" · Cambio "+dinero(cambio):"")):("⚠️ Faltan "+dinero(falta)+" por cubrir — no se puede cobrar todavía");}
+ var btn=document.getElementById("confConfirmar");if(btn)btn.disabled=!ok;
+ /* Detalle colapsado: artículos, Subtotal, IVA, TOTAL, forma de pago, recibido y cambio. */
+ var tot=document.getElementById("confTotales");
+ if(tot)tot.innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div><div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Mixto"?("Efectivo "+dinero(ef)+" + Tarjeta "+dinero(tj)):(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):"—"))+'</span></div>';
+ var cc=document.getElementById("confCambio");if(cc)cc.textContent=dinero(cambio);
+ var cn=document.getElementById("confCambioNota");if(cn)cn.textContent=pago==="Mixto"?(cambio>0?("Cubierto "+dinero(cubierto)+" − Total "+dinero(total)):(falta>0?("Faltan "+dinero(falta)+" por cubrir"):"Cubierto exacto, sin cambio")):(pago==="Efectivo"?(rec>0?("Recibido "+dinero(rec)+" − Total "+dinero(total)):"Importe exacto, sin cambio"):("Sin cambio en "+pago));
 }
 function cancelarConfirmacionCobro(){var m=document.getElementById("modalConfirmar");if(m)m.classList.remove("abierto");}
 function confirmarCobro(){
- cancelarConfirmacionCobro();
  if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  const rec=parseFloat(document.getElementById("recibido").value)||0;
- if(pago==="Efectivo"&&rec>0&&rec<total){toast("Efectivo insuficiente. Faltan "+dinero(total-rec));return}
+ const ef=parseFloat((document.getElementById("mixtoEfectivo")||{}).value)||0;
+ const tj=parseFloat((document.getElementById("mixtoTarjeta")||{}).value)||0;
+ /* Bloqueo (Lalo 2026-11-12 19:41): si no cubre el total, NO se saca la venta.
+    El modal queda abierto para completar el pago. */
+ const cubierto=pago==="Mixto"?ef+tj:(pago==="Efectivo"?(rec>0?rec:total):total);
+ if(cubierto+0.009<total){toast("Faltan "+dinero(total-cubierto)+" por cubrir. Completa el pago para poder cobrar.");return}
+ cancelarConfirmacionCobro();
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
- ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual});
+ ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0});
  const ventaNueva=ventas[ventas.length-1];
- const cambio=pago==="Efectivo"&&rec>0?rec-total:0;
- ticket=[];document.getElementById("recibido").value="";guardar();render();
+ const cambio=pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0);
+ ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";guardar();render();
  if(typeof sincronizarVentaNube==="function")sincronizarVentaNube(ventaNueva);
  toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
 }
@@ -2263,7 +2325,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=20').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=21').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
