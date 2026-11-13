@@ -1373,7 +1373,7 @@ function probarImpresion(){
 /* Interfaz 3.2 · Cajeros y permisos */
 const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
-let sesionActual=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null")||{nombre:"Eduardo Benitez",usuario:"Administrador",rol:"Administrador"};
+let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
 const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
@@ -1384,10 +1384,10 @@ function aplicarPermisosMenu(){
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
  mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
  mostrar("accGasto",esAdmin);mostrar("accCorte",esAdmin);mostrar("accProductos",esAdmin);
- const u=document.getElementById("usuarioActual");if(u)u.textContent=sesionActual.nombre||sesionActual.usuario;
- const r=document.getElementById("rolActual");if(r)r.textContent=sesionActual.rol||"";
- const p=document.getElementById("pieUsuario");if(p)p.textContent=(sesionActual.nombre||sesionActual.usuario)+" · "+(sesionActual.rol||"");
- const m=document.getElementById("miSesion");if(m)m.textContent=(sesionActual.nombre||sesionActual.usuario)+" ("+sesionActual.usuario+" · "+sesionActual.rol+")";
+ const _s=sesionActual||{};const u=document.getElementById("usuarioActual");if(u)u.textContent=_s.nombre||_s.usuario||"";
+ const r=document.getElementById("rolActual");if(r)r.textContent=_s.rol||"";
+ const p=document.getElementById("pieUsuario");if(p)p.textContent=(_s.nombre||_s.usuario||"")+" · "+(_s.rol||"");
+ const m=document.getElementById("miSesion");if(m)m.textContent=(_s.nombre||_s.usuario||"")+" ("+(_s.usuario||"")+" · "+(_s.rol||"")+")";
  aplicarOpcionesSistema();
 }
 function renderCajeros(){
@@ -2060,12 +2060,12 @@ function entrar(){
  if(!c){m.textContent="Usuario no encontrado.";m.className="msg error";limpiarPin();return}
  if(c.estado!=="Activo"){m.textContent="Este cajero está pausado. Pide al Administrador que lo active.";m.className="msg error";limpiarPin();return}
  if(pin!==c.pin){m.textContent="PIN incorrecto. Inténtalo de nuevo.";m.className="msg error";limpiarPin();return}
- sesionActual={nombre:c.nombre,usuario:c.usuario,rol:c.rol};
+ sesionActual={nombre:c.nombre,usuario:c.usuario,rol:c.rol,activa:true,licencia:licenciaActual(),inicio:Date.now()};
  guardarCajeros();
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");
 }
-function salirSesion(){sesionActual={nombre:"Eduardo Benitez",usuario:"Administrador",rol:"Administrador"};guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 document.getElementById("nombreNegocio").addEventListener("input",e=>{document.getElementById("negocioBox").textContent=(e.target.value||"Mi negocio").toUpperCase();localStorage.setItem("kupoPosV146Negocio",e.target.value)});
 const savedNegocio=localStorage.getItem("kupoPosV146Negocio");if(savedNegocio){document.getElementById("nombreNegocio").value=savedNegocio;document.getElementById("negocioBox").textContent=savedNegocio.toUpperCase();}
 document.getElementById("eFecha").value=hoyLocal();
@@ -2075,6 +2075,11 @@ document.getElementById("eProducto").addEventListener("change",mostrarStockActua
 const ea0=document.getElementById("eAlmacen");if(ea0)ea0.addEventListener("change",mostrarStockActual);
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+/* Sesión persistente: solo vale una sesión que se abrió con PIN (activa:true),
+   del cajero que sigue existiendo y Activo, y de la misma licencia. Sin PIN
+   (o tras Cerrar turno, que borra la sesión) se pide PIN de nuevo. */
+function sesionValida(){if(!sesionActual||sesionActual.activa!==true||!sesionActual.usuario||!sesionActual.rol)return false;if(sesionActual.licencia&&sesionActual.licencia!==licenciaActual())return false;const c=cajeros.find(function(x){return x.usuario&&sesionActual.usuario&&x.usuario.toLowerCase()===sesionActual.usuario.toLowerCase()});return !!(c&&c.estado==="Activo");}
+function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");}
 /* Licencia guardada: si hay internet, manda la nube; sin internet, el respaldo local. */
 (async function validarLicenciaGuardada(){
  const licGuardada=localStorage.getItem("kupoPosV146Licencia");
@@ -2084,7 +2089,7 @@ document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-M
  let licOk=false;
  if(nube.disponible){licOk=!!nube.existe&&estadoLicenciaNube(nube.lic)==="Activa";if(licOk)guardarLicenciaLocalDesdeNube(nube.lic);}
  else{let lg=leerLicenciasCompartidas().find(x=>x.clave===licGuardada);licOk=!!lg&&estadoLicencia(lg)==="Activa";}
- if(licOk){document.getElementById("claveLicencia").value=licGuardada;mostrarPasoLogin();}
+ if(licOk){document.getElementById("claveLicencia").value=licGuardada;if(sesionValida()){entrarDirecto();}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;mostrarPasoLogin();}}
  else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}
 })();
 const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
