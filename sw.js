@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v22'; /* v22: SCAN solo smartphone/tablet, en PC lector de códigos USB/Bluetooth que agrega solo */
+const CACHE = 'kupo-pos-v23'; /* v23: nombre del negocio no borrable en el encabezado (ya no es input) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {
