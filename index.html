@@ -378,6 +378,17 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
   body.vista-ventas .layout:not(.sin-panel) .panel-pie p{margin-top:6px}
 }
 
+/* Lalo 2026-11-12 19:31: sin Tablero en Ventas; líneas del ticket arriba y
+   pago en la confirmación. El encabezado ARTÍCULOS queda fijo arriba del
+   panel-cuerpo y los datos (cliente/negocio/almacén) van en un desplegable. */
+.ticket-encabezado{position:sticky;top:0;background:#fff;z-index:2;display:flex;justify-content:space-between;font-weight:800;font-size:13px;padding:6px 0;border-bottom:1px solid #eef2f6}
+.datos-venta{margin-top:12px;border-top:1px solid #eef2f6;padding-top:8px}
+.datos-venta summary{cursor:pointer;font-weight:800;font-size:13px;color:#0b4a6e;padding:6px 0}
+.conf-pago-titulo{font-weight:800;margin:14px 0 8px;font-size:13px;letter-spacing:.5px}
+.conf-tarjeta .pagos{margin-bottom:4px}
+.conf-recibido-label{display:block;font-size:13px;margin:12px 0 4px;font-weight:700}
+.conf-tarjeta input[type=number]{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:16px}
+
 /* Confirmación antes de cobrar (V1.5.0): al tocar Cobrar no se cobra
    directo; se abre esta pantalla para revisar y, si el cliente se
    arrepiente, Regresar sin cobrar, sin descontar stock ni registrar venta. */
@@ -540,13 +551,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <main>
 <div id="vistaVentas">
 <h1>Menú</h1>
-<p style="font-size:13px;color:#555;margin:4px 0 8px">📊 Tablero del día: solo para ver rápido cuánto vendiste hoy, sin complicar.</p>
-<div class="resumen tablero" id="tableroVentas">
-<div class="tarjeta"><small>VENTAS DE HOY</small><b id="tabVentasHoy">$0.00</b></div>
-<div class="tarjeta"><small>TICKETS DE HOY</small><b id="tabTicketsHoy">0</b></div>
-<div class="tarjeta"><small>TOTAL EN CAJA HOY</small><b id="tabCajaHoy">$0.00</b></div>
-<div class="tarjeta"><small>PRODUCTO MÁS VENDIDO HOY</small><b id="tabTopProducto" style="font-size:16px">Sin ventas hoy</b></div>
-</div>
+<!-- Tablero del día quitado de Ventas por Lalo (2026-11-12 19:31). El resumen de ventas sigue en Corte diario. -->
 <div class="gestion oculto" id="gestion">
 <h2>Gestionar productos</h2>
 <form onsubmit="agregarProducto(event)">
@@ -1032,6 +1037,10 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <p class="sub" id="subCliente">Folio se asigna al cobrar · Cliente general</p>
 <p class="fecha">📅 <span id="fecha"></span></p>
 <p class="caja-estado" id="cajaEstado" style="font-size:13px;font-weight:700;color:#0f6a4d;margin:8px 0 0">🟢 Caja abierta</p>
+<!-- Lalo 2026-11-12 19:31: las líneas del ticket van ARRIBA. Antes quedaban debajo de cliente/negocio/almacén (~300px) y en horizontal corto no se veían sin bajar. -->
+<div class="ticket-encabezado"><span>ARTÍCULOS DE ESTA VENTA</span><span>Importe</span></div>
+<div id="ticket" style="margin-top:10px"></div>
+<details class="datos-venta"><summary>👤 Cliente, negocio y almacén</summary>
 <label style="font-size:13px;font-weight:800">👤 Cliente</label>
 <input type="text" id="clienteVenta" value="Cliente general" aria-label="Cliente de la venta" oninput="guardarClienteVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
 <div class="negocio-box">
@@ -1042,8 +1051,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <label style="font-size:13px;font-weight:800">🏬 Almacén para vender</label>
 <select id="ventaAlmacenSel" onchange="cambiarAlmacenVenta(this.value)" style="width:100%;margin:4px 0 2px"></select>
 <p style="font-size:12px;color:#666;margin:0 0 6px">El stock se descuenta de este almacén al cobrar.</p>
-<div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>ARTÍCULOS DE ESTA VENTA</span><span>Importe</span></div>
-<div id="ticket" style="margin-top:10px"></div>
+</details>
 </div>
 <div class="panel-pie">
 <div class="totales">
@@ -1051,16 +1059,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <div class="row"><span>IVA (16%)</span><span id="iva">$0.00</span></div>
 <div class="row total"><span>TOTAL</span><b id="total">$0.00</b></div>
 </div>
-<div class="pago-titulo">FORMA DE PAGO</div>
-<div class="pagos">
-<button class="activo" data-pago="Efectivo" onclick="elegirPago(this)">💵 Efectivo</button>
-<button data-pago="Tarjeta" onclick="elegirPago(this)">💳 Tarjeta</button>
-<button data-pago="Transf." onclick="elegirPago(this)">🏦 Transf.</button>
-<button data-pago="Mixto" onclick="elegirPago(this)">🧾 Mixto</button>
-</div>
-<label>Efectivo recibido (vacío = importe exacto)</label>
-<input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
-<div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
+<!-- Lalo 2026-11-12 19:31: en el panel solo queda Cobrar. Forma de pago, efectivo recibido y cambio se escogen en la pantalla de confirmación. -->
 <button class="btn-cobrar" onclick="mostrarConfirmacionCobro()">Cobrar venta</button>
 <p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.5.0: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 </div>
@@ -1086,6 +1085,16 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
   <p class="conf-sub" id="confCliente">Cliente general</p>
   <div id="confArticulos" class="conf-articulos"></div>
   <div id="confTotales"></div>
+<div class="conf-pago-titulo">FORMA DE PAGO</div>
+<div class="pagos" id="confPagos">
+<button type="button" class="activo" data-pago="Efectivo" onclick="elegirPago(this)">💵 Efectivo</button>
+<button type="button" data-pago="Tarjeta" onclick="elegirPago(this)">💳 Tarjeta</button>
+<button type="button" data-pago="Transf." onclick="elegirPago(this)">🏦 Transf.</button>
+<button type="button" data-pago="Mixto" onclick="elegirPago(this)">🧾 Mixto</button>
+</div>
+<label class="conf-recibido-label">Efectivo recibido (vacío = importe exacto)</label>
+<input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
+
   <div class="conf-cambio"><span>CAMBIO A ENTREGAR</span><b id="confCambio">$0.00</b><small id="confCambioNota"></small></div>
   <p class="conf-aviso">Revisa bien antes de cobrar. Si el cliente se arrepiente, toca Regresar: no se cobra nada, no se descuenta stock y no se registra la venta.</p>
   <div class="conf-botones">
@@ -1211,7 +1220,8 @@ function renderTicket(){
  document.getElementById("total").textContent=dinero(total);
  const rec=parseFloat(document.getElementById("recibido").value)||0;
  const cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
- document.getElementById("cambio").textContent=dinero(cambio);
+ const cambioEl=document.getElementById("cambio");if(cambioEl)cambioEl.textContent=dinero(cambio);
+ if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();
 }
 function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();}
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
@@ -1229,13 +1239,25 @@ function mostrarConfirmacionCobro(){
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  const sub=total/1.16,iva=total-sub;
- const cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
  document.getElementById("confCliente").textContent="👤 "+clienteVentaActual+" · 🏬 "+(av?av.nombre:"");
  document.getElementById("confArticulos").innerHTML=ticket.map(function(l){const p=catalogo.find(function(x){return x.id===l.id})||{unidad:"pieza",nombre:"Producto"};return '<div class="conf-linea"><span class="conf-foto">'+fotoHtml(p)+'</span><span class="conf-info"><b class="conf-nombre">'+escHtml(p.nombre||"Producto")+'</b><span class="conf-desc">'+escHtml(p.categoria||"General")+(p.sku?" · "+escHtml(p.sku):"")+" · "+dinero(l.precio)+" / "+UNIDADES_VENTA[unidadDe(p)].corta+'</span><span class="conf-cant">'+textoCantidad(p,l.cant)+'</span></span><span class="conf-importe">'+dinero(l.cant*l.precio)+"</span></div>"}).join("");
+ document.querySelectorAll("#confPagos button").forEach(function(x){x.classList.toggle("activo",x.dataset.pago===pago)});
+ document.getElementById("modalConfirmar").classList.add("abierto");
+ actualizarConfirmacionCobro();
+}
+/* Pago dentro de la confirmación (Lalo 2026-11-12 19:31): al cambiar la
+   forma de pago o el efectivo recibido dentro del modal, se recalculan
+   Subtotal/IVA/TOTAL y el CAMBIO A ENTREGAR en grande, sin cerrar el modal. */
+function actualizarConfirmacionCobro(){
+ var m=document.getElementById("modalConfirmar");
+ if(!m||!m.classList.contains("abierto")||!ticket.length)return;
+ var total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
+ var sub=total/1.16,iva=total-sub;
+ var rec=parseFloat(document.getElementById("recibido").value)||0;
+ var cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
  document.getElementById("confTotales").innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div><div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):dinero(rec>0?rec:0))+'</span></div>';
  document.getElementById("confCambio").textContent=dinero(cambio);
  document.getElementById("confCambioNota").textContent=pago==="Efectivo"?(rec>0?"Recibido "+dinero(rec)+" − Total "+dinero(total):"Importe exacto, sin cambio"):"Sin cambio en "+pago;
- document.getElementById("modalConfirmar").classList.add("abierto");
 }
 function cancelarConfirmacionCobro(){var m=document.getElementById("modalConfirmar");if(m)m.classList.remove("abierto");}
 function confirmarCobro(){
@@ -2241,7 +2263,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=19').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=20').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
