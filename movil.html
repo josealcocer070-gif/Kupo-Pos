@@ -611,6 +611,20 @@ body.venta-movil-abierta .panel{bottom:180px!important}
 #modalConfirmar #recibido{width:100%!important;border:1px solid #c9d4dc!important;border-radius:10px!important;padding:12px!important;font-size:18px!important;font-weight:700!important}
 #modalConfirmar .conf-cambio b{font-size:56px!important}
 .gestion button,.form-prod button,.prod-row .acciones-prod button,.caj-fila-botones button,.conf-tarjeta .pagos button{min-height:48px!important}
+ /* Cámara para escanear códigos de barras (Lalo, 2026-11-12): solo movil.html */
+.modal-scan{display:none;position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.75);align-items:flex-start;justify-content:center;padding:16px 12px;overflow-y:auto}
+.modal-scan.abierto{display:flex}
+.scan-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.4);margin:auto 0}
+.scan-tarjeta h2{font-size:22px;color:#0b4a6e;margin-bottom:6px}
+.scan-tarjeta p{color:#444;font-size:15px;margin-bottom:12px}
+.scan-marco{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:4/3;margin-bottom:10px}
+.scan-marco video{width:100%;height:100%;object-fit:cover;display:block}
+.scan-linea{position:absolute;left:8%;right:8%;top:50%;height:3px;background:#f5b800;border-radius:3px;box-shadow:0 0 12px #f5b800}
+.scan-estado{font-weight:700;color:#0b4a6e}
+.scan-manual label{display:block;font-weight:800;font-size:14px;color:#0b4a6e;margin:10px 0 6px}
+.scan-manual input{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:12px;font-size:18px;font-weight:700}
+.scan-manual button{width:100%;min-height:52px;margin-top:10px;border:0;border-radius:12px;background:#0b4a6e;color:#fff;font-size:17px;font-weight:800}
+.scan-cerrar{width:100%;min-height:52px;margin-top:10px;border:2px solid #0b4a6e;border-radius:12px;background:#fff;color:#0b4a6e;font-size:17px;font-weight:800}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1308,6 +1322,24 @@ body.venta-movil-abierta .panel{bottom:180px!important}
   </div>
  </div>
 </div>
+ <!-- Cámara para escanear códigos de barras (Lalo, 2026-11-12): se abre solo al
+      tocar SCAN en movil.html. Cámara trasera en vivo; al detectar el código
+      agrega el producto por su SKU/código y cierra la cámara. Sin cámara o sin
+      soporte, se escribe el código a mano abajo. -->
+ <div id="modalScan" class="modal-scan" role="dialog" aria-modal="true" aria-labelledby="scanTitulo" onclick="if(event.target===this)cerrarScan()">
+  <div class="scan-tarjeta">
+   <h2 id="scanTitulo">📷 Escanear código de barras</h2>
+   <p>Apunta la cámara trasera al código de barras del producto.</p>
+   <div class="scan-marco"><video id="scanVideo" playsinline muted autoplay></video><div class="scan-linea"></div></div>
+   <p class="scan-estado" id="scanEstado">Abriendo cámara…</p>
+   <div class="scan-manual">
+    <label for="scanManual">O escribe el código a mano</label>
+    <input id="scanManual" inputmode="numeric" autocomplete="off" placeholder="Ej. 7501234567890 o SKU-001" onkeydown="if(event.key==='Enter'){event.preventDefault();escanearCodigoManual()}">
+    <button type="button" onclick="escanearCodigoManual()">Agregar por código</button>
+   </div>
+   <button type="button" class="scan-cerrar" onclick="cerrarScan()">✕ Cerrar cámara</button>
+  </div>
+ </div>
 <script>
 const EJEMPLO=[
  {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"General",unidad:"pieza",sku:"SKU-001",costo:15,stockMin:5,foto:""},
@@ -1377,14 +1409,26 @@ let categoriaActual="todas";
 function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c=p.categoria||"General";if(seen.indexOf(c)===-1)seen.push(c)});return seen}
 function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
 function elegirCategoria(c){categoriaActual=c;render()}
-function escanearCodigo(){const b=document.getElementById("buscar");if(!b)return;b.focus();b.select();toast("Escanea el código con el lector, o escríbelo y presiona Enter.");}
+/* Cámara para escanear códigos de barras (Lalo, 2026-11-12, solo movil.html):
+   al tocar SCAN se pide permiso de cámara y se abre la cámara trasera en vivo.
+   Se usa BarcodeDetector nativo (sin librerías externas, para que funcione sin
+   internet); si el navegador no lo soporta o no hay cámara, queda el campo
+   manual de abajo. Al detectar el código se agrega el producto por su SKU y
+   se cierra la cámara. */
+let scanStream=null,scanTimer=0,scanDetector=null,scanActivo=false,scanUltimo="",scanUltimoTiempo=0;
+function agregarPorCodigo(codigo){const q=String(codigo==null?"":codigo).trim().toLowerCase();if(!q)return false;const disp=function(x){return !x.pausado&&x.stock>0};const p=catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase().includes(q)})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return false}agregar(p.id);const b=document.getElementById("buscar");if(b)b.value="";render();return true}
+async function escanearCodigo(){const m=document.getElementById("modalScan");const v=document.getElementById("scanVideo");const e=document.getElementById("scanEstado");if(!m||!v||!e)return;if(scanActivo)return;m.classList.add("abierto");scanActivo=true;scanUltimo="";scanUltimoTiempo=0;e.textContent="Abriendo cámara…";const manual=document.getElementById("scanManual");if(manual)manual.value="";if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){e.textContent="Este celular o navegador no permite abrir la cámara aquí. Escribe el código abajo y toca Agregar por código.";return}try{scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});v.srcObject=scanStream;try{await v.play()}catch(_){}}catch(err){scanActivo=false;e.textContent="No se pudo abrir la cámara (permiso denegado o cámara ocupada). Escribe el código abajo y toca Agregar por código.";toast("No se pudo abrir la cámara. Escribe el código a mano.");return}if(typeof window!=="undefined"&&"BarcodeDetector" in window){try{let formatos=["ean_13","ean_8","code_128","code_39","upc_a","upc_e","qr_code"];if(window.BarcodeDetector.getSupportedFormats){try{const sop=await window.BarcodeDetector.getSupportedFormats();if(sop&&sop.length)formatos=formatos.filter(function(f){return sop.indexOf(f)!==-1});}catch(_){}}scanDetector=new window.BarcodeDetector({formats:formatos});e.textContent="Apunta al código de barras…";}catch(_){scanDetector=null;e.textContent="Tu navegador no detecta códigos con la cámara en este celular. Escribe el código abajo y toca Agregar por código.";}}else{scanDetector=null;e.textContent="Tu navegador no detecta códigos con la cámara en este celular. Escribe el código abajo y toca Agregar por código.";}if(scanDetector)detectarCodigoCamara();}
+async function detectarCodigoCamara(){if(!scanActivo||!scanDetector)return;const v=document.getElementById("scanVideo");const e=document.getElementById("scanEstado");try{const res=await scanDetector.detect(v);if(res&&res.length){const codigo=String(res[0].rawValue||"").trim();const ahora=Date.now();if(codigo&&!(codigo===scanUltimo&&ahora-scanUltimoTiempo<2000)){scanUltimo=codigo;scanUltimoTiempo=ahora;if(agregarPorCodigo(codigo)){toast("Producto agregado: "+codigo);cerrarScan();return}if(e)e.textContent="Código "+codigo+" sin producto. Apunta a otro código o escríbelo abajo.";}}}catch(_){}if(scanActivo)scanTimer=setTimeout(detectarCodigoCamara,200);}
+function escanearCodigoManual(){const inp=document.getElementById("scanManual");const codigo=inp?inp.value:"";if(!codigo||!String(codigo).trim()){if(inp)inp.focus();return}if(agregarPorCodigo(codigo))cerrarScan();}
+function cerrarScan(){scanActivo=false;if(scanTimer){clearTimeout(scanTimer);scanTimer=0}if(scanStream){try{scanStream.getTracks().forEach(function(tr){tr.stop()})}catch(_){}scanStream=null}const v=document.getElementById("scanVideo");if(v){try{v.pause()}catch(_){}v.srcObject=null}const m=document.getElementById("modalScan");if(m)m.classList.remove("abierto");}
 /* Lector de códigos de barras USB/Bluetooth en PC: el lector actúa como teclado,
    escribe el código en el buscador y termina con Enter; aquí se agrega solo el
    producto, sin tocar nada. Prioridad: 1) SKU exacto (= código de barras del
    producto), 2) nombre exacto, 3) SKU parcial, 4) nombre parcial. */
-function agregarPrimeroBusqueda(){const q=(document.getElementById("buscar").value||"").trim().toLowerCase();if(!q)return;const disp=function(x){return !x.pausado&&x.stock>0};const p=catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase().includes(q)})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
+function agregarPrimeroBusqueda(){const b=document.getElementById("buscar");if(!b)return;const q=(b.value||"").trim();if(!q)return;if(agregarPorCodigo(q)){b.value="";render();try{b.focus()}catch(_){}}}
 function redirigirLectorABuscador(e){if(typeof vistaActual!=="undefined"&&vistaActual!=="ventas")return false;if(window.innerWidth<=1020)return false;var tg=e.target||{};if(tg.tagName==="INPUT"||tg.tagName==="SELECT"||tg.tagName==="TEXTAREA"||tg.isContentEditable)return false;var modal=document.getElementById("modalConfirmar");if(modal&&!modal.classList.contains("oculto"))return false;var app=document.getElementById("app");if(!app||app.classList.contains("oculto"))return false;if(!e.key||e.key.length!==1)return false;var b=document.getElementById("buscar");if(!b)return false;b.focus();b.value=(b.value||"")+e.key;try{b.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}if(e.preventDefault)e.preventDefault();return true;}
 if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",redirigirLectorABuscador);
+if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("visibilitychange",function(){if(document.hidden&&scanActivo)cerrarScan();});
 function render(){
  llenarSelectVentaAlmacen();renderCategorias();
  const q=(document.getElementById("buscar").value||"").toLowerCase();
