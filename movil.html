@@ -535,43 +535,80 @@ body.movil-ventas #barraVentaMovil{display:flex!important}
 </style>
 
 
-<style id="movil-ideal">
-/* ===== Interfaz móvil ideal (Lalo, 2026-11-12, según imagen) =====
-   Solo anulaciones CSS al final, sobre #movil-separado. No toca lógica,
-   licencias, login PIN, confirmación, localStorage ni Supabase.
-   Una columna, buscador grande con SCAN, pestañas, tarjetas grandes,
-   barra de venta fija con TOTAL dorado y Cobrar amarillo, menú inferior
-   fijo con 5 accesos, azul oscuro / blanco / dorado, botones >=48px. */
-.buscar{gap:10px!important}
-.buscar input,.buscar select{min-height:56px!important;padding:16px 14px!important;font-size:17px!important;border-radius:14px}
-.btn-scan{min-height:56px!important;padding:14px!important;font-size:17px!important;border-radius:14px}
-.categorias{gap:10px!important;padding-bottom:14px!important}
-.categorias button{min-height:48px!important;padding:12px 18px!important;font-size:15px!important}
-.grid{gap:16px!important}
-.card{border-radius:16px;overflow:hidden}
-.card .foto{height:180px!important;font-size:88px}
-.card h3{font-size:20px!important}
-.card .precio{font-size:30px!important}
-.card .stock{font-size:15px}
-.btn-agregar{min-height:52px!important;padding:15px!important;font-size:18px!important;border-radius:14px}
-.cant button{min-height:48px!important;min-width:48px!important}
-.cant input{min-height:48px!important}
-main{padding-bottom:200px!important}
-#barraVentaMovil{padding:12px!important;gap:12px}
-#barraVentaMovil .barra-detalle{min-height:52px}
-#barraVentaMovil .barra-total b{font-size:30px!important}
-#barraVentaMovil .barra-cobrar{min-height:52px!important;padding:14px 22px!important;font-size:19px!important}
-#menuMovil{height:68px!important}
-#menuMovil button{min-height:68px;font-size:12px}
-#menuMovil button span{font-size:22px!important}
-body.venta-movil-abierta .panel{bottom:148px}
-.toast{bottom:170px}
-.gestion button,.form-prod button,.prod-row .acciones-prod button,.caj-fila-botones button,.conf-botones button,.pagos button,.inicio .btn-inicio,.btn-cobrar{min-height:48px!important}
-.conf-botones button{min-height:52px!important}
-.panel .btn-cobrar{min-height:56px!important}
-.teclado button{min-height:56px}
+<style id="movil-imagen">
+/* ===== Interfaz móvil igual a la imagen generada (Lalo, 2026-11-12) =====
+   Referencia: workspace/imagine_media/media-generation-kupo-pos-interfaz-movil-ideal-0-70f15a99-e0c4-41d5-9bf1-0e7b3005c9ad.webp
+   Solo anulaciones CSS, sobre #movil-separado. No toca lógica, licencias,
+   login PIN, confirmación, localStorage ni Supabase. Reemplaza el bloque
+   #movil-ideal anterior. NO es la captura de Yanay Frappé.
+   Azul oscuro #0b2a5e / #0a2456, blanco y dorado #f5b800. */
+body{background:#e9edf3!important}
+main{padding:0 14px 240px!important}
+/* Encabezado: tarjeta azul oscuro con logo KUPO en grande, sin hamburguesa,
+   sin nombre de usuario ni "Conectado" (la imagen solo trae campana y perfil) */
+header{background:#0b2a5e!important;margin:12px 12px 0!important;border-radius:20px!important;padding:16px 18px!important;position:sticky!important;top:12px!important;box-shadow:0 6px 18px rgba(11,42,94,.25)}
+header .menu-btn{display:none!important}
+header .avatar{width:48px!important;height:48px!important;border-radius:12px!important;background:#f5b800!important;padding:3px!important}
+header .negocio b{font-size:0!important;line-height:1}
+header .negocio b::after{content:"KUPO";font-size:34px!important;font-weight:800!important;color:#fff!important;letter-spacing:1px}
+header .sucursal{display:none!important}
+header .user{display:none!important}
+header .pill{display:none!important}
+header::after{content:"🔔  👤";font-size:24px!important;line-height:1;white-space:nowrap}
+/* Ventas en columna: buscador, categorías, título, parrilla (en ese orden) */
+#vistaVentas{display:flex!important;flex-direction:column!important}
+#vistaVentas .buscar{order:1}
+#vistaVentas .categorias{order:2}
+#vistaVentas>h1{order:3}
+#vistaVentas .grid{order:4}
+/* Título de sección como en la imagen: "Productos destacados" + "Ver todo ›" */
+#vistaVentas>h1{font-size:0!important;display:flex!important;justify-content:space-between!important;align-items:baseline!important;margin:4px 2px 14px!important}
+#vistaVentas>h1::before{content:"Productos destacados";font-size:23px!important;font-weight:800!important;color:#0a2456!important}
+#vistaVentas>h1::after{content:"Ver todo ›";font-size:16px!important;font-weight:700!important;color:#d99a00!important}
+/* Buscador dentro de tarjeta azul oscuro: input blanco + SCAN amarillo */
+#vistaVentas .buscar{flex-direction:row!important;gap:10px!important;background:#0b2a5e!important;border-radius:20px!important;padding:14px!important;margin:0 0 14px!important;align-items:stretch!important}
+#vistaVentas .buscar input{flex:1 1 auto!important;min-width:0!important;min-height:56px!important;border:0!important;border-radius:14px!important;padding:14px 16px!important;font-size:17px!important;background:#fff!important}
+#vistaVentas .buscar select{display:none!important}
+#vistaVentas .btn-scan{flex:0 0 88px!important;width:88px!important;min-height:56px!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:14px!important;font-size:15px!important;font-weight:800!important;padding:8px 4px!important;text-align:center!important;white-space:normal!important;line-height:1.25!important}
+/* Pestañas de categoría: blanca con borde azul; activa amarilla como "Todos" */
+.categorias{flex-wrap:nowrap!important;gap:10px!important;padding:2px 2px 12px!important;margin-bottom:6px!important}
+.categorias button{border:2px solid #0b2a5e!important;background:#fff!important;color:#0b2a5e!important;border-radius:24px!important;padding:10px 18px!important;font-size:15px!important;min-height:48px!important;box-shadow:none!important}
+.categorias button.activo{background:#f5b800!important;color:#0a2456!important;border-color:#f5b800!important}
+.categorias button small{display:none!important}
+/* Parrilla de 2 columnas como en la imagen: foto grande en blanco, nombre
+   azul a la izquierda, precio dorado a la izquierda, botón + amarillo */
+#vistaVentas .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+#vistaVentas .card{border-radius:18px!important;box-shadow:0 4px 14px rgba(10,36,86,.10)!important;text-align:left!important;padding-bottom:64px!important;position:relative!important}
+#vistaVentas .card .foto{height:150px!important;background:#fff!important;font-size:64px!important;border-radius:18px 18px 0 0!important}
+#vistaVentas .card .foto img{object-fit:contain!important;background:#fff!important}
+#vistaVentas .card h3{font-size:17px!important;line-height:1.25!important;color:#0a2456!important;text-align:left!important;margin:12px 14px 6px!important;min-height:44px!important}
+#vistaVentas .card .precio{font-size:22px!important;color:#e0a100!important;text-align:left!important;margin:0 14px!important;font-weight:800!important}
+#vistaVentas .card .stock{display:none!important}
+#vistaVentas .card .mini{display:none!important}
+#vistaVentas .btn-agregar{position:absolute!important;right:14px!important;bottom:14px!important;width:56px!important;min-width:56px!important;height:48px!important;min-height:48px!important;background:#f5b800!important;color:#0a2456!important;border-radius:12px!important;font-size:0!important;padding:0!important}
+#vistaVentas .btn-agregar::after{content:"+";font-size:32px!important;font-weight:800!important;line-height:1}
+#vistaVentas .btn-agregar:disabled{background:#d7dde3!important;color:#8a94a0!important}
+/* Barra de venta: tarjeta azul oscuro, TOTAL dorado grande y Cobrar amarillo */
+#barraVentaMovil{left:12px!important;right:12px!important;bottom:84px!important;background:#0b2a5e!important;border:0!important;border-radius:20px!important;padding:14px 16px!important;gap:14px!important;box-shadow:0 8px 22px rgba(11,42,94,.35)!important}
+#barraVentaMovil .barra-detalle{flex:0 0 48px!important;width:48px!important;min-height:48px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:50%!important;font-size:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#barraVentaMovil .barra-detalle::after{content:"🛒";font-size:22px!important}
+#barraVentaMovil .barra-detalle span,#barraVentaMovil .barra-detalle small{display:none!important}
+#barraVentaMovil .barra-total{flex:1!important;text-align:left!important}
+#barraVentaMovil .barra-total small{color:#f5b800!important;font-size:13px!important;letter-spacing:1px!important}
+#barraVentaMovil .barra-total b{font-size:34px!important;color:#f5b800!important}
+#barraVentaMovil .barra-cobrar{flex:0 0 auto!important;background:#f5b800!important;color:#0a2456!important;border-radius:14px!important;min-height:56px!important;padding:14px 20px!important;font-size:0!important;font-weight:800!important}
+#barraVentaMovil .barra-cobrar::before{content:"🛍️ Cobrar venta";font-size:19px!important;font-weight:800!important;color:#0a2456!important}
+body.venta-movil-abierta .panel{bottom:180px!important}
+/* Menú inferior: azul noche, pestaña activa en dorado */
+#menuMovil{height:72px!important;background:#0a2456!important}
+#menuMovil button{color:#fff!important;font-size:11px!important}
+#menuMovil button span{font-size:24px!important}
+#menuMovil button.activo{background:transparent!important;color:#f5b800!important}
+/* Se conserva lo útil del bloque anterior: botones grandes y confirmación */
+.teclado button{min-height:56px!important}
 .conf-total-grande b{font-size:56px!important}
-.conf-tarjeta .pagos button{min-height:48px!important}
+.conf-botones button{min-height:52px!important}
+.gestion button,.form-prod button,.prod-row .acciones-prod button,.caj-fila-botones button,.conf-tarjeta .pagos button{min-height:48px!important}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
