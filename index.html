@@ -339,6 +339,44 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
  .panel-pie{flex:0 0 auto;background:#fff;border-top:2px solid #dfe5ea;padding-top:10px}
 }
 @media(min-width:761px) and (max-width:1020px){body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 420px}}
+
+/* Confirmación antes de cobrar (V1.5.0): al tocar Cobrar no se cobra
+   directo; se abre esta pantalla para revisar y, si el cliente se
+   arrepiente, Regresar sin cobrar, sin descontar stock ni registrar venta. */
+.modal-confirmar{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);align-items:flex-start;justify-content:center;padding:18px 12px;overflow-y:auto}
+.modal-confirmar.abierto{display:flex}
+.conf-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.35);margin:auto 0}
+.conf-tarjeta h2{font-size:24px;color:var(--azul);margin-bottom:4px}
+.conf-sub{color:#555;font-size:15px;font-weight:700;margin-bottom:12px}
+.conf-articulos{border-top:1px solid #eef2f6;border-bottom:1px solid #eef2f6;max-height:280px;overflow-y:auto;margin-bottom:12px}
+.conf-linea{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #f2f4f7}
+.conf-linea:first-child{border-top:0}
+.conf-foto{flex:0 0 56px;width:56px;height:56px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#fde8d8,#ffe9c2);display:flex;align-items:center;justify-content:center;font-size:30px}
+.conf-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.conf-info{flex:1 1 auto;min-width:0}
+.conf-nombre{display:block;font-size:15px;font-weight:800;line-height:1.25}
+.conf-desc{display:block;font-size:12px;color:#666;margin:2px 0;line-height:1.35}
+.conf-cant{font-size:13px;font-weight:700;color:#0b4a6e}
+.conf-importe{flex:0 0 auto;font-weight:800;font-size:15px;white-space:nowrap}
+.conf-fila{display:flex;justify-content:space-between;font-size:15px;padding:4px 0}
+.conf-fila.total{font-size:20px;font-weight:800;color:var(--azul);border-top:2px solid #dfe5ea;margin-top:6px;padding-top:10px}
+.conf-fila.total b{color:#b8860b}
+.conf-cambio{background:#eafaf1;border:2px solid #0f6a4d;border-radius:14px;text-align:center;padding:14px 10px;margin:14px 0 6px}
+.conf-cambio span{display:block;font-size:15px;font-weight:800;letter-spacing:1px;color:#0f6a4d}
+.conf-cambio b{display:block;font-size:52px;line-height:1.1;color:#0f6a4d}
+.conf-cambio small{display:block;font-size:12px;color:#555;margin-top:4px}
+.conf-aviso{font-size:13px;color:#666;text-align:center;margin:8px 0 14px}
+.conf-botones{display:flex;gap:12px}
+.conf-botones button{flex:1;border-radius:26px;padding:18px 12px;font-size:19px;font-weight:800;cursor:pointer}
+.conf-regresar{background:#fff;border:2px solid #c9d4dc;color:#12233a}
+.conf-confirmar{background:var(--dorado);border:0;color:#12233a}
+.conf-confirmar:hover{background:var(--dorado2)}
+@media(max-width:760px){
+ .conf-tarjeta{padding:18px 14px}
+ .conf-cambio b{font-size:44px}
+ .conf-botones{flex-direction:column}
+ .conf-botones button{width:100%;padding:16px;font-size:18px}
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -985,7 +1023,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <label>Efectivo recibido (vacío = importe exacto)</label>
 <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
 <div class="cambio"><span>CAMBIO A ENTREGAR</span><b id="cambio">$0.00</b></div>
-<button class="btn-cobrar" onclick="cobrar()">Cobrar venta</button>
+<button class="btn-cobrar" onclick="mostrarConfirmacionCobro()">Cobrar venta</button>
 <p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.5.0: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 </div>
 </section>
@@ -1000,8 +1038,23 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <div id="barraVentaMovil">
  <button type="button" class="barra-detalle" onclick="toggleVentaMovil()">🛒 <span id="barraArticulos">0 artículos</span><small>Ver detalle de la venta</small></button>
  <div class="barra-total"><small>TOTAL</small><b id="barraTotal">$0.00</b></div>
- <button type="button" class="barra-cobrar" onclick="cobrar()">Cobrar</button>
+ <button type="button" class="barra-cobrar" onclick="mostrarConfirmacionCobro()">Cobrar</button>
 </div>
+</div>
+
+<div id="modalConfirmar" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="confTitulo" onclick="if(event.target===this)cancelarConfirmacionCobro()">
+ <div class="conf-tarjeta">
+  <h2 id="confTitulo">✅ Confirmar cobro</h2>
+  <p class="conf-sub" id="confCliente">Cliente general</p>
+  <div id="confArticulos" class="conf-articulos"></div>
+  <div id="confTotales"></div>
+  <div class="conf-cambio"><span>CAMBIO A ENTREGAR</span><b id="confCambio">$0.00</b><small id="confCambioNota"></small></div>
+  <p class="conf-aviso">Revisa bien antes de cobrar. Si el cliente se arrepiente, toca Regresar: no se cobra nada, no se descuenta stock y no se registra la venta.</p>
+  <div class="conf-botones">
+   <button type="button" class="conf-regresar" onclick="cancelarConfirmacionCobro()">← Regresar</button>
+   <button type="button" class="conf-confirmar" onclick="confirmarCobro()">✅ Confirmar y cobrar</button>
+  </div>
+ </div>
 </div>
 
 <script>
@@ -1127,7 +1180,28 @@ function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll(".pagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();}
 function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
-function cobrar(){
+/* Confirmación antes de cobrar: tocar Cobrar solo abre la pantalla de
+   confirmación. Nada se descuenta ni se registra hasta Confirmar y cobrar.
+   Regresar / Cancelar cierra sin tocar el ticket, el stock ni las ventas. */
+function mostrarConfirmacionCobro(){
+ if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
+ const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
+ const rec=parseFloat(document.getElementById("recibido").value)||0;
+ if(pago==="Efectivo"&&rec>0&&rec<total){toast("Efectivo insuficiente. Faltan "+dinero(total-rec));return}
+ const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
+ for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
+ const sub=total/1.16,iva=total-sub;
+ const cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
+ document.getElementById("confCliente").textContent="👤 "+clienteVentaActual+" · 🏬 "+(av?av.nombre:"");
+ document.getElementById("confArticulos").innerHTML=ticket.map(function(l){const p=catalogo.find(function(x){return x.id===l.id})||{unidad:"pieza",nombre:"Producto"};return '<div class="conf-linea"><span class="conf-foto">'+fotoHtml(p)+'</span><span class="conf-info"><b class="conf-nombre">'+escHtml(p.nombre||"Producto")+'</b><span class="conf-desc">'+escHtml(p.categoria||"General")+(p.sku?" · "+escHtml(p.sku):"")+" · "+dinero(l.precio)+" / "+UNIDADES_VENTA[unidadDe(p)].corta+'</span><span class="conf-cant">'+textoCantidad(p,l.cant)+'</span></span><span class="conf-importe">'+dinero(l.cant*l.precio)+"</span></div>"}).join("");
+ document.getElementById("confTotales").innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div><div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):dinero(rec>0?rec:0))+'</span></div>';
+ document.getElementById("confCambio").textContent=dinero(cambio);
+ document.getElementById("confCambioNota").textContent=pago==="Efectivo"?(rec>0?"Recibido "+dinero(rec)+" − Total "+dinero(total):"Importe exacto, sin cambio"):"Sin cambio en "+pago;
+ document.getElementById("modalConfirmar").classList.add("abierto");
+}
+function cancelarConfirmacionCobro(){var m=document.getElementById("modalConfirmar");if(m)m.classList.remove("abierto");}
+function confirmarCobro(){
+ cancelarConfirmacionCobro();
  if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  const rec=parseFloat(document.getElementById("recibido").value)||0;
