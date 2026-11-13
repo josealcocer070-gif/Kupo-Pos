@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v15'; /* v15: Sesión del cajero persiste al recargar (sin pedir PIN de nuevo); Cerrar turno sí pide PIN */
+const CACHE = 'kupo-pos-v16'; /* v16: Ticket ancho (440px) con foto y descripción por línea, buscador SCAN, cliente y caja abierta (estilo ORBI POS PRO, en azul KUPO V1.5.0); sesión del cajero persiste al recargar */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {

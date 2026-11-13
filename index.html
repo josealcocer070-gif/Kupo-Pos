@@ -33,7 +33,7 @@ header .user span{display:block;font-size:12px;color:#bcd7e6}
 .acc{border:1px solid #c9d4dc;background:#fff;border-radius:22px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
 .acc:hover{background:#eef6fb}
 .acc.cerrar{color:#b3261e;border-color:#e5b6b3}
-.layout{display:grid;grid-template-columns:1fr 350px;gap:0;align-items:start;transition:margin-left .35s ease}
+.layout{display:grid;grid-template-columns:1fr 440px;gap:0;align-items:start;transition:margin-left .35s ease}
 aside{background:var(--azul);color:#fff;min-height:calc(100vh - 72px);padding:14px 10px;position:fixed;left:0;top:72px;bottom:0;width:260px;max-width:85vw;z-index:30;overflow-y:auto;transform:translateX(-105%);transition:transform .35s ease;box-shadow:2px 0 16px rgba(0,0,0,.25)}
 aside.abierto{transform:translateX(0)}@media(min-width:761px){body.menu-abierto #layout{margin-left:260px}body.menu-abierto .fondo{display:none}}
 .fondo{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:25;opacity:0;pointer-events:none;transition:opacity .35s ease}
@@ -50,6 +50,7 @@ main h1{font-size:34px;margin-bottom:14px}
 .buscar{display:flex;gap:12px;margin-bottom:18px}
 .buscar input{flex:1;border:1px solid #c9d4dc;border-radius:24px;padding:12px 18px;font-size:16px}
 .buscar select{border:1px solid #c9d4dc;border-radius:24px;padding:10px 14px;font-size:15px;background:#fff}
+.btn-scan{flex:0 0 auto;border:2px solid #0b4a6e;background:#0b4a6e;color:#fff;border-radius:24px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .card{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);overflow:hidden;text-align:center;padding-bottom:14px}
 .card .foto{height:150px;display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(135deg,#fde8d8,#ffe9c2)}
@@ -86,10 +87,19 @@ main h1{font-size:34px;margin-bottom:14px}
 .ticket-vacio{border:2px dashed #c9d4dc;border-radius:12px;text-align:center;padding:22px 10px;color:#555;background:#f7fafc}
 .linea{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
 .linea .cant button{border:1px solid #c9d4dc;background:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;font-weight:800}
+/* Ticket ancho: cada línea lleva foto del producto, nombre, descripción (categoría · SKU · precio por unidad), cantidad e importe */
+.linea-ticket{align-items:flex-start;gap:10px;padding:12px 0}
+.linea-ticket .ticket-foto{flex:0 0 56px;width:56px;height:56px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#fde8d8,#ffe9c2);display:flex;align-items:center;justify-content:center;font-size:30px}
+.linea-ticket .ticket-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.linea-ticket .ticket-info{flex:1 1 auto;min-width:0}
+.linea-ticket .ticket-nombre{display:block;font-size:15px;line-height:1.25}
+.linea-ticket .ticket-desc{display:block;font-size:12px;color:#666;margin:2px 0 6px;line-height:1.35}
+.linea-ticket .ticket-importe{flex:0 0 auto;font-weight:800;font-size:15px;white-space:nowrap}
+.linea-ticket .cant{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .totales{margin-top:14px}
 .totales .row{display:flex;justify-content:space-between;padding:5px 0;font-size:15px}
 .totales .total{font-size:26px;font-weight:800}
-.totales .total b{color:var(--dorado2);font-size:34px}
+.totales .total b{color:var(--dorado2);font-size:38px}
 .pago-titulo{font-weight:800;margin:14px 0 8px;font-size:13px;letter-spacing:.5px}
 .pagos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pagos button{border:1px solid #c9d4dc;background:#fff;border-radius:10px;padding:10px;font-size:15px;font-weight:700;cursor:pointer}
@@ -262,6 +272,7 @@ main h1{font-size:34px;margin-bottom:14px}
  .layout{grid-template-columns:1fr}
  .buscar{flex-direction:column}
  .buscar input,.buscar select{width:100%;padding:14px;font-size:16px}
+ .buscar .btn-scan{width:100%;padding:14px;font-size:16px}
  .grid{grid-template-columns:1fr;gap:14px}
  .card .foto{height:170px;font-size:84px}
  .card h3{font-size:19px}
@@ -321,12 +332,13 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 @media(min-width:761px){
  body.vista-ventas #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
  body.vista-ventas #app header,body.vista-ventas #app .acciones{flex:0 0 auto}
- body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 350px;flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
+ body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 440px;flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
  body.vista-ventas .layout:not(.sin-panel) main{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
  body.vista-ventas .layout:not(.sin-panel) .panel{position:static;top:auto;min-height:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
  .panel-cuerpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:2px}
  .panel-pie{flex:0 0 auto;background:#fff;border-top:2px solid #dfe5ea;padding-top:10px}
 }
+@media(min-width:761px) and (max-width:1020px){body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,1fr) 420px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -473,7 +485,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <p style="margin-top:8px;font-size:13px;color:#555">Los productos de ejemplo se pueden editar o eliminar. Toca ✏️ o 🗑 en cada tarjeta.</p>
 </div>
 <div class="buscar">
-<input id="buscar" placeholder="🔍 Buscar producto..." oninput="render()">
+<input id="buscar" placeholder="🔍 Buscar producto o código..." oninput="render()" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarPrimeroBusqueda()}"><button type="button" class="btn-scan" onclick="escanearCodigo()" title="Escanear código de barras">📷 SCAN</button>
 <select id="filtro" onchange="render()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option></select>
 </div>
 <div class="categorias" id="categoriasTabs" role="tablist" aria-label="Categorías de productos"></div>
@@ -941,8 +953,11 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <section class="panel" id="panelVenta">
 <div class="panel-cuerpo">
 <h2>🛒 Venta en curso <span class="badge" id="nArticulos">0 artículos</span></h2>
-<p class="sub">Folio se asigna al cobrar · Cliente general</p>
+<p class="sub" id="subCliente">Folio se asigna al cobrar · Cliente general</p>
 <p class="fecha">📅 <span id="fecha"></span></p>
+<p class="caja-estado" id="cajaEstado" style="font-size:13px;font-weight:700;color:#0f6a4d;margin:8px 0 0">🟢 Caja abierta</p>
+<label style="font-size:13px;font-weight:800">👤 Cliente</label>
+<input type="text" id="clienteVenta" value="Cliente general" aria-label="Cliente de la venta" oninput="guardarClienteVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
 <div class="negocio-box">
 <b id="negocioBox">MI NEGOCIO</b><br>
 <input id="direccionNegocio" value="Palizada, Campeche" aria-label="Dirección del negocio"><br>
@@ -951,7 +966,7 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 <label style="font-size:13px;font-weight:800">🏬 Almacén para vender</label>
 <select id="ventaAlmacenSel" onchange="cambiarAlmacenVenta(this.value)" style="width:100%;margin:4px 0 2px"></select>
 <p style="font-size:12px;color:#666;margin:0 0 6px">El stock se descuenta de este almacén al cobrar.</p>
-<div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>ARTÍCULOS DE ESTA VENTA</span><span>Cantidad · Importe</span></div>
+<div style="display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>ARTÍCULOS DE ESTA VENTA</span><span>Importe</span></div>
 <div id="ticket" style="margin-top:10px"></div>
 </div>
 <div class="panel-pie">
@@ -1000,6 +1015,7 @@ const EJEMPLO=[
 ];
 let catalogo=JSON.parse(localStorage.getItem("kupoPosV146Catalogo")||"null")||JSON.parse(JSON.stringify(EJEMPLO));
 let ticket=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"[]");
+let clienteVentaActual=localStorage.getItem("kupoPosV146ClienteVenta")||"Cliente general";
 let ventas=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"[]");
 let folio=(JSON.parse(localStorage.getItem("kupoPosV146Folio")||"0"))||0;
 let entradas=JSON.parse(localStorage.getItem("kupoPosV146Entradas")||"[]");
@@ -1057,12 +1073,14 @@ let categoriaActual="todas";
 function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c=p.categoria||"General";if(seen.indexOf(c)===-1)seen.push(c)});return seen}
 function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
 function elegirCategoria(c){categoriaActual=c;render()}
+function escanearCodigo(){const b=document.getElementById("buscar");if(!b)return;b.focus();b.select();toast("Escanea el código con el lector, o escríbelo y presiona Enter.");}
+function agregarPrimeroBusqueda(){const q=(document.getElementById("buscar").value||"").trim().toLowerCase();if(!q)return;const p=catalogo.find(function(x){return !x.pausado&&x.stock>0&&((x.nombre||"").toLowerCase().includes(q)||(x.sku||"").toLowerCase()===q)})||catalogo.find(function(x){return !x.pausado&&x.stock>0&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
 function render(){
  llenarSelectVentaAlmacen();renderCategorias();
  const q=(document.getElementById("buscar").value||"").toLowerCase();
  const f=document.getElementById("filtro").value;
  const grid=document.getElementById("grid");grid.innerHTML="";
- catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>categoriaActual==="todas"||(p.categoria||"General")===categoriaActual).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
+ catalogo.filter(p=>p.nombre.toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q)).filter(p=>categoriaActual==="todas"||(p.categoria||"General")===categoriaActual).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
   const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
@@ -1090,8 +1108,11 @@ function renderTicket(){
  const box=document.getElementById("ticket");
  const n=ticket.length;
  document.getElementById("nArticulos").textContent=n+" producto"+(n===1?"":"s");
+ const ci=document.getElementById("clienteVenta");if(ci&&ci.value!==clienteVentaActual)ci.value=clienteVentaActual;
+ const sc=document.getElementById("subCliente");if(sc)sc.textContent="Folio se asigna al cobrar · "+clienteVentaActual;
+ const ce=document.getElementById("cajaEstado");if(ce)ce.textContent="🟢 Caja abierta · Fondo "+dinero(fondoCaja||0);
  if(!ticket.length){box.innerHTML=`<div class="ticket-vacio">🛒<br><b>Aún no hay productos</b><br>Toca un producto para agregarlo.</div>`;}
- else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id)||{unidad:"pieza",nombre:"Producto"};const paso=pasoUnidad(p);return `<div class="linea"><span>${p?p.nombre:"Producto"}<br><span class="cant"><button onclick="cambiarCant(${l.id},-${paso})">−</button> <input type="number" min="${esDecimalUnidad(p)?"0.01":"1"}" step="${esDecimalUnidad(p)?"0.01":"1"}" value="${fmtCant(l.cant,unidadDe(p))}" onchange="fijarCant(${l.id},this.value)" aria-label="Cantidad"> <span>${etiquetaUnidad(p,l.cant)}</span> <button onclick="cambiarCant(${l.id},${paso})">+</button></span></span><span>${dinero(l.cant*l.precio)}</span></div>`}).join("")}
+ else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id)||{unidad:"pieza",nombre:"Producto"};const paso=pasoUnidad(p);return `<div class="linea linea-ticket"><span class="ticket-foto">${fotoHtml(p)}</span><span class="ticket-info"><b class="ticket-nombre">${escHtml(p.nombre||"Producto")}</b><span class="ticket-desc">${escHtml(p.categoria||"General")}${p.sku?" · "+escHtml(p.sku):""} · ${dinero(l.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</span><span class="cant"><button onclick="cambiarCant(${l.id},-${paso})">−</button> <input type="number" min="${esDecimalUnidad(p)?"0.01":"1"}" step="${esDecimalUnidad(p)?"0.01":"1"}" value="${fmtCant(l.cant,unidadDe(p))}" onchange="fijarCant(${l.id},this.value)" aria-label="Cantidad"> <span>${etiquetaUnidad(p,l.cant)}</span> <button onclick="cambiarCant(${l.id},${paso})">+</button></span></span><span class="ticket-importe">${dinero(l.cant*l.precio)}</span></div>`}).join("")}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  const sub=total/1.16, iva=total-sub;
  document.getElementById("subtotal").textContent=dinero(sub);
@@ -1105,6 +1126,7 @@ function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta()
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll(".pagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();}
+function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
 function cobrar(){
  if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
@@ -1113,7 +1135,7 @@ function cobrar(){
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
- ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre});
+ ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual});
  const ventaNueva=ventas[ventas.length-1];
  const cambio=pago==="Efectivo"&&rec>0?rec-total:0;
  ticket=[];document.getElementById("recibido").value="";guardar();render();
