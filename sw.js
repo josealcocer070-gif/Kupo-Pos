@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v18'; /* v18: Ticket 60% catálogo / 40% venta en PC; Confirmación antes de cobrar (CAMBIO A ENTREGAR en grande, Regresar sin cobrar); sesión persistente */
+const CACHE = 'kupo-pos-v19'; /* v19: layout horizontal 60/40 con tope de altura en modo escritorio del celular; NETWORK-FIRST para index.html/admin.html para que ninguna actualización se quede en caché viejo (v17/v18) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json'];
 
 self.addEventListener('install', (event) => {
@@ -16,8 +16,28 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function isHtml(request) {
+  const url = new URL(request.url);
+  return request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/' || url.pathname.endsWith('/');
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  // NETWORK-FIRST para el HTML: siempre intenta la versión nueva; si no hay
+  // internet, cae al caché. Así una actualización nunca se queda atorada en v17/v18.
+  if (isHtml(event.request)) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response && response.ok && new URL(event.request.url).origin === self.location.origin) {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      }).catch(() => caches.match(event.request, { ignoreSearch: true }).then((cached) => cached || caches.match('index.html')))
+    );
+    return;
+  }
+  // Cache-first solo para lo demás (manifest, iconos): no cambia entre versiones.
   event.respondWith(
     caches.match(event.request, { ignoreSearch: true }).then((cached) => {
       if (cached) return cached;
@@ -27,10 +47,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE).then((cache) => cache.put(event.request, copy));
         }
         return response;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') return caches.match('index.html');
-        return undefined;
-      });
+      }).catch(() => undefined);
     })
   );
 });

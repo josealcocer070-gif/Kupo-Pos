@@ -460,7 +460,7 @@ function renderRespaldos(){ if(!RESPALDOS.length){document.getElementById('lista
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=19').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });

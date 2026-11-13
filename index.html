@@ -340,6 +340,44 @@ header .negocio input{width:420px;max-width:62vw;font-size:19px}
 }
 @media(min-width:761px) and (max-width:1020px){body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%)}}
 
+/* FIX horizontal / modo escritorio en celular (V1.5.0, v19): en vertical se veía
+   bien, en horizontal fallaba. Causas: 1) el service worker cache-first seguía
+   sirviendo la versión vieja (440px, v17); 2) en modo escritorio del celular el
+   100dvh se infla (la página se escala) y el panel se estiraba hasta abajo,
+   dejando el TOTAL y Cobrar muy abajo con un hueco vacío enorme; 3) en
+   horizontal corto (poca altura) el pie del ticket es más alto que el panel y
+   el Cobrar quedaba fuera de vista. Solución: tope de altura al app, 60/40 con
+   !important que ninguna regla vieja de 1150px pueda apilar, menú como overlay
+   en escritorio angosto (sin encoger el layout) y pie compacto con scroll
+   propio en horizontal corto. En móvil real (<=760px) no cambia nada. */
+@media(min-width:761px){
+  body.vista-ventas #app{height:100vh;height:100dvh;max-height:940px;overflow:hidden}
+  body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%)!important}
+  body.vista-ventas .layout:not(.sin-panel) .panel{max-height:none!important;height:100%}
+}
+@media(min-width:761px) and (max-width:1150px){
+  body.menu-abierto #layout{margin-left:0}
+  body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%)!important}
+  body.vista-ventas .layout:not(.sin-panel) .panel{grid-column:auto;border-left:1px solid #dfe5ea;border-top:0}
+  body.vista-ventas .layout:not(.sin-panel) .grid{grid-template-columns:repeat(2,1fr)}
+}
+/* Horizontal corto: el pie (Subtotal, IVA, TOTAL, pago, cambio, Cobrar) siempre
+   alcanzable; el cuerpo de la venta hace scroll y el pie compacto también. */
+@media(min-width:761px) and (max-height:600px){
+  body.vista-ventas #app{max-height:none}
+  body.vista-ventas #app header{padding:6px 12px}
+  body.vista-ventas #app .acciones{padding:6px 10px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .panel-cuerpo .negocio-box{display:none}
+  body.vista-ventas .layout:not(.sin-panel) .panel h2{font-size:18px;margin-bottom:4px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .totales{padding:8px 10px;margin-top:8px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .totales .row.total b{font-size:26px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .pagos button{padding:8px 4px;font-size:13px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .cambio{padding:8px;margin-top:8px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .btn-cobrar{padding:10px;font-size:18px;margin-top:8px}
+  body.vista-ventas .layout:not(.sin-panel) .panel-pie{max-height:60vh;overflow-y:auto;padding-bottom:6px}
+  body.vista-ventas .layout:not(.sin-panel) .panel-pie p{margin-top:6px}
+}
+
 /* Confirmación antes de cobrar (V1.5.0): al tocar Cobrar no se cobra
    directo; se abre esta pantalla para revisar y, si el cliente se
    arrepiente, Regresar sin cobrar, sin descontar stock ni registrar venta. */
@@ -2203,7 +2241,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=19').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
