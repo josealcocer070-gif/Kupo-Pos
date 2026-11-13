@@ -534,6 +534,46 @@ body.movil-ventas #barraVentaMovil{display:flex!important}
 .conf-total-grande b{font-size:52px}
 </style>
 
+
+<style id="movil-ideal">
+/* ===== Interfaz móvil ideal (Lalo, 2026-11-12, según imagen) =====
+   Solo anulaciones CSS al final, sobre #movil-separado. No toca lógica,
+   licencias, login PIN, confirmación, localStorage ni Supabase.
+   Una columna, buscador grande con SCAN, pestañas, tarjetas grandes,
+   barra de venta fija con TOTAL dorado y Cobrar amarillo, menú inferior
+   fijo con 5 accesos, azul oscuro / blanco / dorado, botones >=48px. */
+.buscar{gap:10px!important}
+.buscar input,.buscar select{min-height:56px!important;padding:16px 14px!important;font-size:17px!important;border-radius:14px}
+.btn-scan{min-height:56px!important;padding:14px!important;font-size:17px!important;border-radius:14px}
+.categorias{gap:10px!important;padding-bottom:14px!important}
+.categorias button{min-height:48px!important;padding:12px 18px!important;font-size:15px!important}
+.grid{gap:16px!important}
+.card{border-radius:16px;overflow:hidden}
+.card .foto{height:180px!important;font-size:88px}
+.card h3{font-size:20px!important}
+.card .precio{font-size:30px!important}
+.card .stock{font-size:15px}
+.btn-agregar{min-height:52px!important;padding:15px!important;font-size:18px!important;border-radius:14px}
+.cant button{min-height:48px!important;min-width:48px!important}
+.cant input{min-height:48px!important}
+main{padding-bottom:200px!important}
+#barraVentaMovil{padding:12px!important;gap:12px}
+#barraVentaMovil .barra-detalle{min-height:52px}
+#barraVentaMovil .barra-total b{font-size:30px!important}
+#barraVentaMovil .barra-cobrar{min-height:52px!important;padding:14px 22px!important;font-size:19px!important}
+#menuMovil{height:68px!important}
+#menuMovil button{min-height:68px;font-size:12px}
+#menuMovil button span{font-size:22px!important}
+body.venta-movil-abierta .panel{bottom:148px}
+.toast{bottom:170px}
+.gestion button,.form-prod button,.prod-row .acciones-prod button,.caj-fila-botones button,.conf-botones button,.pagos button,.inicio .btn-inicio,.btn-cobrar{min-height:48px!important}
+.conf-botones button{min-height:52px!important}
+.panel .btn-cobrar{min-height:56px!important}
+.teclado button{min-height:56px}
+.conf-total-grande b{font-size:56px!important}
+.conf-tarjeta .pagos button{min-height:48px!important}
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
