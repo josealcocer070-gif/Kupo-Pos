@@ -3094,7 +3094,7 @@ setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarRecone
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=36').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=37').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });

@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v36'; /* v36: impresión silenciosa por Bluetooth (Web Bluetooth + ESC/POS) en movil.html — el ticket sale solo al cobrar si hay impresora conectada, si no, window.print de siempre */
+const CACHE = 'kupo-pos-v37'; /* v37: atajos de caja con teclado en PC (index.html) — F10/F9/F3/F4/Ctrl+S/Ctrl+K/Esc + modal Atajos de caja */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {

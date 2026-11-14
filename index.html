@@ -446,6 +446,11 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .conf-detalle{border-top:1px solid #eef2f6;margin-top:12px}
 .conf-detalle summary{cursor:pointer;font-weight:800;color:#0b4a6e;padding:10px 0;font-size:15px}
 .conf-confirmar:disabled{opacity:.45;cursor:not-allowed}
+/* Atajos de caja (PC, Lalo 2026-11-14): lista de teclas para atender más rápido. */
+.atajo-fila{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 6px;border-top:1px solid #eef2f6;font-size:16px;font-weight:700;color:#12233a}
+.atajo-fila:first-of-type{border-top:0}
+.atajo-tecla{flex:0 0 auto;background:#eef4f8;border:1.5px solid #0b4a6e;border-radius:20px;padding:5px 14px;font-size:14px;font-weight:800;color:#0b4a6e;white-space:nowrap}
+.atajo-nota{font-size:13px;color:#666;text-align:left;margin:12px 2px 0;line-height:1.5}
 @media(max-width:760px){
  .conf-tarjeta{padding:18px 14px}
  .conf-cambio b{font-size:44px}
@@ -544,6 +549,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 <div class="acciones" id="accionesRapidas">
 <span class="titulo">⚡ Acciones rápidas</span>
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
+<button class="acc" onclick="abrirAtajos()">⌨️ Atajos de caja</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
 <button class="acc" id="accGasto" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" id="accCorte" onclick="mostrarVista('cortes')">💳 Realizar corte de caja</button>
@@ -1148,6 +1154,22 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
   </div>
  </div>
 </div>
+<div id="modalAtajos" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="atajosTitulo" onclick="if(event.target===this)cerrarAtajos()">
+ <div class="conf-tarjeta">
+  <h2 id="atajosTitulo">⌨️ Atajos de caja</h2>
+  <p class="conf-sub">Teclas para atender más rápido.</p>
+  <div class="atajo-fila"><span>Cobrar venta</span><span class="atajo-tecla">F10</span></div>
+  <div class="atajo-fila"><span>Buscar producto</span><span class="atajo-tecla">F9</span></div>
+  <div class="atajo-fila"><span>Pausar venta</span><span class="atajo-tecla">F3</span></div>
+  <div class="atajo-fila"><span>Recuperar última venta en espera</span><span class="atajo-tecla">Ctrl+S</span></div>
+  <div class="atajo-fila"><span>Corte rápido X/Z</span><span class="atajo-tecla">Ctrl+K</span></div>
+  <div class="atajo-fila"><span>Cancelar / limpiar venta</span><span class="atajo-tecla">F4</span></div>
+  <p class="atajo-nota">F11 abre pantalla completa; Esc sale de pantalla completa o cierra un modal. Una venta en espera no se registra hasta cobrarla.</p>
+  <div class="conf-botones" style="margin-top:14px">
+   <button type="button" class="conf-confirmar" style="width:100%" onclick="cerrarAtajos()">Entendido</button>
+  </div>
+ </div>
+</div>
 <script>
 const EJEMPLO=[
  {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"General",unidad:"pieza",sku:"SKU-001",costo:15,stockMin:5,foto:""},
@@ -1225,6 +1247,9 @@ function escanearCodigo(){const b=document.getElementById("buscar");if(!b)return
 function agregarPrimeroBusqueda(){const q=(document.getElementById("buscar").value||"").trim().toLowerCase();if(!q)return;const disp=function(x){return !x.pausado&&x.stock>0};const p=catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase().includes(q)})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
 function redirigirLectorABuscador(e){if(typeof vistaActual!=="undefined"&&vistaActual!=="ventas")return false;if(window.innerWidth<=1020)return false;var tg=e.target||{};if(tg.tagName==="INPUT"||tg.tagName==="SELECT"||tg.tagName==="TEXTAREA"||tg.isContentEditable)return false;var modal=document.getElementById("modalConfirmar");if(modal&&!modal.classList.contains("oculto"))return false;var app=document.getElementById("app");if(!app||app.classList.contains("oculto"))return false;if(!e.key||e.key.length!==1)return false;var b=document.getElementById("buscar");if(!b)return false;b.focus();b.value=(b.value||"")+e.key;try{b.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}if(e.preventDefault)e.preventDefault();return true;}
 if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",redirigirLectorABuscador);
+/* Atajos de caja en PC: en fase de captura para que corran antes que el
+   redireccionador del lector (Ctrl+S / Ctrl+K no deben escribirse en el buscador). */
+if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",manejarAtajosTeclado,true);
 function render(){
  llenarSelectVentaAlmacen();renderCategorias();
  const q=(document.getElementById("buscar").value||"").toLowerCase();
@@ -2038,6 +2063,41 @@ function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("�
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
 function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
 function corteCaja(){mostrarVista("cortes");}
+/* Atajos de caja (PC, Lalo 2026-11-14): teclas de la referencia del Manus
+   viejo. Solo en PC (index.html); en movil.html no hay teclado. */
+function abrirAtajos(){var m=document.getElementById("modalAtajos");if(m)m.classList.add("abierto");}
+function cerrarAtajos(){var m=document.getElementById("modalAtajos");if(m)m.classList.remove("abierto");}
+function recuperarVentaEnEspera(){var guardada=null;try{guardada=JSON.parse(localStorage.getItem("kupoPosV146Espera")||"null")}catch(e){guardada=null}if(!guardada||!guardada.length){toast("No hay ninguna venta en espera para recuperar.");return}if(ticket.length&&!confirm("Ya hay una venta en curso. ¿Reemplazarla con la venta en espera?"))return;ticket=guardada;try{localStorage.removeItem("kupoPosV146Espera")}catch(e){}guardar();render();toast("Venta en espera recuperada. Recuerda: no se registra hasta cobrarla.");}
+function cancelarVenta(){if(!ticket.length){toast("No hay venta en curso para cancelar.");return}if(!confirm("¿Cancelar la venta en curso? Se quitan los productos del ticket y no se registra nada."))return;ticket=[];var _r=document.getElementById("recibido");if(_r)_r.value="";var _me=document.getElementById("mixtoEfectivo");if(_me)_me.value="";var _mt=document.getElementById("mixtoTarjeta");if(_mt)_mt.value="";guardar();render();toast("Venta cancelada. El ticket quedó vacío.");}
+function corteRapido(){/* X/Z no existe como tal en el código nuevo: Corte diario
+   muestra el resumen del día (X, sin cerrar nada) y ahí mismo está
+   "Realizar corte de dinero" (Z, registra el corte). El atajo abre esa vista. */
+ corteCaja();}
+function manejarAtajosTeclado(e){
+ var app=document.getElementById("app");if(!app||app.classList.contains("oculto"))return;
+ var tg=e.target||{};
+ var escribiendo=tg.tagName==="INPUT"||tg.tagName==="TEXTAREA"||tg.tagName==="SELECT"||tg.isContentEditable;
+ /* Esc: cierra el modal abierto (atajos o confirmación) o sale de pantalla completa. */
+ if(e.key==="Escape"){
+  var ma=document.getElementById("modalAtajos");
+  if(ma&&ma.classList.contains("abierto")){e.preventDefault();cerrarAtajos();return;}
+  var mc=document.getElementById("modalConfirmar");
+  if(mc&&mc.classList.contains("abierto")){e.preventDefault();cancelarConfirmacionCobro();return;}
+  return; /* Sin modal, el navegador sale de pantalla completa solo. */
+ }
+ if(escribiendo)return; /* No disparar atajos mientras se escribe. */
+ if(typeof vistaActual!=="undefined"&&vistaActual!=="ventas")return;
+ var mConf=document.getElementById("modalConfirmar");
+ var mAt=document.getElementById("modalAtajos");
+ if((mConf&&mConf.classList.contains("abierto"))||(mAt&&mAt.classList.contains("abierto")))return;
+ if(e.key==="F10"){e.preventDefault();mostrarConfirmacionCobro();}
+ else if(e.key==="F9"){e.preventDefault();escanearCodigo();}
+ else if(e.key==="F3"){e.preventDefault();ponerEnEspera();}
+ else if(e.key==="F4"){e.preventDefault();cancelarVenta();}
+ else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(e.key==="s"||e.key==="S")){e.preventDefault();if(e.stopPropagation)e.stopPropagation();recuperarVentaEnEspera();}
+ else if((e.ctrlKey||e.metaKey)&&!e.altKey&&(e.key==="k"||e.key==="K")){e.preventDefault();if(e.stopPropagation)e.stopPropagation();corteRapido();}
+ /* F11 no se intercepta: el navegador abre/cierra la pantalla completa solo. */
+}
 function esHoyVenta(v){return new Date(v.fecha).toDateString()===new Date().toDateString()}
 function resumenCorte(){
  const hoy=hoyLocal();
@@ -2354,7 +2414,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=36').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=37').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
