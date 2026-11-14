@@ -278,6 +278,15 @@ main .sub{color:#555;margin-bottom:18px}
    </form>
    <p class="msg" id="msgRespaldo"></p>
   </div>
+  <div class="supabase-auth">
+   <h2>↩️ Restaurar respaldo</h2>
+   <p>Sube un archivo de respaldo (.json) descargado desde aquí para devolver sus datos a la nube. No borra los datos actuales: solo restaura lo que trae el archivo.</p>
+   <input type="file" id="archivoRespaldo" accept=".json,application/json" class="oculto" onchange="elegirArchivoRespaldo()">
+   <button type="button" onclick="document.getElementById('archivoRespaldo').click()">📂 Elegir archivo de respaldo</button>
+   <span id="nombreArchivoRespaldo">Ningún archivo elegido</span><br><br>
+   <button type="button" class="dorado" id="btnRestaurar" disabled onclick="restaurarRespaldo()">↩️ Restaurar respaldo</button>
+   <p class="msg" id="msgRestaurar"></p>
+  </div>
   <div class="info">Horario: <b>01:30 a.m.</b> hora de Campeche · Retención: <b>14 diarias / 8 semanales / 12 mensuales</b> · La clave privada está protegida en el servidor y nunca se muestra ni se envía por WhatsApp o correo.</div>
   <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Terminal</th><th>Estado</th><th>Último éxito</th><th>Tamaño</th><th>Verificado</th></tr></thead><tbody id="listaRespaldos"></tbody></table></div>
  </section>
@@ -514,6 +523,70 @@ async function descargarRespaldo(){
  var total=Object.keys(datos.tablas).reduce(function(s,k){return s+datos.tablas[k].length;},0);
  decir('Respaldo descargado: '+total+' registros en '+f+(fallos.length?' · Sin acceso a: '+fallos.join(', '):''),!fallos.length);
  toast('Respaldo descargado: '+total+' registros');
+}
+/* Restaurar respaldo (Lalo 2026-11-14): sube un archivo JSON de respaldo a la nube con upsert por tabla. Acepta el formato manual ({tablas:{...}}) y el automático ({ventas,productos,cajeros,movimientos}). No borra los datos actuales. Solo Admin. */
+let archivoRespaldoElegido=null;
+function elegirArchivoRespaldo(){
+ var input=document.getElementById('archivoRespaldo');
+ var nombre=document.getElementById('nombreArchivoRespaldo');
+ var btn=document.getElementById('btnRestaurar');
+ archivoRespaldoElegido=(input&&input.files&&input.files[0])||null;
+ if(nombre)nombre.textContent=archivoRespaldoElegido?archivoRespaldoElegido.name:'Ningún archivo elegido';
+ if(btn)btn.disabled=!archivoRespaldoElegido;
+}
+async function restaurarRespaldo(){
+ var msg=document.getElementById('msgRestaurar');
+ function decir(t,ok){if(msg){msg.textContent=t;msg.className='msg '+(ok?'ok':'error');}}
+ if(!kupoSupabase){decir('No hay conexión con Supabase.',false);return;}
+ if(!archivoRespaldoElegido){decir('Primero elige un archivo de respaldo (.json).',false);return;}
+ var texto;
+ try{texto=await archivoRespaldoElegido.text();}
+ catch(e){decir('No se pudo leer el archivo.',false);return;}
+ var datos;
+ try{datos=JSON.parse(texto);}
+ catch(e){decir('Ese archivo no es un respaldo válido de KUPO POS.',false);return;}
+ if(!datos||typeof datos!=='object'){decir('Ese archivo no es un respaldo válido de KUPO POS.',false);return;}
+ var tablas=datos.tablas||{};
+ if(!datos.tablas){
+  tablas={};
+  if(Array.isArray(datos.ventas))tablas.ventas=datos.ventas;
+  if(Array.isArray(datos.productos))tablas.productos=datos.productos;
+  if(Array.isArray(datos.cajeros))tablas.cajeros=datos.cajeros;
+  if(Array.isArray(datos.movimientos))tablas.movimientos_inventario=datos.movimientos;
+ }
+ var nombres={licencias:'licencias',ventas:'ventas',productos:'productos',cajeros:'cajeros',movimientos_inventario:'movimientos'};
+ var claves=Object.keys(tablas).filter(function(k){return Array.isArray(tablas[k])&&tablas[k].length;});
+ if(!claves.length){decir('El archivo no trae datos para restaurar.',false);return;}
+ var licenciaArchivo=datos.licencia||datos.licencia_clave||'';
+ if(licenciaArchivo&&licenciaArchivo!=='todas'){
+  var existe=licencias.some(function(l){return l.clave===licenciaArchivo;});
+  if(!existe){decir('Ese respaldo es de la licencia '+licenciaArchivo+', que ya no existe en el sistema.',false);return;}
+ }
+ var resumen=claves.map(function(k){return tablas[k].length+' '+nombres[k];}).join(', ');
+ var negocio=licenciaArchivo||'todas las licencias';
+ if(!confirm('¿Restaurar este respaldo ('+negocio+')?\n\nSe van a subir: '+resumen+'.\nLos datos actuales que no estén en el archivo se conservan.'))return;
+ decir('Restaurando respaldo...',true);
+ var subidos=0;var fallos=[];
+ for(var i=0;i<claves.length;i++){
+  var t=claves[i];
+  var filas=tablas[t].filter(function(f){return f&&f.id!=null;});
+  if(!filas.length){fallos.push(t);continue;}
+  try{
+   var r=await kupoSupabase.from(t).upsert(filas,{onConflict:'id'});
+   if(r.error){fallos.push(t);}
+   else{subidos+=filas.length;}
+  }catch(e){fallos.push(t);}
+ }
+ if(fallos.length){decir('Restauración parcial: '+subidos+' registros subidos · Sin restaurar: '+fallos.join(', '),false);}
+ else{decir('Respaldo restaurado: '+subidos+' registros de '+negocio+'.',true);}
+ toast(fallos.length?'Restauración parcial':'Respaldo restaurado: '+subidos+' registros');
+ var input=document.getElementById('archivoRespaldo');
+ if(input)input.value='';
+ archivoRespaldoElegido=null;
+ var nombre=document.getElementById('nombreArchivoRespaldo');
+ if(nombre)nombre.textContent='Ningún archivo elegido';
+ var btn=document.getElementById('btnRestaurar');
+ if(btn)btn.disabled=true;
 }
 (function(){
  revisarSesionSupabase();
