@@ -829,6 +829,32 @@ h1,h2{font-weight:800!important}
   body.movil-ventas #panelVenta #ticket{display:block!important;flex:none!important;max-height:46vh!important;overflow-y:auto!important;overscroll-behavior:contain!important}
 }
 </style>
+<style id="productos-lista-compacta">
+/* ===== Productos como lista compacta, no feed (Lalo, 2026-11-13) =====
+   Antes, dos bloques móviles ponían .prod-row en columna con la foto a todo
+   lo ancho (90px) y 3 botones gigantes por tarjeta: había que bajar mucho
+   para ver los productos y era lento de manejar. Ahora cada producto es una
+   fila compacta: foto cuadrada pequeña a la izquierda, nombre/meta/stock al
+   centro, precio dorado y 3 botones de icono a la derecha. Caben 4-5 filas
+   en pantalla. Solo CSS + el HTML que genera renderProductos(); no toca
+   lógica, handlers, Ventas, SCAN, catálogo, licencias ni PC. */
+#vistaProductos .prod-lista{gap:8px!important}
+#vistaProductos .prod-row{flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border-radius:12px!important}
+#vistaProductos .prod-row .foto{width:56px!important;height:56px!important;flex:none!important;border-radius:10px!important;font-size:28px!important}
+#vistaProductos .prod-row .info{flex:1!important;min-width:0!important}
+#vistaProductos .prod-row .info h3{font-size:15px!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important}
+#vistaProductos .prod-row .info .meta{font-size:12px!important;color:#555!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:2px 0 0!important}
+#vistaProductos .prod-row .info .stock-line{font-size:13px!important;font-weight:700!important;color:#0f6a4d!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:2px 0 0!important}
+#vistaProductos .prod-row .info .stock-line.alerta-stock{color:#b3261e!important}
+#vistaProductos .prod-row .info .estado{font-size:10px!important;font-weight:800!important;padding:2px 7px!important;border-radius:20px!important;margin-left:4px!important;vertical-align:1px}
+#vistaProductos .prod-row .etiqueta-pausado{font-size:10px!important;padding:2px 7px!important;margin:0 0 0 4px!important;vertical-align:1px}
+#vistaProductos .prod-row .lado{flex:none!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:6px!important}
+#vistaProductos .prod-row .precio{font-size:19px!important;font-weight:800!important;color:var(--dorado2)!important;white-space:nowrap!important}
+#vistaProductos .prod-row .precio small{font-size:12px!important;color:#555!important;font-weight:700!important}
+#vistaProductos .prod-row .acciones-prod{flex-direction:row!important;flex-wrap:nowrap!important;width:auto!important;gap:6px!important}
+#vistaProductos .prod-row .acciones-prod button{flex:none!important;width:42px!important;height:42px!important;min-height:42px!important;padding:0!important;font-size:18px!important;line-height:1!important;border-radius:10px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#vistaProductos .prod-row .acciones-prod button.peligro{color:#b3261e!important;border-color:#e5b6b3!important}
+</style>
 </head>
 <body>
 
@@ -2419,7 +2445,7 @@ function renderProductos(){
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";
   const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p>${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre} · Costo ${dinero(p.costo||0)} · Margen ${margenProducto(p)}%</p><p class="${_bajo||p.stock<=0?"alerta-stock":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${_bajo||p.stock<=0?" alerta-stock":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)} <span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div><div class="acciones-prod"><button onclick="editarProducto(${p.id})" title="Editar" aria-label="Editar ${escHtml(p.nombre)}">✏️</button><button onclick="togglePausa(${p.id})" title="${p.pausado?"Activar":"Pausar"}" aria-label="${p.pausado?"Activar":"Pausar"} ${escHtml(p.nombre)}">${p.pausado?"▶️":"⏸"}</button><button class="peligro" onclick="eliminar(${p.id})" title="Eliminar" aria-label="Eliminar ${escHtml(p.nombre)}">🗑</button></div></div>`;
   lista.appendChild(d);
  });
 }
@@ -2773,7 +2799,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=31').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=32').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
