@@ -1589,9 +1589,10 @@ h1,h2{font-weight:800!important}
 <input type="text" id="clienteVenta" value="Cliente general" aria-label="Cliente de la venta" oninput="guardarClienteVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
 <div class="negocio-box">
 <b id="negocioBox">MI NEGOCIO</b><br>
-<input id="direccionNegocio" value="Palizada, Campeche" aria-label="Dirección del negocio"><br>
-<input id="telefonoNegocio" value="951 943 3938" aria-label="Teléfono del negocio">
+<span id="direccionNegocio">Palizada, Campeche</span><br>
+<span id="telefonoNegocio">951 943 3938</span>
 </div>
+<p style="font-size:12px;color:#666;margin:6px 0 0">Los datos del negocio solo se cambian en 🎟 Personalizar ticket.</p>
 <label style="font-size:13px;font-weight:800">🏬 Almacén para vender</label>
 <select id="ventaAlmacenSel" onchange="cambiarAlmacenVenta(this.value)" style="width:100%;margin:4px 0 2px"></select>
 <p style="font-size:12px;color:#666;margin:0 0 6px">El stock se descuenta de este almacén al cobrar.</p>
@@ -2085,8 +2086,8 @@ function cargarTicketConfig(){
  const rp=g("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel||"80 mm";
  const tp=g("termPapel"); if(tp)tp.value=ticketConfig.papel||"80 mm";
  const nb=g("negocioBox"); if(nb)nb.textContent=(ticketConfig.negocio||"Mi negocio").toUpperCase();
- const dn=g("direccionNegocio"); if(dn)dn.value=ticketConfig.direccion||"";
- const tn=g("telefonoNegocio"); if(tn)tn.value=ticketConfig.telefono||"";
+ const dn=g("direccionNegocio"); if(dn)dn.textContent=ticketConfig.direccion||"";
+ const tn=g("telefonoNegocio"); if(tn)tn.textContent=ticketConfig.telefono||"";
  mostrarLogoPreview(); renderTicketPreview(); renderTerminales(); aplicarOpcionesSistema();
 }
 function renderTicketPreview(){
