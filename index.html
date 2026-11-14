@@ -674,6 +674,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 <input id="buscarEnt" placeholder="🔍 Buscar por producto o proveedor..." oninput="renderEntradas()">
 <select id="filtroEntProd" onchange="renderEntradas()"><option value="todos">Todos los productos</option></select>
 <input id="filtroEntFecha" type="date" onchange="renderEntradas()" aria-label="Filtrar por fecha">
+<button type="button" onclick="verHistorialSeleccionado()">📜 Ver historial del producto</button>
 </div>
 <div class="tabla-wrap"><table class="tabla">
 <thead><tr><th>Fecha</th><th>Producto</th><th class="num">Cantidad</th><th class="num">Costo unit.</th><th>Proveedor</th><th class="num">Total</th><th></th></tr></thead>
@@ -1197,6 +1198,16 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
   </div>
  </div>
 </div>
+<div id="modalHistorialProducto" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="histProdTitulo" onclick="if(event.target===this)cerrarHistorialProducto()">
+ <div class="conf-tarjeta">
+  <h2 id="histProdTitulo">📜 Historial del producto</h2>
+  <p class="conf-sub" id="histProdSub"></p>
+  <div id="histProdLista"></div>
+  <div class="conf-botones" style="margin-top:14px">
+   <button type="button" class="conf-confirmar" style="width:100%" onclick="cerrarHistorialProducto()">Entendido</button>
+  </div>
+ </div>
+</div>
 <script>
 const EJEMPLO=[
  {id:1,nombre:"Aurrerá suavizante",precio:25,stock:23,emoji:"🍞",categoria:"General",unidad:"pieza",sku:"SKU-001",costo:15,stockMin:5,foto:""},
@@ -1212,6 +1223,7 @@ let clienteVentaActual=localStorage.getItem("kupoPosV146ClienteVenta")||"Cliente
 let ventas=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"[]");
 let folio=(JSON.parse(localStorage.getItem("kupoPosV146Folio")||"0"))||0;
 let entradas=JSON.parse(localStorage.getItem("kupoPosV146Entradas")||"[]");
+let historialProducto=JSON.parse(localStorage.getItem("kupoPosV146HistorialProducto")||"[]");
 let gastos=JSON.parse(localStorage.getItem("kupoPosV146Gastos")||"[]");
 let cortes=JSON.parse(localStorage.getItem("kupoPosV146Cortes")||"[]");
 let fondoCaja=Number(localStorage.getItem("kupoPosV146Fondo")||"0")||0;
@@ -1241,7 +1253,7 @@ function almacenVenta(){let a=almacenActivo(ventaAlmacen);if(a)return a;a=almace
 if(!stockAlmacen){stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0})}
 catalogo.forEach(p=>{if(!stockAlmacen[p.id]){stockAlmacen[p.id]={};const pr=almacenPrincipal();if(pr)stockAlmacen[p.id][pr.id]=p.stock||0}});
 sincronizarStock();
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146Cotizaciones",JSON.stringify(cotizaciones));localStorage.setItem("kupoPosV146CotFolio",JSON.stringify(cotFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146HistorialProducto",JSON.stringify(historialProducto));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146Cotizaciones",JSON.stringify(cotizaciones));localStorage.setItem("kupoPosV146CotFolio",JSON.stringify(cotFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -2008,7 +2020,7 @@ function guardarEntrada(ev){
  const fecha=document.getElementById("eFecha").value||hoyLocal();
  const nota=(document.getElementById("eNota").value||"").trim();
  const alm=almacenActivo(Number(document.getElementById("eAlmacen").value))||almacenPrincipal();
- ajustarStock(p.id,alm.id,cant);
+ ajustarStock(p.id,alm.id,cant);registrarMovimientoProducto(p,"Entrada",cant,{almacen:alm.nombre,proveedor:proveedor,nota:nota});
  entradas.unshift({id:Date.now()+ (uid++),fecha:fecha,productoId:p.id,nombre:p.nombre,emoji:p.emoji||"📦",cantidad:cant,costo:costo,proveedor:proveedor,nota:nota,total:cant*costo,almacenId:alm.id,almacen:alm.nombre});
  guardar(); llenarSelectEntradas();llenarSelectVentaAlmacen(); renderEntradas(); render();
  toast("Entrada registrada: +"+textoCantidad(p,cant)+" de "+p.nombre+". Stock ahora: "+textoCantidad(p,p.stock)+".");
@@ -2025,10 +2037,50 @@ function eliminarEntrada(id){
  const aid=e.almacenId||(almacenPrincipal()||{}).id;
  if(p && stockEn(p.id,aid)+0.000001 < e.cantidad){toast("No se puede eliminar: el stock de "+p.nombre+" en "+((almacenes.find(a=>a.id===aid)||{}).nombre||"ese almacén")+" ("+textoCantidad(p,stockEn(p.id,aid))+") es menor que la entrada ("+textoCantidad(p,e.cantidad)+").");return}
  if(!confirm("¿Eliminar esta entrada de "+e.cantidad+" de "+e.nombre+"? El stock se descuenta de nuevo."))return;
- if(p)ajustarStock(p.id,aid,-e.cantidad);
+ if(p)ajustarStock(p.id,aid,-e.cantidad);if(p)registrarMovimientoProducto(p,"Eliminación de entrada",-e.cantidad,{almacen:((almacenes.find(a=>a.id===aid)||{}).nombre||""),proveedor:e.proveedor||"",nota:e.nota||""});
  entradas=entradas.filter(x=>x.id!==id);
  guardar(); llenarSelectEntradas(); renderEntradas(); render();
  toast("Entrada eliminada. Stock de "+(p?p.nombre:e.nombre)+" ahora: "+(p?textoCantidad(p,p.stock):"0")+"." );
+}
+
+/* Historial del producto (Lalo, 2026-11-14): quién modificó el inventario.
+   Cada cambio de stock —entrada, eliminar una entrada o ajuste al editar el
+   producto— queda registrado con el nombre del cajero en turno. Solo se
+   registran los cambios desde que esto se instala; no hay historial del
+   pasado. Solo local en este dispositivo, no se sube a la nube. */
+let historialProductoId=null;
+function nombreEnTurno(){return (sesionActual&&sesionActual.nombre)||(sesionActual&&sesionActual.usuario)||"Sin sesión";}
+function fechaHoraBonita(iso){try{var d=new Date(iso);if(isNaN(d.getTime()))return "";return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}catch(e){return ""}}
+function registrarMovimientoProducto(p,tipo,cambio,extra){
+ if(!p)return;
+ historialProducto.unshift({id:Date.now()+(uid++),productoId:p.id,nombre:p.nombre,fecha:new Date().toISOString(),tipo:tipo,cambio:redondearCant(Number(cambio)||0),stock:redondearCant(Number(p.stock)||0),cajero:nombreEnTurno(),rol:(sesionActual&&sesionActual.rol)||"",almacen:(extra&&extra.almacen)||"",proveedor:(extra&&extra.proveedor)||"",nota:(extra&&extra.nota)||""});
+ if(historialProducto.length>500)historialProducto.length=500;
+ guardar();
+}
+function verHistorialProducto(id){
+ var p=catalogo.find(function(x){return x.id===id});
+ if(!p){toast("Ese producto ya no existe en el inventario.");return}
+ historialProductoId=id;renderHistorialProducto();
+ var m=document.getElementById("modalHistorialProducto");if(m)m.classList.add("abierto");
+}
+function verHistorialSeleccionado(){
+ var fp=(document.getElementById("filtroEntProd")||{}).value||"todos";
+ if(!fp||fp==="todos"){toast("Elige un producto en el filtro para ver su historial.");return}
+ verHistorialProducto(Number(fp));
+}
+function cerrarHistorialProducto(){var m=document.getElementById("modalHistorialProducto");if(m)m.classList.remove("abierto");}
+function renderHistorialProducto(){
+ var p=catalogo.find(function(x){return x.id===historialProductoId});
+ var lista=document.getElementById("histProdLista");if(!p||!lista)return;
+ var sub=document.getElementById("histProdSub");
+ if(sub)sub.textContent=p.nombre+" · Stock actual: "+textoCantidad(p,p.stock);
+ var items=historialProducto.filter(function(h){return String(h.productoId)===String(historialProductoId)});
+ if(!items.length){lista.innerHTML='<p style="color:#555">Aún no hay movimientos registrados para este producto.<br>Los cambios se registran desde ahora, cada vez que alguien modifique sus entradas o ajuste su inventario.</p>';return}
+ lista.innerHTML=items.map(function(h){
+  var signo=h.cambio>0?"+":"";
+  var color=h.cambio>0?"#1b7a3d":"#b3261e";
+  return '<div style="border-bottom:1px solid #e3e8ec;padding:10px 0"><div><b>'+escHtml(h.tipo)+'</b> · <b style="color:'+color+'">'+signo+escHtml(textoCantidad(p,h.cambio))+'</b><br><span style="color:#555;font-size:13px">Por '+escHtml(h.cajero||"Sin sesión")+(h.rol?" ("+escHtml(h.rol)+")":"")+(h.almacen?" · "+escHtml(h.almacen):"")+(h.proveedor?" · Prov: "+escHtml(h.proveedor):"")+(h.nota?" · "+escHtml(h.nota):"")+'</span></div><div style="text-align:right;font-size:13px;color:#555">'+escHtml(fechaHoraBonita(h.fecha))+'<br>Quedó: <b>'+escHtml(textoCantidad(p,h.stock))+'</b></div></div>';
+ }).join("");
 }
 function renderEntradas(){
  llenarSelectEntradas();
@@ -2044,7 +2096,7 @@ function renderEntradas(){
  const lista=document.getElementById("listaEntradas"); if(!lista)return;
  const items=entradas.filter(e=>(e.nombre+" "+(e.proveedor||"")+" "+(e.nota||"")).toLowerCase().includes(q)).filter(e=>fp==="todos"||String(e.productoId)===fp).filter(e=>!ff||e.fecha===ff);
  if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">📥<br><b>Aún no hay entradas</b><br>Registra tu primera entrada arriba.</td></tr>';return}
- lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
+ lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="verHistorialProducto(${e.productoId})">📜 Historial</button> <button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
 }
 
 function guardarGasto(ev){
@@ -2133,7 +2185,7 @@ function guardarProducto(e){e.preventDefault();
  const foto=fotoProductoActual==="__SIN_FOTO__"?"":(fotoProductoActual||"");
  const pausado=document.getElementById("pEstado").value==="pausado";
  if(!nombre||isNaN(precio)||isNaN(stock))return;
- if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;p.unidad=unidad;fijarStockTotal(p.id,stock);p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;p.sku=sku||p.sku||("SKU-"+String(p.id).padStart(3,"0"));p.costo=isNaN(costo)?(p.costo||0):costo;p.stockMin=isNaN(stockMin)?(p.stockMin==null?5:p.stockMin):stockMin;p.foto=foto;toast("Producto actualizado: "+nombre+" · Stock total "+textoCantidad(p,p.stock));}}
+ if(id){const p=catalogo.find(x=>x.id==id);if(p){p.nombre=nombre;p.precio=precio;p.unidad=unidad;var _stockAntes=p.stock;fijarStockTotal(p.id,stock);if(p.stock!==_stockAntes)registrarMovimientoProducto(p,"Ajuste de inventario",redondearCant(p.stock-_stockAntes),{});p.categoria=categoria;p.emoji=emoji;p.pausado=pausado;p.sku=sku||p.sku||("SKU-"+String(p.id).padStart(3,"0"));p.costo=isNaN(costo)?(p.costo||0):costo;p.stockMin=isNaN(stockMin)?(p.stockMin==null?5:p.stockMin):stockMin;p.foto=foto;toast("Producto actualizado: "+nombre+" · Stock total "+textoCantidad(p,p.stock));}}
  else{const nid2=Date.now()+uid++;catalogo.push({id:nid2,nombre,precio,stock,emoji,categoria,pausado,unidad,sku:sku||("SKU-"+String(nid2).slice(-3)),costo:isNaN(costo)?Math.round(precio*0.6*100)/100:costo,stockMin:isNaN(stockMin)?5:stockMin,foto:foto});stockAlmacen[nid2]={};const pr2=almacenPrincipal();if(pr2)stockAlmacen[nid2][pr2.id]=stock;sincronizarStock();toast("Producto agregado: "+nombre);}
  if(typeof encolarProductoNube==="function"){const _pid=document.getElementById("pId").value;const _pr=_pid?catalogo.find(function(x){return x.id==_pid}):catalogo[catalogo.length-1];if(_pr)encolarProductoNube(_pr);}
  e.target.reset();fotoProductoActual="";const _pv=document.getElementById("pFotoPreview");if(_pv){_pv.src="";_pv.style.display="none"}document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";
@@ -2173,6 +2225,8 @@ function manejarAtajosTeclado(e){
   if(ma&&ma.classList.contains("abierto")){e.preventDefault();cerrarAtajos();return;}
   var mc=document.getElementById("modalConfirmar");
   if(mc&&mc.classList.contains("abierto")){e.preventDefault();cancelarConfirmacionCobro();return;}
+  var mh=document.getElementById("modalHistorialProducto");
+  if(mh&&mh.classList.contains("abierto")){e.preventDefault();cerrarHistorialProducto();return;}
   return; /* Sin modal, el navegador sale de pantalla completa solo. */
  }
  if(escribiendo)return; /* No disparar atajos mientras se escribe. */
@@ -2504,7 +2558,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=38').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=39').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
