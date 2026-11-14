@@ -773,6 +773,36 @@ h1,h2{font-weight:800!important}
  .linea-ticket .linea-quitar{flex:0 0 auto!important;width:44px!important;min-width:44px!important;height:44px!important;background:#fde8e8!important;color:#b3261e!important;border:0!important;border-radius:10px!important;font-size:18px!important;font-weight:800!important;cursor:pointer!important;align-self:center!important}
 }
 </style>
+<style id="ticket-fijo-sin-duplicado">
+/* ===== Un solo TOTAL/Cobrar fijo + solo las líneas hacen scroll (Lalo, 2026-11-13) =====
+   En la captura del celular el TOTAL y "Cobrar venta" salían DOS veces (tarjeta
+   azul Subtotal/IVA/TOTAL + botón grande en el flujo, y barra fija abajo) y al
+   agregar productos el botón del flujo se perdía abajo. Solo móvil (<=760px),
+   solo en Ventas: la app es una columna de alto completo, el panel del ticket
+   ocupa el espacio entre el encabezado y la barra fija, y SOLO #ticket hace
+   scroll. El .panel-pie (totales en flujo + botón grande + texto largo del pie)
+   se oculta en móvil; sus spans #subtotal/#iva/#total siguen en el DOM (ocultos)
+   para que renderTicket() y actualizarBarraMovil() sigan funcionando, y el
+   Subtotal/IVA se sigue viendo en la pantalla de confirmación al cobrar.
+   No toca lógica de cobro, licencias, SCAN, catálogo, localStorage ni Supabase.
+   En escritorio (>760px) no cambia nada: sigue el 60/40 de PC. */
+@media (max-width:760px){
+ /* App a alto completo, sin scroll de página en Ventas */
+ body.movil-ventas #app{display:flex!important;flex-direction:column!important;height:100vh!important;height:100svh!important;height:100dvh!important;overflow:hidden!important}
+ body.movil-ventas #app header{flex:0 0 auto!important}
+ body.movil-ventas #app .layout{flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ body.movil-ventas #app .layout main{flex:0 0 auto!important}
+ /* El ticket llena el espacio entre encabezado y barra fija (190px reservados
+    para barra TOTAL/Cobrar + menú inferior, como ya estaba) */
+ body.movil-ventas #panelVenta{flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;margin-bottom:calc(190px + env(safe-area-inset-bottom,0px))!important}
+ body.movil-ventas #panelVenta .panel-cuerpo{flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+ /* Solo las líneas del ticket hacen scroll; SCAN, encabezado y datos quedan fijos arriba */
+ body.movil-ventas #panelVenta #ticket{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+ /* Sin duplicado: en flujo ya no salen Subtotal/IVA/TOTAL ni el botón grande
+    "Cobrar venta" ni el texto largo del pie; queda solo la barra fija */
+ body.movil-ventas #panelVenta .panel-pie{display:none!important}
+}
+</style>
 </head>
 <body>
 
@@ -1624,9 +1654,9 @@ function renderTicket(){
  else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id)||{unidad:"pieza",nombre:"Producto"};const paso=pasoUnidad(p);return `<div class="linea linea-ticket"><span class="ticket-foto">${fotoHtml(p)}</span><span class="ticket-info"><b class="ticket-nombre">${escHtml(p.nombre||"Producto")}</b><span class="ticket-desc">${escHtml(p.categoria||"General")}${p.sku?" · "+escHtml(p.sku):""} · ${dinero(l.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</span><span class="cant"><button onclick="cambiarCant(${l.id},-${paso})">−</button> <input type="number" min="${esDecimalUnidad(p)?"0.01":"1"}" step="${esDecimalUnidad(p)?"0.01":"1"}" value="${fmtCant(l.cant,unidadDe(p))}" onchange="fijarCant(${l.id},this.value)" aria-label="Cantidad"> <span>${etiquetaUnidad(p,l.cant)}</span> <button onclick="cambiarCant(${l.id},${paso})">+</button></span></span><span class="ticket-importe">${dinero(l.cant*l.precio)}</span><button type="button" class="linea-quitar" onclick="quitarLineaTicket(${l.id})" aria-label="Quitar producto del ticket">✕</button></div>`}).join("")}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  const sub=total/1.16, iva=total-sub;
- document.getElementById("subtotal").textContent=dinero(sub);
- document.getElementById("iva").textContent=dinero(iva);
- document.getElementById("total").textContent=dinero(total);
+ var _st=document.getElementById("subtotal");if(_st)_st.textContent=dinero(sub);
+ var _iv=document.getElementById("iva");if(_iv)_iv.textContent=dinero(iva);
+ var _tt=document.getElementById("total");if(_tt)_tt.textContent=dinero(total);
  const rec=parseFloat(document.getElementById("recibido").value)||0;
  const cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
  const cambioEl=document.getElementById("cambio");if(cambioEl)cambioEl.textContent=dinero(cambio);
@@ -2717,7 +2747,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=29').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=30').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
