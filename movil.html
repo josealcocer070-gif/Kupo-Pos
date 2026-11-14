@@ -2899,7 +2899,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=32').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=33').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
