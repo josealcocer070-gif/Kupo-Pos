@@ -1007,6 +1007,7 @@ h1,h2{font-weight:800!important}
 <span class="titulo">⚡ Acciones rápidas</span>
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
+<button class="acc" id="btnPantallaCompleta" onclick="alternarPantallaCompleta()">⛶ Pantalla completa</button>
 <button class="acc" id="accGasto" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" id="accCorte" onclick="mostrarVista('cortes')">💳 Realizar corte de caja</button>
 <button class="acc" id="accProductos" onclick="mostrarVista('productos')">🕐 Gestionar productos</button>
@@ -2898,6 +2899,18 @@ function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.paus
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
 function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(typeof imprimirVentaSilenciosa==="function"){imprimirVentaSilenciosa(v);toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
+/* Botón de pantalla completa (Lalo 2026-11-14): en Chrome entra y sale con la API de pantalla completa. */
+function alternarPantallaCompleta(){
+  if(document.fullscreenElement){ document.exitFullscreen().catch(function(){}); return; }
+  var el=document.documentElement;
+  if(el.requestFullscreen){ el.requestFullscreen().catch(function(){}); }
+  else if(el.webkitRequestFullscreen){ el.webkitRequestFullscreen(); }
+}
+function actualizarBotonPantallaCompleta(){
+  var b=document.getElementById("btnPantallaCompleta");
+  if(b){ b.textContent=document.fullscreenElement?"⛶ Salir de pantalla completa":"⛶ Pantalla completa"; }
+}
+document.addEventListener("fullscreenchange",actualizarBotonPantallaCompleta);
 function corteCaja(){mostrarVista("cortes");}
 function esHoyVenta(v){return new Date(v.fecha).toDateString()===new Date().toDateString()}
 function resumenCorte(){

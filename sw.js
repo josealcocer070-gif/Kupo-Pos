@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v40'; /* v40: historial del producto en la nube (index.html + movil.html) — movimientos de inventario a Supabase */
+const CACHE = 'kupo-pos-v41'; /* v41: botón de pantalla completa en Acciones rápidas (index.html + movil.html) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {

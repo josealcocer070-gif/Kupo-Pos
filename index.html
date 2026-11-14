@@ -550,6 +550,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 <span class="titulo">⚡ Acciones rápidas</span>
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
 <button class="acc" onclick="abrirAtajos()">⌨️ Atajos de caja</button>
+<button class="acc" id="btnPantallaCompleta" onclick="alternarPantallaCompleta()">⛶ Pantalla completa</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
 <button class="acc" id="accGasto" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" id="accCorte" onclick="mostrarVista('cortes')">💳 Realizar corte de caja</button>
@@ -2217,6 +2218,18 @@ function corteCaja(){mostrarVista("cortes");}
 /* Atajos de caja (PC, Lalo 2026-11-14): teclas de la referencia del Manus
    viejo. Solo en PC (index.html); en movil.html no hay teclado. */
 function abrirAtajos(){var m=document.getElementById("modalAtajos");if(m)m.classList.add("abierto");}
+/* Botón de pantalla completa (Lalo 2026-11-14): en Chrome entra y sale con la API de pantalla completa. F11 ya hacía lo mismo, pero ahora hay botón visible. */
+function alternarPantallaCompleta(){
+  if(document.fullscreenElement){ document.exitFullscreen().catch(function(){}); return; }
+  var el=document.documentElement;
+  if(el.requestFullscreen){ el.requestFullscreen().catch(function(){}); }
+  else if(el.webkitRequestFullscreen){ el.webkitRequestFullscreen(); }
+}
+function actualizarBotonPantallaCompleta(){
+  var b=document.getElementById("btnPantallaCompleta");
+  if(b){ b.textContent=document.fullscreenElement?"⛶ Salir de pantalla completa":"⛶ Pantalla completa"; }
+}
+document.addEventListener("fullscreenchange",actualizarBotonPantallaCompleta);
 function cerrarAtajos(){var m=document.getElementById("modalAtajos");if(m)m.classList.remove("abierto");}
 function recuperarVentaEnEspera(){var guardada=null;try{guardada=JSON.parse(localStorage.getItem("kupoPosV146Espera")||"null")}catch(e){guardada=null}if(!guardada||!guardada.length){toast("No hay ninguna venta en espera para recuperar.");return}if(ticket.length&&!confirm("Ya hay una venta en curso. ¿Reemplazarla con la venta en espera?"))return;ticket=guardada;try{localStorage.removeItem("kupoPosV146Espera")}catch(e){}guardar();render();toast("Venta en espera recuperada. Recuerda: no se registra hasta cobrarla.");}
 function cancelarVenta(){if(!ticket.length){toast("No hay venta en curso para cancelar.");return}if(!confirm("¿Cancelar la venta en curso? Se quitan los productos del ticket y no se registra nada."))return;ticket=[];var _r=document.getElementById("recibido");if(_r)_r.value="";var _me=document.getElementById("mixtoEfectivo");if(_me)_me.value="";var _mt=document.getElementById("mixtoTarjeta");if(_mt)_mt.value="";guardar();render();toast("Venta cancelada. El ticket quedó vacío.");}
