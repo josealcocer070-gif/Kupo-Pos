@@ -836,6 +836,18 @@ h1,h2{font-weight:800!important}
   body.movil-ventas #panelVenta #ticket{display:block!important;flex:none!important;max-height:46vh!important;overflow-y:auto!important;overscroll-behavior:contain!important}
 }
 </style>
+<style id="teclado-no-tapa-ticket">
+/* ===== El teclado no tapa el ticket al cobrar por kilo (Lalo, 2026-11-14) =====
+   Al tocar la cantidad de una línea por kilo, el teclado numérico se abría
+   y la línea quedaba escondida detrás de la barra fija de TOTAL/Cobrar.
+   Solo móvil (<=760px), solo en Ventas: se reserva espacio abajo dentro del
+   ticket para que la última línea pueda subir, y al enfocar el campo la
+   línea se centra en la zona visible (ver verLineaTicket en el JS).
+   No toca lógica de cobro, licencias, SCAN, catálogo, localStorage ni Supabase. */
+@media (max-width:760px){
+  body.movil-ventas #panelVenta #ticket{padding-bottom:170px!important}
+}
+</style>
 <style id="productos-lista-compacta">
 /* ===== Productos como lista compacta, no feed (Lalo, 2026-11-13) =====
    Antes, dos bloques móviles ponían .prod-row en columna con la foto a todo
@@ -1861,7 +1873,7 @@ function renderTicket(){
  const sc=document.getElementById("subCliente");if(sc)sc.textContent="Folio se asigna al cobrar · "+clienteVentaActual;
  const ce=document.getElementById("cajaEstado");if(ce)ce.textContent="🟢 Caja abierta · Fondo "+dinero(fondoCaja||0);
  if(!ticket.length){box.innerHTML=`<div class="ticket-vacio">🛒<br><b>Ticket vacío</b><br>Toca ☰ para agregar productos del catálogo o SCAN para escanear uno.</div>`;}
- else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id)||{unidad:"pieza",nombre:"Producto"};const paso=pasoUnidad(p);return `<div class="linea linea-ticket"><span class="ticket-foto">${fotoHtml(p)}</span><span class="ticket-info"><b class="ticket-nombre">${escHtml(p.nombre||"Producto")}</b><span class="ticket-desc">${escHtml(p.categoria||"General")}${p.sku?" · "+escHtml(p.sku):""} · ${dinero(l.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</span><span class="cant"><button onclick="cambiarCant(${l.id},-${paso})">−</button> <input type="number" min="${esDecimalUnidad(p)?"0.01":"1"}" step="${esDecimalUnidad(p)?"0.01":"1"}" value="${fmtCant(l.cant,unidadDe(p))}" onchange="fijarCant(${l.id},this.value)" aria-label="Cantidad"> <span>${etiquetaUnidad(p,l.cant)}</span> <button onclick="cambiarCant(${l.id},${paso})">+</button></span></span><span class="ticket-importe">${dinero(l.cant*l.precio)}</span><button type="button" class="linea-quitar" onclick="quitarLineaTicket(${l.id})" aria-label="Quitar producto del ticket">✕</button></div>`}).join("")}
+ else{box.innerHTML=ticket.map(l=>{const p=catalogo.find(x=>x.id===l.id)||{unidad:"pieza",nombre:"Producto"};const paso=pasoUnidad(p);return `<div class="linea linea-ticket"><span class="ticket-foto">${fotoHtml(p)}</span><span class="ticket-info"><b class="ticket-nombre">${escHtml(p.nombre||"Producto")}</b><span class="ticket-desc">${escHtml(p.categoria||"General")}${p.sku?" · "+escHtml(p.sku):""} · ${dinero(l.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</span><span class="cant"><button onclick="cambiarCant(${l.id},-${paso})">−</button> <input type="number" inputmode="${esDecimalUnidad(p)?"decimal":"numeric"}" min="${esDecimalUnidad(p)?"0.01":"1"}" step="${esDecimalUnidad(p)?"0.01":"1"}" value="${fmtCant(l.cant,unidadDe(p))}" onfocus="verLineaTicket(this)" onchange="fijarCant(${l.id},this.value)" aria-label="Cantidad"> <span>${etiquetaUnidad(p,l.cant)}</span> <button onclick="cambiarCant(${l.id},${paso})">+</button></span></span><span class="ticket-importe">${dinero(l.cant*l.precio)}</span><button type="button" class="linea-quitar" onclick="quitarLineaTicket(${l.id})" aria-label="Quitar producto del ticket">✕</button></div>`}).join("")}
  const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
  const sub=total/1.16, iva=total-sub;
  var _st=document.getElementById("subtotal");if(_st)_st.textContent=dinero(sub);
@@ -1871,6 +1883,20 @@ function renderTicket(){
  const cambio=pago==="Efectivo"&&rec>0?Math.max(0,rec-total):0;
  const cambioEl=document.getElementById("cambio");if(cambioEl)cambioEl.textContent=dinero(cambio);
  if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();
+}
+/* Teclado móvil (Lalo 2026-11-14): al escribir la cantidad por kilo el teclado tapaba el ticket. Al enfocar el campo, la línea se centra en la zona visible del ticket. */
+function verLineaTicket(input){
+ if(!input)return;
+ var linea=input.closest?input.closest('.linea-ticket'):null;
+ var objetivo=linea||input;
+ setTimeout(function(){try{objetivo.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}},350);
+ setTimeout(function(){try{objetivo.scrollIntoView({block:'center'});}catch(e){}},850);
+}
+if(window.visualViewport){
+ window.visualViewport.addEventListener('resize',function(){
+  var a=document.activeElement;
+  if(a&&a.tagName==='INPUT'&&a.closest&&a.closest('#ticket')){verLineaTicket(a);}
+ });
 }
 function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();toast("Agregado: "+p.nombre+" · "+textoCantidad(p,nuevo)+".");}
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
