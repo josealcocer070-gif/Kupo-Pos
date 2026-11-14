@@ -63,6 +63,7 @@ main .sub{color:#555;margin-bottom:18px}
 .supabase-auth form{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
 .supabase-auth label{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px}
 .supabase-auth input{border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px}
+.supabase-auth select{border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px}
 .supabase-auth button{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
 .supabase-auth button.dorado{background:var(--dorado);color:#12233a}
 .supabase-auth button.secundario{background:#fff;color:var(--azul);border:1px solid var(--azul)}
@@ -268,6 +269,15 @@ main .sub{color:#555;margin-bottom:18px}
  <section id="vistaRespaldos" class="oculto">
   <h1>Respaldos</h1>
   <p class="sub">Respaldos automáticos diarios con cifrado AES-256-GCM</p>
+  <div class="supabase-auth">
+   <h2>⬇️ Descargar respaldo</h2>
+   <p>Descarga los datos de la nube en un archivo JSON: licencias, ventas, productos, cajeros y movimientos de inventario. Elige una licencia o todas.</p>
+   <form onsubmit="event.preventDefault();descargarRespaldo();">
+    <div><label for="respaldoLicencia">Licencia</label><select id="respaldoLicencia"><option value="">Todas las licencias</option></select></div>
+    <button type="submit" class="dorado">⬇️ Descargar respaldo</button>
+   </form>
+   <p class="msg" id="msgRespaldo"></p>
+  </div>
   <div class="info">Horario: <b>01:30 a.m.</b> hora de Campeche · Retención: <b>14 diarias / 8 semanales / 12 mensuales</b> · La clave privada está protegida en el servidor y nunca se muestra ni se envía por WhatsApp o correo.</div>
   <div class="tabla-wrap"><table class="tabla"><thead><tr><th>Terminal</th><th>Estado</th><th>Último éxito</th><th>Tamaño</th><th>Verificado</th></tr></thead><tbody id="listaRespaldos"></tbody></table></div>
  </section>
@@ -450,7 +460,60 @@ function copiarReserva(i){let c=reservas[i].codigo;if(navigator.clipboard)naviga
 function eliminarReserva(i){if(!confirm('¿Eliminar la reserva '+reservas[i].codigo+'?'))return;reservas.splice(i,1);guardar();renderReservas()}
 function renderTerminales(){ if(!TERMINALES.length){document.getElementById('listaTerminales').innerHTML='<tr><td colspan="5"><div class="vacio-accion">🖨<b>Aún no hay terminales registradas</b>Se registran cuando un negocio activa su licencia y conecta su terminal en KUPO POS.<br><button type="button" onclick="toast(\'En KUPO POS: Personalizar ticket &gt; Configurar terminales térmicas. Ahí se agrega la impresora Epson, Xprinter, Nextep, Bixolon o Qian.\')">🖨 Cómo conectar una terminal</button></div></td></tr>';return} document.getElementById('listaTerminales').innerHTML=TERMINALES.map(t=>'<tr><td><b>'+t.nombre+'</b></td><td>'+t.version+'</td><td><span class="estado '+(t.estado==='Actualizada'?'activa':'pendiente')+'">'+t.estado+'</span></td><td>'+t.conexion+'</td><td>'+t.impresora+'</td></tr>').join('');
 }
-function renderRespaldos(){ if(!RESPALDOS.length){document.getElementById('listaRespaldos').innerHTML='<tr><td colspan="5"><div class="vacio-accion">💾<b>Aún no hay respaldos registrados</b>Aparecen cuando una terminal haga su primer respaldo. El respaldo automático corre a la 01:30 a.m., hora de Campeche.<br><button type="button" onclick="toast(\'Respaldos: 01:30 a.m. hora de Campeche · Retención 14 diarias / 8 semanales / 12 mensuales · Cifrado AES-256-GCM.\')">💾 Ver horario de respaldos</button></div></td></tr>';return} document.getElementById('listaRespaldos').innerHTML=RESPALDOS.map(r=>'<tr><td><b>'+r.terminal+'</b></td><td><span class="estado '+(r.estado==='Activa'?'activa':'pausada')+'">'+r.estado+'</span></td><td>'+r.ultimo+'</td><td>'+r.tam+'</td><td>'+r.verificado+'</td></tr>').join('');
+async function renderRespaldos(){
+ var sel=document.getElementById('respaldoLicencia');
+ if(sel){var actual=sel.value;sel.innerHTML='<option value="">Todas las licencias</option>'+licencias.map(function(l){return '<option value="'+l.clave+'">'+l.negocio+' ('+l.clave+')</option>'}).join('');if(actual)sel.value=actual;}
+ var cuerpo=document.getElementById('listaRespaldos');
+ function vacio(){cuerpo.innerHTML='<tr><td colspan="5"><div class="vacio-accion">💾<b>Aún no hay respaldos registrados</b>Aparecen cuando una terminal haga su primer respaldo. El respaldo automático corre a la 01:30 a.m., hora de Campeche.<br><button type="button" onclick="toast(\'Respaldos: 01:30 a.m. hora de Campeche · Retención 14 diarias / 8 semanales / 12 mensuales · Cifrado AES-256-GCM.\')">💾 Ver horario de respaldos</button></div></td></tr>';}
+ if(!kupoSupabase){vacio();return;}
+ var r;
+ try{r=await kupoSupabase.from('respaldos').select('id,licencia_clave,negocio,fecha,tamano_kb,verificado').order('fecha',{ascending:false}).limit(50);}
+ catch(e){vacio();return;}
+ if(r.error||!r.data||!r.data.length){vacio();return;}
+ cuerpo.innerHTML=r.data.map(function(x){return '<tr><td><b>'+(x.negocio||x.licencia_clave)+'</b><br><small>'+x.licencia_clave+'</small></td><td><span class="estado activa">Activa</span></td><td>'+fechaHoraBonita(x.fecha)+'</td><td>'+(x.tamano_kb==null?'—':x.tamano_kb+' KB')+'</td><td>'+(x.verificado?'Sí':'No')+' · <button onclick="descargarRespaldoFila('+x.id+')">Descargar</button></td></tr>';}).join('');
+}
+function fechaHoraBonita(f){if(!f)return '—';var d=new Date(f);return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+/* Descargar un respaldo automático ya guardado (Lalo 2026-11-14). */
+async function descargarRespaldoFila(id){
+ if(!kupoSupabase){toast('No hay conexión con Supabase.');return;}
+ var r=await kupoSupabase.from('respaldos').select('licencia_clave,negocio,fecha,datos').eq('id',id).maybeSingle();
+ if(r.error||!r.data){toast('No se pudo descargar ese respaldo.');return;}
+ var blob=new Blob([JSON.stringify(r.data.datos,null,2)],{type:'application/json'});
+ var a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download='kupo-respaldo-'+r.data.licencia_clave+'-'+String(r.data.fecha||'').slice(0,10)+'.json';
+ document.body.appendChild(a);a.click();a.remove();
+ setTimeout(function(){URL.revokeObjectURL(a.href);},5000);
+ toast('Respaldo descargado: '+(r.data.negocio||r.data.licencia_clave));
+}
+/* Descargar respaldo (Lalo 2026-11-14): baja los datos de la nube en un archivo JSON. Solo Admin, desde la vista Respaldos. */
+async function descargarRespaldo(){
+ var msg=document.getElementById('msgRespaldo');
+ function decir(t,ok){if(msg){msg.textContent=t;msg.className='msg '+(ok?'ok':'error');}}
+ if(!kupoSupabase){decir('No hay conexión con Supabase.',false);return;}
+ var clave=(document.getElementById('respaldoLicencia')||{}).value||'';
+ decir('Descargando respaldo...',true);
+ var tablas=['licencias','ventas','productos','cajeros','movimientos_inventario'];
+ var datos={generado:'KUPO Admin',fecha:new Date().toISOString(),licencia:clave||'todas',tablas:{}};
+ var fallos=[];
+ for(var i=0;i<tablas.length;i++){
+  var t=tablas[i];
+  try{
+   var q=kupoSupabase.from(t).select('*');
+   if(clave){q=q.eq(t==='licencias'?'clave':'licencia_clave',clave);}
+   var r=await q;
+   if(r.error){fallos.push(t);datos.tablas[t]=[];}
+   else{datos.tablas[t]=r.data||[];}
+  }catch(e){fallos.push(t);datos.tablas[t]=[];}
+ }
+ var blob=new Blob([JSON.stringify(datos,null,2)],{type:'application/json'});
+ var a=document.createElement('a');
+ var f='kupo-respaldo-'+hoyLocal()+(clave?'-'+clave:'')+'.json';
+ a.href=URL.createObjectURL(blob);a.download=f;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(function(){URL.revokeObjectURL(a.href);},5000);
+ var total=Object.keys(datos.tablas).reduce(function(s,k){return s+datos.tablas[k].length;},0);
+ decir('Respaldo descargado: '+total+' registros en '+f+(fallos.length?' · Sin acceso a: '+fallos.join(', '):''),!fallos.length);
+ toast('Respaldo descargado: '+total+' registros');
 }
 (function(){
  revisarSesionSupabase();
