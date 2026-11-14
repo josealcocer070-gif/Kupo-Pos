@@ -1,6 +1,6 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v41'; /* v41: botón de pantalla completa en Acciones rápidas (index.html + movil.html) */
-const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
+const CACHE = 'kupo-pos-v42'; /* v42: iconos PWA como SVG (icon.svg/icon-maskable.svg) para que Chrome ofrezca instalar la app; los PNG no se pueden subir por la ruta normal y GitHub no acepta la contrasena guardada */
+const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
