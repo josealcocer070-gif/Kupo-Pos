@@ -745,13 +745,20 @@ h1,h2{font-weight:800!important}
    Solo móvil (hasta 760px): en Ventas el ticket se ve siempre y el catálogo
    sale del lado derecho con ☰. En escritorio (>760px) no cambia nada: sigue
    el 60/40 de PC. No toca lógica de cobro, licencias, SCAN, localStorage ni Supabase. */
+/* Cabecera del cajón (Ver ticket / Cerrar): estilo base para cualquier ancho.
+   Antes solo vivía dentro del @media ≤760px y en pantallas más anchas los
+   botones se veían pequeños y sin estilo (revisión 2026-11-14). */
+.catalogo-cabecera{order:0!important;display:flex!important;align-items:center!important;gap:10px!important;margin:2px 0 12px!important}
+.catalogo-cabecera h2{flex:1!important;font-size:22px!important;color:#0a2456!important;margin:0!important}
+.catalogo-cabecera .btn-ver-ticket{flex:0 0 auto!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:12px!important;padding:12px 14px!important;font-size:15px!important;font-weight:800!important;cursor:pointer!important;min-height:48px!important}
+.catalogo-cabecera .btn-cerrar-catalogo{flex:0 0 auto!important;width:48px!important;min-width:48px!important;height:48px!important;background:#fff!important;color:#0a2456!important;border:1px solid #c9d4dc!important;border-radius:12px!important;font-size:20px!important;font-weight:800!important;cursor:pointer!important}
 @media (max-width:760px){
  /* Hamburguesa a la derecha del encabezado, solo en Ventas móvil */
  body.movil-ventas header .menu-btn{display:flex!important;order:10!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;margin-left:auto!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:12px!important;font-size:26px!important;font-weight:800!important;cursor:pointer!important;position:relative!important}
  body.movil-ventas header .menu-btn .badge-ticket{position:absolute!important;top:-7px!important;right:-7px!important;min-width:22px!important;height:22px!important;border-radius:11px!important;background:#b3261e!important;color:#fff!important;font-size:12px!important;font-weight:800!important;display:none!important;align-items:center!important;justify-content:center!important;padding:0 5px!important}
  body.movil-ventas header .menu-btn .badge-ticket.con-items{display:flex!important}
- /* Catálogo como cajón desde la derecha, oculto fuera de pantalla */
- body.movil-ventas #vistaVentas{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:auto!important;width:min(92vw,430px)!important;max-width:92vw!important;height:100dvh!important;margin:0!important;padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px))!important;background:#e9edf3!important;z-index:90!important;overflow-y:auto!important;box-shadow:-10px 0 34px rgba(0,0,0,.35)!important;transform:translateX(105%)!important;visibility:hidden!important;transition:transform .28s ease,visibility .28s!important}
+ /* Catálogo como cajón desde la derecha, oculto fuera de pantalla. El hueco inferior (170px) deja ver la última fila por encima de la barra fija TOTAL/Cobrar (revisión 2026-11-14). */
+ body.movil-ventas #vistaVentas{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:auto!important;width:min(92vw,430px)!important;max-width:92vw!important;height:100dvh!important;margin:0!important;padding:14px 14px calc(170px + env(safe-area-inset-bottom,0px))!important;background:#e9edf3!important;z-index:90!important;overflow-y:auto!important;box-shadow:-10px 0 34px rgba(0,0,0,.35)!important;transform:translateX(105%)!important;visibility:hidden!important;transition:transform .28s ease,visibility .28s!important}
  body.catalogo-abierto #vistaVentas{transform:translateX(0)!important;visibility:visible!important}
  body.catalogo-abierto #fondoCatalogo{opacity:1!important;pointer-events:auto!important}
  #fondoCatalogo{position:fixed!important;inset:0!important;background:rgba(0,0,0,.45)!important;z-index:85!important;opacity:0!important;pointer-events:none!important;transition:opacity .28s!important}
@@ -923,7 +930,8 @@ h1,h2{font-weight:800!important}
   <p class="aviso-demo">Sin una licencia creada y Activa en KUPO Admin no se puede entrar. La activación en Admin es la llave.</p>
   <div><a class="link-admin dorado" href="admin.html">Ir a KUPO Admin</a><a class="link-admin" href="admin.html">Crear licencia</a></div>
   <div class="contratar">
-   <h3>¿Aún no tienes licencia?<br>Contrata KUPO POS</h3>
+   <h3 onclick="toggleContratar()" style="cursor:pointer">¿Aún no tienes licencia?<br>Contrata KUPO POS <span id="flechaContratar">▾</span></h3>
+   <div id="detallesContratar" class="oculto">
    <p class="contratar-sub">Tu negocio organizado, sin caos en caja.</p>
    <div class="plan">
     <b>Plan sin permanencia</b>
@@ -950,6 +958,7 @@ h1,h2{font-weight:800!important}
    <a class="btn-inicio" href="https://wa.me/529519433938?text=Hola%2C%20quiero%20contratar%20KUPO%20POS" target="_blank" rel="noopener">💬 Contratar por WhatsApp</a>
    <p class="ws-num">WhatsApp: 951 943 3938</p>
    <div class="centro"><a class="link-admin" href="admin.html">Ir a KUPO Admin</a></div>
+   </div>
   </div>
   <p class="inicio-pie">KUPO POS V1.5.0 · Punto de venta inteligente</p>
  </div>
@@ -3090,8 +3099,10 @@ function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
 function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;if((c.tipo||"dinero")==="productos"){toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal));return}toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
-function mostrarPasoLicencia(){document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent="KUPO POS";let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.5.0";}
+function mostrarPasoLicencia(){var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");let n1=document.getElementById("inicioNegocio");if(n1)n1.textContent="KUPO POS";let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.5.0";}
 function mostrarPasoLogin(){document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");}
+/* Contratar (revisión 2026-11-14): planes y funciones se muestran solo al tocar el título, para que activar la licencia sea lo primero y más sencillo. */
+function toggleContratar(){var d=document.getElementById("detallesContratar");var f=document.getElementById("flechaContratar");if(!d)return;var cerrado=d.classList.toggle("oculto");if(f)f.textContent=cerrado?"▾":"▴";}
 const CLAVES_PRUEBA=["KUPO-7F2A-91BC","KUPO-3D8E-44F1","KUPO-9A1C-77D2"];
 function leerLicenciasCompartidas(){try{let l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"null");return Array.isArray(l)?l:[]}catch(e){return[]}}
 function estadoLicencia(l){if(l.estado==="Pausada")return "Pausada";if(l.estado==="Vencida")return "Vencida";if(l.vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.vencimiento+"T00:00:00")<hoy)return "Vencida"}return "Activa"}
