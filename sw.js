@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v42'; /* v42: iconos PWA como SVG (icon.svg/icon-maskable.svg) para que Chrome ofrezca instalar la app; los PNG no se pueden subir por la ruta normal y GitHub no acepta la contrasena guardada */
+const CACHE = 'kupo-pos-v43'; /* v43: cajón de dinero por Bluetooth (pulso ESC/POS al cobrar en efectivo + botón manual + ajuste) en movil.html */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
