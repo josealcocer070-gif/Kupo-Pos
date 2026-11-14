@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v33'; /* v33: campanita y perfil del encabezado con función en móvil: avisos de stock/ventas y panel de sesión */
+const CACHE = 'kupo-pos-v34'; /* v34: tipografía Poppins (Google Fonts, con respaldo system-ui sin internet) en móvil */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {
