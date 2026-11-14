@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v26'; /* v26: fotos reales + tipografia gruesa en movil.html (cada vista es su propia pantalla; #vistaVentas.oculto ya oculta Ventas; barra TOTAL a 96px + safe-area) */
+const CACHE = 'kupo-pos-v27'; /* v27: migración de fotos por nombre aproximado en movil.html (Club Sandwich con otro id y Combo Yanay también reciben foto) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {
