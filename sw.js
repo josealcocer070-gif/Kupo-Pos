@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v38'; /* v38: sección Reportes (index.html + movil.html) — hoy, top 3, por cajero, últimos 7 días */
+const CACHE = 'kupo-pos-v39'; /* v39: historial del producto por cajero (index.html + movil.html) — quién modificó las entradas */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {
