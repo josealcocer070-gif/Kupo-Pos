@@ -814,7 +814,9 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 <label><input type="checkbox" id="tMostrarLogo" checked> Mostrar logo del negocio en el ticket</label>
 <label><input type="checkbox" id="tMostrarIva" checked> Mostrar IVA (16%)</label>
 <label><input type="checkbox" id="tMostrarFolio" checked> Mostrar folio</label>
+<label><input type="checkbox" id="tImpSilenciosa"> Impresión silenciosa en esta PC (sin ventana de imprimir al cobrar)</label>
 </div>
+<div style="font-size:13px;color:#444;background:#f0f7ff;border:1px solid #bcd7f5;border-radius:10px;padding:10px;margin-top:8px"><b>🖨 Cómo se activa la impresión silenciosa en PC:</b> 1) En Windows, pon la impresora térmica de 80 mm como impresora predeterminada. 2) Cierra Chrome y ábrelo con el ajuste <b>--kiosk-printing</b>: clic derecho en el acceso directo de Chrome → Propiedades → en Destino agrega al final <b>--kiosk-printing</b>. 3) Activa la casilla de arriba y guarda. Al cobrar, el ticket se imprime solo en la impresora predeterminada, sin ventana. Si Chrome no se abrió con ese ajuste, la ventana de imprimir seguirá apareciendo: eso lo decide Chrome, no KUPO. En el celular la impresión silenciosa es por Bluetooth (ver KUPO móvil).</div>
 <button type="submit">💾 Guardar personalización</button>
 <button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
 </form>
@@ -1353,6 +1355,12 @@ function confirmarCobro(){
  ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";guardar();render();
  if(typeof sincronizarVentaNube==="function")sincronizarVentaNube(ventaNueva);
  toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
+ /* Impresión silenciosa en PC (Lalo 2026-11-14): solo si la casilla está
+    activa en Personalizar ticket. Imprime el mismo ticket con window.print;
+    sale SIN ventana solo si Chrome se abrió con --kiosk-printing y la
+    térmica de 80 mm es la impresora predeterminada. Si la casilla está
+    apagada, al cobrar no se imprime nada (como hoy) y se usa Reimprimir. */
+ if(ticketConfig.impresionSilenciosa===true&&typeof imprimirTicketVenta==="function")imprimirTicketVenta(ventaNueva);
 }
 
 /* Cotizaciones: folio COT-0001, vigencia en días, IVA 16% incluido.
@@ -1426,7 +1434,7 @@ function cambiarOpcionSistema(clave,valor){
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
  const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
- ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"});
+ ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
  opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false});
@@ -1438,7 +1446,7 @@ function cargarDatosLicencia(){
  const boxEl=document.getElementById("negocioBox"); if(boxEl)boxEl.textContent=nb.toUpperCase();
  aplicarOpcionesSistema();
 }
-let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"});
+let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"});
 let terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
 function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function cargarTicketConfig(){
@@ -1450,6 +1458,7 @@ function cargarTicketConfig(){
  g("tMostrarLogo").checked=ticketConfig.mostrarLogo!==false;
  g("tMostrarIva").checked=ticketConfig.mostrarIva!==false;
  g("tMostrarFolio").checked=ticketConfig.mostrarFolio!==false;
+ if(g("tImpSilenciosa"))g("tImpSilenciosa").checked=ticketConfig.impresionSilenciosa===true;
  if(g("tPapel"))g("tPapel").value=ticketConfig.papel||"80 mm";
  const rp=g("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel||"80 mm";
  const tp=g("termPapel"); if(tp)tp.value=ticketConfig.papel||"80 mm";
@@ -1481,7 +1490,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm"};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm"};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig();
@@ -1489,7 +1498,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(){
  if(!confirm("¿Restablecer los datos del ticket a los valores de ejemplo?"))return;
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm"};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -2345,7 +2354,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=23').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=36').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
