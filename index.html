@@ -19,18 +19,18 @@ body{font-family:Segoe UI,Arial,sans-serif;background:#f2f4f7;color:#12233a}
 header{background:var(--azul);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 16px;position:sticky;top:0;z-index:20}
 header .avatar{width:52px;height:52px;border-radius:14px;object-fit:cover;background:#fff;padding:2px;flex:none}
 header .negocio{font-size:24px;font-weight:800;line-height:1.05}
-header .negocio b{background:transparent;border:0;color:#fff;font-size:20px;font-weight:800}
-header .sucursal{color:#bcd7e6;font-size:13px;letter-spacing:1px;font-weight:700}
+header .negocio b{background:transparent;border:0;color:#fff;font-size:22px;font-weight:800}
+header .sucursal{color:#bcd7e6;font-size:14px;letter-spacing:1px;font-weight:700}
 header .sp{flex:1}
 header .user{text-align:right;line-height:1.2}
-header .user b{font-size:15px}
-header .user span{display:block;font-size:12px;color:#bcd7e6}
-.pill{background:#0f6a4d;border:1px solid #2ea37c;color:#fff;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+header .user b{font-size:16px}
+header .user span{display:block;font-size:13px;color:#bcd7e6}
+.pill{background:#0f6a4d;border:1px solid #2ea37c;color:#fff;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:700;white-space:nowrap}
 .menu-btn{display:block;background:none;border:0;color:#fff;font-size:26px;cursor:pointer;padding:4px 8px;border-radius:8px}
 .menu-btn:hover{background:rgba(255,255,255,.15)}
-.acciones{background:#fff;display:flex;gap:10px;align-items:center;padding:10px 14px;overflow-x:auto;border-bottom:1px solid #dfe5ea;position:sticky;top:72px;z-index:15}
-.acciones .titulo{font-weight:800;white-space:nowrap}
-.acc{border:1px solid #c9d4dc;background:#fff;border-radius:22px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.acciones{background:#fff;display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid #dfe5ea;position:sticky;top:72px;z-index:15}
+.acciones .titulo{font-size:17px;font-weight:800;white-space:nowrap}
+.acc{border:1px solid #c9d4dc;background:#fff;border-radius:22px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
 .acc:hover{background:#eef6fb}
 .acc.cerrar{color:#b3261e;border-color:#e5b6b3}
 .layout{display:grid;grid-template-columns:minmax(0,60%) minmax(0,40%);gap:0;align-items:start;transition:margin-left .35s ease}
@@ -45,7 +45,7 @@ aside .sec{margin:18px 14px 8px;font-size:12px;letter-spacing:1.5px;color:#9dc0d
 aside .pie{margin-top:22px;background:rgba(255,255,255,.08);border-radius:12px;padding:12px}
 aside .pie img{width:100%;background:#fff;border-radius:10px;padding:8px}
 aside .pie small{display:block;margin-top:8px;color:#bcd7e6;line-height:1.4}
-main{padding:18px 22px}
+main{padding:14px 22px 18px}
 main h1{font-size:34px;margin-bottom:14px}
 .buscar{display:flex;gap:12px;margin-bottom:18px}
 .buscar input{flex:1;border:1px solid #c9d4dc;border-radius:24px;padding:12px 18px;font-size:16px}
@@ -57,7 +57,7 @@ main h1{font-size:34px;margin-bottom:14px}
    para lector de códigos o teclear el código. */
 @media(max-width:1020px){.btn-scan{display:block}}
 /* Ayuda del lector en PC: solo visible en PC (>1020px), oculta en móvil/tablet */
-.ayuda-lector-pc{display:none;margin:-8px 0 18px;font-size:13px;color:#0b4a6e;font-weight:700}
+.ayuda-lector-pc{display:none;margin:-6px 0 20px;font-size:14px;line-height:1.55;color:#0b4a6e;font-weight:700}
 @media(min-width:1021px){.ayuda-lector-pc{display:block}}
 @media(max-width:1020px){.ayuda-lector-pc{display:none}}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -86,6 +86,8 @@ main h1{font-size:34px;margin-bottom:14px}
 .card .mini{margin-top:8px}
 .card .mini button{background:none;border:0;color:#0d6cb5;cursor:pointer;font-size:13px;text-decoration:underline}
 .panel{background:#fff;border-left:1px solid #dfe5ea;padding:18px;position:sticky;top:72px;min-height:calc(100vh - 72px)}
+/* Legibilidad PC (2026-11-14): cuando las acciones rápidas ocupan dos filas, el panel se pega más abajo para no quedar debajo de ellas. */
+@media(min-width:1151px) and (max-width:1795px){.panel{top:118px;min-height:calc(100vh - 118px);max-height:calc(100vh - 118px)}}
 .panel h2{font-size:24px}
 .badge{background:#fff3bf;border-radius:16px;padding:4px 12px;font-size:13px;font-weight:800}
 .panel .sub{color:#555;font-size:14px;margin:8px 0}
@@ -93,7 +95,7 @@ main h1{font-size:34px;margin-bottom:14px}
 .negocio-box{background:#eef2f6;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin-bottom:14px}
 .negocio-box b{font-size:14px}
 .negocio-box input{width:100%;border:0;background:transparent;font-size:13px;color:#333;border-bottom:1px dashed #aaa;margin-top:2px}
-.ticket-vacio{border:2px dashed #c9d4dc;border-radius:12px;text-align:center;padding:22px 10px;color:#555;background:#f7fafc}
+.ticket-vacio{border:2px dashed #c9d4dc;border-radius:12px;text-align:center;padding:16px 10px;color:#555;background:#f7fafc}
 .linea{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
 .linea .cant button{border:1px solid #c9d4dc;background:#fff;border-radius:6px;width:26px;height:26px;cursor:pointer;font-weight:800}
 /* Ticket ancho: cada línea lleva foto del producto, nombre, descripción (categoría · SKU · precio por unidad), cantidad e importe */
@@ -105,7 +107,7 @@ main h1{font-size:34px;margin-bottom:14px}
 .linea-ticket .ticket-desc{display:block;font-size:12px;color:#666;margin:2px 0 6px;line-height:1.35}
 .linea-ticket .ticket-importe{flex:0 0 auto;font-weight:800;font-size:15px;white-space:nowrap}
 .linea-ticket .cant{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-.totales{margin-top:14px}
+.totales{margin-top:12px}
 .totales .row{display:flex;justify-content:space-between;padding:5px 0;font-size:15px}
 .totales .total{font-size:26px;font-weight:800}
 .totales .total b{color:var(--dorado2);font-size:38px}
