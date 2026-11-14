@@ -722,13 +722,13 @@ header .negocio b::after{font-weight:800!important;letter-spacing:1px}
 #menuMovil button{font-weight:600!important}
 #menuMovil button.activo{font-weight:800!important}
 h1,h2{font-weight:800!important}
-/* Columna centrada máx. 430px como un celular, no estirarse a todo el ancho */
-@media (min-width:480px){
+/* Columna centrada máx. 480px SOLO en escritorio (más de 760px): en el celular la app ocupa el 100% del ancho, sin tope ni márgenes laterales */
+@media (min-width:761px){
   body{background:#0a2456!important}
-  main{max-width:430px!important;margin:0 auto!important;background:#e9edf3!important;min-height:100vh}
-  header{max-width:430px!important;margin:12px auto 0!important}
-  #menuMovil{max-width:430px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:100%!important}
-  #barraVentaMovil{max-width:406px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:calc(100% - 24px)!important}
+  main{max-width:480px!important;margin:0 auto!important;background:#e9edf3!important;min-height:100vh}
+  header{max-width:480px!important;margin:12px auto 0!important}
+  #menuMovil{max-width:480px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:100%!important}
+  #barraVentaMovil{max-width:456px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:calc(100% - 24px)!important}
 }
 </style>
 
@@ -2661,7 +2661,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=27').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=28').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
