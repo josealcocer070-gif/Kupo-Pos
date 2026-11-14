@@ -2732,21 +2732,29 @@ function eliminarEntrada(id){
    Cada cambio de stock —entrada, eliminar una entrada o ajuste al editar el
    producto— queda registrado con el nombre del cajero en turno. Solo se
    registran los cambios desde que esto se instala; no hay historial del
-   pasado. Solo local en este dispositivo, no se sube a la nube. */
+   pasado. Se sube a la nube (tabla movimientos_inventario) igual que las
+   ventas: con internet y sesión Supabase Auth se sube al momento; sin
+   internet queda en la cola local y se sube después. El modal lee la nube
+   y la combina con lo local, sin duplicar. Si la tabla aún no existe en
+   Supabase, los movimientos se quedan en cola hasta que se ejecute el
+   script movimientos-inventario.sql en el SQL Editor. */
 let historialProductoId=null;
 function nombreEnTurno(){return (sesionActual&&sesionActual.nombre)||(sesionActual&&sesionActual.usuario)||"Sin sesión";}
 function fechaHoraBonita(iso){try{var d=new Date(iso);if(isNaN(d.getTime()))return "";return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}catch(e){return ""}}
 function registrarMovimientoProducto(p,tipo,cambio,extra){
  if(!p)return;
- historialProducto.unshift({id:Date.now()+(uid++),productoId:p.id,nombre:p.nombre,fecha:new Date().toISOString(),tipo:tipo,cambio:redondearCant(Number(cambio)||0),stock:redondearCant(Number(p.stock)||0),cajero:nombreEnTurno(),rol:(sesionActual&&sesionActual.rol)||"",almacen:(extra&&extra.almacen)||"",proveedor:(extra&&extra.proveedor)||"",nota:(extra&&extra.nota)||""});
+ var mov={id:Date.now()+(uid++),nubeId:(typeof nubeId==="function"?nubeId():"nube-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)),subidoNube:false,productoId:p.id,nombre:p.nombre,fecha:new Date().toISOString(),tipo:tipo,cambio:redondearCant(Number(cambio)||0),stock:redondearCant(Number(p.stock)||0),cajero:nombreEnTurno(),rol:(sesionActual&&sesionActual.rol)||"",almacen:(extra&&extra.almacen)||"",proveedor:(extra&&extra.proveedor)||"",nota:(extra&&extra.nota)||""};
+ historialProducto.unshift(mov);
  if(historialProducto.length>500)historialProducto.length=500;
  guardar();
+ if(typeof encolarMovimientoNube==="function"){encolarMovimientoNube(mov);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();}
 }
 function verHistorialProducto(id){
  var p=catalogo.find(function(x){return x.id===id});
  if(!p){toast("Ese producto ya no existe en el inventario.");return}
  historialProductoId=id;renderHistorialProducto();
  var m=document.getElementById("modalHistorialProducto");if(m)m.classList.add("abierto");
+ if(typeof cargarHistorialNube==="function"){cargarHistorialNube(id).then(function(nube){if(historialProductoId===id&&nube&&nube.length)renderHistorialProducto(nube);}).catch(function(){});}
 }
 function verHistorialSeleccionado(){
  var fp=(document.getElementById("filtroEntProd")||{}).value||"todos";
@@ -2754,12 +2762,13 @@ function verHistorialSeleccionado(){
  verHistorialProducto(Number(fp));
 }
 function cerrarHistorialProducto(){var m=document.getElementById("modalHistorialProducto");if(m)m.classList.remove("abierto");}
-function renderHistorialProducto(){
+function renderHistorialProducto(nubeItems){
  var p=catalogo.find(function(x){return x.id===historialProductoId});
  var lista=document.getElementById("histProdLista");if(!p||!lista)return;
  var sub=document.getElementById("histProdSub");
  if(sub)sub.textContent=p.nombre+" · Stock actual: "+textoCantidad(p,p.stock);
  var items=historialProducto.filter(function(h){return String(h.productoId)===String(historialProductoId)});
+ if(nubeItems&&nubeItems.length){var vistos={};items.forEach(function(h){if(h.nubeId)vistos[h.nubeId]=true});nubeItems.forEach(function(h){if(h.nubeId&&vistos[h.nubeId])return;items.push(h)});items.sort(function(a,b){return new Date(b.fecha)-new Date(a.fecha)});}
  if(!items.length){lista.innerHTML='<p style="color:#555">Aún no hay movimientos registrados para este producto.<br>Los cambios se registran desde ahora, cada vez que alguien modifique sus entradas o ajuste su inventario.</p>';return}
  lista.innerHTML=items.map(function(h){
   var signo=h.cambio>0?"+":"";
@@ -3029,7 +3038,7 @@ const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 let kupoSupabase=null;
 try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
 
-/* Sincronización a la nube (Supabase) — ventas, cajeros y productos.
+/* Sincronización a la nube (Supabase) — ventas, cajeros, productos y movimientos de inventario.
    Cada registro lleva su clave de licencia (licenciaActual()), así ningún
    negocio ve ni mezcla los datos de otro. Solo se escribe con sesión
    Supabase Auth (authenticated, como las licencias en Admin); la anon key
@@ -3041,13 +3050,17 @@ try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supaba
    Los PIN de cajero NUNCA salen del dispositivo: a la nube solo van
    nombre, usuario, rol y estado. Nunca la clave de servicio en el código. */
 function nubeId(){return "nube-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10)}
-function leerPendientesNube(){try{const v=JSON.parse(localStorage.getItem("kupoPosV146PendientesNube")||"null");return (v&&typeof v==="object")?{ventas:v.ventas||[],cajeros:v.cajeros||[],productos:v.productos||[],borrados:v.borrados||[]}:{ventas:[],cajeros:[],productos:[],borrados:[]}}catch(e){return{ventas:[],cajeros:[],productos:[],borrados:[]}}}
+function leerPendientesNube(){try{const v=JSON.parse(localStorage.getItem("kupoPosV146PendientesNube")||"null");return (v&&typeof v==="object")?{ventas:v.ventas||[],cajeros:v.cajeros||[],productos:v.productos||[],borrados:v.borrados||[],movimientos:v.movimientos||[]}:{ventas:[],cajeros:[],productos:[],borrados:[],movimientos:[]}}catch(e){return{ventas:[],cajeros:[],productos:[],borrados:[],movimientos:[]}}}
 function guardarPendientesNube(q){try{localStorage.setItem("kupoPosV146PendientesNube",JSON.stringify(q))}catch(e){}}
-function pendientesNubeCount(){const q=leerPendientesNube();return q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length}
+function pendientesNubeCount(){const q=leerPendientesNube();return q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length}
 function encolarNube(tipo,registro){const q=leerPendientesNube();const lista=q[tipo]||[];const i=lista.findIndex(function(x){return x.nubeId===registro.nubeId});if(i>=0)lista[i]=registro;else lista.push(registro);q[tipo]=lista;guardarPendientesNube(q);return q}
 function encolarVentaNube(v){if(!v)return;if(!v.nubeId)v.nubeId=nubeId();encolarNube("ventas",{nubeId:v.nubeId,licencia_clave:licenciaActual(),folio:String(v.folio).padStart(4,"0"),total:Number(v.total)||0,forma_pago:v.pago||"",fecha:v.fecha||new Date().toISOString(),cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",almacen:v.almacen||"",items:(v.items||[]).map(function(l){const pr=(typeof catalogo!=="undefined"?catalogo.find(function(x){return x.id===l.id})||{}:{});return{id:l.id,nombre:pr.nombre||"Producto",unidad:unidadDe(pr),cant:l.cant,precio:l.precio}})});}
 function encolarCajeroNube(c){if(!c)return;if(!c.nubeId)c.nubeId=nubeId();encolarNube("cajeros",{nubeId:c.nubeId,licencia_clave:licenciaActual(),nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.estado==="Activo"});if(typeof guardarCajeros==="function"){try{guardarCajeros()}catch(e){}}}
 function encolarProductoNube(pr){if(!pr)return;if(!pr.nubeId)pr.nubeId=nubeId();encolarNube("productos",{nubeId:pr.nubeId,licencia_clave:licenciaActual(),producto_id:String(pr.id),nombre:pr.nombre,precio:Number(pr.precio)||0,stock:redondearCant(pr.stock||0),unidad:unidadDe(pr),categoria:pr.categoria||"General",emoji:pr.emoji||"📦",pausado:!!pr.pausado});if(typeof guardar==="function"){try{guardar()}catch(e){}}}
+function encolarMovimientoNube(m){if(!m)return;if(!m.nubeId)m.nubeId=nubeId();encolarNube("movimientos",{nubeId:m.nubeId,licencia_clave:licenciaActual(),producto_id:String(m.productoId),producto_nombre:m.nombre||"",fecha:m.fecha||new Date().toISOString(),tipo:m.tipo||"",cambio:Number(m.cambio)||0,stock:Number(m.stock)||0,cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",cajero_nombre:m.cajero||"",rol:m.rol||"",almacen:m.almacen||"",proveedor:m.proveedor||"",nota:m.nota||""});}
+function marcarMovimientoSubido(nubeId){if(!nubeId)return false;var h=null;try{h=historialProducto.find(function(x){return x.nubeId===nubeId})}catch(e){}if(h&&!h.subidoNube){h.subidoNube=true;return true}return false}
+function encolarHistorialLocalNube(){if(typeof historialProducto==="undefined"||!historialProducto.length)return 0;var n=0;historialProducto.forEach(function(h){if(!h.subidoNube){if(!h.nubeId)h.nubeId=nubeId();encolarMovimientoNube(h);n++}});return n}
+function cargarHistorialNube(productoId){if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return Promise.resolve([]);return kupoSupabase.from("movimientos_inventario").select("nube_id,producto_id,producto_nombre,fecha,tipo,cambio,stock,cajero,cajero_nombre,rol,almacen,proveedor,nota").eq("licencia_clave",licenciaActual()).eq("producto_id",String(productoId)).order("fecha",{ascending:false}).limit(100).then(function(r){if(r.error||!r.data)return[];return r.data.map(function(x){return{id:"nube-"+(x.nube_id||""),nubeId:x.nube_id,productoId:productoId,nombre:x.producto_nombre||"",fecha:x.fecha,tipo:x.tipo,cambio:Number(x.cambio)||0,stock:Number(x.stock)||0,cajero:x.cajero_nombre||x.cajero||"",rol:x.rol||"",almacen:x.almacen||"",proveedor:x.proveedor||"",nota:x.nota||"",deNube:true}})}).catch(function(){return[]})}
 function encolarTodosProductosNube(){if(typeof catalogo==="undefined")return;catalogo.forEach(function(pr){encolarProductoNube(pr)})}
 function encolarBorradoNube(tabla,registro){if(!registro||!registro.nubeId)return;const q=leerPendientesNube();const b={tabla:tabla,nubeId:registro.nubeId,licencia_clave:licenciaActual()};if(tabla==="productos")b.producto_id=String(registro.id);if(tabla==="cajeros")b.usuario=registro.usuario;q.borrados.push(b);guardarPendientesNube(q);}
 function sincronizarVentaNube(v){encolarVentaNube(v);if(typeof guardar==="function"){try{guardar()}catch(e){}}(v.items||[]).forEach(function(l){const pr=catalogo.find(function(x){return x.id===l.id});if(pr)encolarProductoNube(pr)});intentarSincronizarNube();}
@@ -3056,7 +3069,7 @@ let sincronizandoNube=false;
 async function intentarSincronizarNube(){
  if(sincronizandoNube)return false;
  const q=leerPendientesNube();
- const total=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length;
+ const total=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length;
  if(!total)return false;
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
  if(!(await sesionSupabaseActiva()))return false;
@@ -3071,8 +3084,10 @@ async function intentarSincronizarNube(){
   for(const v of q.ventas.slice()){const r=await kupoSupabase.from("ventas").upsert({nube_id:v.nubeId,licencia_clave:v.licencia_clave,folio:v.folio,total:v.total,forma_pago:v.forma_pago,fecha:v.fecha,cajero:v.cajero,almacen:v.almacen,items:v.items},{onConflict:"nube_id"});if(!r.error)q.ventas=q.ventas.filter(function(x){return x.nubeId!==v.nubeId});}
   for(const c of q.cajeros.slice()){const r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo},{onConflict:"licencia_clave,usuario"});if(!r.error)q.cajeros=q.cajeros.filter(function(x){return x.nubeId!==c.nubeId});}
   for(const pr of q.productos.slice()){const r=await kupoSupabase.from("productos").upsert({nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado},{onConflict:"licencia_clave,producto_id"});if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
+  for(const m of q.movimientos.slice()){const r=await kupoSupabase.from("movimientos_inventario").upsert({nube_id:m.nubeId,licencia_clave:m.licencia_clave,producto_id:m.producto_id,producto_nombre:m.producto_nombre,fecha:m.fecha,tipo:m.tipo,cambio:m.cambio,stock:m.stock,cajero:m.cajero,cajero_nombre:m.cajero_nombre,rol:m.rol,almacen:m.almacen,proveedor:m.proveedor,nota:m.nota},{onConflict:"nube_id"});if(!r.error){q.movimientos=q.movimientos.filter(function(x){return x.nubeId!==m.nubeId});if(typeof marcarMovimientoSubido==="function")marcarMovimientoSubido(m.nubeId);}}
   guardarPendientesNube(q);
-  const quedan=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length;
+  if(typeof guardar==="function"){try{guardar()}catch(e){}}
+  const quedan=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length;
   if(quedan===0&&total>0&&typeof toast==="function")toast("☁️ Sincronizado con la nube: "+total+" registro(s) subido(s).");
   return quedan===0;
  }catch(e){return false}
@@ -3228,7 +3243,7 @@ cargarTicketConfig();
 actualizarEstadoBT();
 /* Nube: reintentar la cola pendiente al abrir y al volver internet. */
 if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();});
-setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();},3000);
+setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();},3000);
 /* Bluetooth: intentar reconectar sola la impresora que ya se había elegido. */
 setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarReconectarBT();},2000);
 </script>
@@ -3236,7 +3251,7 @@ setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarRecone
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=39').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=40').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
