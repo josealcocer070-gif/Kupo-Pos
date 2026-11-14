@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v30'; /* v30: Ventas móvil sin duplicado de TOTAL/Cobrar, solo las líneas del ticket hacen scroll, barra fija siempre visible */
+const CACHE = 'kupo-pos-v31'; /* v31: Ventas móvil con un solo botón Catálogo (sin ☰ del encabezado) y ticket en su lugar en flujo normal */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {

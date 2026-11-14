@@ -803,6 +803,32 @@ h1,h2{font-weight:800!important}
  body.movil-ventas #panelVenta .panel-pie{display:none!important}
 }
 </style>
+<style id="sin-doble-hamburguesa">
+/* ===== Un solo botón Catálogo + ticket en su lugar (Lalo, 2026-11-13) =====
+   1) DOS hamburguesas abrían el catálogo: el ☰ amarillo del encabezado y el
+   botón "☰ Catálogo" junto al SCAN. Queda SOLO el botón que dice "Catálogo":
+   el ☰ del encabezado se oculta en Ventas móvil. En las demás pantallas el ☰
+   del encabezado ya estaba oculto en móvil y "Más" abre el menú lateral, así
+   que ahí nada cambia. En escritorio (>760px) no cambia nada.
+   2) El ticket se había movido: el bloque anterior ponía #app en columna
+   100dvh con overflow:hidden y #panelVenta/#ticket con flex:1, lo que
+   estiraba el panel y dejaba huecos grandes (el detalle de Cliente quedaba
+   empujado al fondo). Se vuelve al flujo normal: header, ticket justo
+   debajo (Venta en curso, fecha, caja, SCAN/Catálogo, ARTÍCULOS enseguida),
+   sin huecos. Solo las líneas del ticket hacen scroll, dentro de su caja con
+   altura máxima. La barra fija de TOTAL/Cobrar (única, sin duplicado) sigue
+   abajo siempre visible; el margen inferior de 190px la reserva.
+   No toca lógica de cobro, licencias, SCAN, catálogo, localStorage ni Supabase. */
+@media (max-width:760px){
+  body.movil-ventas header .menu-btn{display:none!important}
+  body.movil-ventas #app{display:block!important;height:auto!important;max-height:none!important;overflow:visible!important}
+  body.movil-ventas #app .layout{display:block!important;overflow:visible!important}
+  body.movil-ventas #app .layout main{display:block!important;flex:none!important;min-height:0!important;height:auto!important;padding:0 14px!important;margin:0!important;overflow:visible!important}
+  body.movil-ventas #panelVenta{display:block!important;position:static!important;flex:none!important;min-height:0!important;height:auto!important;max-height:none!important;margin:0 0 calc(190px + env(safe-area-inset-bottom,0px))!important;overflow:visible!important}
+  body.movil-ventas #panelVenta .panel-cuerpo{display:block!important;flex:none!important;min-height:0!important;overflow:visible!important}
+  body.movil-ventas #panelVenta #ticket{display:block!important;flex:none!important;max-height:46vh!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+}
+</style>
 </head>
 <body>
 
@@ -2747,7 +2773,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=30').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=31').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
