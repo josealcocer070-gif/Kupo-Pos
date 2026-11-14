@@ -566,6 +566,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 <a id="navEntradas" onclick="mostrarVista('entradas')">➕ Entradas</a>
 <a id="navGastos" onclick="mostrarVista('gastos')">💲 Gastos</a>
 <a id="navCorte" onclick="mostrarVista('cortes')">📊 Corte diario</a>
+<a id="navReportes" onclick="mostrarVista('reportes')">📈 Reportes</a>
 <a id="navHistCortes" onclick="irHistorialCortes()">🕐 Historial de cortes</a>
 </nav>
 <div class="sec">SISTEMA</div>
@@ -764,6 +765,32 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 <div style="margin-top:16px">
 <button type="button" class="secundario" onclick="irHistorialCortes()">🕐 Ver historial completo de cortes →</button>
 </div>
+</div>
+
+
+<div id="vistaReportes" class="oculto">
+<h1>📈 Reportes</h1>
+<p style="color:#555;margin-bottom:14px"><span id="fechaReportes"></span> · Así va el negocio, en palabras simples.</p>
+<div style="margin-bottom:14px"><button type="button" onclick="renderReportes()">🔄 Actualizar</button> <button type="button" onclick="mostrarVista('ventas')">🧾 Ir a Ventas</button></div>
+<h2>💰 Hoy</h2>
+<div class="resumen">
+<div class="tarjeta"><small>VENDIDO HOY</small><b id="resRepHoyTotal" style="font-size:26px">$0.00</b></div>
+<div class="tarjeta"><small>VENTAS DE HOY</small><b id="resRepHoyNum">0 ventas</b></div>
+<div class="tarjeta"><small>TICKET PROMEDIO</small><b id="resRepHoyProm">$0.00</b></div>
+<div class="tarjeta"><small>EN EFECTIVO</small><b id="resRepHoyEfectivo">$0.00</b></div>
+<div class="tarjeta"><small>TARJETA Y TRANSFERENCIA</small><b id="resRepHoyTarjeta">$0.00</b></div>
+</div>
+<p id="resRepHoyVacio" style="color:#555"></p>
+<h2>🏆 Lo que más se vendió hoy</h2>
+<div id="listaRepTop"></div>
+<h2 id="titRepCajeros">👤 Ventas por cajero hoy</h2>
+<div id="listaRepCajeros"></div>
+<p id="notaRepCajeros" style="color:#555;font-size:13px"></p>
+<div id="secRep7dias">
+<h2>📅 Últimos 7 días</h2>
+<div id="listaRep7dias"></div>
+</div>
+<p id="notaRepCajero" style="color:#555;font-size:13px"></p>
 </div>
 
 <div id="vistaHistorial" class="oculto">
@@ -1374,7 +1401,7 @@ function confirmarCobro(){
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
- ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0});
+ ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
  const ventaNueva=ventas[ventas.length-1];
  const cambio=pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0);
  ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";guardar();render();
@@ -1639,18 +1666,18 @@ function probarImpresion(){
 
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones"]};
+const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
 let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
-const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
+const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
 function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+' onchange="guardarPermisosCajero()"> '+v[1]+'</label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se guardan solo en este dispositivo, por licencia.</p>'}
 function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
+ mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
  mostrar("accGasto",esAdmin);mostrar("accCorte",esAdmin);mostrar("accProductos",esAdmin);
  const _s=sesionActual||{};const u=document.getElementById("usuarioActual");if(u)u.textContent=_s.nombre||_s.usuario||"";
  const r=document.getElementById("rolActual");if(r)r.textContent=_s.rol||"";
@@ -1848,6 +1875,67 @@ function guardarTraspaso(ev){
 
 let vistaActual="ventas";
 function toggleMenu(){const a=document.querySelector("aside");const f=document.getElementById("fondoMenu");const abierto=a.classList.toggle("abierto");if(f)f.classList.toggle("visible",abierto);document.body.classList.toggle("menu-abierto",abierto);}
+
+function dineroMiles(n){return "$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fechaLocalDe(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function etiquetaDiaRep(d){const hoy=new Date();const ayer=new Date();ayer.setDate(hoy.getDate()-1);if(d.toDateString()===hoy.toDateString())return "Hoy";if(d.toDateString()===ayer.toDateString())return "Ayer";const t=d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"});return t.charAt(0).toUpperCase()+t.slice(1)}
+function resumenReportes(){
+ const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
+ const yoUsuario=(sesionActual&&sesionActual.usuario)||"";
+ const vHoy=ventas.filter(esHoyVenta);
+ const base=esAdmin?vHoy:vHoy.filter(function(v){return (v.cajero||"")===yoUsuario});
+ const total=base.reduce(function(a,v){return a+(Number(v.total)||0)},0);
+ const num=base.length;
+ let efectivo=0,tarjeta=0;
+ base.forEach(function(v){const t=Number(v.total)||0;if(v.pago==="Efectivo")efectivo+=t;else if(v.pago==="Tarjeta"||v.pago==="Transf.")tarjeta+=t;else if(v.pago==="Mixto"){efectivo+=Number(v.mixtoEfectivo)||0;tarjeta+=Number(v.mixtoTarjeta)||0}else tarjeta+=t});
+ const porProd={};
+ base.forEach(function(v){(v.items||[]).forEach(function(l){const p=catalogo.find(function(x){return x.id===l.id});const key=l.id;if(!porProd[key])porProd[key]={nombre:p?p.nombre:"Producto",emoji:p?p.emoji:"📦",cantidad:0,monto:0,unidad:unidadDe(p)};porProd[key].cantidad+=Number(l.cant)||0;porProd[key].monto+=(Number(l.cant)||0)*(Number(l.precio)||0)})});
+ const top=Object.values(porProd).sort(function(a,b){return b.cantidad-a.cantidad}).slice(0,3);
+ const porCaj={};
+ vHoy.forEach(function(v){const key=(v.cajero||"")||"__sin__";if(!porCaj[key])porCaj[key]={nombre:v.cajeroNombre||v.cajero||"Sin cajero registrado",total:0,num:0};porCaj[key].total+=Number(v.total)||0;porCaj[key].num++});
+ const cajerosHoy=Object.values(porCaj).sort(function(a,b){return b.total-a.total});
+ const dias=[];
+ for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const clave=fechaLocalDe(d);const delDia=ventas.filter(function(v){return fechaLocalDe(new Date(v.fecha))===clave});dias.push({etiqueta:etiquetaDiaRep(d),fechaCorta:d.toLocaleDateString("es-MX",{day:"numeric",month:"short"}),total:delDia.reduce(function(a,v){return a+(Number(v.total)||0)},0),num:delDia.length})}
+ const max7=Math.max.apply(null,dias.map(function(x){return x.total}).concat([0]));
+ return {esAdmin:esAdmin,total:total,num:num,promedio:num?total/num:0,efectivo:efectivo,tarjeta:tarjeta,top:top,masVendido:top[0]||null,cajerosHoy:cajerosHoy,dias:dias,max7:max7};
+}
+function renderReportes(){
+ const r=resumenReportes();
+ const pon=function(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt};
+ pon("fechaReportes",new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"}));
+ pon("resRepHoyTotal",dineroMiles(r.total));
+ pon("resRepHoyNum",r.num+(r.num===1?" venta":" ventas"));
+ pon("resRepHoyProm",dineroMiles(r.promedio));
+ pon("resRepHoyEfectivo",dineroMiles(r.efectivo));
+ pon("resRepHoyTarjeta",dineroMiles(r.tarjeta));
+ const vacio=document.getElementById("resRepHoyVacio");
+ if(vacio)vacio.textContent=r.num?(""):(r.esAdmin?"Aún no hay ventas hoy. Vende algo en Ventas y aparecerá aquí.":"Aún no tienes ventas hoy. Vende algo en Ventas y aparecerá aquí.");
+ const topEl=document.getElementById("listaRepTop");
+ if(topEl){
+  if(!r.top.length){topEl.innerHTML='<div class="vacio-accion">🏆<b>Aún no hay productos vendidos hoy</b>Vende algo en Ventas y aparecerá aquí.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div>'}
+  else{topEl.innerHTML=r.top.map(function(p,i){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 4px;border-bottom:1px solid #e5e5e5"><span>'+(i===0?"🥇 ":i===1?"🥈 ":"🥉 ")+escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+'</span><span><b>'+textoCantidadU(p.cantidad,p.unidad||"pieza")+'</b> · '+dineroMiles(p.monto)+'</span></div>'}).join("")}
+ }
+ const cajEl=document.getElementById("listaRepCajeros");
+ const titCaj=document.getElementById("titRepCajeros");
+ const notaCaj=document.getElementById("notaRepCajeros");
+ if(r.esAdmin){
+  if(titCaj)titCaj.style.display="";if(cajEl)cajEl.style.display="";
+  if(cajEl)cajEl.innerHTML=r.cajerosHoy.length?r.cajerosHoy.map(function(c){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 4px;border-bottom:1px solid #e5e5e5"><span>👤 '+escHtml(c.nombre)+'</span><span><b>'+dineroMiles(c.total)+'</b> · '+c.num+(c.num===1?" venta":" ventas")+'</span></div>'}).join(""):'<p style="color:#555">Aún no hay ventas hoy.</p>';
+  if(notaCaj)notaCaj.textContent="Las ventas de antes de hoy no tienen cajero registrado, porque ese dato se empezó a guardar hoy. Desde ahora cada venta queda con el nombre de quien cobró.";
+ }else{
+  if(titCaj)titCaj.style.display="none";if(cajEl)cajEl.style.display="none";
+  if(notaCaj)notaCaj.textContent="";
+ }
+ const sec7=document.getElementById("secRep7dias");
+ const lista7=document.getElementById("listaRep7dias");
+ if(sec7)sec7.style.display=r.esAdmin?"":"none";
+ if(r.esAdmin&&lista7){
+  lista7.innerHTML=r.dias.map(function(d){const pct=r.max7>0?Math.round(d.total/r.max7*100):0;return '<div style="padding:8px 4px;border-bottom:1px solid #e5e5e5"><div style="display:flex;justify-content:space-between;gap:10px"><span><b>'+escHtml(d.etiqueta)+'</b> <span style="color:#666">('+escHtml(d.fechaCorta)+')</span></span><span><b>'+dineroMiles(d.total)+'</b> · '+d.num+(d.num===1?" venta":" ventas")+'</span></div><div style="background:#eef2f6;border-radius:6px;height:12px;margin-top:6px;overflow:hidden"><div style="background:#1d5f5e;height:12px;border-radius:6px;width:'+pct+'%"></div></div></div>'}).join("");
+ }
+ const nota=document.getElementById("notaRepCajero");
+ if(nota)nota.textContent=r.esAdmin?"":"Eres Cajero: aquí solo ves tus ventas de hoy. Los últimos 7 días y las ventas de todos los cajeros solo las ve el Administrador.";
+}
+
 function mostrarVista(v){
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas, Cotizaciones y Reimprimir.");return}
  if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
@@ -1863,6 +1951,7 @@ function mostrarVista(v){
  document.getElementById("vistaEntradas").classList.toggle("oculto",v!=="entradas");
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
  document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
+ document.getElementById("vistaReportes").classList.toggle("oculto",v!=="reportes");
  document.getElementById("vistaHistorial").classList.toggle("oculto",v!=="historial");
  document.getElementById("vistaTicket").classList.toggle("oculto",v!=="ticket");
  document.getElementById("vistaCajeros").classList.toggle("oculto",v!=="cajeros");
@@ -1877,6 +1966,7 @@ function mostrarVista(v){
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
  document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
  document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
+ document.getElementById("navReportes").classList.toggle("activo",v==="reportes");
  document.getElementById("navHistCortes").classList.toggle("activo",v==="historial");
  document.getElementById("navTicket").classList.toggle("activo",v==="ticket");
  document.getElementById("navCajeros").classList.toggle("activo",v==="cajeros");
@@ -1884,7 +1974,7 @@ function mostrarVista(v){
  document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else render();
+ if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -2414,7 +2504,7 @@ setTimeout(function(){if(typeof intentarSincronizarNube==="function")intentarSin
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=37').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=38').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });

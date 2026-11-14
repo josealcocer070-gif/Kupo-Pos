@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v37'; /* v37: atajos de caja con teclado en PC (index.html) — F10/F9/F3/F4/Ctrl+S/Ctrl+K/Esc + modal Atajos de caja */
+const CACHE = 'kupo-pos-v38'; /* v38: sección Reportes (index.html + movil.html) — hoy, top 3, por cajero, últimos 7 días */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json'];
 
 self.addEventListener('install', (event) => {
