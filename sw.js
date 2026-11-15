@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v68'; /* v68: encabezado cabe al 100% de zoom 2026-11-14 — a 360px la campana y el perfil se salían 76px porque el nombre (56vw) no dejaba encoger el encabezado; ahora el nombre se recorta con … y todo cabe sin bajar el zoom a 67%; logo GB de 48px en el pie del menú en vez del logo grande de KUPO POS */
+const CACHE = 'kupo-pos-v69'; /* v69: icono en cada tarjeta 2026-11-14 — sin emoji ni foto prestada: fotoHtml ya no usa el emoji, y fuera fotoPorNombre (prestaba la foto de un ejemplo por coincidencia de nombre, p. ej. "bolillo"→Pan Bolillo); el producto sin foto real muestra un ícono de caja SVG; Ticket vacío también sin 🛒 */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
