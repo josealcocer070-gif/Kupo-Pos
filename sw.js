@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v60'; /* v60: login más limpio 2026-11-14 — título centrado sin "Paso 2" y ojito 👁️ para ver/ocultar el PIN (al limpiar con C vuelve a oculto) */
+const CACHE = 'kupo-pos-v61'; /* v61: teclado del login oculto en móvil 2026-11-14 — en el celular ya sale el teclado del sistema al tocar el PIN; en PC el teclado de la app sigue */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
