@@ -166,7 +166,7 @@ main .sub{color:#555;margin-bottom:18px}
     <button class="btn-inicio" type="submit">Entrar con Supabase</button>
    </form>
    <div class="msg" id="msgAdmin"></div>
-   <p class="aviso-demo">Solo el administrador entra con su correo y contraseña de Supabase. Sin sesión no se puede entrar a KUPO Admin, ni en local. Tu contraseña nunca se guarda en el código ni en localStorage.</p>
+   <p class="aviso-demo">Solo el administrador entra con su correo y contraseña de Supabase. Sin sesión no se puede entrar a KUPO Admin, ni en local. Tu contraseña nunca se guarda en el código ni en localStorage. 🔒 Por seguridad, al cerrar esta ventana tendrás que volver a poner tu contraseña.</p>
    <p class="inicio-pie">KUPO Admin · Versión V1.5.0 · Grupo Benítez</p>
   </div>
 </div>
@@ -308,6 +308,12 @@ main .sub{color:#555;margin-bottom:18px}
    Crear/Activar/Pausar/Eliminar licencias solo se sincronizan a la nube con
    sesión activa. La contraseña de Supabase nunca se guarda en el código ni en
    localStorage; la sesión la guarda el cliente de Supabase.
+   SEGURIDAD (2026-11-14): el Admin solo entra sin contraseña si ESTA pestaña
+   fue desbloqueada con la contraseña (bandera 'kupoAdminSesionPestana' en
+   sessionStorage). Al cerrar la pestaña o ventana la bandera se borra y al
+   volver a abrir el enlace pide la contraseña otra vez. La sesión de Supabase
+   sigue guardada en localStorage para que el POS (PC/móvil) pueda sincronizar
+   a la nube en ese mismo navegador; eso no abre el Admin solo.
    Nunca se usa la service_role key. */
 const SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
@@ -349,6 +355,7 @@ async function entrarSupabase(){
   if(r.error)throw r.error;
  }catch(e){sesionSupabase=false;actualizarEstadoSupabase();m.textContent='No se pudo entrar a Supabase: '+(e.message||'revisa tu correo y contraseña');m.className='msg error';return;}
  sesionSupabase=true;correoSesionSupabase=correo;
+ try{sessionStorage.setItem('kupoAdminSesionPestana','1');}catch(e){}
  document.getElementById('claveAdmin').value='';
  m.textContent='✅ Bienvenido, '+correo;m.className='msg ok';
  actualizarEstadoSupabase();mostrarAppAdmin();toast('Sesión Supabase activa');
@@ -357,6 +364,7 @@ async function entrarSupabase(){
 async function salirAdmin(){
  try{if(kupoSupabase)await kupoSupabase.auth.signOut();}catch(e){}
  sesionSupabase=false;correoSesionSupabase='';
+ try{sessionStorage.removeItem('kupoAdminSesionPestana');}catch(e){}
  let c=document.getElementById('claveAdmin');if(c)c.value='';
  let m=document.getElementById('msgAdmin');if(m){m.textContent='Sesión cerrada.';m.className='msg';}
  document.getElementById('appAdmin').classList.add('oculto');
@@ -365,7 +373,7 @@ async function salirAdmin(){
 }
 async function revisarSesionSupabase(){
  if(!kupoSupabase){actualizarEstadoSupabase();return;}
- try{let r=await kupoSupabase.auth.getSession();if(r.data&&r.data.session&&r.data.session.user){sesionSupabase=true;correoSesionSupabase=r.data.session.user.email||'';actualizarEstadoSupabase();mostrarAppAdmin();sincronizarTodasLicenciasNube();return;}}catch(e){sesionSupabase=false;}
+ try{let r=await kupoSupabase.auth.getSession();let pestanaOk=false;try{pestanaOk=sessionStorage.getItem('kupoAdminSesionPestana')==='1';}catch(e){}if(pestanaOk&&r.data&&r.data.session&&r.data.session.user){sesionSupabase=true;correoSesionSupabase=r.data.session.user.email||'';actualizarEstadoSupabase();mostrarAppAdmin();sincronizarTodasLicenciasNube();return;}}catch(e){sesionSupabase=false;}
  actualizarEstadoSupabase();
 }
 function datosLicenciaNube(l){return{clave:l.clave,negocio:l.negocio,tipo:l.tipo,giro:l.giro||'Abarrotes',estado:l.estado,fecha_alta:l.alta||null,fecha_vencimiento:l.vencimiento||null};}
