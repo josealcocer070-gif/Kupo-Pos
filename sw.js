@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v72'; /* v72: Productos reorganizado 2026-11-14 — la foto va primero con botones Subir desde galería y Tomar foto (cámara trasera, solo móvil; en PC solo galería), generador de códigos SKU-XXXXXX único junto al SCAN, y fuera el selector Icono (pEmoji/nuevoEmoji); los productos nuevos ya no guardan emoji */
+const CACHE = 'kupo-pos-v73'; /* v72: Productos reorganizado 2026-11-14 — la foto va primero con botones Subir desde galería y Tomar foto (cámara trasera, solo móvil; en PC solo galería), generador de códigos SKU-XXXXXX único junto al SCAN, y fuera el selector Icono (pEmoji/nuevoEmoji); los productos nuevos ya no guardan emoji */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
