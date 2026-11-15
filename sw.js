@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v69'; /* v69: icono en cada tarjeta 2026-11-14 — sin emoji ni foto prestada: fotoHtml ya no usa el emoji, y fuera fotoPorNombre (prestaba la foto de un ejemplo por coincidencia de nombre, p. ej. "bolillo"→Pan Bolillo); el producto sin foto real muestra un ícono de caja SVG; Ticket vacío también sin 🛒 */
+const CACHE = 'kupo-pos-v70'; /* v70: interruptores en Personalizar ticket 2026-11-14 — los 3 checkbox (logo en ticket, IVA, folio) ahora son interruptores como en Cajeros y permisos (texto a la izquierda, interruptor a la derecha, verde al activar); mismos ids, la lógica de guardar no cambia */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {

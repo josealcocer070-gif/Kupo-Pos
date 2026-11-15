@@ -920,9 +920,9 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <input type="file" id="tLogoArchivo" accept="image/jpeg,image/png,image/*" style="display:none" onchange="subirLogoNegocio(event)">
 <p style="font-size:12px;color:#666">El logo se guarda solo en este dispositivo (localStorage, base64). No se sube a ningún servidor. Se ajusta automáticamente para el ticket de 80 mm.</p>
 <div class="checks">
-<label><input type="checkbox" id="tMostrarLogo" checked> Mostrar logo del negocio en el ticket</label>
-<label><input type="checkbox" id="tMostrarIva" checked> Mostrar IVA (16%)</label>
-<label><input type="checkbox" id="tMostrarFolio" checked> Mostrar folio</label>
+<label class="perm-fila"><span>Mostrar logo del negocio en el ticket</span><span class="interruptor"><input type="checkbox" id="tMostrarLogo" checked><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>Mostrar IVA (16%)</span><span class="interruptor"><input type="checkbox" id="tMostrarIva" checked><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>Mostrar folio</span><span class="interruptor"><input type="checkbox" id="tMostrarFolio" checked><span class="deslizador"></span></span></label>
 <label><input type="checkbox" id="tImpSilenciosa"> Impresión silenciosa en esta PC (sin ventana de imprimir al cobrar)</label>
 </div>
 <div style="font-size:13px;color:#444;background:#f0f7ff;border:1px solid #bcd7f5;border-radius:10px;padding:10px;margin-top:8px"><b>🖨 Cómo se activa la impresión silenciosa en PC:</b> 1) En Windows, pon la impresora térmica de 80 mm como impresora predeterminada. 2) Cierra Chrome y ábrelo con el ajuste <b>--kiosk-printing</b>: clic derecho en el acceso directo de Chrome → Propiedades → en Destino agrega al final <b>--kiosk-printing</b>. 3) Activa la casilla de arriba y guarda. Al cobrar, el ticket se imprime solo en la impresora predeterminada, sin ventana. Si Chrome no se abrió con ese ajuste, la ventana de imprimir seguirá apareciendo: eso lo decide Chrome, no KUPO. En el celular la impresión silenciosa es por Bluetooth (ver KUPO móvil).</div>

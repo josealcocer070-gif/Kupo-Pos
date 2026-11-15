@@ -1399,9 +1399,9 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <input type="file" id="tLogoArchivo" accept="image/jpeg,image/png,image/*" style="display:none" onchange="subirLogoNegocio(event)">
 <p style="font-size:12px;color:#666">El logo se guarda solo en este dispositivo (localStorage, base64). No se sube a ningún servidor. Se ajusta automáticamente para el ticket de 80 mm.</p>
 <div class="checks">
-<label><input type="checkbox" id="tMostrarLogo" checked> Mostrar logo del negocio en el ticket</label>
-<label><input type="checkbox" id="tMostrarIva" checked> Mostrar IVA (16%)</label>
-<label><input type="checkbox" id="tMostrarFolio" checked> Mostrar folio</label>
+<label class="perm-fila"><span>Mostrar logo del negocio en el ticket</span><span class="interruptor"><input type="checkbox" id="tMostrarLogo" checked><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>Mostrar IVA (16%)</span><span class="interruptor"><input type="checkbox" id="tMostrarIva" checked><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>Mostrar folio</span><span class="interruptor"><input type="checkbox" id="tMostrarFolio" checked><span class="deslizador"></span></span></label>
 </div>
 <button type="submit">💾 Guardar personalización</button>
 <button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
