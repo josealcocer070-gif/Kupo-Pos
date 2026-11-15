@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v50'; /* v50: cambiar de cajero 2026-11-14 — la app ya no se cruza con el login: #app.oculto gana a las reglas de Ventas y salirSesion quita las clases de vista */
+const CACHE = 'kupo-pos-v51'; /* v51: menú inferior con permisos 2026-11-14 — la barra inferior y el título SISTEMA ya respetan los permisos del cajero */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {

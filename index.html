@@ -1706,6 +1706,8 @@ function aplicarPermisosMenu(){
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
  mostrar("navProductos",tienePermiso("productos"));mostrar("navEntradas",tienePermiso("entradas"));mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
  mostrar("accGasto",tienePermiso("gastos"));mostrar("accCorte",tienePermiso("cortes"));mostrar("accProductos",tienePermiso("productos"));
+ document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.style.display=tienePermiso(b.getAttribute("data-nav"))?"":"none"});
+ const _sec=document.querySelector("aside .sec");if(_sec)_sec.style.display=(tienePermiso("ticket")||tienePermiso("cajeros")||tienePermiso("multi")||esAdmin)?"":"none";
  const _s=sesionActual||{};const u=document.getElementById("usuarioActual");if(u)u.textContent=_s.nombre||_s.usuario||"";
  const r=document.getElementById("rolActual");if(r)r.textContent=_s.rol||"";
  const p=document.getElementById("pieUsuario");if(p)p.textContent=(_s.nombre||_s.usuario||"")+" · "+(_s.rol||"");
