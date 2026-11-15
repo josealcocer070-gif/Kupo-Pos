@@ -1439,7 +1439,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <button type="button" class="secundario" onclick="probarImpresionBT()">🧾 Probar ticket por Bluetooth</button>
 <button type="button" class="secundario" onclick="abrirCajonBT()">💵 Abrir cajón ahora</button>
 </div>
-<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700;margin-top:10px"><input type="checkbox" id="tAbrirCajon" checked onchange="guardarAbrirCajon()"> 💵 Abrir el cajón de dinero al cobrar en efectivo (solo por Bluetooth)</label>
+<label class="perm-fila"><span>💵 Abrir el cajón de dinero al cobrar en efectivo (solo por Bluetooth)</span><span class="interruptor"><input type="checkbox" id="tAbrirCajon" checked onchange="guardarAbrirCajon()"><span class="deslizador"></span></span></label>
 <p style="font-size:12px;color:#666;margin-top:6px">El cajón se abre solo cuando la venta es en efectivo o mixta y la impresora está conectada por Bluetooth. El cajón va conectado a la impresora con su cable. Sin impresora Bluetooth, el cajón no se puede abrir desde KUPO.</p>
 <p style="font-size:12px;color:#666;margin-top:8px">Pasos: 1) Enciende la impresora y activa su Bluetooth. 2) Toca “Conectar impresora Bluetooth” y elige la impresora en la lista. 3) Cobra una venta: el ticket se imprime solo. Si la impresora se apaga o se aleja, KUPO vuelve a imprimir con la ventana de siempre para no dejarte sin ticket.</p>
 </div>
@@ -1511,8 +1511,8 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <p style="color:#555;font-size:14px">Licencia: <b id="optLicencia">—</b> · Negocio: <b id="optNegocio">—</b></p>
 <p style="color:#555;font-size:14px">Estas opciones son solo para esta licencia/negocio. Solo el Administrador de este negocio puede cambiarlas.</p>
 <div class="checks">
-<label><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"> 📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></label>
-<label><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"> 🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></label>
+<label class="perm-fila"><span>📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"><span class="deslizador"></span></span></label>
 </div>
 <p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button><button type="button" id="btnIrMulti" class="secundario" onclick="mostrarVista('multi')">🏬 Ir a Multi-almacén</button></div>

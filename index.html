@@ -1021,8 +1021,8 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <p style="color:#555;font-size:14px">Licencia: <b id="optLicencia">—</b> · Negocio: <b id="optNegocio">—</b></p>
 <p style="color:#555;font-size:14px">Estas opciones son solo para esta licencia/negocio. Solo el Administrador de este negocio puede cambiarlas.</p>
 <div class="checks">
-<label><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"> 📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></label>
-<label><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"> 🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></label>
+<label class="perm-fila"><span>📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"><span class="deslizador"></span></span></label>
 </div>
 <p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button><button type="button" id="btnIrMulti" class="secundario" onclick="mostrarVista('multi')">🏬 Ir a Multi-almacén</button></div>
