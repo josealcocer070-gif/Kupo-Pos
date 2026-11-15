@@ -1254,7 +1254,6 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 </div>
 <!-- Lalo 2026-11-12 19:31: en el panel solo queda Cobrar. Forma de pago, efectivo recibido y cambio se escogen en la pantalla de confirmación. -->
 <button class="btn-cobrar" onclick="mostrarConfirmacionCobro()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.5.0: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 </div>
 </section>
 </div>
@@ -2786,7 +2785,7 @@ setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHi
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=76').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=77').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
