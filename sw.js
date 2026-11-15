@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v64'; /* v64: pantalla de licencia pulida 2026-11-14 — título centrado sin "Paso 1" y botón de soporte WhatsApp (solo logo) al pie de la tarjeta, igual que en el login */
+const CACHE = 'kupo-pos-v65'; /* v65: pantalla de licencia sin Admin 2026-11-14 — fuera "Ir a KUPO Admin", "Crear licencia" y el texto sobre la licencia (ese paso es personal de Lalo); queda solo clave + Validar, Contrata y el botón de soporte */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
