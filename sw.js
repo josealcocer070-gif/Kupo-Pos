@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v45'; /* v45: legibilidad PC 2026-11-14 — franja superior y acciones rápidas más legibles, acciones en dos filas sin cortes, texto del lector más legible, panel sin solape */
+const CACHE = 'kupo-pos-v46'; /* v46: bloqueo de intentos de PIN 2026-11-14 — 5 PIN incorrectos bloquean al usuario por 5 minutos */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {

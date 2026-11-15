@@ -2532,6 +2532,15 @@ function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
 function teclaPin(d){vibrarPin();const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
 function borrarPin(){vibrarPin();const i=document.getElementById("pinLogin");i.value=i.value.slice(0,-1);actualizarPuntosPin();}
 function limpiarPin(){vibrarPin();document.getElementById("pinLogin").value="";actualizarPuntosPin();}
+/* Bloqueo de intentos de PIN (Lalo 2026-11-14): 5 PIN incorrectos seguidos
+   bloquean a ese usuario por 5 minutos. Se guarda en localStorage por
+   usuario, así recargar la página no quita el bloqueo. */
+const PIN_MAX_INTENTOS=5,PIN_BLOQUEO_MS=5*60*1000;
+function leerBloqueoPin(){try{return JSON.parse(localStorage.getItem("kupoPosV146BloqueoPin")||"{}")}catch(e){return{}}}
+function guardarBloqueoPin(b){try{localStorage.setItem("kupoPosV146BloqueoPin",JSON.stringify(b))}catch(e){}}
+function textoBloqueoPin(hasta){const s=Math.ceil((hasta-Date.now())/1000);if(s<=60)return s+" segundo"+(s===1?"":"s");const m=Math.ceil(s/60);return m+" minuto"+(m===1?"":"s");}
+function registrarPinIncorrecto(usuario){const b=leerBloqueoPin();const k=usuario.toLowerCase();const r=b[k]||{intentos:0,hasta:0};if(r.hasta&&r.hasta>Date.now())return r;r.intentos=(r.intentos||0)+1;if(r.intentos>=PIN_MAX_INTENTOS){r.hasta=Date.now()+PIN_BLOQUEO_MS;r.intentos=0;}b[k]=r;guardarBloqueoPin(b);return r;}
+function limpiarBloqueoPin(usuario){const b=leerBloqueoPin();const k=usuario.toLowerCase();if(b[k]){delete b[k];guardarBloqueoPin(b);}}
 function entrar(){
  vibrarPin();
  const usuario=(document.getElementById("usuarioLogin").value||"").trim();
@@ -2542,7 +2551,10 @@ function entrar(){
  const c=cajeros.find(x=>x.usuario.toLowerCase()===usuario.toLowerCase());
  if(!c){m.textContent="Usuario no encontrado.";m.className="msg error";limpiarPin();return}
  if(c.estado!=="Activo"){m.textContent="Este cajero está pausado. Pide al Administrador que lo active.";m.className="msg error";limpiarPin();return}
- if(pin!==c.pin){m.textContent="PIN incorrecto. Inténtalo de nuevo.";m.className="msg error";limpiarPin();return}
+ const bl=(leerBloqueoPin()[usuario.toLowerCase()]||{});
+ if(bl.hasta&&bl.hasta>Date.now()){m.textContent="Demasiados intentos. Este usuario está bloqueado. Intenta de nuevo en "+textoBloqueoPin(bl.hasta)+".";m.className="msg error";limpiarPin();return}
+ if(pin!==c.pin){const r=registrarPinIncorrecto(usuario);if(r.hasta&&r.hasta>Date.now()){m.textContent="PIN incorrecto. Demasiados intentos: este usuario queda bloqueado por 5 minutos.";}else{const q=PIN_MAX_INTENTOS-r.intentos;m.textContent="PIN incorrecto. Inténtalo de nuevo. Te quedan "+q+" intento"+(q===1?"":"s")+".";}m.className="msg error";limpiarPin();return}
+ limpiarBloqueoPin(usuario);
  sesionActual={nombre:c.nombre,usuario:c.usuario,rol:c.rol,activa:true,licencia:licenciaActual(),inicio:Date.now()};
  guardarCajeros();
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
