@@ -1002,6 +1002,20 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 .cot-cant b{min-width:56px;text-align:center;font-size:13px}
 .cot-precio{width:96px}
 </style>
+<style id="entradas-v74">
+/* Entradas v74: menú hamburguesa dentro del apartado y picker de productos. */
+.ent-cabecera{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ent-cabecera h1{margin:0}
+.ent-menu-wrap{position:relative}
+.ent-menu-btn{min-width:44px;min-height:44px;font-size:20px}
+.ent-menu{display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #d8dee2;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.18);min-width:230px;z-index:50;overflow:hidden}
+.ent-menu.abierto{display:block}
+.ent-menu button{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid #eef1f3;padding:12px 14px;font-size:15px;color:#123}
+.ent-menu button:last-child{border-bottom:none}
+#listaProdEnt{max-height:260px;overflow-y:auto;border:1px solid #e5e8ea;border-radius:8px;padding:0 8px}
+#listaProdEnt .cot-prod.sel{background:#e8f4f3;border-radius:6px}
+#prodEntElegido .ent-elegido{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#e8f4f3;border-radius:8px;padding:10px 12px;font-size:14px}
+</style>
 </head>
 <body>
 
@@ -1215,7 +1229,18 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 </div>
 
 <div id="vistaEntradas" class="oculto">
-<h1>Entradas</h1>
+<div class="ent-cabecera">
+<h1>📥 Entradas</h1>
+<div class="ent-menu-wrap">
+<button type="button" class="ent-menu-btn" onclick="toggleMenuEntradas(event)" aria-label="Menú de Entradas">☰</button>
+<div id="menuEntradas" class="ent-menu">
+<button type="button" onclick="mostrarPanelEntradas('form')">📥 Registrar entrada</button>
+<button type="button" onclick="mostrarPanelEntradas('lista')">📋 Lista de entradas</button>
+<button type="button" onclick="verHistorialEntradaActual()">📜 Historial del producto</button>
+<button type="button" onclick="mostrarVista('productos')">📦 Ver Productos</button>
+</div>
+</div>
+</div>
 <p style="color:#555;margin-bottom:14px">Registra la mercancía que entra al negocio. Al guardar, el stock del producto sube en Productos y en Ventas.</p>
 <div class="resumen">
 <div class="tarjeta"><small>ENTRADAS DE HOY</small><b id="resEntHoy">0</b></div>
@@ -1223,21 +1248,33 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <div class="tarjeta"><small>COSTO TOTAL DE HOY</small><b id="resCostoHoy">$0.00</b></div>
 <div class="tarjeta"><small>TOTAL DE ENTRADAS</small><b id="resEntTotal">0</b></div>
 </div>
-<div class="form-prod">
+<div id="entPanelForm" class="form-prod">
 <h2>📥 Registrar entrada</h2>
 <form onsubmit="guardarEntrada(event)">
-<div><label>Producto</label><select id="eProducto" required></select></div>
-<div><label>Almacén donde entra</label><select id="eAlmacen"></select></div>
-<div><label>Cantidad que entra</label><input id="eCantidad" type="number" min="0.01" step="0.01" placeholder="0" required></div>
-<div><label>Costo unitario $ (opcional)</label><input id="eCosto" type="number" min="0" step="0.01" placeholder="0.00"></div>
+<div><label>Producto</label>
+<input id="buscarProdEnt" placeholder="🔍 Buscar producto por nombre o código..." oninput="renderListaProdEnt()">
+<div id="listaProdEnt" style="margin-top:8px"></div>
+<div id="prodEntElegido" style="margin-top:8px"></div>
+</div>
+<div><label>Almacén donde entra</label><select id="eAlmacen" onchange="mostrarStockActual()"></select></div>
+<div><label>Cantidad que entra</label>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<span class="cot-cant"><button type="button" onclick="cambiarCantEntrada(-1)">−</button><input id="eCantidad" type="number" min="0.01" step="0.01" placeholder="0" required style="width:90px;text-align:center" oninput="actualizarTotalEntrada()"><button type="button" onclick="cambiarCantEntrada(1)">+</button></span>
+<button type="button" class="secundario" onclick="sumarCantEntrada(5)">+5</button>
+<button type="button" class="secundario" onclick="sumarCantEntrada(10)">+10</button>
+</div></div>
+<div><label>Costo unitario $ (opcional)</label><input id="eCosto" type="number" min="0" step="0.01" placeholder="0.00" oninput="actualizarTotalEntrada()"></div>
+<p id="totalEntradaPreview" style="margin-top:6px;font-size:14px;color:#555"></p>
 <div><label>Proveedor (opcional)</label><input id="eProveedor" type="text" placeholder="Ej. Panadería Central"></div>
 <div><label>Fecha</label><input id="eFecha" type="date" required></div>
 <div><label>Nota (opcional)</label><input id="eNota" type="text" placeholder="Ej. Pedido de la semana"></div>
 <button type="submit">💾 Guardar entrada</button>
+<button type="button" onclick="guardarEntrada(null,true)">💾 Guardar y otra</button>
 <button type="button" class="secundario" onclick="limpiarEntrada()">Limpiar</button>
 </form>
 <p id="stockActual" style="margin-top:10px;font-size:14px;color:#555"></p>
 </div>
+<div id="entPanelLista" class="oculto">
 <div class="buscar">
 <input id="buscarEnt" placeholder="🔍 Buscar por producto o proveedor..." oninput="renderEntradas()">
 <select id="filtroEntProd" onchange="renderEntradas()"><option value="todos">Todos los productos</option></select>
@@ -1249,6 +1286,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <tbody id="listaEntradas"></tbody>
 </table></div>
 <p style="margin-top:10px;font-size:13px;color:#555">Para quitar una entrada, toca Eliminar: el stock se descuenta de nuevo. Solo se puede eliminar si hay stock suficiente.</p>
+</div>
 </div>
 
 <div id="vistaGastos" class="oculto">
@@ -2837,24 +2875,21 @@ function actualizarBarraMovil(){var t=document.getElementById("total");var b=doc
 (function(){var tot=document.getElementById("total");if(tot&&typeof MutationObserver!=="undefined"){new MutationObserver(actualizarBarraMovil).observe(tot,{childList:true,characterData:true,subtree:true});}actualizarBarraMovil();})();
 function llenarSelectEntradas(){
  const ea=document.getElementById("eAlmacen"); if(ea){const av=ea.value;ea.innerHTML=almacenes.filter(a=>a.estado==="Activo").map(a=>`<option value="${a.id}">${escHtml(a.nombre)}${a.principal?" (Principal)":""}</option>`).join("");if(av)ea.value=av;if(!ea.value&&almacenPrincipal())ea.value=almacenPrincipal().id;}
- const sel=document.getElementById("eProducto"); if(!sel)return;
- const actual=sel.value;
- sel.innerHTML='<option value="">Elige un producto...</option>'+catalogo.map(p=>`<option value="${p.id}">${p.emoji||"📦"} ${p.nombre} · Stock: ${textoCantidad(p,p.stock)}</option>`).join("");
- if(actual)sel.value=actual;
  const fs=document.getElementById("filtroEntProd"); if(fs){const f=fs.value; fs.innerHTML='<option value="todos">Todos los productos</option>'+catalogo.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join(""); if(f)fs.value=f;}
+ const ef=document.getElementById("eFecha"); if(ef&&!ef.value)ef.value=hoyLocal();
+ renderListaProdEnt();
  mostrarStockActual();
 }
 function mostrarStockActual(){
  const el=document.getElementById("stockActual"); if(!el)return;
- const p=catalogo.find(x=>String(x.id)===document.getElementById("eProducto").value);
+ const p=catalogo.find(x=>x.id===entradaProductoId);
  const a=almacenActivo(Number((document.getElementById("eAlmacen")||{}).value))||almacenPrincipal();
  el.textContent=p?("Stock de "+p.nombre+" en "+(a?a.nombre:"—")+": "+(a?textoCantidad(p,stockEn(p.id,a.id)):"0")+" · Total en almacenes activos: "+textoCantidad(p,p.stock)+". Al guardar la entrada, el stock sube en ese almacén."):"";
 }
-function guardarEntrada(ev){
- ev.preventDefault();
- const id=Number(document.getElementById("eProducto").value);
- const p=catalogo.find(x=>x.id===id);
- if(!p){toast("Elige un producto del inventario.");return}
+function guardarEntrada(ev,otra){
+ if(ev)ev.preventDefault();
+ const p=catalogo.find(x=>x.id===entradaProductoId);
+ if(!p){toast("Elige un producto: búscalo arriba y tócalo.");return}
  const cant=redondearCant(Number(document.getElementById("eCantidad").value)||0);
  if(cant<=0){toast("La cantidad debe ser mayor a 0.");return}
  const costo=Number(document.getElementById("eCosto").value)||0;
@@ -2866,13 +2901,26 @@ function guardarEntrada(ev){
  entradas.unshift({id:Date.now()+ (uid++),fecha:fecha,productoId:p.id,nombre:p.nombre,emoji:p.emoji||"📦",cantidad:cant,costo:costo,proveedor:proveedor,nota:nota,total:cant*costo,almacenId:alm.id,almacen:alm.nombre});
  guardar(); llenarSelectEntradas();llenarSelectVentaAlmacen(); renderEntradas(); render();
  toast("Entrada registrada: +"+textoCantidad(p,cant)+" de "+p.nombre+". Stock ahora: "+textoCantidad(p,p.stock)+".");
- limpiarEntrada();
+ if(otra){document.getElementById("eCantidad").value="";document.getElementById("eCosto").value="";document.getElementById("eNota").value="";actualizarTotalEntrada();document.getElementById("eCantidad").focus();}else{limpiarEntrada();}
 }
 function limpiarEntrada(){
  const f=document.querySelector("#vistaEntradas form"); if(f)f.reset();
  const ef=document.getElementById("eFecha"); if(ef)ef.value=hoyLocal();
- mostrarStockActual();
+ entradaProductoId=null;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML="";const b=document.getElementById("buscarProdEnt");if(b)b.value="";
+ renderListaProdEnt();actualizarTotalEntrada();mostrarStockActual();
 }
+let entradaProductoId=null;
+function renderListaProdEnt(){const box=document.getElementById("listaProdEnt");if(!box)return;quitarFocoDentro(box);const q=((document.getElementById("buscarProdEnt")||{}).value||"").toLowerCase().trim();const lista=catalogo.filter(function(p){return !p.pausado}).filter(function(p){return !q||p.nombre.toLowerCase().indexOf(q)!==-1||(p.sku||"").toLowerCase().indexOf(q)!==-1});if(!lista.length){box.innerHTML='<p style="color:#888;font-size:13px">Sin productos para "'+escHtml(q)+'".</p>';return}box.innerHTML=lista.slice(0,30).map(function(p){return '<div class="cot-prod'+(p.id===entradaProductoId?' sel':'')+'"><span class="cot-prod-info"><b>'+escHtml(p.nombre)+'</b><span>'+dinero(p.precio)+' / '+UNIDADES_VENTA[unidadDe(p)].corta+' · Stock: '+textoCantidad(p,p.stock)+'</span></span><button type="button" onclick="elegirProductoEntrada('+p.id+')" aria-label="Elegir producto">➕</button></div>'}).join("")}
+function elegirProductoEntrada(id){const p=catalogo.find(function(x){return x.id===id});if(!p){toast("Ese producto ya no está en el catálogo.");return}entradaProductoId=p.id;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML='<div class="ent-elegido"><span>📦 <b>'+escHtml(p.nombre)+'</b> · '+dinero(p.precio)+' / '+UNIDADES_VENTA[unidadDe(p)].corta+'</span><button type="button" class="secundario" onclick="quitarProductoEntrada()">Cambiar</button></div>';renderListaProdEnt();mostrarStockActual();const c=document.getElementById("eCantidad");if(c)c.focus();}
+function quitarProductoEntrada(){entradaProductoId=null;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML="";renderListaProdEnt();mostrarStockActual();}
+function cambiarCantEntrada(dir){const p=catalogo.find(x=>x.id===entradaProductoId);const inp=document.getElementById("eCantidad");if(!inp)return;const paso=p?pasoUnidad(p):1;const v=redondearCant((Number(inp.value)||0)+paso*dir);inp.value=v>0?v:"";actualizarTotalEntrada()}
+function sumarCantEntrada(n){const inp=document.getElementById("eCantidad");if(!inp)return;inp.value=redondearCant((Number(inp.value)||0)+n);actualizarTotalEntrada()}
+function actualizarTotalEntrada(){const cant=Number((document.getElementById("eCantidad")||{}).value)||0;const costo=Number((document.getElementById("eCosto")||{}).value)||0;const el=document.getElementById("totalEntradaPreview");if(el)el.textContent=(cant>0&&costo>0)?("Total de esta entrada: "+dinero(cant*costo)):"";}
+function toggleMenuEntradas(e){if(e)e.stopPropagation();var m=document.getElementById("menuEntradas");if(m)m.classList.toggle("abierto")}
+function cerrarMenuEntradas(){var m=document.getElementById("menuEntradas");if(m)m.classList.remove("abierto")}
+function mostrarPanelEntradas(cual){document.getElementById("entPanelForm").classList.toggle("oculto",cual!=="form");document.getElementById("entPanelLista").classList.toggle("oculto",cual!=="lista");cerrarMenuEntradas();if(cual==="lista")renderEntradas();}
+function verHistorialEntradaActual(){cerrarMenuEntradas();if(entradaProductoId){verHistorialProducto(entradaProductoId);return}var fp=(document.getElementById("filtroEntProd")||{}).value;if(fp&&fp!=="todos"){verHistorialProducto(Number(fp));return}toast("Elige un producto primero: búscalo arriba y tócalo.");}
+document.addEventListener("click",function(e){var m=document.getElementById("menuEntradas");if(m&&m.classList.contains("abierto")&&!(e.target&&e.target.closest&&e.target.closest(".ent-menu-wrap")))m.classList.remove("abierto")});
 function eliminarEntrada(id){
  const e=entradas.find(x=>x.id===id); if(!e)return;
  const p=catalogo.find(x=>x.id===e.productoId);
@@ -2934,6 +2982,7 @@ function renderHistorialProducto(nubeItems){
  }).join("");
 }
 function renderEntradas(){
+ cerrarMenuEntradas();
  llenarSelectEntradas();
  const hoy=hoyLocal();
  const deHoy=entradas.filter(e=>e.fecha===hoy);
@@ -2947,7 +2996,7 @@ function renderEntradas(){
  const lista=document.getElementById("listaEntradas"); if(!lista)return;
  const items=entradas.filter(e=>(e.nombre+" "+(e.proveedor||"")+" "+(e.nota||"")).toLowerCase().includes(q)).filter(e=>fp==="todos"||String(e.productoId)===fp).filter(e=>!ff||e.fecha===ff);
  if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">📥<br><b>Aún no hay entradas</b><br>Registra tu primera entrada arriba.</td></tr>';return}
- lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="verHistorialProducto(${e.productoId})">📜 Historial</button> <button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
+ lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.almacen?`<br><span style="color:#666;font-size:12px">🏬 ${e.almacen}</span>`:""}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="verHistorialProducto(${e.productoId})">📜 Historial</button> <button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
 }
 
 function guardarGasto(ev){
@@ -3407,7 +3456,6 @@ const _tn=document.getElementById("tNegocio");if(_tn)_tn.addEventListener("blur"
 document.getElementById("eFecha").value=hoyLocal();
 document.getElementById("gFecha").value=hoyLocal();
 document.getElementById("fondoCaja").value=fondoCaja||"";
-document.getElementById("eProducto").addEventListener("change",mostrarStockActual);
 const ea0=document.getElementById("eAlmacen");if(ea0)ea0.addEventListener("change",mostrarStockActual);
 llenarSelectEntradas();
 document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
