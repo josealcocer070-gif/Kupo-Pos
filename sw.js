@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v54'; /* v54: catálogo sin X duplicada 2026-11-14 — queda solo el botón Ver ticket, la X hacía lo mismo */
+const CACHE = 'kupo-pos-v55'; /* v55: ticket moderno 2026-11-14 — renglón como tarjeta, stepper en una línea, bote de basura para borrar y Fondo oculto del encabezado */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
