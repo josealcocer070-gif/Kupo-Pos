@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v63'; /* v63: botón de soporte solo con el logo 2026-11-14 — sin número ni texto, solo el logo de WhatsApp en círculo verde que abre el chat con Lalo */
+const CACHE = 'kupo-pos-v64'; /* v64: pantalla de licencia pulida 2026-11-14 — título centrado sin "Paso 1" y botón de soporte WhatsApp (solo logo) al pie de la tarjeta, igual que en el login */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
