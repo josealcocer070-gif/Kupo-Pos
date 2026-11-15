@@ -385,7 +385,8 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
  body.vista-ventas .layout:not(.sin-panel) main{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
  body.vista-ventas .layout:not(.sin-panel) .panel{position:static;top:auto;min-height:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
  .panel-cuerpo{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:2px}
- .panel-pie{flex:0 0 auto;background:#fff;border-top:2px solid #dfe5ea;padding-top:10px}
+ .panel-pie{flex:0 0 auto;background:#fff;border-top:2px solid #dfe5ea;padding-top:10px;padding-bottom:18px}
+ body.vista-ventas .layout:not(.sin-panel) .panel .btn-cobrar{margin-top:22px} /* Lalo 2026-11-15: bajar el botón Cobrar para que el pie del ticket no quede apretado */
 }
 @media(min-width:761px) and (max-width:1020px){body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%)}}
 
@@ -422,8 +423,8 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
   body.vista-ventas .layout:not(.sin-panel) .panel .totales .row.total b{font-size:26px}
   body.vista-ventas .layout:not(.sin-panel) .panel .pagos button{padding:8px 4px;font-size:13px}
   body.vista-ventas .layout:not(.sin-panel) .panel .cambio{padding:8px;margin-top:8px}
-  body.vista-ventas .layout:not(.sin-panel) .panel .btn-cobrar{padding:10px;font-size:18px;margin-top:8px}
-  body.vista-ventas .layout:not(.sin-panel) .panel-pie{max-height:60vh;overflow-y:auto;padding-bottom:6px}
+  body.vista-ventas .layout:not(.sin-panel) .panel .btn-cobrar{padding:10px;font-size:18px;margin-top:22px} /* Lalo 2026-11-15: bajar el botón Cobrar para que el pie del ticket no quede apretado */
+  body.vista-ventas .layout:not(.sin-panel) .panel-pie{max-height:60vh;overflow-y:auto;padding-bottom:18px}
   body.vista-ventas .layout:not(.sin-panel) .panel-pie p{margin-top:6px}
 }
 
@@ -2785,7 +2786,7 @@ setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHi
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=77').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=78').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
