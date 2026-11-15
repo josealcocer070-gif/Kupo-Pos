@@ -2608,7 +2608,7 @@ function entrar(){
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");
 }
-function salirSesion(){sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */

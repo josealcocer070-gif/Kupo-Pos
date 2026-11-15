@@ -703,6 +703,7 @@ aside nav a{min-height:48px!important}
 #vistaVentas.oculto,#vistaProductos.oculto,#vistaEntradas.oculto,#vistaGastos.oculto,#vistaCortes.oculto,#vistaHistorial.oculto,#vistaTicket.oculto,#vistaCotizaciones.oculto,#vistaAdminLic.oculto,#vistaCajeros.oculto,#vistaMulti.oculto{display:none!important}
 #vistaVentas:not(.oculto){display:flex!important;flex-direction:column!important}
 #panelVenta.oculto,#accionesRapidas.oculto{display:none!important}
+#app.oculto,body.movil-ventas #app.oculto,body.vista-ventas #app.oculto{display:none!important}
 /* Barra TOTAL/Cobrar: solo en Ventas, nunca tapada por el menu inferior.
    El menu mide 72px + safe-area; la barra queda a 96px + safe-area y
    con z-index por encima del menu, para que el TOTAL se vea completo. */
@@ -3313,7 +3314,7 @@ function entrar(){
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");
 }
-function salirSesion(){sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
