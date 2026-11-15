@@ -1690,13 +1690,13 @@ let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPo
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
 const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
-function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+' onchange="guardarPermisosCajero()"> '+v[1]+'</label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se guardan solo en este dispositivo, por licencia.</p>'}
-function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
+function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};const esAdminP=(sesionActual&&sesionActual.rol)==="Administrador";box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+(esAdminP?"":" disabled")+' onchange="guardarPermisosCajero()"> '+v[1]+'</label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se guardan solo en este dispositivo, por licencia.</p>';if(!esAdminP){box.insertAdjacentHTML("beforeend",'<p style="font-size:12px;color:#666">Solo el Administrador cambia permisos.</p>');}}
+function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia permisos.");return}c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",esAdmin);mostrar("navEntradas",esAdmin);mostrar("navGastos",esAdmin);mostrar("navCorte",esAdmin);mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",esAdmin);mostrar("navTicket",esAdmin);mostrar("navCajeros",esAdmin);mostrar("navAdminLic",esAdmin);mostrar("navMulti",esAdmin&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
- mostrar("accGasto",esAdmin);mostrar("accCorte",esAdmin);mostrar("accProductos",esAdmin);
+ mostrar("navProductos",tienePermiso("productos"));mostrar("navEntradas",tienePermiso("entradas"));mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
+ mostrar("accGasto",tienePermiso("gastos"));mostrar("accCorte",tienePermiso("cortes"));mostrar("accProductos",tienePermiso("productos"));
  const _s=sesionActual||{};const u=document.getElementById("usuarioActual");if(u)u.textContent=_s.nombre||_s.usuario||"";
  const r=document.getElementById("rolActual");if(r)r.textContent=_s.rol||"";
  const p=document.getElementById("pieUsuario");if(p)p.textContent=(_s.nombre||_s.usuario||"")+" · "+(_s.rol||"");
@@ -1723,7 +1723,7 @@ function renderCajeros(){
 }
 function guardarCajero(ev){
  if(ev)ev.preventDefault();
- if(!tienePermiso("cajeros")){toast("⛔ Sin permiso: solo el Administrador puede crear cajeros.");return}
+ if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Sin permiso: solo el Administrador puede crear cajeros.");return}
  const nombre=document.getElementById("cNombre").value.trim();
  const usuario=document.getElementById("cUsuario").value.trim();
  const pin=document.getElementById("cPin").value.trim();
@@ -1745,6 +1745,7 @@ function toggleCajero(id){
 }
 function eliminarCajero(id){
  const c=cajeros.find(x=>x.id===id);if(!c)return;
+ if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador elimina cajeros.");return}
  if(c.rol==="Administrador"){toast("No se puede eliminar al Administrador.");return}
  if(sesionActual&&sesionActual.usuario===c.usuario){toast("No puedes eliminar tu propia sesión.");return}
  if(!confirm("¿Eliminar al cajero "+c.nombre+" ("+c.usuario+")? Ya no podrá entrar."))return;
@@ -1755,6 +1756,7 @@ function eliminarCajero(id){
 }
 function cambiarPinCajero(id){
  const c=cajeros.find(x=>x.id===id);if(!c)return;
+ if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia el PIN de un cajero.");return}
  const nuevo=prompt("PIN nuevo de 6 dígitos para "+c.nombre+" ("+c.usuario+"):");
  if(nuevo===null)return;
  if(!/^\d{6}$/.test(nuevo.trim())){toast("El PIN debe tener 6 dígitos.");return}
@@ -1955,7 +1957,7 @@ function renderReportes(){
 }
 
 function mostrarVista(v){
- if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso: tu rol ("+((sesionActual&&sesionActual.rol)||"")+") solo puede usar Ventas, Cotizaciones y Reimprimir.");return}
+ if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso para esta sección. Pide al Administrador que te active el permiso.");return}
  if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  vistaActual=v;
  document.body.classList.toggle("movil-ventas",v==="ventas");
