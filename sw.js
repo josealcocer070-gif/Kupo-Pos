@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v71'; /* v71: interruptores en Administrador de licencia 2026-11-14 — Corte por productos y Multi-almacén ahora son interruptores como en permisos (texto a la izquierda, interruptor a la derecha, verde al activar), con su estado · Activado/Desactivado; también el de Abrir el cajón en Personalizar ticket (solo móvil); mismos ids y handlers, sin cambio en la lógica */
+const CACHE = 'kupo-pos-v72'; /* v72: Productos reorganizado 2026-11-14 — la foto va primero con botones Subir desde galería y Tomar foto (cámara trasera, solo móvil; en PC solo galería), generador de códigos SKU-XXXXXX único junto al SCAN, y fuera el selector Icono (pEmoji/nuevoEmoji); los productos nuevos ya no guardan emoji */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
