@@ -76,13 +76,16 @@ jobs:
           PY
 
       - name: Prepare release keystore (solo si hay secretos de firma)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
+       env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+        if [ -z "$KEYSTORE_B64" ]; then
+        echo "Sin secretos de firma: se compilara APK debug."
+        exit 0
+        fi
           echo "$KEYSTORE_B64" | base64 -d > android/kupo-release.keystore
           cat > android/keystore.properties <<EOF
           storeFile=kupo-release.keystore
