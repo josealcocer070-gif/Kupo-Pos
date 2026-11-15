@@ -287,7 +287,7 @@ main h1{font-size:34px;margin-bottom:14px}
  header .pill{display:none}
  header .sucursal{font-size:11px}
  .acciones{display:none!important}
- main{padding:12px 12px 180px}
+ main{padding:12px 12px 116px}
  main h1{font-size:26px}
  .layout{grid-template-columns:1fr}
  .buscar{flex-direction:column}
@@ -322,7 +322,7 @@ main h1{font-size:34px;margin-bottom:14px}
  .toast{bottom:160px}
  /* Barra fija de Venta en curso (solo en Ventas, solo móvil) */
  body.movil-ventas #barraVentaMovil{display:flex}
- #barraVentaMovil{position:fixed;left:0;right:0;bottom:64px;z-index:50;background:#fff;border-top:2px solid #dfe5ea;box-shadow:0 -4px 16px rgba(0,0,0,.12);align-items:center;gap:10px;padding:10px 12px}
+ #barraVentaMovil{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:2px solid #dfe5ea;box-shadow:0 -4px 16px rgba(0,0,0,.12);align-items:center;gap:10px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))}
  #barraVentaMovil .barra-detalle{flex:1;min-width:0;background:#eef6fb;border:1px solid #c9d4dc;border-radius:12px;padding:8px 10px;font-size:14px;font-weight:700;color:var(--azul);cursor:pointer;text-align:left}
  #barraVentaMovil .barra-detalle small{display:block;font-size:11px;color:#555;font-weight:600}
  #barraVentaMovil .barra-total{text-align:right}
@@ -330,7 +330,7 @@ main h1{font-size:34px;margin-bottom:14px}
  #barraVentaMovil .barra-total b{font-size:26px;color:var(--dorado2);white-space:nowrap}
  #barraVentaMovil .barra-cobrar{background:var(--dorado);border:0;border-radius:22px;padding:14px 20px;font-size:18px;font-weight:800;cursor:pointer;white-space:nowrap}
  /* Menú inferior fijo: 5 accesos */
- #menuMovil{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
+ #menuMovil{display:none!important;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
  #menuMovil button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
  #menuMovil button span{font-size:21px;line-height:1}
  #menuMovil button.activo{background:rgba(255,255,255,.22)}
