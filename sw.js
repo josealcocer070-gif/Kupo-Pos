@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v53'; /* v53: hamburguesa siempre visible 2026-11-14 — la ☰ del encabezado ya no se esconde fuera de Ventas, para poder volver al ticket */
+const CACHE = 'kupo-pos-v54'; /* v54: catálogo sin X duplicada 2026-11-14 — queda solo el botón Ver ticket, la X hacía lo mismo */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {

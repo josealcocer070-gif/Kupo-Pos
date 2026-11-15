@@ -762,7 +762,6 @@ h1,h2{font-weight:800!important}
 .catalogo-cabecera{order:0!important;display:flex!important;align-items:center!important;gap:10px!important;margin:2px 0 12px!important}
 .catalogo-cabecera h2{flex:1!important;font-size:22px!important;color:#0a2456!important;margin:0!important}
 .catalogo-cabecera .btn-ver-ticket{flex:0 0 auto!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:12px!important;padding:12px 14px!important;font-size:15px!important;font-weight:800!important;cursor:pointer!important;min-height:48px!important}
-.catalogo-cabecera .btn-cerrar-catalogo{flex:0 0 auto!important;width:48px!important;min-width:48px!important;height:48px!important;background:#fff!important;color:#0a2456!important;border:1px solid #c9d4dc!important;border-radius:12px!important;font-size:20px!important;font-weight:800!important;cursor:pointer!important}
 @media (max-width:760px){
  /* Hamburguesa a la derecha del encabezado, solo en Ventas móvil */
  body.movil-ventas header .menu-btn{display:flex!important;order:10!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;margin-left:auto!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:12px!important;font-size:26px!important;font-weight:800!important;cursor:pointer!important;position:relative!important}
@@ -777,7 +776,6 @@ h1,h2{font-weight:800!important}
  .catalogo-cabecera{order:0!important;display:flex!important;align-items:center!important;gap:10px!important;margin:2px 0 12px!important}
  .catalogo-cabecera h2{flex:1!important;font-size:22px!important;color:#0a2456!important;margin:0!important}
  .catalogo-cabecera .btn-ver-ticket{flex:0 0 auto!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:12px!important;padding:12px 14px!important;font-size:15px!important;font-weight:800!important;cursor:pointer!important;min-height:48px!important}
- .catalogo-cabecera .btn-cerrar-catalogo{flex:0 0 auto!important;width:48px!important;min-width:48px!important;height:48px!important;background:#fff!important;color:#0a2456!important;border:1px solid #c9d4dc!important;border-radius:12px!important;font-size:20px!important;font-weight:800!important;cursor:pointer!important}
  /* En el cajón el buscador+SCAN queda fijo arriba al bajar */
  body.movil-ventas #vistaVentas .buscar{position:sticky!important;top:0!important;z-index:2!important}
  /* El ticket es la pantalla principal: panel visible en flujo, no hoja inferior */
@@ -1075,7 +1073,7 @@ h1,h2{font-weight:800!important}
 
 <main>
 <div id="vistaVentas">
-<div class="catalogo-cabecera"><h2>🛒 Catálogo</h2><button type="button" class="btn-ver-ticket" onclick="cerrarCatalogo()">Ver ticket 🧾</button><button type="button" class="btn-cerrar-catalogo" onclick="cerrarCatalogo()" aria-label="Cerrar catálogo">✕</button></div>
+<div class="catalogo-cabecera"><h2>🛒 Catálogo</h2><button type="button" class="btn-ver-ticket" onclick="cerrarCatalogo()">Ver ticket 🧾</button></div>
 <h1>Menú</h1>
 <!-- Tablero del día quitado de Ventas por Lalo (2026-11-12 19:31). El resumen de ventas sigue en Corte diario. -->
 <div class="gestion oculto" id="gestion">
