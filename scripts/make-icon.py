@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Genera assets/icon.png (1024x1024) para @capacitor/assets.
 
-Fuente: el icono más grande incrustado en manifest.json del repo (data URI
-PNG). No se sube ningún binario al repo: este script corre en CI y genera el
-icono ahí. Requiere Pillow (pip install pillow).
+Fuente (en orden): el icono más grande incrustado en manifest.json (data URI
+PNG); si no hay, el archivo icon-512.png del repo (el icono oficial de KUPO
+POS, subido como archivo). No se sube ningún binario al repo: este script
+corre en CI y genera el icono ahí. Requiere Pillow (pip install pillow).
 """
 import base64
+import io
 import json
 import sys
 from pathlib import Path
@@ -29,21 +31,29 @@ def main() -> None:
         if size > best_size:
             best_size = size
             best = src
-    if best is None:
-        print("No se encontró un icono PNG en manifest.json", file=sys.stderr)
-        sys.exit(1)
 
-    raw = base64.b64decode(best.split(",", 1)[1])
     from PIL import Image
 
-    import io
+    if best is not None:
+        raw = base64.b64decode(best.split(",", 1)[1])
+        img = Image.open(io.BytesIO(raw)).convert("RGBA")
+        origen = f"data URI {best_size}x{best_size}"
+    else:
+        png = ROOT / "icon-512.png"
+        if not png.exists():
+            print(
+                "No se encontró un icono PNG en manifest.json ni icon-512.png",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        img = Image.open(png).convert("RGBA")
+        origen = "icon-512.png"
 
-    img = Image.open(io.BytesIO(raw)).convert("RGB")
     img = img.resize((1024, 1024), Image.LANCZOS)
     out = ROOT / "assets" / "icon.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     img.save(out, "PNG")
-    print(f"Icono generado: {out} (1024x1024, desde {best_size}x{best_size})")
+    print(f"Icono generado: {out} (1024x1024, desde {origen})")
 
 
 if __name__ == "__main__":
