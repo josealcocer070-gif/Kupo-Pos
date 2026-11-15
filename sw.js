@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v59'; /* v59: texto demo del login corregido 2026-11-14 — fuera el PIN 123456 viejo (Lalo ya lo cambió) y la frase de José Alcocer que ya no es cierta; el texto ya no muestra ningún PIN */
+const CACHE = 'kupo-pos-v60'; /* v60: login más limpio 2026-11-14 — título centrado sin "Paso 2" y ojito 👁️ para ver/ocultar el PIN (al limpiar con C vuelve a oculto) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
