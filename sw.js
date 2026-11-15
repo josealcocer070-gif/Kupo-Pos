@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v66'; /* v66: KUPO POS no repetido en licencia 2026-11-14 — fuera el texto "KUPO POS" bajo el logo (quedaba repetido); solo el logo, con "SIN LICENCIA ACTIVA · V1.5.0" debajo; limpiadas las referencias JS a inicioNegocio */
+const CACHE = 'kupo-pos-v67'; /* v67: logo Grupo Benítez discreto 2026-11-14 — ícono GB (56px) al pie de ambas pantallas, arriba del pie, con el logo original de Lalo incrustado en base64 */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
