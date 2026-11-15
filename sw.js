@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v57'; /* v57: iconos 3D en Confirmar cobro 2026-11-14 — las 4 formas de pago (Efectivo, Tarjeta, Transf., Mixto) con la misma pastilla 3D del menú */
+const CACHE = 'kupo-pos-v58'; /* v58: nombre del negocio en el encabezado 2026-11-14 — fuera el "KUPO" que se ponía con ::after y el nombre escondido con font-size:0; ahora el encabezado móvil muestra el nombre del negocio de la licencia */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {

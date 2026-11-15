@@ -953,6 +953,11 @@ h1,h2{font-weight:800!important}
  .btn-panel-cerrar{width:100%!important;min-height:48px!important;border:2px solid #0b4a6e!important;border-radius:12px!important;background:#fff!important;color:#0b4a6e!important;font-size:16px!important;font-weight:800!important;cursor:pointer!important}
 }
 </style>
+<style id="nombre-negocio-encabezado">
+/* Nombre del negocio en el encabezado (Lalo, 2026-11-14): antes el nombre se escondía con font-size:0 y se ponía "KUPO" con ::after; ahora el encabezado muestra el nombre del negocio de la licencia, en grande y con puntos suspensivos si es muy largo. */
+header .negocio b{display:inline-block!important;font-size:18px!important;line-height:1.15!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;width:auto!important;max-width:56vw!important;vertical-align:middle!important}
+header .negocio b::after{content:none!important}
+</style>
 </head>
 <body>
 
