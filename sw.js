@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v61'; /* v61: teclado del login oculto en móvil 2026-11-14 — en el celular ya sale el teclado del sistema al tocar el PIN; en PC el teclado de la app sigue */
+const CACHE = 'kupo-pos-v62'; /* v62: soporte por WhatsApp en el login 2026-11-14 — fuera el texto demo; ahora un botón verde con el logo oficial de WhatsApp que abre el chat con Lalo (951 943 3938) */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
