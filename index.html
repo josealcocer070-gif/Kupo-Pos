@@ -1690,8 +1690,8 @@ let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPo
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
 const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
-function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};const esAdminP=(sesionActual&&sesionActual.rol)==="Administrador";box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+(esAdminP?"":" disabled")+' onchange="guardarPermisosCajero()"> '+v[1]+'</label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se guardan solo en este dispositivo, por licencia.</p>';if(!esAdminP){box.insertAdjacentHTML("beforeend",'<p style="font-size:12px;color:#666">Solo el Administrador cambia permisos.</p>');}}
-function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia permisos.");return}c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
+function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};const esAdminP=(sesionActual&&sesionActual.rol)==="Administrador";box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+(esAdminP?"":" disabled")+' onchange="guardarPermisosCajero()"> '+v[1]+'</label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se sincronizan a la nube para todas las sucursales (con internet y sesión del Administrador en este navegador).</p>';if(!esAdminP){box.insertAdjacentHTML("beforeend",'<p style="font-size:12px;color:#666">Solo el Administrador cambia permisos.</p>');}}
+function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia permisos.");return}c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();if(typeof encolarCajeroNube==="function")encolarCajeroNube(c);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
@@ -1960,6 +1960,7 @@ function mostrarVista(v){
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso para esta sección. Pide al Administrador que te active el permiso.");return}
  if(v==="multi"&&!opcionesSistema.multiAlmacen){toast("El Multi-almacén está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  vistaActual=v;
+ if(v==="cajeros"&&typeof descargarCajerosNube==="function")descargarCajerosNube();
  document.body.classList.toggle("movil-ventas",v==="ventas");
  document.body.classList.toggle("vista-ventas",v==="ventas");
  document.body.classList.remove("venta-movil-abierta");
@@ -2429,7 +2430,43 @@ function guardarPendientesNube(q){try{localStorage.setItem("kupoPosV146Pendiente
 function pendientesNubeCount(){const q=leerPendientesNube();return q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length}
 function encolarNube(tipo,registro){const q=leerPendientesNube();const lista=q[tipo]||[];const i=lista.findIndex(function(x){return x.nubeId===registro.nubeId});if(i>=0)lista[i]=registro;else lista.push(registro);q[tipo]=lista;guardarPendientesNube(q);return q}
 function encolarVentaNube(v){if(!v)return;if(!v.nubeId)v.nubeId=nubeId();encolarNube("ventas",{nubeId:v.nubeId,licencia_clave:licenciaActual(),folio:String(v.folio).padStart(4,"0"),total:Number(v.total)||0,forma_pago:v.pago||"",fecha:v.fecha||new Date().toISOString(),cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",almacen:v.almacen||"",items:(v.items||[]).map(function(l){const pr=(typeof catalogo!=="undefined"?catalogo.find(function(x){return x.id===l.id})||{}:{});return{id:l.id,nombre:pr.nombre||"Producto",unidad:unidadDe(pr),cant:l.cant,precio:l.precio}})});}
-function encolarCajeroNube(c){if(!c)return;if(!c.nubeId)c.nubeId=nubeId();encolarNube("cajeros",{nubeId:c.nubeId,licencia_clave:licenciaActual(),nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.estado==="Activo"});if(typeof guardarCajeros==="function"){try{guardarCajeros()}catch(e){}}}
+function encolarCajeroNube(c){if(!c)return;if(!c.nubeId)c.nubeId=nubeId();encolarNube("cajeros",{nubeId:c.nubeId,licencia_clave:licenciaActual(),nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.estado==="Activo",permisos:c.permisos||{}});if(typeof guardarCajeros==="function"){try{guardarCajeros()}catch(e){}}}
+async function descargarCajerosNube(){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
+ const clave=licenciaActual();if(!clave)return false;
+ try{
+  const r=await kupoSupabase.from("cajeros").select("nube_id,licencia_clave,nombre,usuario,rol,activo,permisos").eq("licencia_clave",clave).limit(200);
+  if(r.error||!r.data)return false;
+  const q=leerPendientesNube();
+  const borrados=new Set((q.borrados||[]).filter(function(b){return b.tabla==="cajeros"}).map(function(b){return (b.usuario||"").toLowerCase()}));
+  let cambio=false;let qCambio=false;
+  for(const x of r.data){
+   const u=(x.usuario||"").toLowerCase();if(!u||borrados.has(u))continue;
+   const per=(x.permisos&&typeof x.permisos==="object")?x.permisos:{};
+   const est=x.activo===false?"Pausado":"Activo";
+   let loc=cajeros.find(function(c){return (c.usuario||"").toLowerCase()===u});
+   if(!loc){
+    cajeros.push({id:Date.now()+Math.floor(Math.random()*100000),nubeId:x.nube_id||null,nombre:x.nombre||x.usuario,usuario:x.usuario,pin:"",rol:x.rol||"Cajero",estado:est,permisos:per});
+    cambio=true;
+   }else{
+    if(JSON.stringify(loc.permisos||{})!==JSON.stringify(per)){loc.permisos=per;cambio=true;}
+    if(x.nombre&&loc.nombre!==x.nombre){loc.nombre=x.nombre;cambio=true;}
+    if(x.rol&&loc.rol!==x.rol){loc.rol=x.rol;cambio=true;}
+    if(loc.estado!==est){loc.estado=est;cambio=true;}
+    if(x.nube_id&&!loc.nubeId){loc.nubeId=x.nube_id;cambio=true;}
+   }
+   const qi=(q.cajeros||[]).findIndex(function(y){return (y.usuario||"").toLowerCase()===u});
+   if(qi>=0){
+    if(JSON.stringify(q.cajeros[qi].permisos||{})!==JSON.stringify(per)){q.cajeros[qi].permisos=per;qCambio=true;}
+    if(x.rol&&q.cajeros[qi].rol!==x.rol){q.cajeros[qi].rol=x.rol;qCambio=true;}
+    if(typeof x.activo==="boolean"&&q.cajeros[qi].activo!==x.activo){q.cajeros[qi].activo=x.activo;qCambio=true;}
+   }
+  }
+  if(qCambio)guardarPendientesNube(q);
+  if(cambio){guardarCajeros();aplicarPermisosMenu();if(typeof renderCajeros==="function"&&typeof vistaActual!=="undefined"&&vistaActual==="cajeros")renderCajeros();}
+  return cambio;
+ }catch(e){return false}
+}
 function encolarProductoNube(pr){if(!pr)return;if(!pr.nubeId)pr.nubeId=nubeId();encolarNube("productos",{nubeId:pr.nubeId,licencia_clave:licenciaActual(),producto_id:String(pr.id),nombre:pr.nombre,precio:Number(pr.precio)||0,stock:redondearCant(pr.stock||0),unidad:unidadDe(pr),categoria:pr.categoria||"General",emoji:pr.emoji||"📦",pausado:!!pr.pausado});if(typeof guardar==="function"){try{guardar()}catch(e){}}}
 function encolarMovimientoNube(m){if(!m)return;if(!m.nubeId)m.nubeId=nubeId();encolarNube("movimientos",{nubeId:m.nubeId,licencia_clave:licenciaActual(),producto_id:String(m.productoId),producto_nombre:m.nombre||"",fecha:m.fecha||new Date().toISOString(),tipo:m.tipo||"",cambio:Number(m.cambio)||0,stock:Number(m.stock)||0,cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",cajero_nombre:m.cajero||"",rol:m.rol||"",almacen:m.almacen||"",proveedor:m.proveedor||"",nota:m.nota||""});}
 function marcarMovimientoSubido(nubeId){if(!nubeId)return false;var h=null;try{h=historialProducto.find(function(x){return x.nubeId===nubeId})}catch(e){}if(h&&!h.subidoNube){h.subidoNube=true;return true}return false}
@@ -2456,7 +2493,7 @@ async function intentarSincronizarNube(){
    if(r&&!r.error)q.borrados=q.borrados.filter(function(x){return x!==b});
   }
   for(const v of q.ventas.slice()){const r=await kupoSupabase.from("ventas").upsert({nube_id:v.nubeId,licencia_clave:v.licencia_clave,folio:v.folio,total:v.total,forma_pago:v.forma_pago,fecha:v.fecha,cajero:v.cajero,almacen:v.almacen,items:v.items},{onConflict:"nube_id"});if(!r.error)q.ventas=q.ventas.filter(function(x){return x.nubeId!==v.nubeId});}
-  for(const c of q.cajeros.slice()){const r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo},{onConflict:"licencia_clave,usuario"});if(!r.error)q.cajeros=q.cajeros.filter(function(x){return x.nubeId!==c.nubeId});}
+  for(const c of q.cajeros.slice()){let r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo,permisos:c.permisos||{}},{onConflict:"licencia_clave,usuario"});if(r.error&&/permisos/i.test(r.error.message||"")){r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo},{onConflict:"licencia_clave,usuario"});}if(!r.error)q.cajeros=q.cajeros.filter(function(x){return x.nubeId!==c.nubeId});}
   for(const pr of q.productos.slice()){const r=await kupoSupabase.from("productos").upsert({nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado},{onConflict:"licencia_clave,producto_id"});if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
   for(const m of q.movimientos.slice()){const r=await kupoSupabase.from("movimientos_inventario").upsert({nube_id:m.nubeId,licencia_clave:m.licencia_clave,producto_id:m.producto_id,producto_nombre:m.producto_nombre,fecha:m.fecha,tipo:m.tipo,cambio:m.cambio,stock:m.stock,cajero:m.cajero,cajero_nombre:m.cajero_nombre,rol:m.rol,almacen:m.almacen,proveedor:m.proveedor,nota:m.nota},{onConflict:"nube_id"});if(!r.error){q.movimientos=q.movimientos.filter(function(x){return x.nubeId!==m.nubeId});if(typeof marcarMovimientoSubido==="function")marcarMovimientoSubido(m.nubeId);}}
   guardarPendientesNube(q);
@@ -2600,8 +2637,8 @@ aplicarPermisosMenu();
 render();
 cargarTicketConfig();
 /* Nube: reintentar la cola pendiente al abrir y al volver internet. */
-if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();});
-setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();},3000);
+if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();});
+setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();},3000);
 </script>
 <script>
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
