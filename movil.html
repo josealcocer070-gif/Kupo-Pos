@@ -64,6 +64,12 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
 #navAdminLic .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#90a4ae,#37474f)!important}
 #navMulti .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#80deea,#0097a7)!important}
+/* Iconos 3D de las formas de pago (Lalo, 2026-11-14): misma pastilla 3D, más chica para el botón. */
+#confPagos .icono-3d{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:30px!important;height:30px!important;border-radius:9px!important;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#45c3d5,#1d5f5e)!important;box-shadow:0 3px 6px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.55)!important;font-size:17px!important;margin-right:7px!important;vertical-align:middle!important;flex:0 0 auto!important}
+#confPagos [data-pago="Efectivo"] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#9be89b,#2e9e4f)!important}
+#confPagos [data-pago="Tarjeta"] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8ec9ff,#2b7cd3)!important}
+#confPagos [data-pago="Transf."] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8fb8ff,#3d5afe)!important}
+#confPagos [data-pago="Mixto"] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
 .fondo{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:25;opacity:0;pointer-events:none;transition:opacity .35s ease}
 .fondo.visible{opacity:1;pointer-events:auto}
 aside nav a{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;color:#fff;text-decoration:none;font-size:15px;cursor:pointer}
@@ -1676,10 +1682,10 @@ h1,h2{font-weight:800!important}
   <div class="conf-total-grande"><span>CANTIDAD A COBRAR</span><b id="confTotalGrande">$0.00</b><small id="confResumen"></small></div>
 <div class="conf-pago-titulo">FORMA DE PAGO</div>
 <div class="pagos" id="confPagos">
-<button type="button" class="activo" data-pago="Efectivo" onclick="elegirPago(this)">💵 Efectivo</button>
-<button type="button" data-pago="Tarjeta" onclick="elegirPago(this)">💳 Tarjeta</button>
-<button type="button" data-pago="Transf." onclick="elegirPago(this)">🏦 Transf.</button>
-<button type="button" data-pago="Mixto" onclick="elegirPago(this)">🧾 Mixto</button>
+<button type="button" class="activo" data-pago="Efectivo" onclick="elegirPago(this)"><span class="icono-3d">💵</span> Efectivo</button>
+<button type="button" data-pago="Tarjeta" onclick="elegirPago(this)"><span class="icono-3d">💳</span> Tarjeta</button>
+<button type="button" data-pago="Transf." onclick="elegirPago(this)"><span class="icono-3d">🏦</span> Transf.</button>
+<button type="button" data-pago="Mixto" onclick="elegirPago(this)"><span class="icono-3d">🧾</span> Mixto</button>
 </div>
   <div id="confMixto" class="conf-mixto" hidden>
    <h3>🧾 Pago mixto, paso a paso</h3>

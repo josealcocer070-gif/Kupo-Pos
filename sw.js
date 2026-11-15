@@ -1,5 +1,5 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v56'; /* v56: ticket limpio e iconos 3D 2026-11-14 — fuera la línea de la impresora del ticket; los iconos del menú ahora son pastillas 3D de color */
+const CACHE = 'kupo-pos-v57'; /* v57: iconos 3D en Confirmar cobro 2026-11-14 — las 4 formas de pago (Efectivo, Tarjeta, Transf., Mixto) con la misma pastilla 3D del menú */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg'];
 
 self.addEventListener('install', (event) => {
