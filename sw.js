@@ -1,11 +1,11 @@
 /* KUPO POS - Service Worker (PWA) V1.5.0: permite usar la app sin internet. */
-const CACHE = 'kupo-pos-v78'; /* v78: instalación resistente — cada archivo se guarda por separado y si uno falla (internet lento) el service worker igual se instala, para que Chrome/Edge ofrezcan instalar la app */ /* v75: licencia ya no se prellena (campo vacío al abrir la pantalla) + iconos PNG 192/512 en el manifiesto y en caché para que Chrome ofrezca instalar la app */
+const CACHE = 'kupo-pos-v80'; /* v80: botón Enviar ticket por WhatsApp (wa.me) + texto plano del ticket · v79: instalación resistente — cada archivo se guarda por separado y si uno falla (internet lento) el service worker igual se instala, para que Chrome/Edge ofrezcan instalar la app */ /* v75: licencia ya no se prellena (campo vacío al abrir la pantalla) + iconos PNG 192/512 en el manifiesto y en caché para que Chrome ofrezca instalar la app */
 const ASSETS = ['./', 'index.html', 'admin.html', 'manifest.json', 'movil.html', 'manifest-movil.json', 'icon.svg', 'icon-maskable.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
-      Promise.all(ASSETS.map((url) => cache.add(url).catch(function () { /* v78: un archivo que falle no tumba la instalación */ })))
+      Promise.all(ASSETS.map((url) => cache.add(url).catch(function () { /* v79: un archivo que falle no tumba la instalación */ })))
     ).then(() => self.skipWaiting())
   );
 });

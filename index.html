@@ -508,6 +508,16 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 /* Botón de Soporte por WhatsApp en el login (Lalo, 2026-11-14): logo oficial de WhatsApp, al picarlo abre el chat con Lalo. */
 .btn-soporte-ws{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:54px!important;height:54px!important;min-height:54px!important;padding:0!important;border-radius:50%!important;background:#25d366!important;color:#fff!important;text-decoration:none!important;box-shadow:0 3px 10px rgba(37,211,102,.5)!important}
 .btn-soporte-ws svg{width:28px!important;height:28px!important;flex:0 0 auto!important}
+.btn-whatsapp{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;background:#25d366!important;border:1px solid #1da851!important;color:#fff!important;border-radius:22px!important;padding:10px 16px!important;font-size:14px!important;font-weight:700!important;cursor:pointer!important;white-space:nowrap!important;box-shadow:0 3px 10px rgba(37,211,102,.4)!important}
+.btn-whatsapp svg{width:20px!important;height:20px!important;flex:0 0 auto!important}
+.conf-whatsapp-bloque{margin:14px 0 0}
+.conf-whatsapp-toggle{display:inline-flex;align-items:center;gap:6px;background:#f1f4f6;border:1px solid #c9d4dc;border-radius:22px;padding:8px 14px;font-size:14px;font-weight:700;color:#7a8a94;cursor:pointer;opacity:.7}
+.conf-whatsapp-toggle svg{width:20px;height:20px;flex:0 0 auto}
+.conf-whatsapp-toggle svg path{fill:#7a8a94}
+.conf-whatsapp-toggle.on{background:#25d366;border-color:#1da851;color:#fff;opacity:1;box-shadow:0 3px 10px rgba(37,211,102,.4)}
+.conf-whatsapp-toggle.on svg path{fill:#fff}
+.conf-whatsapp-numero{margin:8px 0 0}
+.conf-whatsapp-numero input{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px}
 /* Logo de Grupo Benítez discreto al pie de las pantallas de inicio (Lalo, 2026-11-14): solo el ícono GB, pequeño, arriba del pie. */
 .logo-gb{text-align:center!important;margin:12px 0 2px!important}
 .logo-gb-img{width:56px!important;height:56px!important;opacity:.92!important}
@@ -655,6 +665,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <button class="acc" onclick="abrirAtajos()">⌨️ Atajos de caja</button>
 <button class="acc" id="btnPantallaCompleta" onclick="alternarPantallaCompleta()">⛶ Pantalla completa</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
+<button class="acc btn-whatsapp" onclick="enviarTicketWhatsApp()"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> 📲 Enviar ticket por WhatsApp</button>
 <button class="acc" id="accGasto" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" id="accCorte" onclick="mostrarVista('cortes')">💳 Realizar corte de caja</button>
 <button class="acc" id="accProductos" onclick="mostrarVista('productos')">🕐 Gestionar productos</button>
@@ -1236,6 +1247,8 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <details class="datos-venta"><summary>👤 Cliente, negocio y almacén</summary>
 <label style="font-size:13px;font-weight:800">👤 Cliente</label>
 <input type="text" id="clienteVenta" value="Cliente general" aria-label="Cliente de la venta" oninput="guardarClienteVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
+<label style="font-size:13px;font-weight:800">📲 WhatsApp del cliente (opcional)</label>
+<input type="tel" id="whatsappVenta" inputmode="tel" placeholder="Ej. 951 123 4567" aria-label="WhatsApp del cliente" oninput="guardarWhatsAppVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
 <div class="negocio-box">
 <b id="negocioBox">MI NEGOCIO</b><br>
 <span id="direccionNegocio">Palizada, Campeche</span><br>
@@ -1305,6 +1318,13 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
    <div class="conf-cambio"><span>CAMBIO A ENTREGAR</span><b id="confCambio">$0.00</b><small id="confCambioNota"></small></div>
   </details>
   <p class="conf-aviso">Revisa bien antes de cobrar. Si el cliente se arrepiente, toca Regresar: no se cobra nada, no se descuenta stock y no se registra la venta.</p>
+  <div class="conf-whatsapp-bloque">
+   <input type="checkbox" id="confEnviarWhatsApp" hidden>
+   <button type="button" class="conf-whatsapp-toggle" id="confWhatsAppToggle" onclick="alternarWhatsAppCobro()" aria-label="Enviar ticket por WhatsApp"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> ticket</button>
+   <div class="conf-whatsapp-numero" id="confWhatsAppNumeroBloque" hidden>
+    <input type="tel" id="confWhatsAppNumero" inputmode="tel" placeholder="Ej. 951 123 4567" aria-label="WhatsApp del cliente" oninput="guardarWhatsAppCobro()">
+   </div>
+  </div>
   <div class="conf-botones">
    <button type="button" class="conf-regresar" onclick="cancelarConfirmacionCobro()">← Regresar</button>
    <button type="button" class="conf-confirmar" id="confConfirmar" onclick="confirmarCobro()">✅ Confirmar y cobrar</button>
@@ -1349,6 +1369,7 @@ const EJEMPLO=[
 let catalogo=JSON.parse(localStorage.getItem("kupoPosV146Catalogo")||"null")||JSON.parse(JSON.stringify(EJEMPLO));
 let ticket=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"[]");
 let clienteVentaActual=localStorage.getItem("kupoPosV146ClienteVenta")||"Cliente general";
+let whatsappVentaActual=localStorage.getItem("kupoPosV146WhatsAppVenta")||"";
 let ventas=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"[]");
 let folio=(JSON.parse(localStorage.getItem("kupoPosV146Folio")||"0"))||0;
 let entradas=JSON.parse(localStorage.getItem("kupoPosV146Entradas")||"[]");
@@ -1452,6 +1473,7 @@ function renderTicket(){
  const n=ticket.length;
  document.getElementById("nArticulos").textContent=n+" producto"+(n===1?"":"s");
  const ci=document.getElementById("clienteVenta");if(ci&&ci.value!==clienteVentaActual)ci.value=clienteVentaActual;
+ const wv=document.getElementById("whatsappVenta");if(wv&&wv.value!==whatsappVentaActual)wv.value=whatsappVentaActual;
  const sc=document.getElementById("subCliente");if(sc)sc.textContent="Folio se asigna al cobrar · "+clienteVentaActual;
  const ce=document.getElementById("cajaEstado");if(ce)ce.textContent="🟢 Caja abierta";
  if(!ticket.length){box.innerHTML=`<div class="ticket-vacio">🛒<br><b>Aún no hay productos</b><br>Toca un producto para agregarlo.</div>`;}
@@ -1471,6 +1493,13 @@ function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll("#confPagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();}
 function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
+function guardarWhatsAppVenta(){const v=(document.getElementById("whatsappVenta").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var cn=document.getElementById("confWhatsAppNumero");if(cn&&cn.value!==v)cn.value=v;}
+/* WhatsApp en la pantalla de pagos (Lalo 2026-11-17): el número del modal
+   de cobro y el de la venta son el mismo (localStorage kupoPosV146WhatsAppVenta). */
+function guardarWhatsAppCobro(){const v=(document.getElementById("confWhatsAppNumero").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var wv=document.getElementById("whatsappVenta");if(wv&&wv.value!==v)wv.value=v;}
+/* WhatsApp compacto en la pantalla de pagos (Lalo 2026-11-17): solo el logo
+   + "ticket"; al tocarlo prende/apaga la opcion y muestra el campo del numero. */
+function alternarWhatsAppCobro(){var cw=document.getElementById("confEnviarWhatsApp");if(!cw)return;cw.checked=!cw.checked;var t=document.getElementById("confWhatsAppToggle");if(t)t.classList.toggle("on",cw.checked);var nb=document.getElementById("confWhatsAppNumeroBloque");if(nb)nb.hidden=!cw.checked;if(cw.checked){var cn=document.getElementById("confWhatsAppNumero");if(cn)cn.focus();}}
 /* Confirmación antes de cobrar: tocar Cobrar solo abre la pantalla de
    confirmación. Nada se descuenta ni se registra hasta Confirmar y cobrar.
    Regresar / Cancelar cierra sin tocar el ticket, el stock ni las ventas. */
@@ -1489,6 +1518,12 @@ function mostrarConfirmacionCobro(){
  var _me=document.getElementById("mixtoEfectivo");if(_me)_me.value="";
  var _mt=document.getElementById("mixtoTarjeta");if(_mt)_mt.value="";
  document.getElementById("modalConfirmar").classList.add("abierto");
+ /* WhatsApp en la pantalla de pagos (Lalo 2026-11-17): la casilla empieza
+    apagada en cada cobro; el número se llena con el de la venta, si ya hay. */
+ var _cw=document.getElementById("confEnviarWhatsApp");if(_cw)_cw.checked=false;
+ var _ct=document.getElementById("confWhatsAppToggle");if(_ct)_ct.classList.remove("on");
+ var _nb=document.getElementById("confWhatsAppNumeroBloque");if(_nb)_nb.hidden=true;
+ var _cn=document.getElementById("confWhatsAppNumero");if(_cn)_cn.value=whatsappVentaActual||"";
  actualizarConfirmacionCobro();
 }
 /* Pago dentro de la confirmación (Lalo 2026-11-12 19:31): al cambiar la
@@ -1538,11 +1573,15 @@ function confirmarCobro(){
     El modal queda abierto para completar el pago. */
  const cubierto=pago==="Mixto"?ef+tj:(pago==="Efectivo"?(rec>0?rec:total):total);
  if(cubierto+0.009<total){toast("Faltan "+dinero(total-cubierto)+" por cubrir. Completa el pago para poder cobrar.");return}
+ /* Opción de WhatsApp en la pantalla de pagos (Lalo 2026-11-17): se lee
+    ANTES de cobrar, porque al confirmar se cierra el modal. */
+ var _enviarTicketWA=(document.getElementById("confEnviarWhatsApp")||{}).checked===true;
+ var _numeroWA=String((document.getElementById("confWhatsAppNumero")||{}).value||whatsappVentaActual||"").trim();
  cancelarConfirmacionCobro();
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
- ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
+ ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,whatsapp:whatsappVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
  const ventaNueva=ventas[ventas.length-1];
  const cambio=pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0);
  ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";guardar();render();
@@ -1554,6 +1593,16 @@ function confirmarCobro(){
     térmica de 80 mm es la impresora predeterminada. Si la casilla está
     apagada, al cobrar no se imprime nada (como hoy) y se usa Reimprimir. */
  if(ticketConfig.impresionSilenciosa===true&&typeof imprimirTicketVenta==="function")imprimirTicketVenta(ventaNueva);
+ /* Enviar ticket por WhatsApp desde la pantalla de pagos (Lalo 2026-11-17):
+    solo si la casilla estaba activada al confirmar. Sin número no bloquea
+    el cobro: la venta ya quedó registrada y el ticket se puede mandar
+    después desde Reimprimir. */
+ if(_enviarTicketWA){
+  if(!_numeroWA){toast("Venta cobrada. Sin número de WhatsApp no se mandó el ticket; se puede enviar después desde Reimprimir.");}
+  else{var _waCobro=normalizarWhatsAppMX(_numeroWA);
+   if(_waCobro.length!==12||_waCobro.indexOf("52")!==0){toast("Venta cobrada. El WhatsApp debe tener 10 dígitos (ej. 951 123 4567); el ticket se puede mandar después desde Reimprimir.");}
+   else{window.open("https://wa.me/"+_waCobro+"?text="+encodeURIComponent(textoTicketPlano(ventaNueva)),"_blank");}}
+ }
 }
 
 /* Cotizaciones: folio COT-0001, vigencia en días, IVA 16% incluido.
@@ -2363,6 +2412,48 @@ function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.paus
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
 function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
+/* Enviar ticket por WhatsApp (Lalo 2026-11-17): versión simple y gratis con
+   enlace wa.me. El texto es el MISMO contenido del ticket impreso por
+   Bluetooth/ESC-POS, en texto plano y sin códigos de control. */
+function textoTicketPlano(v){
+ if(!v)return"";
+ var total=v.total||0,sub=total/1.16,iva=total-sub;
+ var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ var lineas=[];
+ lineas.push(ticketConfig.negocio||"Mi negocio");
+ if(ticketConfig.direccion)lineas.push(ticketConfig.direccion);
+ if(ticketConfig.telefono)lineas.push(ticketConfig.telefono);
+ lineas.push(fechaTxt);
+ if(ticketConfig.mostrarFolio!==false)lineas.push("Folio #"+String(v.folio).padStart(4,"0"));
+ lineas.push("------------------------------");
+ (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);lineas.push(cantTxt+" x "+nombre);lineas.push("  "+dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio));});
+ lineas.push("------------------------------");
+ lineas.push("Subtotal: "+dinero(sub));
+ if(ticketConfig.mostrarIva!==false)lineas.push("IVA (16%): "+dinero(iva));
+ lineas.push("TOTAL: "+dinero(total));
+ lineas.push((v.pago||"Efectivo")+": "+dinero(total));
+ if(v.cambio&&v.cambio>0)lineas.push("Cambio: "+dinero(v.cambio));
+ lineas.push("------------------------------");
+ lineas.push(ticketConfig.mensaje||"¡Gracias por su compra!");
+ lineas.push("Un producto de Grupo Benítez · V1.5.0");
+ return lineas.join("\n");
+}
+function normalizarWhatsAppMX(num){
+ var d=String(num||"").replace(/\D/g,"");
+ if(d.length===10)return "52"+d;
+ if(d.length===12&&d.indexOf("52")===0)return d;
+ return d;
+}
+function enviarTicketWhatsApp(v){
+ var venta=v||ventas[ventas.length-1];
+ if(!venta){toast("Aún no hay ventas para enviar por WhatsApp.");return}
+ var numero=String((venta.whatsapp||"").trim()||whatsappVentaActual||"").trim();
+ if(!numero){toast("Escribe el WhatsApp del cliente en la venta para enviarle el ticket.");var det=document.querySelector("details.datos-venta");if(det)det.open=true;var inp=document.getElementById("whatsappVenta");if(inp)inp.focus();return}
+ var wa=normalizarWhatsAppMX(numero);
+ if(wa.length!==12||wa.indexOf("52")!==0){toast("El WhatsApp debe tener 10 dígitos (ej. 951 123 4567).");return}
+ window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(textoTicketPlano(venta)),"_blank");
+ toast("Abriendo WhatsApp con el ticket #"+String(venta.folio).padStart(4,"0")+" · Total "+dinero(venta.total)+".");
+}
 function corteCaja(){mostrarVista("cortes");}
 /* Atajos de caja (PC, Lalo 2026-11-14): teclas de la referencia del Manus
    viejo. Solo en PC (index.html); en movil.html no hay teclado. */
@@ -2786,7 +2877,7 @@ setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHi
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js?v=78').catch(function (err) {
+    navigator.serviceWorker.register('sw.js?v=80').catch(function (err) {
       console.log('KUPO POS: service worker no registrado', err);
     });
   });
