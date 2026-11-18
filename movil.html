@@ -1502,6 +1502,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <label class="perm-fila"><span>Mostrar logo del negocio en el ticket</span><span class="interruptor"><input type="checkbox" id="tMostrarLogo" checked><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>Mostrar IVA (16%)</span><span class="interruptor"><input type="checkbox" id="tMostrarIva" checked><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>Mostrar folio</span><span class="interruptor"><input type="checkbox" id="tMostrarFolio" checked><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>Abrir la ventana de imprimir al cobrar</span><span class="interruptor"><input type="checkbox" id="tImpSilenciosa"><span class="deslizador"></span></span></label>
 </div>
 <button type="submit">💾 Guardar personalización</button>
 <button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
@@ -2302,7 +2303,7 @@ function cambiarOpcionSistema(clave,valor){
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
  const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
- ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true});
+ ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
  opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true});
@@ -2314,7 +2315,7 @@ function cargarDatosLicencia(){
  const boxEl=document.getElementById("negocioBox"); if(boxEl)boxEl.textContent=nb.toUpperCase();
  aplicarOpcionesSistema();
 }
-let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true});
+let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false});
 let terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
 function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function cargarTicketConfig(){
@@ -2326,6 +2327,7 @@ function cargarTicketConfig(){
  g("tMostrarLogo").checked=ticketConfig.mostrarLogo!==false;
  g("tMostrarIva").checked=ticketConfig.mostrarIva!==false;
  g("tMostrarFolio").checked=ticketConfig.mostrarFolio!==false;
+ const is=g("tImpSilenciosa"); if(is)is.checked=ticketConfig.impresionSilenciosa===true;
  const ac=g("tAbrirCajon"); if(ac)ac.checked=ticketConfig.abrirCajon!==false;
  if(g("tPapel"))g("tPapel").value=ticketConfig.papel||"80 mm";
  const rp=g("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel||"80 mm";
@@ -2358,7 +2360,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:document.getElementById("tImpSilenciosa").checked,logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig();
@@ -2366,7 +2368,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(){
  if(!confirm("¿Restablecer los datos del ticket a los valores de ejemplo?"))return;
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -2603,7 +2605,13 @@ function intentarReconectarBT(){
 }
 function imprimirVentaSilenciosa(v){
  if(!btConectada()){
-  return Promise.resolve(imprimirTicketVenta(v));
+  /* v83: sin impresora Bluetooth, la ventana de imprimir solo se abre si
+     la casilla "Abrir la ventana de imprimir al cobrar" está prendida
+     (Personalizar ticket, apagada por default). Apagada, el ticket queda
+     en Reimprimir y no se abre nada al cobrar. */
+  if(ticketConfig.impresionSilenciosa===true)return Promise.resolve(imprimirTicketVenta(v));
+  toast("Ticket listo en Reimprimir 🖨 Folio #"+String(v.folio).padStart(4,"0"));
+  return Promise.resolve(false);
  }
  return btEscribir(ticketESCPosBytes(v)).then(function(){
   /* Cajón (Lalo 2026-11-14): solo se abre en ventas con efectivo (Efectivo o Mixto). Si el pulso falla, el ticket ya salió: no se reimprime, solo se avisa. */
@@ -2622,8 +2630,11 @@ function imprimirVentaSilenciosa(v){
   try{if(btImpresora.device&&btImpresora.device.gatt)btImpresora.device.gatt.disconnect()}catch(err){}
   btImpresora={device:null,server:null,caracteristica:null,nombre:""};
   actualizarEstadoBT();
-  toast("Falló la impresora Bluetooth; el ticket sale con la ventana de imprimir de siempre.");
-  return imprimirTicketVenta(v);
+  /* v83: si falla el Bluetooth, la ventana solo se abre si la casilla está
+     prendida; apagada, el ticket queda en Reimprimir. */
+  if(ticketConfig.impresionSilenciosa===true){toast("Falló la impresora Bluetooth; el ticket sale con la ventana de imprimir de siempre.");return imprimirTicketVenta(v);}
+  toast("Falló la impresora Bluetooth. Ticket listo en Reimprimir 🖨 Folio #"+String(v.folio).padStart(4,"0"));
+  return Promise.resolve(false);
  });
 }
 /* Cajón de dinero (Lalo 2026-11-14): la pollería recibe tablet + cajón + impresora 58 mm. El cajón va conectado a la impresora con su cable y se abre con el pulso ESC/POS ESC p 0 (0x1B 0x70 0x00 0x19 0xFA). Solo funciona por Bluetooth; por la ventana de imprimir no se puede mandar el pulso. */
@@ -3214,7 +3225,7 @@ function cancelarEdicion(){document.getElementById("pId").value="";document.getE
 function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();if(typeof encolarProductoNube==="function")encolarProductoNube(p);toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
-function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(typeof imprimirVentaSilenciosa==="function"){imprimirVentaSilenciosa(v);toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
+function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(typeof btConectada==="function"&&btConectada()&&typeof imprimirVentaSilenciosa==="function"){imprimirVentaSilenciosa(v);toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
 /* Enviar ticket por WhatsApp (Lalo 2026-11-17): versión simple y gratis con
    enlace wa.me. El texto es el MISMO contenido del ticket impreso por
    Bluetooth/ESC-POS, en texto plano y sin códigos de control. */
