@@ -1061,6 +1061,190 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 #listaProdEnt .cot-prod.sel{background:#e8f4f3;border-radius:6px}
 #prodEntElegido .ent-elegido{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#e8f4f3;border-radius:8px;padding:10px 12px;font-size:14px}
 </style>
+<style id="tema-dia-noche">
+/* ===== Modo día / modo noche (v86, Lalo 2026-11-18) =====
+   Día: fondo blanco, texto oscuro. Noche: fondo negro, texto claro,
+   dorado #f5b800 y cian visibles. Se guarda por aparato en localStorage
+   (kupoPosV146Tema: "dia"/"noche", default "dia") y se aplica con
+   data-tema en <html>. El ticket de papel (.ticket-80) y las ventanas de
+   imprimir quedan en blanco como siempre (papel). */
+:root{
+  --fondo:#ffffff;--sup:#ffffff;--sup2:#f7fafc;--texto:#12233a;--texto2:#555;--texto3:#666;
+  --borde:#c9d4dc;--borde2:#dfe5ea;--azul-txt:#0b4a6e;--azul-txt2:#0a2456;--entrada:#ffffff;
+  --rojo-txt:#b3261e;--verde-txt:#0f6a4d;--naranja-txt:#d97706;
+}
+html[data-tema="noche"]{
+  --fondo:#000000;--sup:#14171a;--sup2:#1b1f24;--texto:#ffffff;--texto2:#c3ccd4;--texto3:#a7b2bc;
+  --borde:#2e353c;--borde2:#262c32;--azul-txt:#8fd0f0;--azul-txt2:#8fd0f0;--entrada:#1b1f24;
+  --rojo-txt:#ff8a80;--verde-txt:#4ade80;--naranja-txt:#fbbf24;
+}
+body{background:var(--fondo);color:var(--texto)}
+/* Botón de modo día/noche en el encabezado (igual en PC y móvil) */
+.btn-tema{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:12px;font-size:20px;cursor:pointer;flex:0 0 auto;padding:0}
+.btn-tema:hover{background:rgba(255,255,255,.22)}
+@media(max-width:760px){
+  /* El botón de tema suma un icono al encabezado: se compacta un poco para que el nombre del negocio siga cabiendo */
+  header{padding-left:8px!important;padding-right:8px!important;gap:4px!important}
+  header .avatar{width:36px!important;height:36px!important}
+  header .negocio b{font-size:15px!important}
+  .btn-tema{width:32px;height:32px;min-width:32px;font-size:17px}
+}
+/* ===== Noche: superficies y textos ===== */
+html[data-tema="noche"] .card,html[data-tema="noche"] .resumen .tarjeta,html[data-tema="noche"] .prod-row,
+html[data-tema="noche"] .gestion,html[data-tema="noche"] .form-prod,html[data-tema="noche"] .tabla,
+html[data-tema="noche"] .ticket-preview,html[data-tema="noche"] .term-row,html[data-tema="noche"] .inicio-tarjeta,
+html[data-tema="noche"] .conf-tarjeta,html[data-tema="noche"] .scan-tarjeta,html[data-tema="noche"] .panel,
+html[data-tema="noche"] .panel-pie,html[data-tema="noche"] .acciones,html[data-tema="noche"] .ticket-encabezado,
+html[data-tema="noche"] .ent-menu,html[data-tema="noche"] .conf-mixto{background:var(--sup);border-color:var(--borde2)}
+html[data-tema="noche"] .negocio-box,html[data-tema="noche"] .ticket-vacio,html[data-tema="noche"] .vacio-accion,
+html[data-tema="noche"] .contratar .plan,html[data-tema="noche"] .teclado button,html[data-tema="noche"] .chat-dia,
+html[data-tema="noche"] .ent-elegido,html[data-tema="noche"] #listaProdEnt .cot-prod.sel,
+html[data-tema="noche"] #prodEntElegido .ent-elegido{background:var(--sup2)}
+html[data-tema="noche"] .panel .sub,html[data-tema="noche"] .inicio-sub,html[data-tema="noche"] .inicio-negocio span,
+html[data-tema="noche"] .contratar .contratar-sub,html[data-tema="noche"] .contratar .nota,
+html[data-tema="noche"] .contratar .ws-num,html[data-tema="noche"] .inicio .aviso-demo,
+html[data-tema="noche"] .inicio-pie,html[data-tema="noche"] .conf-sub,html[data-tema="noche"] .conf-desc,
+html[data-tema="noche"] .conf-aviso,html[data-tema="noche"] .conf-mixto-ayuda,html[data-tema="noche"] .atajo-nota,
+html[data-tema="noche"] .term-row .info small,html[data-tema="noche"] .ticket-desc,html[data-tema="noche"] .card .stock,
+html[data-tema="noche"] .chat-nota,html[data-tema="noche"] .chat-vacio,html[data-tema="noche"] .resumen .tarjeta small,
+html[data-tema="noche"] .form-prod label,html[data-tema="noche"] .inicio label,html[data-tema="noche"] .prod-row .info p,
+html[data-tema="noche"] .cot-prod-info span,html[data-tema="noche"] .conf-cambio small,html[data-tema="noche"] .inicio .msg,
+html[data-tema="noche"] #vistaProductos .prod-row .info .meta,html[data-tema="noche"] #vistaProductos .prod-row .precio small,
+html[data-tema="noche"] .aviso-vacio,html[data-tema="noche"] .sesion-fila span,html[data-tema="noche"] .aviso-fila span{color:var(--texto2)}
+html[data-tema="noche"] .resumen .tarjeta b,html[data-tema="noche"] .inicio-negocio b,html[data-tema="noche"] .inicio h2,
+html[data-tema="noche"] .contratar h3,html[data-tema="noche"] .contratar .plan b,html[data-tema="noche"] .contratar .plan .precio,
+html[data-tema="noche"] .pin-puntos,html[data-tema="noche"] .ticket-preview h2,html[data-tema="noche"] .conf-tarjeta h2,
+html[data-tema="noche"] .scan-tarjeta h2,html[data-tema="noche"] .conf-fila.total,html[data-tema="noche"] .conf-mixto h3,
+html[data-tema="noche"] .datos-venta summary,html[data-tema="noche"] .conf-detalle summary,
+html[data-tema="noche"] .ayuda-lector-pc,html[data-tema="noche"] .vacio-accion b,html[data-tema="noche"] .scan-estado,
+html[data-tema="noche"] .scan-manual label,html[data-tema="noche"] .scan-tarjeta p,html[data-tema="noche"] .catalogo-cabecera h2{color:var(--azul-txt)}
+html[data-tema="noche"] .atajo-tecla{background:var(--sup2);border-color:#3d6f8f;color:var(--azul-txt)}
+html[data-tema="noche"] .atajo-fila{color:var(--texto);border-color:var(--borde2)}
+html[data-tema="noche"] .marcas span{background:var(--sup2);color:var(--azul-txt)}
+html[data-tema="noche"] .inicio-logo,html[data-tema="noche"] .inicio-icono{background:#fff;border-radius:12px;padding:6px}
+/* ===== Noche: botones y controles ===== */
+html[data-tema="noche"] .acc,html[data-tema="noche"] .pagos button,html[data-tema="noche"] .categorias button,
+html[data-tema="noche"] .prod-row .acciones-prod button,html[data-tema="noche"] .caj-fila-botones button,
+html[data-tema="noche"] .form-prod button.secundario,html[data-tema="noche"] .inicio .secundario,
+html[data-tema="noche"] .inicio .link-admin,html[data-tema="noche"] .term-row button,
+html[data-tema="noche"] .conf-regresar,html[data-tema="noche"] .scan-cerrar,
+html[data-tema="noche"] .btn-panel-cerrar,html[data-tema="noche"] .btn-panel.rojo{background:var(--sup2);color:var(--texto);border-color:var(--borde)}
+html[data-tema="noche"] .acc:hover,html[data-tema="noche"] .caj-fila-botones button:hover{background:#22282e}
+html[data-tema="noche"] .acc.cerrar,html[data-tema="noche"] .prod-row .acciones-prod button.peligro,
+html[data-tema="noche"] .caj-fila-botones button.peligro,html[data-tema="noche"] .tabla button,
+html[data-tema="noche"] #vistaProductos .prod-row .acciones-prod button.peligro{color:var(--rojo-txt);border-color:#5a2320}
+html[data-tema="noche"] .categorias button.activo{background:var(--azul);color:#fff;border-color:var(--azul)}
+html[data-tema="noche"] .teclado button{color:var(--texto);border-color:var(--borde)}
+html[data-tema="noche"] .teclado button:hover{background:#22282e}
+html[data-tema="noche"] .conf-whatsapp-toggle{background:var(--sup2);color:var(--texto3);border-color:var(--borde)}
+html[data-tema="noche"] .conf-whatsapp-toggle svg path{fill:var(--texto3)}
+/* ===== Noche: formularios ===== */
+html[data-tema="noche"] input,html[data-tema="noche"] select,html[data-tema="noche"] textarea{background:var(--entrada);color:var(--texto);border-color:var(--borde)}
+html[data-tema="noche"] input::placeholder,html[data-tema="noche"] textarea::placeholder{color:var(--texto3)}
+html[data-tema="noche"] .buscar input,html[data-tema="noche"] .buscar select,html[data-tema="noche"] .gestion input,
+html[data-tema="noche"] .gestion select,html[data-tema="noche"] .form-prod input,html[data-tema="noche"] .form-prod select,
+html[data-tema="noche"] .panel input[type=number],html[data-tema="noche"] .panel input[type=text],
+html[data-tema="noche"] .inicio input,html[data-tema="noche"] .chat-entrada input,
+html[data-tema="noche"] .conf-tarjeta input[type=number],html[data-tema="noche"] .conf-mixto input[type=number],
+html[data-tema="noche"] .conf-whatsapp-numero input,html[data-tema="noche"] .scan-manual input,
+html[data-tema="noche"] #modalConfirmar #recibido,html[data-tema="noche"] .cot-precio{background:var(--entrada);color:var(--texto);border-color:var(--borde)}
+html[data-tema="noche"] .chat-entrada input:disabled{background:#22262b;color:var(--texto3)}
+html[data-tema="noche"] .negocio-box input{background:transparent;color:var(--texto)}
+html[data-tema="noche"] .negocio-box{color:var(--texto2)}
+/* ===== Noche: tablas y líneas ===== */
+html[data-tema="noche"] .tabla td{border-color:var(--borde2);color:var(--texto)}
+html[data-tema="noche"] .tabla tr:nth-child(even) td{background:#1a1e22}
+html[data-tema="noche"] .linea{border-color:var(--borde2)}
+html[data-tema="noche"] .linea .cant button{background:var(--sup2);color:var(--texto);border-color:var(--borde)}
+html[data-tema="noche"] .linea-ticket{background:var(--sup2)!important;border-color:var(--borde2)!important;box-shadow:none!important}
+html[data-tema="noche"] .linea-ticket .cant{background:var(--sup)!important;border-color:var(--borde2)!important}
+html[data-tema="noche"] .linea-ticket .cant button{background:#262c32!important;color:var(--texto)!important}
+html[data-tema="noche"] .linea-ticket .cant input{color:#f5b800!important}
+html[data-tema="noche"] .linea-ticket .cant>span{color:var(--texto)!important}
+html[data-tema="noche"] .linea-ticket .ticket-importe{color:#f5b800!important}
+html[data-tema="noche"] .linea-ticket .linea-quitar{background:#3a1512!important;color:#ff8a80!important}
+html[data-tema="noche"] .card .foto,html[data-tema="noche"] .prod-row .foto,
+html[data-tema="noche"] .linea-ticket .ticket-foto,html[data-tema="noche"] .conf-foto{background:linear-gradient(135deg,#3a2f22,#241d14)}
+html[data-tema="noche"] .conf-linea{border-color:var(--borde2)}
+html[data-tema="noche"] .conf-articulos{border-color:var(--borde2)}
+html[data-tema="noche"] .conf-fila.total{border-color:var(--borde2)}
+html[data-tema="noche"] .conf-detalle{border-top-color:var(--borde2)}
+html[data-tema="noche"] .datos-venta{border-top-color:var(--borde2)}
+html[data-tema="noche"] .ticket-encabezado{border-color:var(--borde2)}
+html[data-tema="noche"] .perm-fila{border-color:var(--borde2);color:var(--texto)}
+html[data-tema="noche"] .checks label{color:var(--texto)}
+html[data-tema="noche"] .cot-prod{border-color:var(--borde2)}
+html[data-tema="noche"] #cotListaProd,html[data-tema="noche"] #listaProdEnt{border-color:var(--borde2)}
+html[data-tema="noche"] #listaProdEnt .cot-prod.sel,html[data-tema="noche"] #prodEntElegido .ent-elegido{background:#123c34}
+html[data-tema="noche"] .ent-menu button{color:var(--texto);border-color:var(--borde2)}
+html[data-tema="noche"] .sesion-fila{border-color:var(--borde2)}
+/* ===== Noche: chat, avisos y estados ===== */
+html[data-tema="noche"] .chat-msg.entrante{background:var(--sup2);border-color:var(--borde2);color:var(--texto)}
+html[data-tema="noche"] .chat-msg.entrante .quien{color:#ff9a7a}
+html[data-tema="noche"] .inicio{background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#000 52%)}
+html[data-tema="dia"] .inicio{background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#fff 52%)}
+html[data-tema="noche"] .cambio{background:#0e3a30;border-color:#1d5f5e;color:var(--texto)}
+html[data-tema="noche"] .conf-cambio,html[data-tema="noche"] .conf-estado.ok{background:#0e3a30;border-color:#1d5f5e;color:#7ddba3}
+html[data-tema="noche"] .conf-cambio span,html[data-tema="noche"] .conf-cambio b{color:#7ddba3}
+html[data-tema="noche"] .conf-estado.falta{background:#3a1414;border-color:#5a2320;color:#ff8a80}
+html[data-tema="noche"] .conf-mixto{border-color:#3d6f8f}
+html[data-tema="noche"] .conf-mixto-fila.falta{color:#ff8a80}
+html[data-tema="noche"] .perm-si,html[data-tema="noche"] #vistaProductos .prod-row .info .stock-line{color:var(--verde-txt)!important}
+html[data-tema="noche"] .perm-no,html[data-tema="noche"] #vistaProductos .prod-row .info .stock-line.alerta-stock{color:var(--rojo-txt)!important}
+html[data-tema="noche"] .stock.alerta-stock,html[data-tema="noche"] .alerta-stock{color:var(--rojo-txt)}
+html[data-tema="noche"] .resumen .tarjeta b.alerta,html[data-tema="noche"] .card .stock.bajo{color:var(--naranja-txt)}
+html[data-tema="noche"] .inicio .msg.ok{color:var(--verde-txt)}
+html[data-tema="noche"] .inicio .msg.error{color:var(--rojo-txt)}
+html[data-tema="noche"] .aviso-fila{background:var(--sup2)!important;border-color:var(--borde2)!important;color:var(--azul-txt)!important}
+html[data-tema="noche"] .aviso-fila.agotado{background:#2a1512!important;border-color:#5a2320!important}
+html[data-tema="noche"] .aviso-fila.bajo{background:#2a2206!important;border-color:#6b5a1e!important}
+html[data-tema="noche"] .aviso-fila.pausado{background:var(--sup2)!important;border-color:var(--borde2)!important}
+/* ===== Noche: móvil (drawer, barra, menú, tarjetas) ===== */
+html[data-tema="noche"] body{background:#000!important}
+html[data-tema="noche"] body.movil-ventas #vistaVentas{background:#000!important}
+html[data-tema="noche"] body.movil-ventas #panelVenta,html[data-tema="noche"] body.movil-ventas .panel{background:var(--sup)!important}
+html[data-tema="noche"] #barraVentaMovil{background:var(--sup)!important;border-color:var(--borde2)!important}
+html[data-tema="noche"] #barraVentaMovil .barra-detalle{background:var(--sup2)!important;border-color:var(--borde)!important;color:var(--azul-txt)!important}
+html[data-tema="noche"] #barraVentaMovil .barra-detalle small{color:var(--texto2)!important}
+html[data-tema="noche"] #barraVentaMovil .barra-total small{color:var(--texto2)!important}
+html[data-tema="noche"] #vistaVentas>h1::before{color:var(--azul-txt)!important}
+html[data-tema="noche"] #vistaVentas .card h3{color:var(--azul-txt)!important}
+html[data-tema="noche"] #vistaVentas .card .foto{background:var(--sup2)!important}
+html[data-tema="noche"] #vistaVentas .card .foto img{background:var(--sup2)!important}
+html[data-tema="noche"] .categorias button{background:var(--sup2)!important;color:var(--azul-txt)!important;border-color:var(--azul-txt)!important}
+html[data-tema="noche"] .categorias button.activo{background:#f5b800!important;color:#0a2456!important;border-color:#f5b800!important}
+@media(min-width:761px){
+  html[data-tema="dia"] main{background:#fff!important}
+  html[data-tema="noche"] body{background:#000!important}
+  html[data-tema="noche"] main{background:#000!important}
+}
+@media(max-width:760px){
+  html[data-tema="dia"] body{background:#fff!important}
+}
+
+/* ===== Noche: textos con color en línea (el render los genera con style="color:#...") =====
+   El color en línea gana a cualquier regla sin !important, por eso estos van con !important. */
+html[data-tema="noche"] .badge{color:#12233a}
+html[data-tema="noche"] .ticket-vacio,html[data-tema="noche"] .vacio-accion{color:var(--texto2)}
+html[data-tema="noche"] .chat-toggle{color:var(--azul-txt)}
+html[data-tema="noche"] .chat-dia{color:var(--texto2)}
+html[data-tema="noche"] [style*="color:#555"]{color:var(--texto2)!important}
+html[data-tema="noche"] [style*="color:#666"]{color:var(--texto2)!important}
+html[data-tema="noche"] [style*="color:#888"]{color:var(--texto3)!important}
+html[data-tema="noche"] [style*="color:#444"]{color:var(--texto2)!important}
+html[data-tema="noche"] [style*="color:#a33"]{color:#ff8a80!important}
+html[data-tema="noche"] [style*="color:#0f6a4d"],html[data-tema="noche"] [style*="color:#0a7d4f"]{color:#4ade80!important}
+html[data-tema="noche"] [style*="background:#f0f7ff"]{background:var(--sup2)!important;border-color:var(--borde)!important}
+</style>
+
+<script>
+/* Modo día/noche v86 (Lalo, 2026-11-18): fondo blanco de día, negro de noche. Se guarda por aparato en localStorage (kupoPosV146Tema: "dia"/"noche", default "dia") y se aplica al cargar, antes de pintar, para no parpadear. */
+(function(){try{var t=localStorage.getItem("kupoPosV146Tema");if(t!=="dia"&&t!=="noche")t="dia";document.documentElement.setAttribute("data-tema",t);}catch(e){document.documentElement.setAttribute("data-tema","dia");}})();
+function aplicarTema(){try{var t=localStorage.getItem("kupoPosV146Tema");if(t!=="dia"&&t!=="noche")t="dia";document.documentElement.setAttribute("data-tema",t);var b=document.getElementById("btnTema");if(b){b.textContent=(t==="noche")?"\u2600\uFE0F":"\uD83C\uDF19";b.setAttribute("aria-label",(t==="noche")?"Cambiar a modo día":"Cambiar a modo noche");}}catch(e){}}
+function cambiarTema(){try{var t=localStorage.getItem("kupoPosV146Tema");localStorage.setItem("kupoPosV146Tema",(t==="noche")?"dia":"noche");}catch(e){}aplicarTema();}
+document.addEventListener("DOMContentLoaded",aplicarTema);
+</script>
+
 </head>
 <body>
 
@@ -1144,6 +1328,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.6.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️<span class="badge-sync" id="badgeSync">0</span></button>
+<button type="button" class="btn-tema" id="btnTema" onclick="cambiarTema()" aria-label="Cambiar a modo noche">🌙</button>
 <button type="button" class="btn-campana" id="btnCampana" onclick="abrirAvisos()" aria-label="Avisos del negocio">🔔<span class="badge-avisos" id="badgeAvisos">0</span></button>
 <button type="button" class="btn-perfil" id="btnPerfil" onclick="abrirSesion()" aria-label="Mi sesión">👤</button>
 <div class="user"><b id="usuarioActual">Eduardo Benitez</b><span id="rolActual">Administrador</span></div>
