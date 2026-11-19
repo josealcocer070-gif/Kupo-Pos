@@ -1021,11 +1021,13 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div><label>Costo unitario $ (opcional)</label><input id="eCosto" type="number" min="0" step="0.01" placeholder="0.00" oninput="actualizarTotalEntrada()"></div>
 <p id="totalEntradaPreview" style="margin-top:6px;font-size:14px;color:#555"></p>
 <div><label>Proveedor (opcional)</label><input id="eProveedor" type="text" placeholder="Ej. Panadería Central"></div>
+<div><label>Folio de factura (opcional)</label><input id="eFolio" type="text" placeholder="Ej. A-1234"></div>
 <div><label>Fecha</label><input id="eFecha" type="date" required></div>
 <div><label>Nota (opcional)</label><input id="eNota" type="text" placeholder="Ej. Pedido de la semana"></div>
-<button type="submit">💾 Guardar entrada</button>
-<button type="button" onclick="guardarEntrada(null,true)">💾 Guardar y otra</button>
+<button type="submit" id="btnGuardarEntrada">💾 Guardar entrada</button>
+<button type="button" id="btnGuardarOtra" onclick="guardarEntrada(null,true)">💾 Guardar y otra</button>
 <button type="button" class="secundario" onclick="limpiarEntrada()">Limpiar</button>
+<button type="button" class="secundario oculto" id="btnCancelarEdicion" onclick="cancelarEdicionEntrada()">✖️ Cancelar edición</button>
 </form>
 <p id="stockActual" style="margin-top:10px;font-size:14px;color:#555"></p>
 </div>
@@ -1040,7 +1042,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <thead><tr><th>Fecha</th><th>Producto</th><th class="num">Cantidad</th><th class="num">Costo unit.</th><th>Proveedor</th><th class="num">Total</th><th></th></tr></thead>
 <tbody id="listaEntradas"></tbody>
 </table></div>
-<p style="margin-top:10px;font-size:13px;color:#555">Para quitar una entrada, toca Eliminar: el stock se descuenta de nuevo. Solo se puede eliminar si hay stock suficiente.</p>
+<p style="margin-top:10px;font-size:13px;color:#555">Para corregir una entrada, toca ✏️ Editar. Para quitarla, toca Eliminar: el stock se descuenta de nuevo. Solo se puede eliminar si hay stock suficiente.</p>
 </div>
 </div>
 
@@ -2489,24 +2491,42 @@ function guardarEntrada(ev,otra){
  if(cant<=0){toast("La cantidad debe ser mayor a 0.");return}
  const costo=Number(document.getElementById("eCosto").value)||0;
  const proveedor=(document.getElementById("eProveedor").value||"").trim();
+ const folio=(document.getElementById("eFolio").value||"").trim();
  const fecha=document.getElementById("eFecha").value||hoyLocal();
  const nota=(document.getElementById("eNota").value||"").trim();
+ if(entradaEditandoId!==null){guardarCorreccionEntrada(p,cant,costo,proveedor,folio,nota);return}
  const alm=almacenActivo(Number(document.getElementById("eAlmacen").value))||almacenPrincipal();
  ajustarStock(p.id,alm.id,cant);registrarMovimientoProducto(p,"Entrada",cant,{almacen:alm.nombre,proveedor:proveedor,nota:nota});
- entradas.unshift({id:Date.now()+ (uid++),fecha:fecha,productoId:p.id,nombre:p.nombre,emoji:p.emoji||"📦",cantidad:cant,costo:costo,proveedor:proveedor,nota:nota,total:cant*costo,almacenId:alm.id,almacen:alm.nombre});
+ entradas.unshift({id:Date.now()+ (uid++),fecha:fecha,productoId:p.id,nombre:p.nombre,emoji:p.emoji||"📦",cantidad:cant,costo:costo,proveedor:proveedor,folio:folio,nota:nota,total:cant*costo,almacenId:alm.id,almacen:alm.nombre});
  guardar(); llenarSelectEntradas();llenarSelectVentaAlmacen(); renderEntradas(); render();
  toast("Entrada registrada: +"+textoCantidad(p,cant)+" de "+p.nombre+". Stock ahora: "+textoCantidad(p,p.stock)+".");
- if(otra){document.getElementById("eCantidad").value="";document.getElementById("eCosto").value="";document.getElementById("eNota").value="";actualizarTotalEntrada();document.getElementById("eCantidad").focus();}else{limpiarEntrada();}
+ if(otra){document.getElementById("eCantidad").value="";document.getElementById("eCosto").value="";document.getElementById("eNota").value="";document.getElementById("eFolio").value="";actualizarTotalEntrada();document.getElementById("eCantidad").focus();}else{limpiarEntrada();}
 }
 function limpiarEntrada(){
+ const enEdicion=entradaEditandoId!==null;
+ if(enEdicion)salirModoEdicion();
  const f=document.querySelector("#vistaEntradas form"); if(f)f.reset();
  const ef=document.getElementById("eFecha"); if(ef)ef.value=hoyLocal();
  entradaProductoId=null;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML="";const b=document.getElementById("buscarProdEnt");if(b)b.value="";
- renderListaProdEnt();actualizarTotalEntrada();mostrarStockActual();
+ renderListaProdEnt();actualizarTotalEntrada();
+ if(enEdicion){const ea=document.getElementById("eAlmacen"); if(ea&&almacenPrincipal())ea.value=almacenPrincipal().id;}
+ mostrarStockActual();
 }
+/* v87: restaura el formulario de Entradas tras cancelar o guardar una corrección */
+function salirModoEdicion(){
+ entradaEditandoId=null;
+ const b=document.getElementById("btnGuardarEntrada"); if(b)b.textContent="💾 Guardar entrada";
+ const o=document.getElementById("btnGuardarOtra"); if(o)o.classList.remove("oculto");
+ const c=document.getElementById("btnCancelarEdicion"); if(c)c.classList.add("oculto");
+ const ea=document.getElementById("eAlmacen"); if(ea)ea.disabled=false;
+ const bp=document.getElementById("buscarProdEnt"); if(bp){bp.disabled=false;bp.style.display="";}
+ const lp=document.getElementById("listaProdEnt"); if(lp)lp.style.display="";
+}
+function cancelarEdicionEntrada(){limpiarEntrada();}
 let entradaProductoId=null;
+let entradaEditandoId=null; // v87: id de la entrada en edición (null = registrando una nueva)
 function renderListaProdEnt(){const box=document.getElementById("listaProdEnt");if(!box)return;quitarFocoDentro(box);const q=((document.getElementById("buscarProdEnt")||{}).value||"").toLowerCase().trim();const lista=catalogo.filter(function(p){return !p.pausado}).filter(function(p){return !q||p.nombre.toLowerCase().indexOf(q)!==-1||(p.sku||"").toLowerCase().indexOf(q)!==-1});if(!lista.length){box.innerHTML='<p style="color:#888;font-size:13px">Sin productos para "'+escHtml(q)+'".</p>';return}box.innerHTML=lista.slice(0,30).map(function(p){return '<div class="cot-prod'+(p.id===entradaProductoId?' sel':'')+'"><span class="cot-prod-info"><b>'+escHtml(p.nombre)+'</b><span>'+dinero(p.precio)+' / '+UNIDADES_VENTA[unidadDe(p)].corta+' · Stock: '+textoCantidad(p,p.stock)+'</span></span><button type="button" onclick="elegirProductoEntrada('+p.id+')" aria-label="Elegir producto">➕</button></div>'}).join("")}
-function elegirProductoEntrada(id){const p=catalogo.find(function(x){return x.id===id});if(!p){toast("Ese producto ya no está en el catálogo.");return}entradaProductoId=p.id;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML='<div class="ent-elegido"><span>📦 <b>'+escHtml(p.nombre)+'</b> · '+dinero(p.precio)+' / '+UNIDADES_VENTA[unidadDe(p)].corta+'</span><button type="button" class="secundario" onclick="quitarProductoEntrada()">Cambiar</button></div>';renderListaProdEnt();mostrarStockActual();const c=document.getElementById("eCantidad");if(c)c.focus();}
+function elegirProductoEntrada(id){if(entradaEditandoId!==null){toast("En edición no se cambia el producto. Para cambiarlo, borra la entrada y crea una nueva.");return}const p=catalogo.find(function(x){return x.id===id});if(!p){toast("Ese producto ya no está en el catálogo.");return}entradaProductoId=p.id;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML='<div class="ent-elegido"><span>📦 <b>'+escHtml(p.nombre)+'</b> · '+dinero(p.precio)+' / '+UNIDADES_VENTA[unidadDe(p)].corta+'</span><button type="button" class="secundario" onclick="quitarProductoEntrada()">Cambiar</button></div>';renderListaProdEnt();mostrarStockActual();const c=document.getElementById("eCantidad");if(c)c.focus();}
 function quitarProductoEntrada(){entradaProductoId=null;const ch=document.getElementById("prodEntElegido");if(ch)ch.innerHTML="";renderListaProdEnt();mostrarStockActual();}
 function cambiarCantEntrada(dir){const p=catalogo.find(x=>x.id===entradaProductoId);const inp=document.getElementById("eCantidad");if(!inp)return;const paso=p?pasoUnidad(p):1;const v=redondearCant((Number(inp.value)||0)+paso*dir);inp.value=v>0?v:"";actualizarTotalEntrada()}
 function sumarCantEntrada(n){const inp=document.getElementById("eCantidad");if(!inp)return;inp.value=redondearCant((Number(inp.value)||0)+n);actualizarTotalEntrada()}
@@ -2526,6 +2546,40 @@ function eliminarEntrada(id){
  entradas=entradas.filter(x=>x.id!==id);
  guardar(); llenarSelectEntradas(); renderEntradas(); render();
  toast("Entrada eliminada. Stock de "+(p?p.nombre:e.nombre)+" ahora: "+(p?textoCantidad(p,p.stock):"0")+"." );
+}
+
+/* v87 (Lalo, 2026-11-18): corregir una entrada sin borrarla. El almacén y la
+   fecha de la entrada no se cambian; el producto tampoco. El stock se ajusta
+   por la diferencia (delta) en el almacén de esa entrada; si el delta es
+   negativo y el stock quedaría por debajo de 0, la corrección se bloquea
+   con el mismo estilo de aviso que el borrado. */
+function editarEntrada(id){
+ const e=entradas.find(x=>x.id===id); if(!e)return;
+ const p=catalogo.find(x=>x.id===e.productoId);
+ mostrarPanelEntradas("form");
+ if(p)elegirProductoEntrada(p.id);
+ entradaEditandoId=id;
+ const bp=document.getElementById("buscarProdEnt"); if(bp){bp.disabled=true;bp.style.display="none";}
+ const lp=document.getElementById("listaProdEnt"); if(lp)lp.style.display="none";
+ const set=function(i,v){const el=document.getElementById(i); if(el)el.value=v;};
+ set("eCantidad",e.cantidad); set("eCosto",e.costo); set("eProveedor",e.proveedor||""); set("eFolio",e.folio||""); set("eNota",e.nota||""); set("eFecha",e.fecha||"");
+ const ea=document.getElementById("eAlmacen"); if(ea){ea.value=e.almacenId||"";ea.disabled=true;}
+ const b=document.getElementById("btnGuardarEntrada"); if(b)b.textContent="💾 Guardar corrección";
+ const o=document.getElementById("btnGuardarOtra"); if(o)o.classList.add("oculto");
+ const c=document.getElementById("btnCancelarEdicion"); if(c)c.classList.remove("oculto");
+ actualizarTotalEntrada(); mostrarStockActual();
+ window.scrollTo(0,0);
+}
+function guardarCorreccionEntrada(p,cant,costo,proveedor,folio,nota){
+ const e=entradas.find(x=>x.id===entradaEditandoId); if(!e){limpiarEntrada();return}
+ const delta=redondearCant(cant-e.cantidad);
+ const aid=e.almacenId||(almacenPrincipal()||{}).id;
+ if(delta<0&&p&&stockEn(p.id,aid)+delta+0.000001<0){toast("No se puede corregir: el stock de "+p.nombre+" en "+((almacenes.find(a=>a.id===aid)||{}).nombre||"ese almacén")+" ("+textoCantidad(p,stockEn(p.id,aid))+") es menor que lo que se descuenta ("+textoCantidad(p,-delta)+").");return}
+ if(delta!==0&&p){ajustarStock(p.id,aid,delta);registrarMovimientoProducto(p,"Corrección de entrada",delta,{almacen:e.almacen||((almacenes.find(a=>a.id===aid)||{}).nombre||""),proveedor:proveedor,nota:nota});}
+ e.cantidad=cant;e.costo=costo;e.total=cant*costo;e.proveedor=proveedor;e.folio=folio;e.nota=nota;
+ guardar();llenarSelectEntradas();renderEntradas();render();
+ limpiarEntrada();
+ toast("Entrada corregida: "+p.nombre+" ahora "+textoCantidad(p,cant)+". Stock: "+textoCantidad(p,p.stock)+".");
 }
 
 /* Historial del producto (Lalo, 2026-11-14): quién modificó el inventario.
@@ -2589,9 +2643,9 @@ function renderEntradas(){
  const fp=(document.getElementById("filtroEntProd")||{}).value||"todos";
  const ff=(document.getElementById("filtroEntFecha")||{}).value||"";
  const lista=document.getElementById("listaEntradas"); if(!lista)return;
- const items=entradas.filter(e=>(e.nombre+" "+(e.proveedor||"")+" "+(e.nota||"")).toLowerCase().includes(q)).filter(e=>fp==="todos"||String(e.productoId)===fp).filter(e=>!ff||e.fecha===ff);
+ const items=entradas.filter(e=>(e.nombre+" "+(e.proveedor||"")+" "+(e.nota||"")+" "+(e.folio||"")).toLowerCase().includes(q)).filter(e=>fp==="todos"||String(e.productoId)===fp).filter(e=>!ff||e.fecha===ff);
  if(!items.length){lista.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555">📥<br><b>Aún no hay entradas</b><br>Registra tu primera entrada arriba.</td></tr>';return}
- lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.almacen?`<br><span style="color:#666;font-size:12px">🏬 ${e.almacen}</span>`:""}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="verHistorialProducto(${e.productoId})">📜 Historial</button> <button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
+ lista.innerHTML=items.map(e=>`<tr><td>${fechaBonita(e.fecha)}${e.almacen?`<br><span style="color:#666;font-size:12px">🏬 ${e.almacen}</span>`:""}${e.folio?`<br><span style="color:#666;font-size:12px">🧾 Folio: ${escHtml(e.folio)}</span>`:""}${e.nota?`<br><span style="color:#666;font-size:12px">${e.nota}</span>`:""}</td><td>${e.emoji||"📦"} ${e.nombre}</td><td class="num">${(function(){const pp=catalogo.find(x=>x.id===e.productoId);return pp?textoCantidad(pp,e.cantidad):e.cantidad})()}</td><td class="num">${dinero(e.costo)}</td><td>${e.proveedor||"—"}</td><td class="num"><b>${dinero(e.total)}</b></td><td><button onclick="editarEntrada(${e.id})">✏️ Editar</button> <button onclick="verHistorialProducto(${e.productoId})">📜 Historial</button> <button onclick="eliminarEntrada(${e.id})">Eliminar</button></td></tr>`).join("");
 }
 
 function guardarGasto(ev){
