@@ -701,6 +701,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
 <button class="acc" id="btnMensajesVentas" onclick="mostrarVista('mensajes')">💬 Mensajes <span class="badge-msg" id="badgeMsgVentas">0</span></button>
 <button class="acc btn-whatsapp" onclick="enviarTicketWhatsApp()"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> 📲 Enviar ticket por WhatsApp</button>
+<button class="acc" onclick="enviarTicketImagen()">🖼 Ticket como imagen</button>
 <button class="acc" id="accGasto" onclick="mostrarVista('gastos')">🧾 Registrar gasto de efectivo</button>
 <button class="acc" id="accCorte" onclick="mostrarVista('cortes')">💳 Realizar corte de caja</button>
 <button class="acc" id="accProductos" onclick="mostrarVista('productos')">🕐 Gestionar productos</button>
@@ -1133,6 +1134,7 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 <label class="perm-fila"><span>📦 Corte por productos <span id="estCorteProductos" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optCorteProductos" onchange="cambiarOpcionSistema('corteProductos',this.checked)"><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>💬 Chat interno <span id="estChatInterno" style="color:#666">· Activado</span></span><span class="interruptor"><input type="checkbox" id="optChatInterno" onchange="cambiarOpcionSistema('chatInterno',this.checked)"><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>🏷️ Descuentos <span id="estDescuentos" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optDescuentos" onchange="cambiarOpcionSistema('descuentos',this.checked)"><span class="deslizador"></span></span></label>
 </div>
 <p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button><button type="button" id="btnIrMulti" class="secundario" onclick="mostrarVista('multi')">🏬 Ir a Multi-almacén</button></div>
@@ -1145,6 +1147,9 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
 </div>
 <div class="form-prod"><h2>💬 Chat interno</h2>
 <p style="font-size:14px;color:#555">Activado: el patrón y los cajeros se escriben dentro de KUPO POS, sin salir a WhatsApp. Apagado: los cajeros ya no ven Mensajes en el menú; el Administrador la sigue viendo para volver a prenderlo.</p>
+</div>
+<div class="form-prod"><h2>🏷️ Descuentos</h2>
+<p style="font-size:14px;color:#555">Activado: al cobrar, el Administrador puede aplicar un descuento en % o en pesos; se resta del total y sale en el ticket. Apagado: el total siempre es la suma de los precios, sin poder rebajarlo. El descuento lo decide cada negocio.</p>
 </div>
 </div>
 
@@ -1338,6 +1343,14 @@ aside .pie img.logo-gb-pie{width:48px!important;height:48px!important;display:bl
   <h2 id="confTitulo">✅ Confirmar cobro</h2>
   <p class="conf-sub" id="confCliente">Cliente general</p>
   <div class="conf-total-grande"><span>CANTIDAD A COBRAR</span><b id="confTotalGrande">$0.00</b><small id="confResumen"></small></div>
+<div id="confDescuento" class="conf-mixto" hidden>
+   <h3>🏷️ Descuento (solo Administrador)</h3>
+   <label for="descTipo">Tipo de descuento</label>
+   <select id="descTipo" onchange="actualizarConfirmacionCobro()"><option value="%">% Porcentaje</option><option value="$">$ Pesos</option></select>
+   <label for="descValor">Valor del descuento</label>
+   <input type="number" id="descValor" min="0" step="0.01" placeholder="0" oninput="actualizarConfirmacionCobro()">
+   <div class="conf-mixto-fila"><span>Descuento aplicado</span><b id="descResumen">$0.00</b></div>
+  </div>
 <div class="conf-pago-titulo">FORMA DE PAGO</div>
 <div class="pagos" id="confPagos">
 <button type="button" class="activo" data-pago="Efectivo" onclick="elegirPago(this)"><span class="icono-3d">💵</span> Efectivo</button>
@@ -1569,6 +1582,11 @@ function mostrarConfirmacionCobro(){
  document.getElementById("modalConfirmar").classList.add("abierto");
  /* WhatsApp en la pantalla de pagos (Lalo 2026-11-17): la casilla empieza
     apagada en cada cobro; el número se llena con el de la venta, si ya hay. */
+ /* Descuentos (v85): el campo solo se ve si la opción está prendida y el
+    usuario es Administrador; cada cobro empieza sin descuento. */
+ var _dv=document.getElementById("descValor");if(_dv)_dv.value="";
+ var _dt=document.getElementById("descTipo");if(_dt)_dt.value="%";
+ var _db=document.getElementById("confDescuento");if(_db)_db.hidden=!descuentosActivos();
  var _cw=document.getElementById("confEnviarWhatsApp");if(_cw)_cw.checked=false;
  var _ct=document.getElementById("confWhatsAppToggle");if(_ct)_ct.classList.remove("on");
  var _nb=document.getElementById("confWhatsAppNumeroBloque");if(_nb)_nb.hidden=true;
@@ -1578,11 +1596,29 @@ function mostrarConfirmacionCobro(){
 /* Pago dentro de la confirmación (Lalo 2026-11-12 19:31): al cambiar la
    forma de pago o el efectivo recibido dentro del modal, se recalculan
    Subtotal/IVA/TOTAL y el CAMBIO A ENTREGAR en grande, sin cerrar el modal. */
+/* Descuentos (v85, Lalo 2026-11-18): el descuento lo decide cada negocio.
+   El interruptor "Descuentos" en Opciones de esta licencia lo prende o lo
+   apaga (apagado por default). Solo el Administrador lo aplica al cobrar. */
+function descuentosActivos(){try{return opcionesSistema.descuentos===true&&(sesionActual&&sesionActual.rol)==="Administrador"}catch(e){return false}}
+function calcularDescuento(base){
+ var r={monto:0,tipo:"%",valor:0};
+ if(!descuentosActivos())return r;
+ var tipo=(document.getElementById("descTipo")||{}).value||"%";
+ var valor=parseFloat((document.getElementById("descValor")||{}).value)||0;
+ if(isNaN(valor)||valor<=0)return r;
+ if(tipo==="%"){valor=Math.min(valor,100);r.monto=Math.round(base*valor)/100;}
+ else{valor=Math.min(valor,base);r.monto=Math.round(valor*100)/100;}
+ r.monto=Math.min(r.monto,base);
+ r.tipo=tipo;r.valor=valor;
+ return r;
+}
 function actualizarConfirmacionCobro(){
  var m=document.getElementById("modalConfirmar");
  if(!m||!m.classList.contains("abierto")||!ticket.length)return;
- var total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
- var sub=total/1.16,iva=total-sub;
+ var baseTotal=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
+ var desc=calcularDescuento(baseTotal);
+ var total=Math.round((baseTotal-desc.monto)*100)/100;
+ var sub=baseTotal/1.16,iva=baseTotal-sub;
  var rec=parseFloat(document.getElementById("recibido").value)||0;
  var ef=parseFloat((document.getElementById("mixtoEfectivo")||{}).value)||0;
  var tj=parseFloat((document.getElementById("mixtoTarjeta")||{}).value)||0;
@@ -1607,14 +1643,17 @@ function actualizarConfirmacionCobro(){
  var btn=document.getElementById("confConfirmar");if(btn)btn.disabled=!ok;
  /* Detalle colapsado: artículos, Subtotal, IVA, TOTAL, forma de pago, recibido y cambio. */
  var tot=document.getElementById("confTotales");
- if(tot)tot.innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div><div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Mixto"?("Efectivo "+dinero(ef)+" + Tarjeta "+dinero(tj)):(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):"—"))+'</span></div>';
+ if(tot)tot.innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'+(desc.monto>0?'<div class="conf-fila"><span>'+(desc.tipo==="%"?("Descuento ("+desc.valor+"%)"):"Descuento")+'</span><span>−'+dinero(desc.monto)+'</span></div>':"")+'<div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Mixto"?("Efectivo "+dinero(ef)+" + Tarjeta "+dinero(tj)):(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):"—"))+'</span></div>';
+ var dr=document.getElementById("descResumen");if(dr)dr.textContent=desc.monto>0?("−"+dinero(desc.monto)+" en esta venta"):"$0.00";
  var cc=document.getElementById("confCambio");if(cc)cc.textContent=dinero(cambio);
  var cn=document.getElementById("confCambioNota");if(cn)cn.textContent=pago==="Mixto"?(cambio>0?("Cubierto "+dinero(cubierto)+" − Total "+dinero(total)):(falta>0?("Faltan "+dinero(falta)+" por cubrir"):"Cubierto exacto, sin cambio")):(pago==="Efectivo"?(rec>0?("Recibido "+dinero(rec)+" − Total "+dinero(total)):"Importe exacto, sin cambio"):("Sin cambio en "+pago));
 }
 function cancelarConfirmacionCobro(){var m=document.getElementById("modalConfirmar");if(m)m.classList.remove("abierto");}
 function confirmarCobro(){
  if(!ticket.length){toast("El ticket está vacío. Agrega un producto.");return}
- const total=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
+ const baseTotal=ticket.reduce((a,l)=>a+l.cant*l.precio,0);
+ const desc=calcularDescuento(baseTotal);
+ const total=Math.round((baseTotal-desc.monto)*100)/100;
  const rec=parseFloat(document.getElementById("recibido").value)||0;
  const ef=parseFloat((document.getElementById("mixtoEfectivo")||{}).value)||0;
  const tj=parseFloat((document.getElementById("mixtoTarjeta")||{}).value)||0;
@@ -1630,12 +1669,12 @@ function confirmarCobro(){
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
- ventas.push({folio,total,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,whatsapp:whatsappVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
+ ventas.push({folio,total,totalBase:baseTotal,descuento:desc.monto,descuentoTipo:desc.tipo,descuentoValor:desc.valor,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,whatsapp:whatsappVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
  const ventaNueva=ventas[ventas.length-1];
  const cambio=pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0);
- ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";guardar();render();
+ ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";var _dv2=document.getElementById("descValor");if(_dv2)_dv2.value="";var _dt2=document.getElementById("descTipo");if(_dt2)_dt2.value="%";guardar();render();
  if(typeof sincronizarVentaNube==="function")sincronizarVentaNube(ventaNueva);
- toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
+ toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(desc.monto>0?" · Descuento −"+dinero(desc.monto):"")+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
  /* Impresión silenciosa en PC (Lalo 2026-11-14): solo si la casilla está
     activa en Personalizar ticket. Imprime el mismo ticket con window.print;
     sale SIN ventana solo si Chrome se abrió con --kiosk-printing y la
@@ -1698,9 +1737,9 @@ function cargarDatoLicencia(base,defecto){
  }
  return defecto;
 }
-let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true});
-if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true};
-opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false};
+let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false});
+if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false};
+opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true};
 function guardarOpcionesSistema(){guardarPorLicencia("kupoPosV146Opciones",opcionesSistema);}
 /* Migración v82: el interruptor del chat vivía en localStorage kupoPosV146ChatActivo; ahora vive en opcionesSistema.chatInterno (por licencia). */
 try{var _chatViejo=localStorage.getItem("kupoPosV146ChatActivo");if(_chatViejo!==null){opcionesSistema.chatInterno=_chatViejo==="true";localStorage.removeItem("kupoPosV146ChatActivo");guardarOpcionesSistema();}}catch(e){}
@@ -1711,12 +1750,14 @@ function aplicarOpcionesSistema(){
  const o1=document.getElementById("optCorteProductos"); if(o1)o1.checked=opcionesSistema.corteProductos;
  const o2=document.getElementById("optMultiAlmacen"); if(o2)o2.checked=opcionesSistema.multiAlmacen;
  const o3=document.getElementById("optChatInterno"); if(o3)o3.checked=opcionesSistema.chatInterno;
+ const o4=document.getElementById("optDescuentos"); if(o4)o4.checked=opcionesSistema.descuentos===true;
  const e1=document.getElementById("estCorteProductos"); if(e1)e1.textContent=opcionesSistema.corteProductos?"· Activado":"· Desactivado";
  const e2=document.getElementById("estMultiAlmacen"); if(e2)e2.textContent=opcionesSistema.multiAlmacen?"· Activado":"· Desactivado";
  const e3=document.getElementById("estChatInterno"); if(e3)e3.textContent=opcionesSistema.chatInterno?"· Activado":"· Desactivado";
+ const e4=document.getElementById("estDescuentos"); if(e4)e4.textContent=opcionesSistema.descuentos===true?"· Activado":"· Desactivado";
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
- const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+(opcionesSistema.chatInterno?"Chat interno activado: el patrón y los cajeros se escriben en Mensajes. ":"Chat interno desactivado: los cajeros no ven Mensajes en el menú. ")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
+ const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+(opcionesSistema.chatInterno?"Chat interno activado: el patrón y los cajeros se escriben en Mensajes. ":"Chat interno desactivado: los cajeros no ven Mensajes en el menú. ")+(opcionesSistema.descuentos?"Descuentos activados: al cobrar se puede aplicar un descuento en % o en pesos (solo el Administrador). ":"Descuentos desactivados: al cobrar no se puede rebajar el total. ")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
  const av=document.getElementById("avisoCorteProductos"); if(av)av.style.display=opcionesSistema.corteProductos?"none":"";
  const bM=document.getElementById("btnIrMulti"); if(bM)bM.disabled=!opcionesSistema.multiAlmacen;
  const ol=document.getElementById("optLicencia"); if(ol)ol.textContent=licenciaActual();
@@ -1724,13 +1765,13 @@ function aplicarOpcionesSistema(){
 }
 function cambiarOpcionSistema(clave,valor){
  if(!((sesionActual&&sesionActual.rol)==="Administrador")){toast("⛔ Sin permiso: solo el Administrador puede cambiar las opciones de esta licencia.");aplicarOpcionesSistema();return}
- if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno")return;
+ if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos")return;
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
  aplicarOpcionesSistema();
  if(clave==="multiAlmacen"&&!valor&&vistaActual==="multi")mostrarVista("ventas");
  if(clave==="chatInterno"){aplicarPermisosMenu();if(!valor&&vistaActual==="mensajes"&&!esAdminChat())mostrarVista("ventas");}
- toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
+ toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":clave==="descuentos"?"Descuentos":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
 }
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
@@ -1738,9 +1779,9 @@ function cargarDatosLicencia(){
  ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
- opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true});
- if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true};
- opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false};
+ opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false});
+ if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false};
+ opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true};
  const nb=(ticketConfig&&ticketConfig.negocio)||negDef;
  localStorage.setItem("kupoPosV146Negocio",nb);
  const nbEl=document.getElementById("nombreNegocio"); if(nbEl)nbEl.textContent=nb;
@@ -1853,7 +1894,8 @@ function quitarLogoNegocio(){
  toast("Logo quitado. El ticket solo muestra el nombre del negocio.");
 }
 function ticketImpresoHTML(v){
- const total=v.total||0, sub=total/1.16, iva=total-sub;
+ const total=v.total||0, base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total, descMonto=Math.min(Number(v.descuento)||0,base), sub=base/1.16, iva=base-sub;
+ const descTxt=(descMonto>0)?('<div class="t-line"><span>'+(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+'</span><span>−'+dinero(descMonto)+'</span></div>'):"";
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio" style="max-width:130px"><br>':"";
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(v.folio).padStart(4,"0")+"<br>"):"";
  const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
@@ -1866,6 +1908,7 @@ function ticketImpresoHTML(v){
   +'<hr>'+lineas+'<hr>'
   +'<div class="t-line"><span>Subtotal</span><span>'+dinero(sub)+'</span></div>'
   +ivaTxt
+  +descTxt
   +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
   +'<div class="t-line"><span>'+escHtml(v.pago||"Efectivo")+'</span><span>'+dinero(total)+'</span></div>'
   +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez · V1.6.0</small>';
@@ -2477,7 +2520,7 @@ function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay 
    Bluetooth/ESC-POS, en texto plano y sin códigos de control. */
 function textoTicketPlano(v){
  if(!v)return"";
- var total=v.total||0,sub=total/1.16,iva=total-sub;
+ var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),sub=base/1.16,iva=base-sub;
  var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
  var lineas=[];
  lineas.push(ticketConfig.negocio||"Mi negocio");
@@ -2490,6 +2533,7 @@ function textoTicketPlano(v){
  lineas.push("------------------------------");
  lineas.push("Subtotal: "+dinero(sub));
  if(ticketConfig.mostrarIva!==false)lineas.push("IVA (16%): "+dinero(iva));
+ if(descMonto>0)lineas.push((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):("Descuento"))+": −"+dinero(descMonto));
  lineas.push("TOTAL: "+dinero(total));
  lineas.push((v.pago||"Efectivo")+": "+dinero(total));
  if(v.cambio&&v.cambio>0)lineas.push("Cambio: "+dinero(v.cambio));
@@ -2514,6 +2558,148 @@ function enviarTicketWhatsApp(v){
  window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(textoTicketPlano(venta)),"_blank");
  toast("Abriendo WhatsApp con el ticket #"+String(venta.folio).padStart(4,"0")+" · Total "+dinero(venta.total)+".");
 }
+/* Ticket como imagen (v84, Lalo 2026-11-18): dibuja el ticket en un <canvas>
+   (Canvas 2D, sin librerías) y lo comparte como PNG para mandarlo virtual
+   por WhatsApp, o lo descarga si el navegador no puede compartir archivos. */
+function envolverTextoTicket(ctx,texto,maxAncho){
+ var palabras=String(texto||"").split(/\s+/).filter(function(w){return w.length;});
+ var lineas=[],actual="";
+ palabras.forEach(function(p){
+  var prueba=actual?actual+" "+p:p;
+  if(ctx.measureText(prueba).width<=maxAncho){actual=prueba;}
+  else{if(actual)lineas.push(actual);actual=p;}
+ });
+ if(actual)lineas.push(actual);
+ return lineas.length?lineas:[""];
+}
+function cargarImagenTicket(src){
+ return new Promise(function(res){
+  if(!src){res(null);return;}
+  var img=new Image(),listo=false;
+  var fin=function(v){if(!listo){listo=true;res(v);}};
+  img.onload=function(){fin(img);};
+  img.onerror=function(){fin(null);};
+  setTimeout(function(){fin(null);},1500);
+  try{img.src=src;}catch(e){fin(null);}
+ });
+}
+async function dibujarTicketCanvas(v){
+ if(!v)return null;
+ var ANCHO=480,PAD=24,W=ANCHO-PAD*2;
+ var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),sub=base/1.16,iva=base-sub;
+ var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ var logoImg=null;
+ if(ticketConfig.mostrarLogo!==false&&ticketConfig.logo){logoImg=await cargarImagenTicket(ticketConfig.logo);}
+ var canvas=document.createElement("canvas");
+ var ctx=canvas.getContext("2d");
+ canvas.width=ANCHO;
+ var filas=[];
+ function centro(texto,px,negrita){filas.push({t:texto,px:px,n:!!negrita,align:"center"});}
+ function izqDer(izq,der,px,negrita){filas.push({t:izq,px:px,n:!!negrita,align:"izqder",der:der});}
+ function linea(texto,px,negrita){filas.push({t:texto,px:px,n:!!negrita,align:"left"});}
+ function separador(){filas.push({sep:true});}
+ if(logoImg){filas.push({logo:true,h:100});}
+ centro(ticketConfig.negocio||"Mi negocio",26,true);
+ if(ticketConfig.direccion)centro(ticketConfig.direccion,20,false);
+ if(ticketConfig.telefono)centro(ticketConfig.telefono,20,false);
+ centro(fechaTxt,20,false);
+ if(ticketConfig.mostrarFolio!==false)centro("Folio #"+String(v.folio).padStart(4,"0"),20,false);
+ separador();
+ (v.items||[]).forEach(function(l){
+  var p=catalogo.find(function(x){return x.id===l.id});
+  var nombre=p?p.nombre:"Producto";
+  var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);
+  linea(cantTxt+" x "+nombre,20,false);
+  linea("  "+dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio),20,false);
+ });
+ separador();
+ izqDer("Subtotal",dinero(sub),20,false);
+ if(ticketConfig.mostrarIva!==false)izqDer("IVA (16%)",dinero(iva),20,false);
+ if(descMonto>0)izqDer(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento","−"+dinero(descMonto),20,false);
+ izqDer("TOTAL",dinero(total),32,true);
+ izqDer(v.pago||"Efectivo",dinero(total),20,false);
+ if(v.cambio&&v.cambio>0)izqDer("Cambio",dinero(v.cambio),20,false);
+ separador();
+ centro(ticketConfig.mensaje||"¡Gracias por su compra!",20,false);
+ centro("Un producto de Grupo Benítez · V1.6.0",17,false);
+ /* Alto total: se mide con la envoltura antes de dibujar. */
+ var H=PAD;
+ filas.forEach(function(f){
+  if(f.logo){H+=f.h+8;return;}
+  if(f.sep){H+=22;return;}
+  ctx.font=(f.n?"bold ":"")+f.px+"px monospace";
+  var n=1;
+  if(f.align!=="izqder"){n=envolverTextoTicket(ctx,f.t,W).length;}
+  H+=n*Math.round(f.px*1.4);
+ });
+ H+=PAD;
+ canvas.height=H;
+ ctx.fillStyle="#ffffff";ctx.fillRect(0,0,ANCHO,H);
+ ctx.fillStyle="#111111";ctx.textBaseline="top";
+ var yy=PAD;
+ filas.forEach(function(f){
+  if(f.logo){
+   var iw=logoImg.width,ih=logoImg.height,esc=Math.min(140/iw,100/ih,1);
+   var dw=Math.round(iw*esc),dh=Math.round(ih*esc);
+   ctx.drawImage(logoImg,Math.round((ANCHO-dw)/2),yy,dw,dh);
+   yy+=f.h+8;return;
+  }
+  if(f.sep){
+   ctx.strokeStyle="#999999";ctx.setLineDash([6,4]);ctx.beginPath();
+   ctx.moveTo(PAD,yy+10);ctx.lineTo(ANCHO-PAD,yy+10);ctx.stroke();ctx.setLineDash([]);
+   yy+=22;return;
+  }
+  ctx.font=(f.n?"bold ":"")+f.px+"px monospace";
+  if(f.align==="izqder"){
+   ctx.textAlign="left";ctx.fillText(f.t,PAD,yy);
+   ctx.textAlign="right";ctx.fillText(f.der,ANCHO-PAD,yy);
+   ctx.textAlign="left";
+  }else if(f.align==="center"){
+   var lineasC=envolverTextoTicket(ctx,f.t,W);
+   lineasC.forEach(function(ln){ctx.textAlign="center";ctx.fillText(ln,ANCHO/2,yy);yy+=Math.round(f.px*1.4);});
+   ctx.textAlign="left";
+   return;
+  }else{
+   var lineasL=envolverTextoTicket(ctx,f.t,W);
+   lineasL.forEach(function(ln){ctx.fillText(ln,PAD,yy);yy+=Math.round(f.px*1.4);});
+   return;
+  }
+  yy+=Math.round(f.px*1.4);
+ });
+ return canvas;
+}
+async function enviarTicketImagen(v){
+ var venta=v||ventas[ventas.length-1];
+ if(!venta){toast("Aún no hay ventas para enviar como imagen.");return;}
+ var nombre="ticket-folio-"+String(venta.folio).padStart(4,"0")+".png";
+ var canvas;
+ try{canvas=await dibujarTicketCanvas(venta);}catch(e){toast("No se pudo generar la imagen del ticket.");return;}
+ if(!canvas||typeof canvas.toBlob!=="function"){toast("Este navegador no puede generar la imagen del ticket.");return;}
+ canvas.toBlob(function(blob){
+  if(!blob){toast("No se pudo generar la imagen del ticket.");return;}
+  var archivo=null;
+  try{archivo=new File([blob],nombre,{type:"image/png"});}catch(e){archivo=null;}
+  if(!archivo){toast("Este navegador no puede compartir la imagen del ticket.");return;}
+  var compartir=function(){
+   if(navigator.canShare&&navigator.canShare({files:[archivo]})){
+    return navigator.share({files:[archivo],title:"Ticket #"+String(venta.folio).padStart(4,"0"),text:"Ticket "+(ticketConfig.negocio||"Mi negocio")+" · Total "+dinero(venta.total)}).then(function(){return"share";},function(err){
+     if(err&&err.name==="AbortError")return"cancelado";
+     return"falla";
+    });
+   }
+   return Promise.resolve("no-soportado");
+  };
+  compartir().then(function(res){
+   if(res==="share"){toast("Ticket como imagen listo para compartir 🖼 Folio #"+String(venta.folio).padStart(4,"0"));return;}
+   if(res==="cancelado"){toast("Compartir cancelado.");return;}
+   var url=URL.createObjectURL(blob);
+   var a=document.createElement("a");a.href=url;a.download=nombre;document.body.appendChild(a);a.click();a.remove();
+   setTimeout(function(){URL.revokeObjectURL(url);},5000);
+   toast("Imagen descargada: "+nombre+" — adjúntala manual en WhatsApp 🖼");
+  });
+ },"image/png");
+}
+
 function corteCaja(){mostrarVista("cortes");}
 /* Atajos de caja (PC, Lalo 2026-11-14): teclas de la referencia del Manus
    viejo. Solo en PC (index.html); en movil.html no hay teclado. */
@@ -2819,6 +3005,7 @@ async function sincronizarAhora(){
    Supabase); sin ella, los mensajes quedan en cola local y se reenvían solos. */
 let mensajesChat=[];
 let mensajesChatTimer=null;
+let mensajesChatFondoTimer=null;
 let mensajesChatCanal=null;
 let mensajesChatLicencia="";
 const CHAT_PEND_KEY="kupoPosV146MensajesPendientes";
@@ -2902,7 +3089,7 @@ function recibirMensajeChat(m){
  mensajesChat.push(m);
  renderMensajes();
  if(vistaActual==="mensajes"){marcarMensajesLeidos();}
- else{actualizarBadgeMensajes();toast("💬 Nuevo mensaje de "+m.remitente);}
+ else{actualizarBadgeMensajes();if(m.creado_en&&new Date(m.creado_en).getTime()>ultimoLeidoChat())toast("💬 Nuevo mensaje de "+m.remitente);}
 }
 function suscribirChatMensajes(){
  var lic=licenciaActual();
@@ -2915,6 +3102,31 @@ function suscribirChatMensajes(){
    .subscribe();
   mensajesChatLicencia=lic;
  }catch(e){mensajesChatCanal=null;}
+}
+/* v84: revisión periódica en segundo plano (Lalo 2026-11-18). La insignia
+   dorada y el aviso no pueden depender solo de Realtime: si el canal no está
+   conectado, nada avisaba estando en otra vista. Cada ~25 s, en cualquier
+   vista, se consulta la nube y se actualiza la insignia; los mensajes nuevos
+   del otro remitente entran por recibirMensajeChat (que descarta duplicados
+   por id, así el aviso sale una sola vez aunque Realtime también lo traiga).
+   NO marca nada como leído: eso solo lo hace abrirMensajes(). */
+async function revisarMensajesFondo(){
+ if(!kupoSupabase)return;
+ var lic=licenciaActual();if(!lic||lic==="SIN-LICENCIA")return;
+ if(!verMensajesChat())return;
+ if(!mensajesChatCanal||mensajesChatLicencia!==lic){suscribirChatMensajes();}
+ try{
+  var r=await kupoSupabase.from("mensajes").select("id,licencia_clave,remitente,remitente_rol,texto,creado_en").eq("licencia_clave",lic).order("creado_en",{ascending:false}).limit(100);
+  if(r.error||!r.data)return;
+  var nube=r.data.slice().reverse();
+  nube.forEach(function(m){recibirMensajeChat(m);});
+  actualizarBadgeMensajes();
+ }catch(e){}
+}
+function iniciarRevisionMensajesFondo(){
+ if(mensajesChatFondoTimer)return;
+ mensajesChatFondoTimer=setInterval(revisarMensajesFondo,25000);
+ revisarMensajesFondo();
 }
 function abrirMensajes(){
  if(!chatActivo()&&!esAdminChat()){toast("💬 El chat interno está apagado. Pide al Administrador que lo prenda.");mostrarVista("ventas");return;}
@@ -3049,7 +3261,7 @@ document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-M
    del cajero que sigue existiendo y Activo, y de la misma licencia. Sin PIN
    (o tras Cerrar turno, que borra la sesión) se pide PIN de nuevo. */
 function sesionValida(){if(!sesionActual||sesionActual.activa!==true||!sesionActual.usuario||!sesionActual.rol)return false;if(sesionActual.licencia&&sesionActual.licencia!==licenciaActual())return false;const c=cajeros.find(function(x){return x.usuario&&sesionActual.usuario&&x.usuario.toLowerCase()===sesionActual.usuario.toLowerCase()});return !!(c&&c.estado==="Activo");}
-function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();}
+function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();}
 /* Licencia guardada: si hay internet, manda la nube; sin internet, el respaldo local. */
 (async function validarLicenciaGuardada(){
  const licGuardada=localStorage.getItem("kupoPosV146Licencia");
@@ -3070,7 +3282,7 @@ aplicarPermisosMenu();
 render();
 cargarTicketConfig();
 /* Nube: reintentar la cola pendiente al abrir y al volver internet. */
-if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();});
+if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();});
 setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof cargarMensajes==="function")cargarMensajes();},3000);
 </script>
 <script>
