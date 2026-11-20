@@ -1147,7 +1147,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <thead><tr id="headCorteProductos"><th>Producto</th><th class="num">Vendidas</th><th class="num">Monto</th><th class="num">Stock inicial</th><th class="num">Stock vendido</th><th class="num">Stock restante</th></tr></thead>
 <tbody id="listaCorteProductos"></tbody>
 </table></div>
-<p style="margin-top:10px;font-size:13px;color:#555">Las Entradas siguen en su propia sección para los negocios que sí las manejan; aquí solo se usan para calcular el stock inicial del día.</p>
+<p id="notaEntradasCorte" style="margin-top:10px;font-size:13px;color:#555">Las Entradas siguen en su propia sección para los negocios que sí las manejan; aquí solo se usan para calcular el stock inicial del día.</p>
 <button type="button" onclick="realizarCorteProductos()">📦 Realizar corte de productos</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
 </div>
@@ -1381,7 +1381,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 <div id="vistaCajeros" class="oculto">
 <h1>🛡 Cajeros y permisos</h1>
-<p style="color:#555;margin-bottom:14px">Quién puede entrar a la caja y qué puede hacer cada rol. Solo el Administrador ve esta pantalla. El cajero Administrador de ejemplo es Eduardo Benitez (usuario Administrador, PIN demo 123456); José Alcocer es el administrador de KUPO Admin. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
+<p style="color:#555;margin-bottom:14px">Quién puede entrar a la caja y qué puede hacer cada rol. Solo el Administrador ve esta pantalla. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 <div class="resumen">
 <div class="tarjeta"><small>CAJEROS REGISTRADOS</small><b id="resCajTotal">0</b></div>
 <div class="tarjeta"><small>ACTIVOS</small><b id="resCajActivos">0</b></div>
@@ -1540,6 +1540,10 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </details>
 </div>
 <div class="panel-pie">
+<div style="margin-bottom:8px">
+<p id="btEstadoVentas" style="font-size:13px;font-weight:700;margin:0 0 6px">🖨 Impresora Bluetooth: no conectada.</p>
+<button type="button" id="btnReconectarBT" class="secundario" onclick="reconectarImpresoraBT()" style="width:100%">🔄 Reconectar impresora</button>
+</div>
 <div class="totales">
 <div class="row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
 <div class="row"><span>IVA (16%)</span><span id="iva">$0.00</span></div>
@@ -1969,6 +1973,8 @@ function aplicarOpcionesSistema(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const navM=document.getElementById("navMulti"); if(navM)navM.style.display=(esAdmin&&opcionesSistema.multiAlmacen)?"":"none";
  const secP=document.getElementById("secCorteProductos"); if(secP)secP.style.display=opcionesSistema.corteProductos?"":"none";
+ var secE=document.getElementById("vistaEntradas"); if(secE)secE.style.display=opcionesSistema.sinStock===true?"none":"";
+ var notaE=document.getElementById("notaEntradasCorte"); if(notaE)notaE.style.display=opcionesSistema.sinStock===true?"none":"";
  const o1=document.getElementById("optCorteProductos"); if(o1)o1.checked=opcionesSistema.corteProductos;
  const o2=document.getElementById("optMultiAlmacen"); if(o2)o2.checked=opcionesSistema.multiAlmacen;
  const o3=document.getElementById("optChatInterno"); if(o3)o3.checked=opcionesSistema.chatInterno;
@@ -1994,7 +2000,8 @@ function cambiarOpcionSistema(clave,valor){
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
  aplicarOpcionesSistema();
- if(clave==="sinStock"){renderCortes();render();}
+ if(clave==="sinStock"){renderCortes();render();if(typeof aplicarPermisosMenu==="function")aplicarPermisosMenu();}
+ if(clave==="sinStock"&&valor&&vistaActual==="entradas")mostrarVista("ventas");
  if(clave==="multiAlmacen"&&!valor&&vistaActual==="multi")mostrarVista("ventas");
  if(clave==="chatInterno"){aplicarPermisosMenu();if(!valor&&vistaActual==="mensajes"&&!esAdminChat())mostrarVista("ventas");}
  toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":clave==="descuentos"?"Descuentos":clave==="sinStock"?"Sin stock":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
@@ -2345,7 +2352,7 @@ function btEscribir(bytes){
  }
  return paso();
 }
-function btConectarDispositivo(device){
+function btConectarDispositivo(device,silencioso){
  return device.gatt.connect().then(function(server){
   function probar(idx){
    if(idx>=BT_SERVICIOS.length){return btBuscarCaracteristica(server)}
@@ -2358,10 +2365,10 @@ function btConectarDispositivo(device){
   return probar(0).then(function(ch){
    btImpresora={device:device,server:server,caracteristica:ch,nombre:device.name||"Impresora térmica"};
    btGuardarNombre(btImpresora.nombre);
-   device.addEventListener("gattserverdisconnected",function(){btImpresora={device:null,server:null,caracteristica:null,nombre:""};actualizarEstadoBT();toast("Se perdió la conexión con la impresora Bluetooth. El ticket saldrá con la ventana de imprimir de siempre.");});
+   if(!device._kupoListener){device._kupoListener=true;device.addEventListener("gattserverdisconnected",function(){btImpresora={device:null,server:null,caracteristica:null,nombre:""};actualizarEstadoBT();toast("Se perdió la conexión con la impresora Bluetooth. El ticket saldrá con la ventana de imprimir de siempre.");});}
    actualizarEstadoBT();return true;
   });
- }).catch(function(e){toast("No se pudo conectar a esa impresora por Bluetooth.");return false});
+ }).catch(function(e){if(!silencioso)toast("No se pudo conectar a esa impresora por Bluetooth.");return false});
 }
 function btBuscarCaracteristica(server){
  return server.getPrimaryServices().then(function(svcs){
@@ -2398,19 +2405,62 @@ function actualizarEstadoBT(){
  var txt;
  if(!btSoportado())txt="🖨 Impresora Bluetooth: este navegador no permite Bluetooth web (usa Chrome en Android). El ticket saldrá con la ventana de imprimir de siempre.";
  else if(btConectada())txt="✅ Impresora Bluetooth conectada: "+btImpresora.nombre+" — el ticket saldrá solo al cobrar, sin ventana.";
- else txt="🖨 Impresora Bluetooth: no conectada — el ticket saldrá por la ventana de imprimir.";
+ else txt="🖨 Impresora Bluetooth: no conectada — toca 🔄 Reconectar impresora.";
  var e1=document.getElementById("btEstado");if(e1)e1.textContent=txt;
  var e2=document.getElementById("btEstadoVentas");if(e2)e2.textContent=txt;
  var b=document.getElementById("btnDesconectarBT");if(b)b.style.display=btConectada()?"":"none";
+ var br=document.getElementById("btnReconectarBT");if(br)br.style.display=btConectada()?"none":"";
 }
+/* v95 (Lalo 2026-11-20): la conexión Bluetooth vive en la pestaña del
+   navegador — al recargar o cerrar KUPO, Chrome la cierra y hay que
+   volver a conectar. Antes, el reintento automático era un solo intento
+   y fallaba en silencio, así que cada recarga dejaba la impresora
+   desconectada. Ahora reintenta 3 veces (la impresora tarda en despertar),
+   vuelve a intentar sola cada minuto y en Ventas hay un botón
+   "Reconectar impresora" que abre la lista ya filtrada a la impresora
+   guardada. */
+var _btReconectando=false;
 function intentarReconectarBT(){
- if(!btSoportado()||typeof navigator.bluetooth.getDevices!=="function")return;
- var g=btGuardada();if(!g||!g.nombre)return;
- navigator.bluetooth.getDevices().then(function(devices){
-  var d=devices.find(function(x){return x.name===g.nombre});
-  if(!d)return;
-  return btConectarDispositivo(d).then(function(ok){if(ok)toast("Impresora Bluetooth reconectada: "+d.name+" ✅")});
- }).catch(function(){});
+ if(_btReconectando)return Promise.resolve(false);
+ if(btConectada())return Promise.resolve(true);
+ var g=btGuardada();if(!g||!g.nombre){actualizarEstadoBT();return Promise.resolve(false)}
+ if(!btSoportado()){actualizarEstadoBT();return Promise.resolve(false)}
+ _btReconectando=true;
+ function intentar(n){
+  if(btConectada()){_btReconectando=false;return Promise.resolve(true)}
+  if(typeof navigator.bluetooth.getDevices!=="function"){_btReconectando=false;actualizarEstadoBT();return Promise.resolve(false)}
+  return navigator.bluetooth.getDevices().then(function(devices){
+   var d=devices.find(function(x){return x.name===g.nombre});
+   if(!d)throw new Error("sin dispositivo guardado");
+   return btConectarDispositivo(d,true);
+  }).then(function(ok){
+   if(ok){_btReconectando=false;toast("Impresora Bluetooth reconectada: "+g.nombre+" ✅");return true}
+   throw new Error("no conectó");
+  }).catch(function(){
+   if(n<3)return new Promise(function(r){setTimeout(r,1500)}).then(function(){return intentar(n+1)});
+   _btReconectando=false;actualizarEstadoBT();return Promise.resolve(false);
+  });
+ }
+ return intentar(1);
+}
+function reconectarImpresoraBT(){
+ if(btConectada()){toast("La impresora ya está conectada: "+btImpresora.nombre+" ✅");return Promise.resolve(true)}
+ var g=btGuardada();
+ if(!g||!g.nombre){return conectarImpresoraBT()}
+ return intentarReconectarBT().then(function(ok){
+  if(ok)return true;
+  /* El reintento silencioso no encontró la impresora guardada (o este
+     Chrome no lista los aparatos): abrir la lista filtrada por el nombre
+     guardado, un solo toque para elegirla. requestDevice exige el toque
+     del botón, por eso esto solo se hace aquí y no al abrir la página. */
+  if(!btSoportado()){toast("Este navegador no permite Bluetooth web. Usa Chrome en Android.");return false}
+  return navigator.bluetooth.requestDevice({filters:[{name:g.nombre}],optionalServices:BT_SERVICIOS}).then(function(device){
+   return btConectarDispositivo(device);
+  }).then(function(ok2){if(ok2)toast("Impresora Bluetooth conectada: "+(btImpresora.nombre||g.nombre)+" ✅");return ok2}).catch(function(e){
+   if(e&&e.name==="NotFoundError")toast("No elegiste ninguna impresora. Toca de nuevo Reconectar y elige la impresora en la lista.");
+   return false;
+  });
+ });
 }
 function imprimirVentaSilenciosa(v){
  if(!btConectada()){
@@ -2478,7 +2528,7 @@ function guardarPermisosCajero(){const sel=document.getElementById("selPermCajer
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",tienePermiso("productos"));mostrar("navEntradas",tienePermiso("entradas"));mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
+ mostrar("navProductos",tienePermiso("productos"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
  mostrar("btnMensajesVentas",verMensajesChat()&&esAdmin);mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);var _bw=document.getElementById("btnWhatsAppVentas");if(_bw){if(esAdmin)_bw.style.removeProperty("display");else _bw.style.setProperty("display","none","important");}var _ti=document.getElementById("btnTicketImgVentas");if(_ti){if(esAdmin)_ti.style.removeProperty("display");else _ti.style.setProperty("display","none","important");}
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.style.display=tienePermiso(b.getAttribute("data-nav"))?"":"none"});
  document.querySelectorAll('#menuMovil button[data-nav="mensajes"]').forEach(function(b){b.style.display=verMensajesChat()?"":"none";});
@@ -3915,6 +3965,8 @@ if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener(
 setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof cargarMensajes==="function")cargarMensajes();},3000);
 /* Bluetooth: intentar reconectar sola la impresora que ya se había elegido. */
 setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarReconectarBT();},2000);
+/* v95: si la impresora se apaga o se aleja y vuelve, reconectar sola cada minuto (solo si ya se había elegido una impresora). */
+setInterval(function(){if(typeof intentarReconectarBT==="function"&&typeof btConectada==="function"&&!btConectada())intentarReconectarBT();},60000);
 </script>
 <script>
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
