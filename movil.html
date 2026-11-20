@@ -488,6 +488,11 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .modal-confirmar.abierto{display:flex}
 .conf-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.35);margin:auto 0}
 .conf-tarjeta h2{font-size:24px;color:var(--azul);margin-bottom:4px}
+/* v98: modal Restablecer PIN (los botones .btn-inicio y .secundario solo existen bajo .inicio) */
+#modalRestablecerPin .conf-tarjeta label{display:block;font-weight:700;margin:12px 0 4px}
+#modalRestablecerPin .conf-tarjeta input,#modalRestablecerPin .conf-tarjeta select{width:100%;box-sizing:border-box;border:1px solid #c9d4dc;border-radius:10px;padding:12px;font-size:16px}
+#modalRestablecerPin .conf-tarjeta .btn-inicio{width:100%;background:var(--dorado);border:0;border-radius:26px;padding:15px;font-size:19px;font-weight:800;cursor:pointer;margin-top:14px}
+#modalRestablecerPin .conf-tarjeta .secundario{width:100%;background:#fff;color:var(--azul);border:1px solid var(--azul);border-radius:12px;padding:10px;font-weight:700;cursor:pointer;margin-top:10px}
 .conf-sub{color:#555;font-size:15px;font-weight:700;margin-bottom:12px}
 .conf-articulos{border-top:1px solid #eef2f6;border-bottom:1px solid #eef2f6;max-height:280px;overflow-y:auto;margin-bottom:12px}
 .conf-linea{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #f2f4f7}
@@ -1320,6 +1325,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
    <button type="button" onclick="limpiarPin()">C</button><button type="button" onclick="teclaPin('0')">0</button><button type="button" onclick="borrarPin()">⌫</button>
   </div>
   <button class="btn-inicio" type="button" onclick="entrar()">Entrar</button>
+  <button type="button" id="btnOlvidoPin" class="secundario oculto" style="margin-top:10px" onclick="mostrarRestablecerPin()">¿Olvidaste tu PIN?</button>
   <p class="msg" id="msgLogin"></p>
   <button class="secundario" type="button" onclick="document.getElementById('msgLicencia').textContent='';mostrarPasoLicencia()">Cambiar licencia</button>
   <p class="aviso-demo" style="text-align:center"><a class="btn-soporte-ws" href="https://wa.me/5219519433938" target="_blank" rel="noopener" aria-label="Soporte por WhatsApp"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a></p>
@@ -1933,6 +1939,13 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="submit">💾 Cambiar mi PIN</button>
 </form>
 </div>
+<div class="form-prod">
+<h2>🔑 Clave maestra</h2>
+<p style="font-size:13px;color:#555;margin-bottom:10px">Si a un cajero se le olvida su PIN, con esta clave se le puede poner uno nuevo desde la pantalla de inicio de sesión, sin entrar al sistema. Solo el Administrador ve esta sección. Guárdala en un lugar seguro: quien la tenga puede cambiar cualquier PIN.</p>
+<div><label>Clave maestra nueva (6 dígitos)</label><input id="claveMaestraNueva" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off"></div>
+<button type="button" onclick="guardarClaveMaestraAdmin()">💾 Guardar clave maestra</button>
+<p style="font-size:13px;color:#555;margin-top:10px" id="estadoClaveMaestra"></p>
+</div>
 </div>
 
 <div id="vistaMulti" class="oculto">
@@ -2128,6 +2141,29 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
    <button type="button" class="scan-cerrar" onclick="cerrarScan()">✕ Cerrar cámara</button>
   </div>
  </div>
+<div id="modalRestablecerPin" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="restPinTitulo" onclick="if(event.target===this)cerrarRestablecerPin()">
+ <div class="conf-tarjeta">
+  <h2 id="restPinTitulo">🔑 Restablecer PIN</h2>
+  <p class="conf-sub">Si se te olvidó tu PIN, restablécelo con la clave maestra.</p>
+  <div id="pasoMaestra">
+   <label for="pinMaestra">Clave maestra (6 dígitos)</label>
+   <input id="pinMaestra" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+   <p class="msg" id="msgMaestra"></p>
+   <button type="button" class="btn-inicio" onclick="verificarClaveMaestra()">Verificar clave maestra</button>
+  </div>
+  <div id="pasoNuevoPin" class="oculto">
+   <label for="restCajero">Cajero</label>
+   <select id="restCajero" style="width:100%;margin-bottom:10px"></select>
+   <label for="restPinNuevo">PIN nuevo (6 dígitos)</label>
+   <input id="restPinNuevo" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+   <label for="restPinNuevo2">Repite el PIN nuevo</label>
+   <input id="restPinNuevo2" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+   <p class="msg" id="msgRestPin"></p>
+   <button type="button" class="btn-inicio" onclick="confirmarRestablecerPin()">Guardar PIN nuevo</button>
+  </div>
+  <button type="button" class="secundario" style="margin-top:10px" onclick="cerrarRestablecerPin()">Cancelar</button>
+ </div>
+</div>
 <div id="modalHistorialProducto" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="histProdTitulo" onclick="if(event.target===this)cerrarHistorialProducto()">
  <div class="conf-tarjeta">
   <h2 id="histProdTitulo">📜 Historial del producto</h2>
@@ -3105,6 +3141,7 @@ function aplicarPermisosMenu(){
 }
 function renderCajeros(){
  renderPermisosCajero();
+ actualizarEstadoClaveMaestra();
  const q=((document.getElementById("buscarCaj")||{}).value||"").toLowerCase();
  const fr=(document.getElementById("filtroCajRol")||{}).value||"todos";
  const fe=(document.getElementById("filtroCajEstado")||{}).value||"todos";
@@ -3178,6 +3215,63 @@ function cambiarMiPin(ev){
  ev.target.reset();
  toast("Tu PIN fue cambiado. Usa el nuevo PIN la próxima vez que entres.");
 }
+/* v98: clave maestra por licencia, solo en este dispositivo (nunca sube a la nube, como los PINs). Sirve para restablecer el PIN de un cajero cuando se le olvida. */
+function leerClaveMaestra(){return leerPorLicencia("kupoPosV146ClaveMaestra","")||"";}
+function guardarClaveMaestra(v){guardarPorLicencia("kupoPosV146ClaveMaestra",v);}
+function actualizarEstadoClaveMaestra(){var e=document.getElementById("estadoClaveMaestra");if(!e)return;e.textContent=leerClaveMaestra()?"✅ Clave maestra configurada.":"⚠️ Sin clave maestra configurada: si a un cajero se le olvida su PIN no habrá forma de restablecerlo.";}
+function guardarClaveMaestraAdmin(){
+ if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia la clave maestra.");return}
+ const v=(document.getElementById("claveMaestraNueva").value||"").trim();
+ if(!/^\d{6}$/.test(v)){toast("La clave maestra debe tener 6 dígitos.");return}
+ guardarClaveMaestra(v);
+ document.getElementById("claveMaestraNueva").value="";
+ actualizarEstadoClaveMaestra();
+ toast("Clave maestra guardada. Guárdala en un lugar seguro.");
+}
+function actualizarBotonOlvido(){var b=document.getElementById("btnOlvidoPin");if(!b)return;b.classList.toggle("oculto",!leerClaveMaestra());}
+function mostrarRestablecerPin(){
+ if(!leerClaveMaestra()){toast("No hay clave maestra configurada.");return}
+ document.getElementById("pasoMaestra").classList.remove("oculto");
+ document.getElementById("pasoNuevoPin").classList.add("oculto");
+ document.getElementById("pinMaestra").value="";
+ document.getElementById("msgMaestra").textContent="";
+ document.getElementById("modalRestablecerPin").classList.add("abierto");
+}
+function cerrarRestablecerPin(){document.getElementById("modalRestablecerPin").classList.remove("abierto");}
+function verificarClaveMaestra(){
+ const v=(document.getElementById("pinMaestra").value||"").trim();
+ const m=document.getElementById("msgMaestra");
+ const bl=(leerBloqueoPin()["maestra"]||{});
+ if(bl.hasta&&bl.hasta>Date.now()){m.textContent="Demasiados intentos. Intenta de nuevo en "+textoBloqueoPin(bl.hasta)+".";m.className="msg error";return}
+ if(v!==leerClaveMaestra()){
+  const r=registrarPinIncorrecto("maestra");
+  if(r.hasta&&r.hasta>Date.now()){m.textContent="Clave maestra incorrecta. Demasiados intentos: bloqueado por 5 minutos.";}
+  else{const q=PIN_MAX_INTENTOS-r.intentos;m.textContent="Clave maestra incorrecta. Te quedan "+q+" intento"+(q===1?"":"s")+".";}
+  m.className="msg error";return;
+ }
+ limpiarBloqueoPin("maestra");
+ var sel=document.getElementById("restCajero");
+ sel.innerHTML=cajeros.filter(function(c){return c.estado==="Activo"}).map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join("");
+ document.getElementById("restPinNuevo").value="";
+ document.getElementById("restPinNuevo2").value="";
+ document.getElementById("msgRestPin").textContent="";
+ document.getElementById("pasoMaestra").classList.add("oculto");
+ document.getElementById("pasoNuevoPin").classList.remove("oculto");
+}
+function confirmarRestablecerPin(){
+ const id=parseInt(document.getElementById("restCajero").value,10);
+ const c=cajeros.find(function(x){return x.id===id});
+ const m=document.getElementById("msgRestPin");
+ if(!c){m.textContent="Elige un cajero.";m.className="msg error";return}
+ const n1=(document.getElementById("restPinNuevo").value||"").trim();
+ const n2=(document.getElementById("restPinNuevo2").value||"").trim();
+ if(!/^\d{6}$/.test(n1)){m.textContent="El PIN nuevo debe tener 6 dígitos.";m.className="msg error";return}
+ if(n1!==n2){m.textContent="El PIN nuevo no coincide con la repetición.";m.className="msg error";return}
+ c.pin=n1;guardarCajeros();limpiarBloqueoPin(c.usuario);
+ cerrarRestablecerPin();
+ toast("PIN de "+c.nombre+" restablecido. Ya puede entrar con su PIN nuevo.");
+}
+
 
 
 /* Interfaz 3.3 · Multi-almacén */
@@ -4031,7 +4125,7 @@ function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;impr
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
 function mostrarPasoLicencia(){var _cl=document.getElementById("claveLicencia");if(_cl)_cl.value="";var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.6.0";}
-function mostrarPasoLogin(){var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");}
+function mostrarPasoLogin(){var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");actualizarBotonOlvido();}
 /* v91 (Lalo 2026-11-20): configuración inicial del dueño. Antes, cada
    licencia nueva sembraba en silencio un cajero de ejemplo ("Eduardo
    Benitez", usuario Administrador, PIN 123456) que no se puede eliminar
@@ -4461,7 +4555,7 @@ function entrar(){
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
