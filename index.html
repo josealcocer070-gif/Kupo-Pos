@@ -1217,7 +1217,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <label class="perm-fila"><span>Mostrar folio</span><span class="interruptor"><input type="checkbox" id="tMostrarFolio" checked><span class="deslizador"></span></span></label>
 <label><input type="checkbox" id="tImpSilenciosa"> Impresión silenciosa en esta PC (sin ventana de imprimir al cobrar)</label>
 </div>
-<div style="font-size:13px;color:#444;background:#f0f7ff;border:1px solid #bcd7f5;border-radius:10px;padding:10px;margin-top:8px"><b>🖨 Cómo se activa la impresión silenciosa en PC:</b> 1) En Windows, pon la impresora térmica de 80 mm como impresora predeterminada. 2) Cierra Chrome y ábrelo con el ajuste <b>--kiosk-printing</b>: clic derecho en el acceso directo de Chrome → Propiedades → en Destino agrega al final <b>--kiosk-printing</b>. 3) Activa la casilla de arriba y guarda. Al cobrar, el ticket se imprime solo en la impresora predeterminada, sin ventana. Si Chrome no se abrió con ese ajuste, la ventana de imprimir seguirá apareciendo: eso lo decide Chrome, no KUPO. En el celular la impresión silenciosa es por Bluetooth (ver KUPO móvil).</div>
+<div style="font-size:13px;color:#444;background:#f0f7ff;border:1px solid #bcd7f5;border-radius:10px;padding:10px;margin-top:8px"><b>🖨 Cómo se activa la impresión silenciosa en PC:</b> 1) En Windows, pon la impresora térmica de 80 mm como impresora predeterminada. 2) Cierra Chrome y ábrelo con el ajuste <b>--kiosk-printing</b>: clic derecho en el acceso directo de Chrome → Propiedades → en Destino agrega al final <b>--kiosk-printing</b>. 3) Activa la casilla de arriba y guarda. Al cobrar, el ticket se imprime solo en la impresora predeterminada, sin ventana. Si Chrome no se abrió con ese ajuste, la ventana de imprimir seguirá apareciendo: eso lo decide Chrome, no KUPO. En Chrome de Android la impresión también puede ser por Bluetooth (ver abajo, Impresora Bluetooth).</div>
 <button type="submit">💾 Guardar personalización</button>
 <button type="button" class="secundario" onclick="restablecerTicketConfig()">Restablecer</button>
 </form>
@@ -1245,6 +1245,19 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="submit">➕ Agregar terminal</button>
 </form>
 <div id="listaTerminales"></div>
+<div class="form-prod" style="margin-top:12px"><h2>📶 Impresora Bluetooth (impresión silenciosa)</h2>
+<p style="color:#555;font-size:14px">Conecta la impresora térmica por Bluetooth y el ticket sale solo al cobrar, sin abrir la ventana de imprimir. Funciona en Chrome de Android. En iPhone el navegador no permite Bluetooth web: ahí el ticket sale con la ventana de imprimir de siempre.</p>
+<p id="btEstado" style="font-size:14px;font-weight:700">🖨 Impresora Bluetooth: no conectada.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" onclick="conectarImpresoraBT()">📶 Conectar impresora Bluetooth</button>
+<button type="button" class="secundario" id="btnDesconectarBT" onclick="desconectarImpresoraBT()" style="display:none">Desconectar</button>
+<button type="button" class="secundario" onclick="probarImpresionBT()">🧾 Probar ticket por Bluetooth</button>
+<button type="button" class="secundario" onclick="abrirCajonBT()">💵 Abrir cajón ahora</button>
+</div>
+<label class="perm-fila"><span>💵 Abrir el cajón de dinero al cobrar en efectivo (solo por Bluetooth)</span><span class="interruptor"><input type="checkbox" id="tAbrirCajon" checked onchange="guardarAbrirCajon()"><span class="deslizador"></span></span></label>
+<p style="font-size:12px;color:#666;margin-top:6px">El cajón se abre solo cuando la venta es en efectivo o mixta y la impresora está conectada por Bluetooth. El cajón va conectado a la impresora con su cable. Sin impresora Bluetooth, el cajón no se puede abrir desde KUPO.</p>
+<p style="font-size:12px;color:#666;margin-top:8px">Pasos: 1) Enciende la impresora y activa su Bluetooth. 2) Toca “Conectar impresora Bluetooth” y elige la impresora en la lista. 3) Cobra una venta: el ticket se imprime solo. Si la impresora se apaga o se aleja, KUPO vuelve a imprimir con la ventana de siempre para no dejarte sin ticket.</p>
+</div>
 <p style="font-size:12px;color:#666;margin-top:10px">Prueba la terminal exacta con un ticket real antes de comprar más. Si una impresora no agarra, se corrige en el sistema.</p>
 </div>
 </div>
@@ -1866,12 +1879,15 @@ function confirmarCobro(){
  ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";var _dv2=document.getElementById("descValor");if(_dv2)_dv2.value="";var _dt2=document.getElementById("descTipo");if(_dt2)_dt2.value="%";guardar();render();
  if(typeof sincronizarVentaNube==="function")sincronizarVentaNube(ventaNueva);
  toast("Venta cobrada. Folio #"+String(folio).padStart(4,"0")+" · Total "+dinero(total)+(desc.monto>0?" · Descuento −"+dinero(desc.monto):"")+(cambio>0?" · Cambio "+dinero(cambio):"")+" · "+pago);
- /* Impresión silenciosa en PC (Lalo 2026-11-14): solo si la casilla está
-    activa en Personalizar ticket. Imprime el mismo ticket con window.print;
-    sale SIN ventana solo si Chrome se abrió con --kiosk-printing y la
-    térmica de 80 mm es la impresora predeterminada. Si la casilla está
-    apagada, al cobrar no se imprime nada (como hoy) y se usa Reimprimir. */
- if(ticketConfig.impresionSilenciosa===true&&typeof imprimirTicketVenta==="function")imprimirTicketVenta(ventaNueva);
+ /* Impresión al cobrar — v90 (Lalo 2026-11-20): si hay una impresora
+    térmica Bluetooth conectada, el ticket sale solo por Bluetooth (ESC/POS)
+    y el cajón se abre en ventas en efectivo; si no hay impresora, se usa
+    la casilla "Impresión silenciosa en esta PC": prendida abre la ventana
+    de imprimir de siempre; apagada no se abre nada y el ticket queda en
+    Reimprimir. Sin Bluetooth, en una PC con Windows la casilla imprime sin
+    ventana solo si Chrome se abrió con --kiosk-printing y la térmica es la
+    impresora predeterminada. */
+ if(typeof imprimirVentaSilenciosa==="function")imprimirVentaSilenciosa(ventaNueva);
  /* Enviar ticket por WhatsApp desde la pantalla de pagos (Lalo 2026-11-17):
     solo si la casilla estaba activada al confirmar. Sin número no bloquea
     el cobro: la venta ya quedó registrada y el ticket se puede mandar
@@ -1967,7 +1983,7 @@ function cambiarOpcionSistema(clave,valor){
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
  const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
- ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"});
+ ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
  opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false});
@@ -1979,7 +1995,7 @@ function cargarDatosLicencia(){
  const boxEl=document.getElementById("negocioBox"); if(boxEl)boxEl.textContent=nb.toUpperCase();
  aplicarOpcionesSistema();
 }
-let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"});
+let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true});
 let terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
 function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function cargarTicketConfig(){
@@ -1992,6 +2008,7 @@ function cargarTicketConfig(){
  g("tMostrarIva").checked=ticketConfig.mostrarIva!==false;
  g("tMostrarFolio").checked=ticketConfig.mostrarFolio!==false;
  if(g("tImpSilenciosa"))g("tImpSilenciosa").checked=ticketConfig.impresionSilenciosa===true;
+ const ac=g("tAbrirCajon"); if(ac)ac.checked=ticketConfig.abrirCajon!==false;
  if(g("tPapel"))g("tPapel").value=ticketConfig.papel||"80 mm";
  const rp=g("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel||"80 mm";
  const tp=g("termPapel"); if(tp)tp.value=ticketConfig.papel||"80 mm";
@@ -2023,7 +2040,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm"};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig();
@@ -2031,7 +2048,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(){
  if(!confirm("¿Restablecer los datos del ticket a los valores de ejemplo?"))return;
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm"};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -2135,6 +2152,7 @@ function probarImpresion(){
  const activa=terminales.find(function(t){return t.estado==="Activa"});
  const m=document.getElementById("msgTermica");
  if(!activa){toast("Agrega y activa una terminal térmica primero."); return}
+ if(typeof btConectada==="function"&&btConectada()){probarImpresionBT();if(m){m.innerHTML='<p style="color:#0a7d4f;font-weight:700;margin-top:10px">✅ Ticket de prueba enviado por Bluetooth a '+escHtml(btImpresora.nombre)+'.</p>'}return}
  const texto="Ticket de prueba · "+(ticketConfig.negocio||"Mi negocio")+" · Folio #"+String(folio+1).padStart(4,"0")+" · Total $70.00 · Terminal: "+activa.nombre+" ("+activa.marca+" "+(activa.modelo||"")+ ", "+activa.conexion+", papel "+activa.papel+", ESC/POS)";
  if(m){m.innerHTML='<p style="color:#0a7d4f;font-weight:700;margin-top:10px">✅ '+escHtml(texto)+'</p>'}
  if(typeof window!=="undefined"&&typeof window.open==="function"){
@@ -2147,6 +2165,187 @@ function probarImpresion(){
 }
 
 
+
+/* v90 (Lalo 2026-11-20): impresión Bluetooth portada de movil.html a PC.
+   La tablet de Jonuta usa la versión PC en horizontal (se ve bien) y el
+   dueño quiere imprimir: el ticket sale por Bluetooth (ESC/POS) y el
+   cajón se abre al cobrar en efectivo, igual que en la móvil. Sin
+   impresora Bluetooth, se usa la casilla de impresión silenciosa de PC. */
+/* Impresión silenciosa por Bluetooth (Web Bluetooth + ESC/POS) — Lalo 2026-11-14.
+   Al cobrar, si hay una impresora térmica Bluetooth conectada, el ticket se
+   manda como bytes ESC/POS directo a la impresora, SIN abrir la ventana de
+   imprimir del navegador. Si no hay impresora conectada o falla el envío, se
+   usa la impresión de siempre (window.print) para nunca dejar sin ticket.
+   Solo funciona en Chrome de Android (Web Bluetooth). En iPhone/iPad el
+   navegador no permite Bluetooth web: ahí siempre se usa window.print.
+   La primera vez se elige la impresora tocando "Conectar impresora Bluetooth"
+   (el navegador pide permiso); después KUPO intenta reconectarla sola al abrir. */
+var BT_SERVICIOS=["49535343-fe7d-4ae5-8fa9-9fafd205e455","0000ffe0-0000-1000-8000-00805f9a34fb"];
+var btImpresora={device:null,server:null,caracteristica:null,nombre:""};
+function btGuardada(){try{return JSON.parse(localStorage.getItem(clavePorLicencia("kupoPosV146ImpresoraBT"))||"null")}catch(e){return null}}
+function btGuardarNombre(n){try{localStorage.setItem(clavePorLicencia("kupoPosV146ImpresoraBT"),JSON.stringify({nombre:n||""}))}catch(e){}}
+function btSoportado(){return (typeof navigator!=="undefined"&&!!navigator.bluetooth&&typeof navigator.bluetooth.requestDevice==="function")}
+function btConectada(){return !!(btImpresora.caracteristica&&btImpresora.device&&btImpresora.device.gatt&&btImpresora.device.gatt.connected)}
+function btSinAcentos(s){return String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ñ/g,"n").replace(/Ñ/g,"N").replace(/[¡¿]/g,"").replace(/[^\x20-\x7E]/g,"")}
+function btLineaIzqDer(izq,der,ancho){izq=btSinAcentos(izq);der=btSinAcentos(der);var espacios=ancho-izq.length-der.length;if(espacios<1){izq=izq.slice(0,Math.max(0,ancho-der.length-1));espacios=1}return izq+new Array(espacios+1).join(" ")+der+"\n"}
+function btCentrar(txt,ancho){txt=btSinAcentos(txt);if(txt.length>=ancho)return txt.slice(0,ancho)+"\n";var pad=Math.floor((ancho-txt.length)/2);return new Array(pad+1).join(" ")+txt+"\n"}
+function ticketESCPosBytes(v){
+ var ancho=(ticketConfig.papel||"80 mm")==="58 mm"?32:48;
+ var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),sub=base/1.16,iva=base-sub;
+ var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ var out="";
+ out+="\x1B@";
+ out+="\x1Ba\x01\x1BE\x01"+btCentrar(ticketConfig.negocio||"Mi negocio",ancho)+"\x1BE\x00";
+ out+="\x1Ba\x01"+btCentrar(ticketConfig.direccion||"",ancho)+btCentrar(ticketConfig.telefono||"",ancho);
+ out+=btCentrar(fechaTxt,ancho);
+ if(ticketConfig.mostrarFolio!==false)out+=btCentrar("Folio #"+String(v.folio).padStart(4,"0"),ancho);
+ out+="\x1Ba\x00";
+ out+=new Array(ancho+1).join("-")+"\n";
+ (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);out+=btSinAcentos(cantTxt+" x "+nombre).slice(0,ancho)+"\n";out+=btLineaIzqDer("  "+dinero(l.precio)+" c/u",dinero(l.cant*l.precio),ancho);});
+ out+=new Array(ancho+1).join("-")+"\n";
+ out+=btLineaIzqDer("Subtotal",dinero(sub),ancho);
+ if(ticketConfig.mostrarIva!==false)out+=btLineaIzqDer("IVA (16%)",dinero(iva),ancho);
+ if(descMonto>0)out+=btLineaIzqDer(btSinAcentos(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento"),"-"+dinero(descMonto),ancho);
+ out+="\x1D!\x11"+btLineaIzqDer("TOTAL",dinero(total),Math.floor(ancho/2))+"\x1D!\x00";
+ out+=btLineaIzqDer(v.pago||"Efectivo",dinero(total),ancho);
+ if(v.cambio&&v.cambio>0)out+=btLineaIzqDer("Cambio",dinero(v.cambio),ancho);
+ out+=new Array(ancho+1).join("-")+"\n";
+ out+="\x1Ba\x01"+btCentrar(ticketConfig.mensaje||"¡Gracias por su compra!",ancho);
+ out+=btCentrar("Un producto de Grupo Benitez - V1.6.0",ancho);
+ out+="\n\n\n\x1DV\x00";
+ var bytes=new Uint8Array(out.length);for(var i=0;i<out.length;i++){bytes[i]=out.charCodeAt(i)&0xFF}return bytes;
+}
+function btEscribir(bytes){
+ if(!btImpresora.caracteristica)return Promise.reject(new Error("sin impresora"));
+ var ch=btImpresora.caracteristica;var i=0;
+ function paso(){
+  if(i>=bytes.length)return Promise.resolve();
+  var trozo=bytes.slice(i,i+20);i+=20;
+  var p=(typeof ch.writeValueWithoutResponse==="function")?ch.writeValueWithoutResponse(trozo):ch.writeValue(trozo);
+  return Promise.resolve(p).then(function(){return new Promise(function(r){setTimeout(r,15)})}).then(paso);
+ }
+ return paso();
+}
+function btConectarDispositivo(device){
+ return device.gatt.connect().then(function(server){
+  function probar(idx){
+   if(idx>=BT_SERVICIOS.length){return btBuscarCaracteristica(server)}
+   return server.getPrimaryService(BT_SERVICIOS[idx]).then(function(svc){return svc.getCharacteristics()}).then(function(chars){
+    var w=chars.find(function(c){return (c.properties.writeWithoutResponse||c.properties.write)});
+    if(!w)throw new Error("sin escritura");
+    return w;
+   }).catch(function(){return probar(idx+1)});
+  }
+  return probar(0).then(function(ch){
+   btImpresora={device:device,server:server,caracteristica:ch,nombre:device.name||"Impresora térmica"};
+   btGuardarNombre(btImpresora.nombre);
+   device.addEventListener("gattserverdisconnected",function(){btImpresora={device:null,server:null,caracteristica:null,nombre:""};actualizarEstadoBT();toast("Se perdió la conexión con la impresora Bluetooth. El ticket saldrá con la ventana de imprimir de siempre.");});
+   actualizarEstadoBT();return true;
+  });
+ }).catch(function(e){toast("No se pudo conectar a esa impresora por Bluetooth.");return false});
+}
+function btBuscarCaracteristica(server){
+ return server.getPrimaryServices().then(function(svcs){
+  var cadena=Promise.resolve(null);
+  svcs.forEach(function(svc){
+   cadena=cadena.then(function(encontrada){
+    if(encontrada)return encontrada;
+    return svc.getCharacteristics().then(function(chars){
+     return chars.find(function(c){return (c.properties.writeWithoutResponse||c.properties.write)})||null;
+    }).catch(function(){return null});
+   });
+  });
+  return cadena;
+ }).then(function(ch){if(!ch)throw new Error("sin caracteristica escribible");return ch});
+}
+function conectarImpresoraBT(){
+ if(!btSoportado()){toast("Este navegador no permite Bluetooth web. Usa Chrome en Android para conectar la impresora por Bluetooth; en iPhone el ticket sale con la ventana de imprimir de siempre.");return Promise.resolve(false)}
+ return navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:BT_SERVICIOS}).then(function(device){
+  return btConectarDispositivo(device);
+ }).then(function(ok){if(ok){toast("Impresora Bluetooth conectada: "+(btImpresora.nombre||"impresora")+" ✅ El ticket saldrá solo al cobrar.")}return ok}).catch(function(e){
+  if(e&&e.name==="NotFoundError"){toast("No elegiste ninguna impresora. Toca de nuevo Conectar y elige la impresora en la lista.");}
+  else{toast("No se pudo conectar por Bluetooth: "+(e&&e.message?e.message:"error desconocido"));}
+  return false;
+ });
+}
+function desconectarImpresoraBT(){
+ try{if(btImpresora.device&&btImpresora.device.gatt&&btImpresora.device.gatt.connected)btImpresora.device.gatt.disconnect()}catch(e){}
+ btImpresora={device:null,server:null,caracteristica:null,nombre:""};
+ btGuardarNombre("");
+ actualizarEstadoBT();
+ toast("Impresora Bluetooth desconectada. El ticket saldrá con la ventana de imprimir de siempre.");
+}
+function actualizarEstadoBT(){
+ var txt;
+ if(!btSoportado())txt="🖨 Impresora Bluetooth: este navegador no permite Bluetooth web (usa Chrome en Android). El ticket saldrá con la ventana de imprimir de siempre.";
+ else if(btConectada())txt="✅ Impresora Bluetooth conectada: "+btImpresora.nombre+" — el ticket saldrá solo al cobrar, sin ventana.";
+ else txt="🖨 Impresora Bluetooth: no conectada — el ticket saldrá por la ventana de imprimir.";
+ var e1=document.getElementById("btEstado");if(e1)e1.textContent=txt;
+ var e2=document.getElementById("btEstadoVentas");if(e2)e2.textContent=txt;
+ var b=document.getElementById("btnDesconectarBT");if(b)b.style.display=btConectada()?"":"none";
+}
+function intentarReconectarBT(){
+ if(!btSoportado()||typeof navigator.bluetooth.getDevices!=="function")return;
+ var g=btGuardada();if(!g||!g.nombre)return;
+ navigator.bluetooth.getDevices().then(function(devices){
+  var d=devices.find(function(x){return x.name===g.nombre});
+  if(!d)return;
+  return btConectarDispositivo(d).then(function(ok){if(ok)toast("Impresora Bluetooth reconectada: "+d.name+" ✅")});
+ }).catch(function(){});
+}
+function imprimirVentaSilenciosa(v){
+ if(!btConectada()){
+  /* v83: sin impresora Bluetooth, la ventana de imprimir solo se abre si
+     la casilla "Abrir la ventana de imprimir al cobrar" está prendida
+     (Personalizar ticket, apagada por default). Apagada, el ticket queda
+     en Reimprimir y no se abre nada al cobrar. */
+  if(ticketConfig.impresionSilenciosa===true)return Promise.resolve(imprimirTicketVenta(v));
+  toast("Ticket listo en Reimprimir 🖨 Folio #"+String(v.folio).padStart(4,"0"));
+  return Promise.resolve(false);
+ }
+ return btEscribir(ticketESCPosBytes(v)).then(function(){
+  /* Cajón (Lalo 2026-11-14): solo se abre en ventas con efectivo (Efectivo o Mixto). Si el pulso falla, el ticket ya salió: no se reimprime, solo se avisa. */
+  if(ticketConfig.abrirCajon===false||(v.pago!=="Efectivo"&&v.pago!=="Mixto")){
+   toast("Ticket impreso en silencio en "+btImpresora.nombre+" 🖨 Folio #"+String(v.folio).padStart(4,"0"));
+   return true;
+  }
+  return btEscribir(BT_CAJON_BYTES).then(function(){
+   toast("Ticket impreso en silencio en "+btImpresora.nombre+" 🖨 Folio #"+String(v.folio).padStart(4,"0")+" · Cajón abierto 💵");
+   return true;
+  }).catch(function(){
+   toast("Ticket impreso en silencio en "+btImpresora.nombre+" 🖨 Folio #"+String(v.folio).padStart(4,"0")+" · No se pudo abrir el cajón.");
+   return true;
+  });
+ }).catch(function(e){
+  try{if(btImpresora.device&&btImpresora.device.gatt)btImpresora.device.gatt.disconnect()}catch(err){}
+  btImpresora={device:null,server:null,caracteristica:null,nombre:""};
+  actualizarEstadoBT();
+  /* v83: si falla el Bluetooth, la ventana solo se abre si la casilla está
+     prendida; apagada, el ticket queda en Reimprimir. */
+  if(ticketConfig.impresionSilenciosa===true){toast("Falló la impresora Bluetooth; el ticket sale con la ventana de imprimir de siempre.");return imprimirTicketVenta(v);}
+  toast("Falló la impresora Bluetooth. Ticket listo en Reimprimir 🖨 Folio #"+String(v.folio).padStart(4,"0"));
+  return Promise.resolve(false);
+ });
+}
+/* Cajón de dinero (Lalo 2026-11-14): la pollería recibe tablet + cajón + impresora 58 mm. El cajón va conectado a la impresora con su cable y se abre con el pulso ESC/POS ESC p 0 (0x1B 0x70 0x00 0x19 0xFA). Solo funciona por Bluetooth; por la ventana de imprimir no se puede mandar el pulso. */
+var BT_CAJON_BYTES=new Uint8Array([0x1B,0x70,0x00,0x19,0xFA]);
+function abrirCajonBT(){
+ if(!btSoportado()){toast("Este navegador no permite Bluetooth web. Usa Chrome en Android.");return Promise.resolve(false)}
+ if(!btConectada()){toast("Primero conecta la impresora con el botón Conectar impresora Bluetooth.");return Promise.resolve(false)}
+ return btEscribir(BT_CAJON_BYTES).then(function(){toast("Cajón abierto 💵");return true}).catch(function(){toast("No se pudo abrir el cajón. Revisa que la impresora esté encendida y cerca.");return false});
+}
+function guardarAbrirCajon(){
+ var c=document.getElementById("tAbrirCajon");if(!c)return;
+ ticketConfig.abrirCajon=c.checked;guardar();
+ toast(c.checked?"El cajón se abrirá al cobrar en efectivo 💵":"El cajón ya no se abrirá solo al cobrar.");
+}
+function probarImpresionBT(){
+ if(!btSoportado()){toast("Este navegador no permite Bluetooth web. Usa Chrome en Android.");return}
+ if(!btConectada()){toast("Primero conecta la impresora con el botón Conectar impresora Bluetooth.");return}
+ var primerProd=(typeof catalogo!=="undefined"&&catalogo.length?catalogo[0]:null);
+ var prueba={folio:folio+1,total:70,pago:"Efectivo",fecha:new Date().toISOString(),items:[{id:primerProd?primerProd.id:0,cant:1,precio:70}],cambio:0};
+ btEscribir(ticketESCPosBytes(prueba)).then(function(){toast("Ticket de prueba enviado por Bluetooth a "+btImpresora.nombre+" ✅")}).catch(function(){toast("No se pudo enviar el ticket de prueba por Bluetooth. Revisa que la impresora esté encendida y cerca.")});
+}
 
 /* Interfaz 3.2 · Cajeros y permisos */
 const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones","mensajes"]};
@@ -2759,7 +2958,7 @@ function cancelarEdicion(){document.getElementById("pId").value="";document.getE
 function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();if(typeof encolarProductoNube==="function")encolarProductoNube(p);toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
-function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
+function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay ventas para reimprimir.");return}if(typeof btConectada==="function"&&btConectada()&&typeof imprimirVentaSilenciosa==="function"){imprimirVentaSilenciosa(v);toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);return}if(imprimirTicketVenta(v)){toast("Reimprimiendo ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}else{toast("Último ticket: Folio #"+String(v.folio).padStart(4,"0")+" · Total "+dinero(v.total)+" · "+v.pago);}}
 /* Enviar ticket por WhatsApp (Lalo 2026-11-17): versión simple y gratis con
    enlace wa.me. El texto es el MISMO contenido del ticket impreso por
    Bluetooth/ESC-POS, en texto plano y sin códigos de control. */
@@ -3539,9 +3738,12 @@ if(pinGuardado){const adm=cajeros.find(x=>x.rol==="Administrador");if(adm&&adm.p
 aplicarPermisosMenu();
 render();
 cargarTicketConfig();
+actualizarEstadoBT();
 /* Nube: reintentar la cola pendiente al abrir y al volver internet. */
 if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();});
 setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof cargarMensajes==="function")cargarMensajes();},3000);
+/* Bluetooth: intentar reconectar sola la impresora que ya se había elegido. */
+setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarReconectarBT();},2000);
 </script>
 <script>
 /* KUPO POS PWA: registro del service worker (trabajar sin internet). */
