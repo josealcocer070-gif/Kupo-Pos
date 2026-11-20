@@ -1615,7 +1615,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <div class="form-prod" id="secCorteProductos" style="margin-top:16px">
 <h2>📦 Corte de productos</h2>
-<p style="color:#555;margin-bottom:14px">Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.</p>
+<p id="descCorteProductos" style="color:#555;margin-bottom:14px">Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.</p>
 <div class="resumen">
 <div class="tarjeta"><small>PRODUCTOS VENDIDOS HOY</small><b id="resProdTipos">0 productos</b></div>
 <div class="tarjeta"><small>TOTAL VENDIDO (CANTIDAD)</small><b id="resProdPiezas">0</b></div>
@@ -1623,7 +1623,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="tarjeta"><small>STOCK RESTANTE TOTAL</small><b id="resProdStock">0</b></div>
 </div>
 <div class="tabla-wrap"><table class="tabla">
-<thead><tr><th>Producto</th><th class="num">Vendidas</th><th class="num">Monto</th><th class="num">Stock inicial</th><th class="num">Stock vendido</th><th class="num">Stock restante</th></tr></thead>
+<thead><tr id="headCorteProductos"><th>Producto</th><th class="num">Vendidas</th><th class="num">Monto</th><th class="num">Stock inicial</th><th class="num">Stock vendido</th><th class="num">Stock restante</th></tr></thead>
 <tbody id="listaCorteProductos"></tbody>
 </table></div>
 <p style="margin-top:10px;font-size:13px;color:#555">Las Entradas siguen en su propia sección para los negocios que sí las manejan; aquí solo se usan para calcular el stock inicial del día.</p>
@@ -1838,6 +1838,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <label class="perm-fila"><span>🏬 Multi-almacén <span id="estMultiAlmacen" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optMultiAlmacen" onchange="cambiarOpcionSistema('multiAlmacen',this.checked)"><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>💬 Chat interno <span id="estChatInterno" style="color:#666">· Activado</span></span><span class="interruptor"><input type="checkbox" id="optChatInterno" onchange="cambiarOpcionSistema('chatInterno',this.checked)"><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>🏷️ Descuentos <span id="estDescuentos" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optDescuentos" onchange="cambiarOpcionSistema('descuentos',this.checked)"><span class="deslizador"></span></span></label>
+<label class="perm-fila"><span>🚫 Sin stock <span id="estSinStock" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optSinStock" onchange="cambiarOpcionSistema('sinStock',this.checked)"><span class="deslizador"></span></span></label>
 </div>
 <p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button><button type="button" id="btnIrMulti" class="secundario" onclick="mostrarVista('multi')">🏬 Ir a Multi-almacén</button></div>
@@ -2279,7 +2280,7 @@ function render(){
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
   const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}">${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${p.stock<=0||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${(p.stock<=0&&opcionesSistema.sinStock!==true)||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
   grid.appendChild(d);
  });
  renderTicket();renderTableroVentas();
@@ -2334,9 +2335,9 @@ if(window.visualViewport){
   if(a&&a.tagName==='INPUT'&&a.closest&&a.closest('#ticket')){verLineaTicket(a);}
  });
 }
-function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();toast("Agregado: "+p.nombre+" · "+textoCantidad(p,nuevo)+".");}
-function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
-function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
+function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(opcionesSistema.sinStock!==true&&disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(opcionesSistema.sinStock!==true&&nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();toast("Agregado: "+p.nombre+" · "+textoCantidad(p,nuevo)+".");}
+function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
+function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll("#confPagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();}
 function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
 function guardarWhatsAppVenta(){const v=(document.getElementById("whatsappVenta").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var cn=document.getElementById("confWhatsAppNumero");if(cn&&cn.value!==v)cn.value=v;}
@@ -2356,7 +2357,7 @@ function mostrarConfirmacionCobro(){
     insuficiente: el modal muestra cuánto falta y el botón Confirmar queda
     bloqueado hasta completar el total. */
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
- for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
+ for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||(opcionesSistema.sinStock!==true&&stockEn(l.id,av.id)+0.000001<l.cant)){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  const sub=total/1.16,iva=total-sub;
  document.getElementById("confCliente").textContent="👤 "+clienteVentaActual+" · 🏬 "+(av?av.nombre:"");
  document.getElementById("confArticulos").innerHTML=ticket.map(function(l){const p=catalogo.find(function(x){return x.id===l.id})||{unidad:"pieza",nombre:"Producto"};return '<div class="conf-linea"><span class="conf-foto">'+fotoHtml(p)+'</span><span class="conf-info"><b class="conf-nombre">'+escHtml(p.nombre||"Producto")+'</b><span class="conf-desc">'+escHtml(p.categoria||"General")+(p.sku?" · "+escHtml(p.sku):"")+" · "+dinero(l.precio)+" / "+UNIDADES_VENTA[unidadDe(p)].corta+'</span><span class="conf-cant">'+textoCantidad(p,l.cant)+'</span></span><span class="conf-importe">'+dinero(l.cant*l.precio)+"</span></div>"}).join("");
@@ -2451,8 +2452,8 @@ function confirmarCobro(){
  var _numeroWA=String((document.getElementById("confWhatsAppNumero")||{}).value||whatsappVentaActual||"").trim();
  cancelarConfirmacionCobro();
  const av=almacenVenta();if(!av){toast("No hay almacén activo para vender.");return}
- for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
- folio++;ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
+ for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||(opcionesSistema.sinStock!==true&&stockEn(l.id,av.id)+0.000001<l.cant)){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
+ folio++;if(opcionesSistema.sinStock!==true)ticket.forEach(l=>{ajustarStock(l.id,av.id,-l.cant)});
  ventas.push({folio,total,totalBase:baseTotal,descuento:desc.monto,descuentoTipo:desc.tipo,descuentoValor:desc.valor,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,whatsapp:whatsappVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
  const ventaNueva=ventas[ventas.length-1];
  const cambio=pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0);
@@ -2496,7 +2497,7 @@ function convertirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio
 function imprimirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return false;if(typeof window==="undefined"||typeof window.open!=="function")return false;try{const t=totalesCot(c.lineas);const w=window.open("","_blank","width=820,height=900");if(!w)return false;const neg=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||"Mi negocio";const dir=(typeof ticketConfig!=="undefined"&&ticketConfig.direccion)||"";const tel=(typeof ticketConfig!=="undefined"&&ticketConfig.telefono)||"";const logo=(typeof ticketConfig!=="undefined"&&ticketConfig.logo&&ticketConfig.mostrarLogo!==false)?ticketConfig.logo:"";const filas=c.lineas.map(function(l,i){return "<tr><td>"+(i+1)+"</td><td>"+textoCantidadU(l.cant,l.unidad)+"</td><td>"+escHtml(l.nombre)+"</td><td class=\"num\">"+dinero(l.precio)+"</td><td class=\"num\">"+dinero(l.cant*l.precio)+"</td></tr>"}).join("");w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotización '+escHtml(c.folio)+'</title><style>@page{size:letter;margin:14mm}body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:0;font-size:13px}.doc{max-width:190mm;margin:0 auto}.enc{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0b4a6e;padding-bottom:10px}.enc h1{margin:0;font-size:22px;color:#0b4a6e}.enc .datos{font-size:12px;color:#444;text-align:right}.logo{max-height:64px;max-width:140px}.titulo{margin:18px 0 4px;font-size:20px;color:#0b4a6e}.folio{font-size:14px;color:#444}.meta{display:flex;justify-content:space-between;gap:12px;margin:14px 0;flex-wrap:wrap}.meta div{font-size:13px;line-height:1.6}.cliente{border:1px solid #ccc;border-radius:6px;padding:10px 12px;margin-bottom:14px}.cliente b{font-size:14px}table{width:100%;border-collapse:collapse;margin-top:6px}th{background:#0b4a6e;color:#fff;text-align:left;padding:8px}td{padding:8px;border-bottom:1px solid #ddd}.num{text-align:right}.totales{margin-left:auto;width:250px;margin-top:12px}.totales div{display:flex;justify-content:space-between;padding:4px 0}.totales .total{font-size:17px;font-weight:700;border-top:2px solid #0b4a6e;padding-top:8px}.notas{margin-top:18px;font-size:12px;color:#555;line-height:1.6}.firma{margin-top:48px;display:flex;justify-content:space-between}.firma div{width:45%;text-align:center;border-top:1px solid #111;padding-top:6px;font-size:12px}.pie{margin-top:24px;text-align:center;font-size:11px;color:#888}</style></head><body><div class="doc"><div class="enc"><div>'+(logo?'<img class="logo" src="'+logo+'" alt="Logo">':"")+'<h1>'+escHtml(neg)+'</h1></div><div class="datos">'+(dir?escHtml(dir)+"<br>":"")+(tel?"Tel/WhatsApp: "+escHtml(tel):"")+'</div></div><div class="titulo">COTIZACIÓN</div><div class="folio">Folio: <b>'+escHtml(c.folio)+'</b> · Estado: '+estadoCot(c)+'</div><div class="meta"><div>Fecha: '+fechaBonita(c.fecha)+'<br>Vigencia: '+c.vigenciaDias+' días</div><div>Válida hasta: <b>'+fechaBonita(fechaVencimientoCot(c))+'</b><br>Precios con IVA incluido</div></div><div class="cliente">Cliente: <b>'+escHtml(c.cliente)+'</b>'+(c.telefono?"<br>Teléfono: "+escHtml(c.telefono):"")+'</div><table><thead><tr><th>#</th><th>Cantidad</th><th>Producto</th><th class="num">Precio unit.</th><th class="num">Importe</th></tr></thead><tbody>'+filas+'</tbody></table><div class="totales"><div><span>Subtotal:</span><span>'+dinero(t.subtotal)+'</span></div><div><span>IVA 16% incluido:</span><span>'+dinero(t.iva)+'</span></div><div class="total"><span>TOTAL:</span><span>'+dinero(t.total)+'</span></div></div><div class="notas">Esta cotización no es un ticket de venta. Los precios incluyen IVA y son válidos hasta el '+fechaBonita(fechaVencimientoCot(c))+'. El stock se descuenta solo cuando la cotización se convierte en venta y se cobra.</div><div class="firma"><div>'+escHtml(neg)+'</div><div>Cliente · Firma de conformidad</div></div><div class="pie">Generado con KUPO POS · '+escHtml(c.folio)+'</div></div></body></html>');w.document.close();w.focus();setTimeout(function(){w.print()},300);return true}catch(e){return false}}
 function eliminarCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return;if(!confirm("¿Eliminar la cotización "+folio+" de "+c.cliente+"?"))return;cotizaciones=cotizaciones.filter(x=>x.folio!==folio);guardar();renderCotizaciones();const box=document.getElementById("detalleCotizacion");if(box)box.innerHTML="";toast("Cotización eliminada: "+folio)}
 
-function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji="";if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad,sku:"SKU-"+String(nid).slice(-3),costo:Math.round(precio*0.6*100)/100,stockMin:5,foto:""});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();if(typeof encolarProductoNube==="function")encolarProductoNube(catalogo[catalogo.length-1]);toast("Producto agregado: "+nombre);}
+function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=(opcionesSistema.sinStock===true)?0:redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji="";if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad,sku:"SKU-"+String(nid).slice(-3),costo:Math.round(precio*0.6*100)/100,stockMin:5,foto:""});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();if(typeof encolarProductoNube==="function")encolarProductoNube(catalogo[catalogo.length-1]);toast("Producto agregado: "+nombre);}
 function editar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede editar productos.");return}mostrarVista("productos");editarProducto(id);}
 function eliminar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}const p=catalogo.find(x=>x.id===id);if(p&&confirm("¿Eliminar "+p.nombre+" del catálogo?")){if(typeof encolarBorradoNube==="function")encolarBorradoNube("productos",p);catalogo=catalogo.filter(x=>x.id!==id);delete stockAlmacen[id];ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();}}
 function restablecerEjemplo(){if(confirm("¿Restablecer los productos de ejemplo?")){catalogo=JSON.parse(JSON.stringify(EJEMPLO));stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0});sincronizarStock();guardar();render();renderProductos();if(typeof encolarTodosProductosNube==="function")encolarTodosProductosNube();}}
@@ -2518,9 +2519,9 @@ function cargarDatoLicencia(base,defecto){
  }
  return defecto;
 }
-let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false});
-if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false};
-opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true};
+let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false});
+if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false};
+opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true};
 function guardarOpcionesSistema(){guardarPorLicencia("kupoPosV146Opciones",opcionesSistema);}
 /* Migración v82: el interruptor del chat vivía en localStorage kupoPosV146ChatActivo; ahora vive en opcionesSistema.chatInterno (por licencia). */
 try{var _chatViejo=localStorage.getItem("kupoPosV146ChatActivo");if(_chatViejo!==null){opcionesSistema.chatInterno=_chatViejo==="true";localStorage.removeItem("kupoPosV146ChatActivo");guardarOpcionesSistema();}}catch(e){}
@@ -2532,13 +2533,16 @@ function aplicarOpcionesSistema(){
  const o2=document.getElementById("optMultiAlmacen"); if(o2)o2.checked=opcionesSistema.multiAlmacen;
  const o3=document.getElementById("optChatInterno"); if(o3)o3.checked=opcionesSistema.chatInterno;
  const o4=document.getElementById("optDescuentos"); if(o4)o4.checked=opcionesSistema.descuentos===true;
+ const o5=document.getElementById("optSinStock"); if(o5)o5.checked=opcionesSistema.sinStock===true;
  const e1=document.getElementById("estCorteProductos"); if(e1)e1.textContent=opcionesSistema.corteProductos?"· Activado":"· Desactivado";
  const e2=document.getElementById("estMultiAlmacen"); if(e2)e2.textContent=opcionesSistema.multiAlmacen?"· Activado":"· Desactivado";
  const e3=document.getElementById("estChatInterno"); if(e3)e3.textContent=opcionesSistema.chatInterno?"· Activado":"· Desactivado";
  const e4=document.getElementById("estDescuentos"); if(e4)e4.textContent=opcionesSistema.descuentos===true?"· Activado":"· Desactivado";
+ const e5=document.getElementById("estSinStock"); if(e5)e5.textContent=opcionesSistema.sinStock===true?"· Activado":"· Desactivado";
+ var ns=document.getElementById("nuevoStock"); if(ns){ns.style.display=opcionesSistema.sinStock===true?"none":"";ns.required=opcionesSistema.sinStock!==true;}
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
- const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+(opcionesSistema.chatInterno?"Chat interno activado: el patrón y los cajeros se escriben en Mensajes. ":"Chat interno desactivado: los cajeros no ven Mensajes en el menú. ")+(opcionesSistema.descuentos?"Descuentos activados: al cobrar se puede aplicar un descuento en % o en pesos (solo el Administrador). ":"Descuentos desactivados: al cobrar no se puede rebajar el total. ")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
+ const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+(opcionesSistema.chatInterno?"Chat interno activado: el patrón y los cajeros se escriben en Mensajes. ":"Chat interno desactivado: los cajeros no ven Mensajes en el menú. ")+(opcionesSistema.descuentos?"Descuentos activados: al cobrar se puede aplicar un descuento en % o en pesos (solo el Administrador). ":"Descuentos desactivados: al cobrar no se puede rebajar el total. ")+(opcionesSistema.sinStock===true?"Sin stock activado: esta licencia no maneja inventario; las ventas no se bloquean por stock y el corte de productos no muestra columnas de stock. ":"")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
  const av=document.getElementById("avisoCorteProductos"); if(av)av.style.display=opcionesSistema.corteProductos?"none":"";
  const bM=document.getElementById("btnIrMulti"); if(bM)bM.disabled=!opcionesSistema.multiAlmacen;
  const ol=document.getElementById("optLicencia"); if(ol)ol.textContent=licenciaActual();
@@ -2546,13 +2550,14 @@ function aplicarOpcionesSistema(){
 }
 function cambiarOpcionSistema(clave,valor){
  if(!((sesionActual&&sesionActual.rol)==="Administrador")){toast("⛔ Sin permiso: solo el Administrador puede cambiar las opciones de esta licencia.");aplicarOpcionesSistema();return}
- if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos")return;
+ if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos"&&clave!=="sinStock")return;
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
  aplicarOpcionesSistema();
+ if(clave==="sinStock"){renderCortes();render();}
  if(clave==="multiAlmacen"&&!valor&&vistaActual==="multi")mostrarVista("ventas");
  if(clave==="chatInterno"){aplicarPermisosMenu();if(!valor&&vistaActual==="mensajes"&&!esAdminChat())mostrarVista("ventas");}
- toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":clave==="descuentos"?"Descuentos":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
+ toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":clave==="descuentos"?"Descuentos":clave==="sinStock"?"Sin stock":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
 }
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
@@ -2560,9 +2565,9 @@ function cargarDatosLicencia(){
  ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
- opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false});
- if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false};
- opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true};
+ opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false});
+ if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false};
+ opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true};
  const nb=(ticketConfig&&ticketConfig.negocio)||negDef;
  localStorage.setItem("kupoPosV146Negocio",nb);
  const nbEl=document.getElementById("nombreNegocio"); if(nbEl)nbEl.textContent=nb;
@@ -2781,6 +2786,106 @@ function ticketESCPosBytes(v){
  out+=btCentrar("Un producto de Grupo Benitez - V1.6.0",ancho);
  out+="\n\n\n\x1DV\x00";
  var bytes=new Uint8Array(out.length);for(var i=0;i<out.length;i++){bytes[i]=out.charCodeAt(i)&0xFF}return bytes;
+}
+
+/* v94 (Lalo 2026-11-20): impresión de los dos cortes (dinero y productos).
+   Al realizar un corte se imprime solo por Bluetooth, como el ticket de
+   venta; "Reimprimir" en el Historial también imprime de verdad (antes
+   solo mostraba un aviso). Sin Bluetooth, la ventana de imprimir solo se
+   abre si la casilla de impresión silenciosa está prendida; si no, el
+   corte queda guardado y se puede reimprimir desde Historial. El cajón
+   NO se abre al imprimir un corte (no es una venta). */
+function corteESCPosBytes(c){
+ var ancho=(ticketConfig.papel||"80 mm")==="58 mm"?32:48;
+ var esProd=(c.tipo||"dinero")==="productos";
+ var out="";
+ out+="\x1B@";
+ out+="\x1Ba\x01\x1BE\x01"+btCentrar(ticketConfig.negocio||"Mi negocio",ancho)+"\x1BE\x00";
+ out+="\x1Ba\x01"+btCentrar(ticketConfig.direccion||"",ancho)+btCentrar(ticketConfig.telefono||"",ancho);
+ out+=btCentrar((c.fecha||"")+" "+(c.hora||""),ancho);
+ out+=btCentrar((esProd?"CORTE DE PRODUCTOS #":"CORTE DE DINERO #")+String(c.folio).padStart(4,"0"),ancho);
+ out+="\x1Ba\x00";
+ out+=new Array(ancho+1).join("-")+"\n";
+ if(esProd){
+  (c.productos||[]).forEach(function(p){
+   out+=btSinAcentos(p.nombre||"Producto").slice(0,ancho)+"\n";
+   out+=btLineaIzqDer("  "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" x "+dinero(p.precio||0),dinero(p.monto||0),ancho);
+  });
+  out+=new Array(ancho+1).join("-")+"\n";
+  out+=btLineaIzqDer("Total vendido",redondearCant(c.totalPiezas||0),ancho);
+  out+="\x1D!\x11"+btLineaIzqDer("TOTAL",dinero(c.ventasTotal||0),Math.floor(ancho/2))+"\x1D!\x00";
+ } else {
+  out+=btLineaIzqDer("Ventas",c.ventasNum+" · "+dinero(c.ventasTotal||0),ancho);
+  out+=btLineaIzqDer("  Efectivo",dinero(c.efectivo||0),ancho);
+  out+=btLineaIzqDer("  Tarjeta",dinero(c.tarjeta||0),ancho);
+  out+=btLineaIzqDer("  Transf.",dinero(c.transf||0),ancho);
+  out+=btLineaIzqDer("  Mixto",dinero(c.mixto||0),ancho);
+  out+=btLineaIzqDer("Gastos",dinero(c.gastos||0),ancho);
+  out+=btLineaIzqDer("Costo entradas",dinero(c.entradasCosto||0)+" ("+redondearCant(c.entradasPiezas||0)+")",ancho);
+  out+=btLineaIzqDer("Ganancia",dinero(c.ganancia||0),ancho);
+  out+=btLineaIzqDer("Fondo",dinero(c.fondo||0),ancho);
+  out+=btLineaIzqDer("Efectivo esperado",dinero(c.efectivoEsperado||0),ancho);
+  out+=btLineaIzqDer("Efectivo contado",dinero(c.efectivoContado||0),ancho);
+  out+=btLineaIzqDer("Diferencia",dinero(c.diferencia||0),ancho);
+  out+="\x1D!\x11"+btLineaIzqDer("TOTAL",dinero(c.totalCaja||0),Math.floor(ancho/2))+"\x1D!\x00";
+ }
+ out+=new Array(ancho+1).join("-")+"\n";
+ out+="\x1Ba\x01"+btCentrar("Un producto de Grupo Benitez - V1.6.0",ancho);
+ out+="\n\n\n\x1DV\x00";
+ var bytes=new Uint8Array(out.length);for(var i=0;i<out.length;i++){bytes[i]=out.charCodeAt(i)&0xFF}return bytes;
+}
+function corteImpresoHTML(c){
+ var esProd=(c.tipo||"dinero")==="productos";
+ var filas="";
+ if(esProd){
+  filas=(c.productos||[]).map(function(p){return '<div class="t-line"><span>'+escHtml(p.nombre||"Producto")+'</span><span>'+textoCantidadU(p.cantidad,p.unidad||"pieza")+' x '+dinero(p.precio||0)+' = '+dinero(p.monto||0)+'</span></div>'}).join("");
+  filas+='<div class="t-line"><span>Total vendido</span><span>'+redondearCant(c.totalPiezas||0)+'</span></div>';
+ } else {
+  filas='<div class="t-line"><span>Ventas</span><span>'+c.ventasNum+' · '+dinero(c.ventasTotal||0)+'</span></div>'
+  +'<div class="t-line"><span>Efectivo</span><span>'+dinero(c.efectivo||0)+'</span></div>'
+  +'<div class="t-line"><span>Tarjeta</span><span>'+dinero(c.tarjeta||0)+'</span></div>'
+  +'<div class="t-line"><span>Transf.</span><span>'+dinero(c.transf||0)+'</span></div>'
+  +'<div class="t-line"><span>Mixto</span><span>'+dinero(c.mixto||0)+'</span></div>'
+  +'<div class="t-line"><span>Gastos</span><span>'+dinero(c.gastos||0)+'</span></div>'
+  +'<div class="t-line"><span>Costo entradas</span><span>'+dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')</span></div>'
+  +'<div class="t-line"><span>Ganancia</span><span>'+dinero(c.ganancia||0)+'</span></div>'
+  +'<div class="t-line"><span>Fondo</span><span>'+dinero(c.fondo||0)+'</span></div>'
+  +'<div class="t-line"><span>Efectivo esperado</span><span>'+dinero(c.efectivoEsperado||0)+'</span></div>'
+  +'<div class="t-line"><span>Efectivo contado</span><span>'+dinero(c.efectivoContado||0)+'</span></div>'
+  +'<div class="t-line"><span>Diferencia</span><span>'+dinero(c.diferencia||0)+'</span></div>';
+ }
+ return '<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div><div>'+escHtml((c.fecha||"")+" "+(c.hora||""))+'</div><div class="t-titulo">'+(esProd?"CORTE DE PRODUCTOS":"CORTE DE DINERO")+' #'+String(c.folio).padStart(4,"0")+'</div><hr>'+filas+'<hr><div class="t-line t-total"><span>TOTAL</span><span>'+dinero(esProd?(c.ventasTotal||0):(c.totalCaja||0))+'</span></div><div>Un producto de Grupo Benitez - V1.6.0</div>';
+}
+function imprimirCorteVentana(c){
+ if(!c)return false;
+ if(typeof window==="undefined"||typeof window.open!=="function")return false;
+ try{
+  const w=window.open("","_blank","width=340,height=600");
+  if(!w)return false;
+  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Corte #'+String(c.folio).padStart(4,"0")+'</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px;color:#111}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}hr{border-top:1px dashed #999}</style></head><body><div>'+corteImpresoHTML(c)+'</div></body></html>');
+  w.document.close(); w.focus(); w.print(); return true;
+ }catch(e){return false}
+}
+function imprimirCorteSilenciosa(c){
+ if(!c)return Promise.resolve(false);
+ var etiqueta=(c.tipo||"dinero")==="productos"?"Corte de productos":"Corte de dinero";
+ var folioTxt="#"+String(c.folio).padStart(4,"0");
+ if(!btConectada()){
+  if(ticketConfig.impresionSilenciosa===true)return Promise.resolve(imprimirCorteVentana(c));
+  toast(etiqueta+" "+folioTxt+" guardado 🖨 Conecta la impresora Bluetooth para imprimirlo, o reimprímelo desde Historial.");
+  return Promise.resolve(false);
+ }
+ return btEscribir(corteESCPosBytes(c)).then(function(){
+  toast(etiqueta+" "+folioTxt+" impreso en "+btImpresora.nombre+" 🖨");
+  return true;
+ }).catch(function(e){
+  try{if(btImpresora.device&&btImpresora.device.gatt)btImpresora.device.gatt.disconnect()}catch(err){}
+  btImpresora={device:null,server:null,caracteristica:null,nombre:""};
+  actualizarEstadoBT();
+  if(ticketConfig.impresionSilenciosa===true){toast("Falló la impresora Bluetooth; el corte sale con la ventana de imprimir de siempre.");return imprimirCorteVentana(c);}
+  toast("Falló la impresora Bluetooth. "+etiqueta+" "+folioTxt+" listo en Historial para reimprimir 🖨");
+  return Promise.resolve(false);
+ });
 }
 function btEscribir(bytes){
  if(!btImpresora.caracteristica)return Promise.reject(new Error("sin impresora"));
@@ -3771,10 +3876,14 @@ function renderCorteProductos(){
  const elP=document.getElementById("resProdPiezas"); if(elP)elP.textContent=redondearCant(r.totalPiezas);
  const elM=document.getElementById("resProdMonto"); if(elM)elM.textContent=dinero(r.totalMonto);
  const elS=document.getElementById("resProdStock"); if(elS)elS.textContent=redondearCant(r.stockRestante);
+ var sinStockCorte=opcionesSistema.sinStock===true;
+ var headCP=document.getElementById("headCorteProductos"); if(headCP)headCP.innerHTML=sinStockCorte?'<th>Producto</th><th class="num">Precio c/u</th><th class="num">Vendidas</th><th class="num">Monto</th>':'<th>Producto</th><th class="num">Vendidas</th><th class="num">Monto</th><th class="num">Stock inicial</th><th class="num">Stock vendido</th><th class="num">Stock restante</th>';
+ var descCP=document.getElementById("descCorteProductos"); if(descCP)descCP.textContent=sinStockCorte?"Productos vendidos hoy, con precio, cantidad vendida y monto. Esta licencia no maneja stock.":"Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.";
+ var rsCard=document.getElementById("resProdStock"); if(rsCard&&rsCard.parentElement)rsCard.parentElement.style.display=sinStockCorte?"none":"";
  const lista=document.getElementById("listaCorteProductos"); if(!lista)return;
- if(!r.filas.length){lista.innerHTML='<tr><td colspan="6"><div class="vacio-accion">📦<b>Aún no hay productos vendidos hoy</b>Vende algo en Ventas y aparecerá aquí.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div></td></tr>';return}
- lista.innerHTML=r.filas.map(f=>'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+textoCantidadU(f.cantidad,f.unidad||"pieza")+'</td><td class="num"><b>'+dinero(f.monto)+'</b></td><td class="num">'+textoCantidadU(f.stockInicial,f.unidad||"pieza")+'</td><td class="num">'+textoCantidadU(f.stockVendido,f.unidad||"pieza")+'</td><td class="num"><b>'+textoCantidadU(f.stockRestante,f.unidad||"pieza")+'</b></td></tr>').join("")+
- '<tr><td><b>Total</b></td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td><td class="num">—</td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+redondearCant(r.stockRestante)+'</b></td></tr>';
+ if(!r.filas.length){lista.innerHTML='<tr><td colspan="'+(sinStockCorte?4:6)+'"><div class="vacio-accion">📦<b>Aún no hay productos vendidos hoy</b>Vende algo en Ventas y aparecerá aquí.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div></td></tr>';return}
+ lista.innerHTML=r.filas.map(f=>sinStockCorte?'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+dinero(f.precio)+'</td><td class="num">'+textoCantidadU(f.cantidad,f.unidad||"pieza")+'</td><td class="num"><b>'+dinero(f.monto)+'</b></td></tr>':'<tr><td>'+escHtml(f.emoji||"📦")+' '+escHtml(f.nombre)+'</td><td class="num">'+textoCantidadU(f.cantidad,f.unidad||"pieza")+'</td><td class="num"><b>'+dinero(f.monto)+'</b></td><td class="num">'+textoCantidadU(f.stockInicial,f.unidad||"pieza")+'</td><td class="num">'+textoCantidadU(f.stockVendido,f.unidad||"pieza")+'</td><td class="num"><b>'+textoCantidadU(f.stockRestante,f.unidad||"pieza")+'</b></td></tr>').join("")+
+ (sinStockCorte?'<tr><td><b>Total</b></td><td class="num">—</td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td></tr>':'<tr><td><b>Total</b></td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+dinero(r.totalMonto)+'</b></td><td class="num">—</td><td class="num"><b>'+redondearCant(r.totalPiezas)+'</b></td><td class="num"><b>'+redondearCant(r.stockRestante)+'</b></td></tr>');
 }
 function actualizarCuadre(){
  const r=resumenCorte();
@@ -3828,7 +3937,7 @@ function realizarCorteDinero(){
  cortes.unshift(c);
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
- toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" realizado · Total en caja "+dinero(c.totalCaja)+(c.diferencia!==0?" · Diferencia "+dinero(c.diferencia):" · Caja cuadrada ✅"));
+ imprimirCorteSilenciosa(c);
 }
 function realizarCorte(){realizarCorteDinero();}
 function realizarCorteProductos(){
@@ -3840,13 +3949,13 @@ function realizarCorteProductos(){
  const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoCaja,efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
- toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" realizado · "+redondearCant(r.totalPiezas)+" · "+dinero(r.totalMonto));
+ imprimirCorteSilenciosa(c);
 }
 function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
  var det=document.getElementById("detalleHistCorte")||document.getElementById("detalleCorte"); if(!det)return;
  if((c.tipo||"dinero")==="productos"){
   det.innerHTML="<b>📦 Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
-  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+" · Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza")).join("<br>")+
+  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+(opcionesSistema.sinStock===true?"":" · Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza"))).join("<br>")+
   "<br><b>Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
  } else {
   det.innerHTML="<b>💰 Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
@@ -3857,7 +3966,7 @@ function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
  }
  if(det)det.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;if((c.tipo||"dinero")==="productos"){toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal));return}toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
+function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;imprimirCorteSilenciosa(c);}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
 function mostrarPasoLicencia(){var _cl=document.getElementById("claveLicencia");if(_cl)_cl.value="";var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.6.0";}
