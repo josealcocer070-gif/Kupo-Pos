@@ -193,6 +193,8 @@ main h1{font-size:34px;margin-bottom:14px}
 .gestion input,.gestion select{border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px}
 .gestion button{background:var(--azul);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
 .oculto{display:none!important}
+.aviso-gracia{background:#fff3cd;border:1px solid #f5b800;border-left:6px solid #f5b800;color:#5a3d00;font-weight:700;font-size:13px;line-height:1.45;padding:9px 12px;margin:8px 12px 0;border-radius:8px}
+html[data-tema="noche"] .aviso-gracia{background:#3a2f00;border-color:#f5b800;color:#ffe9a8}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12233a;color:#fff;padding:12px 18px;border-radius:12px;z-index:50;max-width:90vw;text-align:center}
 @media(max-width:1150px){.layout{grid-template-columns:1fr}.panel{grid-column:1/-1;position:static;border-left:0;border-top:1px solid #dfe5ea}.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){
@@ -1334,6 +1336,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="user"><b id="usuarioActual">Eduardo Benitez</b><span id="rolActual">Administrador</span></div>
 <span class="pill">📶 Conectado</span>
 </header>
+
+<div id="avisoGracia" class="aviso-gracia oculto" role="alert"></div>
 
 <div id="modalAvisos" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="avisosTitulo" onclick="if(event.target===this)cerrarAvisos()">
  <div class="conf-tarjeta tarjeta-panel">
@@ -3841,7 +3845,21 @@ function mostrarPasoLogin(){document.getElementById("pantallaLogin").classList.r
 function toggleContratar(){var d=document.getElementById("detallesContratar");var f=document.getElementById("flechaContratar");if(!d)return;var cerrado=d.classList.toggle("oculto");if(f)f.textContent=cerrado?"▾":"▴";}
 const CLAVES_PRUEBA=["KUPO-7F2A-91BC","KUPO-3D8E-44F1","KUPO-9A1C-77D2"];
 function leerLicenciasCompartidas(){try{let l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"null");return Array.isArray(l)?l:[]}catch(e){return[]}}
-function estadoLicencia(l){if(l.estado==="Pausada")return "Pausada";if(l.estado==="Vencida")return "Vencida";if(l.vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.vencimiento+"T00:00:00")<hoy)return "Vencida"}return "Activa"}
+/* Periodo de gracia de 3 días (v89, Lalo 2026-11-20): vencida la mensualidad,
+   la licencia sigue funcionando 3 días naturales para renovar sin quedarse
+   parado. Al 4º día se bloquea como antes. Solo aplica a rentas (con
+   vencimiento); las vitalicias no tienen vencimiento y no se ven afectadas. */
+const DIAS_GRACIA=3;
+function diasDesdeVencimiento(venc){if(!venc)return null;let hoy=new Date();hoy.setHours(0,0,0,0);let v=new Date(venc+"T00:00:00");if(isNaN(v.getTime()))return null;return Math.floor((hoy-v)/86400000);}
+function estadoPorVencimiento(venc,estado){if(estado==="Pausada")return "Pausada";if(estado==="Vencida")return "Vencida";if(venc){let d=diasDesdeVencimiento(venc);if(d!==null&&d>0){if(d<=DIAS_GRACIA)return "Gracia";return "Vencida";}}return "Activa";}
+function diasGraciaRestantes(venc){let d=diasDesdeVencimiento(venc);if(d===null||d<=0)return DIAS_GRACIA;return Math.max(0,DIAS_GRACIA-d+1);}
+function fechaLimiteGracia(venc){let v=new Date(venc+"T00:00:00");v.setDate(v.getDate()+DIAS_GRACIA);return v.getFullYear()+"-"+String(v.getMonth()+1).padStart(2,"0")+"-"+String(v.getDate()).padStart(2,"0");}
+function textoAvisoGracia(venc){let rest=diasGraciaRestantes(venc);let lim=fechaBonita(fechaLimiteGracia(venc));let ven=fechaBonita(venc);if(rest<=1)return "⚠️ Tu licencia venció el "+ven+". Hoy es tu último día de gracia: renueva antes de que termine el día para seguir vendiendo sin interrupciones. Escríbenos al WhatsApp 951 943 3938.";return "⚠️ Tu licencia venció el "+ven+". Tienes "+rest+" días de gracia para renovar, hasta el "+lim+". Escríbenos al WhatsApp 951 943 3938 y seguimos atendiéndote.";}
+function textoEstadoLicencia(lic){let v=(lic&&(lic.vencimiento||lic.fecha_vencimiento))||"";if(estadoPorVencimiento(v,lic?lic.estado:"")==="Gracia")return "⚠️ LICENCIA EN GRACIA · RENUEVA ANTES DEL "+fechaBonita(fechaLimiteGracia(v));return v?"✅ LICENCIA ACTIVA · VENCE "+fechaBonita(v):"✅ LICENCIA ACTIVA · V1.6.0";}
+function licenciaEnGracia(){try{let lista=leerLicenciasCompartidas();let lic=lista.find(function(x){return x.clave===licenciaActual()});if(!lic)return null;let venc=lic.vencimiento||"";if(estadoPorVencimiento(venc,lic.estado)!=="Gracia")return null;return{venc:venc};}catch(e){return null}}
+function actualizarEncabezadoLicencia(){let s1=document.getElementById("inicioSucursal");if(!s1)return;try{let lista=leerLicenciasCompartidas();let lic=lista.find(function(x){return x.clave===licenciaActual()});if(lic)s1.textContent=textoEstadoLicencia(lic);}catch(e){}}
+function actualizarAvisoGracia(mostrarToast){actualizarEncabezadoLicencia();let g=licenciaEnGracia();let b=document.getElementById("avisoGracia");if(!b)return false;if(!g){b.classList.add("oculto");b.textContent="";return false;}let t=textoAvisoGracia(g.venc);b.textContent=t;b.classList.remove("oculto");if(mostrarToast){try{toast(t)}catch(e){}}return true;}
+function estadoLicencia(l){return estadoPorVencimiento(l.vencimiento,l.estado)}
 /* KUPO POS · Supabase (nube) — licencias en la nube, localStorage como respaldo sin internet.
    La anon key es pública por diseño de Supabase (va en el cliente); si no hay internet o
    Supabase falla, se valida contra kupoLicenciasCompartidas local como antes. Si hay
@@ -4120,9 +4138,8 @@ async function consultarLicenciaNube(clave){
 }
 function estadoLicenciaNube(l){
  if(!l)return"Activa";
- if(l.estado==="Pausada")return"Pausada";
- if(l.estado==="Vencida")return"Vencida";
- if(l.fecha_vencimiento){let hoy=new Date();hoy.setHours(0,0,0,0);if(new Date(l.fecha_vencimiento+"T00:00:00")<hoy)return"Vencida";}
+ let est=estadoPorVencimiento(l.fecha_vencimiento,l.estado);
+ if(est==="Gracia"||est==="Vencida"||est==="Pausada")return est;
  if(l.estado==="Activa")return"Activa";
  return l.estado||"Activa";
 }
@@ -4139,8 +4156,8 @@ function guardarLicenciaLocalDesdeNube(nube){
 }
 function entrarConLicencia(c,lic){
  localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();
- if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let nh=document.getElementById("nombreNegocio");if(nh)nh.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent=(lic.vencimiento?"✅ LICENCIA ACTIVA · VENCE "+fechaBonita(lic.vencimiento):"✅ LICENCIA ACTIVA · V1.6.0");let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
- const m=document.getElementById("msgLicencia");m.textContent="✅ Licencia validada — "+lic.negocio;m.className="msg ok";mostrarPasoLogin();
+ if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let nh=document.getElementById("nombreNegocio");if(nh)nh.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent=textoEstadoLicencia(lic);let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
+ const m=document.getElementById("msgLicencia");let _v=(lic&&(lic.vencimiento||lic.fecha_vencimiento))||"";if(estadoPorVencimiento(_v,lic?lic.estado:"")==="Gracia"){m.textContent="✅ Licencia validada — "+lic.negocio+" · "+textoAvisoGracia(_v);}else{m.textContent="✅ Licencia validada — "+lic.negocio;}m.className="msg ok";mostrarPasoLogin();
 }
 function validarLicenciaLocal(c){
  const m=document.getElementById("msgLicencia");
@@ -4164,7 +4181,7 @@ async function validarLicencia(){
   let est=estadoLicenciaNube(nube.lic);
   if(est==="Pausada"){m.textContent="Licencia pausada en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return;}
   if(est==="Vencida"){m.textContent="Licencia vencida en KUPO Admin. Renueva la licencia para entrar.";m.className="msg error";return;}
-  if(est!=="Activa"){m.textContent="Licencia no activa en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return;}
+  if(est!=="Activa"&&est!=="Gracia"){m.textContent="Licencia no activa en KUPO Admin. Pide al administrador que la active.";m.className="msg error";return;}
   guardarLicenciaLocalDesdeNube(nube.lic);
   entrarConLicencia(c,nube.lic);return;
  }
@@ -4203,7 +4220,7 @@ function entrar(){
  sesionActual={nombre:c.nombre,usuario:c.usuario,rol:c.rol,activa:true,licencia:licenciaActual(),inicio:Date.now()};
  guardarCajeros();
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
- aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();
+ aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);
 }
 function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
@@ -4221,7 +4238,7 @@ document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-M
    del cajero que sigue existiendo y Activo, y de la misma licencia. Sin PIN
    (o tras Cerrar turno, que borra la sesión) se pide PIN de nuevo. */
 function sesionValida(){if(!sesionActual||sesionActual.activa!==true||!sesionActual.usuario||!sesionActual.rol)return false;if(sesionActual.licencia&&sesionActual.licencia!==licenciaActual())return false;const c=cajeros.find(function(x){return x.usuario&&sesionActual.usuario&&x.usuario.toLowerCase()===sesionActual.usuario.toLowerCase()});return !!(c&&c.estado==="Activo");}
-function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();}
+function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();actualizarAvisoGracia(true);}
 /* Entrada rápida (Lalo 2026-11-13): al abrir, NO esperar a la nube.
    La pantalla de licencia sale oculta por defecto y solo se muestra cuando
    hace falta. Si hay licencia guardada y sesión válida, se entra DIRECTO a
@@ -4248,7 +4265,8 @@ entradaRapida();
  let nube=null;
  try{nube=await consultarLicenciaNube(licGuardada);}catch(e){nube={disponible:false};}
  if(!nube||!nube.disponible)return;
- const licOk=!!nube.existe&&estadoLicenciaNube(nube.lic)==="Activa";
+ const _e=!!nube.existe?estadoLicenciaNube(nube.lic):"";
+ const licOk=_e==="Activa"||_e==="Gracia";
  if(licOk){guardarLicenciaLocalDesdeNube(nube.lic);return;}
  if(localStorage.getItem("kupoPosV146Licencia")!==licGuardada)return;
  localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();
