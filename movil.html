@@ -40,6 +40,7 @@ header .user{text-align:right;line-height:1.2}
 header .user b{font-size:15px}
 header .user span{display:block;font-size:12px;color:#bcd7e6}
 .pill{background:#0f6a4d;border:1px solid #2ea37c;color:#fff;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.pill.sin-conexion{background:#8a2f2f;border-color:#c05050}
 /* Botón Sincronizar en el encabezado (Lalo, 2026-11-17): fuerza la subida de la cola pendiente a la nube, como el botón del POS de Manus. En móvil es compacto, solo la nube ☁️ con la insignia dorada de pendientes (se oculta en 0). */
 .btn-sync{position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;min-width:40px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:12px;font-size:20px;cursor:pointer;flex:0 0 auto;padding:0}
 .btn-sync:hover{background:rgba(255,255,255,.22)}
@@ -1366,7 +1367,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" class="btn-campana" id="btnCampana" onclick="abrirAvisos()" aria-label="Avisos del negocio">🔔<span class="badge-avisos" id="badgeAvisos">0</span></button>
 <button type="button" class="btn-perfil" id="btnPerfil" onclick="abrirSesion()" aria-label="Mi sesión">👤</button>
 <div class="user"><b id="usuarioActual">Eduardo Benitez</b><span id="rolActual">Administrador</span></div>
-<span class="pill">📶 Conectado</span>
+<span class="pill" id="pillConexion">📶 Conectado</span>
 </header>
 
 <div id="avisoGracia" class="aviso-gracia oculto" role="alert"></div>
@@ -2323,7 +2324,7 @@ function render(){
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
   const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${(p.stock<=0&&opcionesSistema.sinStock!==true)||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>${(sesionActual&&sesionActual.rol==="Cajero")?"":`<div class="mini"><button onclick="editar(${p.id})">✏️ Editar</button> <button onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`}`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" ${(p.stock<=0&&opcionesSistema.sinStock!==true)||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>`;
   grid.appendChild(d);
  });
  renderTicket();renderTableroVentas();
@@ -4629,6 +4630,10 @@ cargarTicketConfig();
 actualizarEstadoBT();
 /* Nube: reintentar la cola pendiente al abrir y al volver internet. */
 if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();});
+/* v99: la pastilla de conexión refleja el internet real (Lalo 2026-11-20): antes decía "Conectado" siempre, aunque no hubiera internet. */
+function actualizarPillConexion(){var p=document.getElementById("pillConexion");if(!p)return;var enLinea=(typeof navigator!=="undefined"&&navigator.onLine!==false);p.textContent=enLinea?"📶 Conectado":"📶 Sin conexión";p.classList.toggle("sin-conexion",!enLinea);}
+if(typeof window!=="undefined"&&window.addEventListener){window.addEventListener("online",actualizarPillConexion);window.addEventListener("offline",actualizarPillConexion);}
+actualizarPillConexion();
 setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof cargarMensajes==="function")cargarMensajes();},3000);
 /* Bluetooth: intentar reconectar sola la impresora que ya se había elegido. */
 setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarReconectarBT();},2000);
