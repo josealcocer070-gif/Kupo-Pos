@@ -469,19 +469,21 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .ticket-encabezado{position:sticky;top:0;background:#fff;z-index:2;display:flex;justify-content:space-between;font-weight:800;font-size:13px;padding:6px 0;border-bottom:1px solid #eef2f6}
 .datos-venta{margin-top:12px;border-top:1px solid #eef2f6;padding-top:8px}
 .datos-venta summary{cursor:pointer;font-weight:800;font-size:13px;color:#0b4a6e;padding:6px 0}
-.conf-pago-titulo{font-weight:800;margin:14px 0 8px;font-size:13px;letter-spacing:.5px}
+.conf-pago-titulo{font-weight:800;margin:10px 0 6px;font-size:13px;letter-spacing:.5px}
 .conf-tarjeta .pagos{margin-bottom:4px}
-.conf-recibido-label{display:block;font-size:13px;margin:12px 0 4px;font-weight:700}
+.conf-recibido-label{display:block;font-size:17px;margin:12px 0 6px;font-weight:800}
 .conf-tarjeta input[type=number]{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:16px}
+#recibido{font-size:30px;padding:12px;font-weight:800;text-align:center}
+.conf-recibido{margin-top:12px;border-top:1px solid #eef2f6;padding-top:2px}
 
 /* Confirmación antes de cobrar (V1.5.0): al tocar Cobrar no se cobra
    directo; se abre esta pantalla para revisar y, si el cliente se
    arrepiente, Regresar sin cobrar, sin descontar stock ni registrar venta. */
 .modal-confirmar{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);align-items:flex-start;justify-content:center;padding:18px 12px;overflow-y:auto}
 .modal-confirmar.abierto{display:flex}
-.conf-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.35);margin:auto 0}
+.conf-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:14px 20px;box-shadow:0 12px 40px rgba(0,0,0,.35);margin:auto 0}
 .conf-tarjeta h2{font-size:24px;color:var(--azul);margin-bottom:4px}
-.conf-sub{color:#555;font-size:15px;font-weight:700;margin-bottom:12px}
+.conf-sub{color:#555;font-size:15px;font-weight:700;margin-bottom:10px}
 .conf-articulos{border-top:1px solid #eef2f6;border-bottom:1px solid #eef2f6;max-height:280px;overflow-y:auto;margin-bottom:12px}
 .conf-linea{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #f2f4f7}
 .conf-linea:first-child{border-top:0}
@@ -495,21 +497,21 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .conf-fila{display:flex;justify-content:space-between;font-size:15px;padding:4px 0}
 .conf-fila.total{font-size:20px;font-weight:800;color:var(--azul);border-top:2px solid #dfe5ea;margin-top:6px;padding-top:10px}
 .conf-fila.total b{color:#b8860b}
-.conf-cambio{background:#eafaf1;border:2px solid #0f6a4d;border-radius:14px;text-align:center;padding:14px 10px;margin:14px 0 6px}
+.conf-cambio{background:#eafaf1;border:2px solid #0f6a4d;border-radius:14px;text-align:center;padding:10px;margin:10px 0 4px}
 .conf-cambio span{display:block;font-size:15px;font-weight:800;letter-spacing:1px;color:#0f6a4d}
-.conf-cambio b{display:block;font-size:52px;line-height:1.1;color:#0f6a4d}
+.conf-cambio b{display:block;font-size:48px;line-height:1.1;color:#0f6a4d}
 .conf-cambio small{display:block;font-size:12px;color:#555;margin-top:4px}
-.conf-aviso{font-size:13px;color:#666;text-align:center;margin:8px 0 14px}
+.conf-aviso{font-size:13px;color:#666;text-align:center;margin:6px 0 10px}
 .conf-botones{display:flex;gap:12px}
 .conf-botones button{flex:1;border-radius:26px;padding:18px 12px;font-size:19px;font-weight:800;cursor:pointer}
 .conf-regresar{background:#fff;border:2px solid #c9d4dc;color:#12233a}
 .conf-confirmar{background:var(--dorado);border:0;color:#12233a}
 .conf-confirmar:hover{background:var(--dorado2)}
-.conf-total-grande{background:#0b4a6e;border-radius:14px;text-align:center;padding:16px 10px 12px;margin:6px 0 12px}
+.conf-total-grande{background:#0b4a6e;border-radius:14px;text-align:center;padding:12px 10px 10px;margin:4px 0 10px}
 .conf-total-grande span{display:block;font-size:14px;font-weight:800;letter-spacing:2px;color:#cfe6f2}
-.conf-total-grande b{display:block;font-size:64px;line-height:1.05;color:#f5c518}
+.conf-total-grande b{display:block;font-size:58px;line-height:1.05;color:#f5c518}
 .conf-total-grande small{display:block;font-size:13px;color:#dbe9f0;margin-top:4px}
-.conf-estado{border-radius:12px;text-align:center;font-weight:800;font-size:16px;padding:10px;margin:10px 0}
+.conf-estado{border-radius:12px;text-align:center;font-weight:800;font-size:16px;padding:8px;margin:8px 0}
 .conf-estado.ok{background:#eafaf1;color:#0f6a4d;border:2px solid #0f6a4d}
 .conf-estado.falta{background:#fdecea;color:#9b1c1c;border:2px solid #e0a3a3}
 .conf-mixto{border:2px solid #0b4a6e;border-radius:14px;padding:12px;margin:12px 0;text-align:left}
@@ -519,8 +521,6 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .conf-mixto input[type=number]{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:12px;font-size:18px;font-weight:700}
 .conf-mixto-fila{display:flex;justify-content:space-between;font-size:15px;padding:4px 0;font-weight:700}
 .conf-mixto-fila.falta{color:#9b1c1c}
-.conf-detalle{border-top:1px solid #eef2f6;margin-top:12px}
-.conf-detalle summary{cursor:pointer;font-weight:800;color:#0b4a6e;padding:10px 0;font-size:15px}
 .conf-confirmar:disabled{opacity:.45;cursor:not-allowed}
 /* Atajos de caja (PC, Lalo 2026-11-14): lista de teclas para atender más rápido. */
 .atajo-fila{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 6px;border-top:1px solid #eef2f6;font-size:16px;font-weight:700;color:#12233a}
@@ -1595,14 +1595,11 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
    <div class="conf-mixto-fila" id="mixtoCambioFila" hidden><span>Cambio a entregar</span><b id="mixtoCambio">$0.00</b></div>
   </div>
   <div id="confEstado" class="conf-estado ok">✅ Total cubierto</div>
-  <details class="conf-detalle" id="confDetalle">
-   <summary>Ver detalle</summary>
-   <div id="confArticulos" class="conf-articulos"></div>
-   <div id="confTotales"></div>
-   <label class="conf-recibido-label">Efectivo recibido (vacío = importe exacto)</label>
+  <div class="conf-recibido">
+   <label class="conf-recibido-label" for="recibido">Efectivo recibido (vacío = importe exacto)</label>
    <input type="number" id="recibido" min="0" step="0.01" placeholder="$0.00" oninput="renderTicket()">
    <div class="conf-cambio"><span>CAMBIO A ENTREGAR</span><b id="confCambio">$0.00</b><small id="confCambioNota"></small></div>
-  </details>
+  </div>
   <p class="conf-aviso">Revisa bien antes de cobrar. Si el cliente se arrepiente, toca Regresar: no se cobra nada, no se descuenta stock y no se registra la venta.</p>
   <div class="conf-whatsapp-bloque">
    <input type="checkbox" id="confEnviarWhatsApp" hidden>
@@ -1800,7 +1797,6 @@ function mostrarConfirmacionCobro(){
  for(const l of ticket){const p=catalogo.find(x=>x.id===l.id);if(!p||stockEn(l.id,av.id)+0.000001<l.cant){toast("No hay suficiente stock de "+(p?p.nombre:"ese producto")+" en "+av.nombre+".");return}}
  const sub=total/1.16,iva=total-sub;
  document.getElementById("confCliente").textContent="👤 "+clienteVentaActual+" · 🏬 "+(av?av.nombre:"");
- document.getElementById("confArticulos").innerHTML=ticket.map(function(l){const p=catalogo.find(function(x){return x.id===l.id})||{unidad:"pieza",nombre:"Producto"};return '<div class="conf-linea"><span class="conf-foto">'+fotoHtml(p)+'</span><span class="conf-info"><b class="conf-nombre">'+escHtml(p.nombre||"Producto")+'</b><span class="conf-desc">'+escHtml(p.categoria||"General")+(p.sku?" · "+escHtml(p.sku):"")+" · "+dinero(l.precio)+" / "+UNIDADES_VENTA[unidadDe(p)].corta+'</span><span class="conf-cant">'+textoCantidad(p,l.cant)+'</span></span><span class="conf-importe">'+dinero(l.cant*l.precio)+"</span></div>"}).join("");
  document.querySelectorAll("#confPagos button").forEach(function(x){x.classList.toggle("activo",x.dataset.pago===pago)});
  var _me=document.getElementById("mixtoEfectivo");if(_me)_me.value="";
  var _mt=document.getElementById("mixtoTarjeta");if(_mt)_mt.value="";
@@ -1866,9 +1862,6 @@ function actualizarConfirmacionCobro(){
  var est=document.getElementById("confEstado");
  if(est){est.className="conf-estado "+(ok?"ok":"falta");est.textContent=ok?("✅ Total cubierto"+(cambio>0?" · Cambio "+dinero(cambio):"")):("⚠️ Faltan "+dinero(falta)+" por cubrir — no se puede cobrar todavía");}
  var btn=document.getElementById("confConfirmar");if(btn)btn.disabled=!ok;
- /* Detalle colapsado: artículos, Subtotal, IVA, TOTAL, forma de pago, recibido y cambio. */
- var tot=document.getElementById("confTotales");
- if(tot)tot.innerHTML='<div class="conf-fila"><span>Subtotal</span><span>'+dinero(sub)+'</span></div><div class="conf-fila"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'+(desc.monto>0?'<div class="conf-fila"><span>'+(desc.tipo==="%"?("Descuento ("+desc.valor+"%)"):"Descuento")+'</span><span>−'+dinero(desc.monto)+'</span></div>':"")+'<div class="conf-fila total"><span>TOTAL</span><b>'+dinero(total)+'</b></div><div class="conf-fila"><span>Forma de pago</span><b>'+escHtml(pago)+'</b></div><div class="conf-fila"><span>Efectivo recibido</span><span>'+(pago==="Mixto"?("Efectivo "+dinero(ef)+" + Tarjeta "+dinero(tj)):(pago==="Efectivo"?(rec>0?dinero(rec):"Importe exacto"):"—"))+'</span></div>';
  var dr=document.getElementById("descResumen");if(dr)dr.textContent=desc.monto>0?("−"+dinero(desc.monto)+" en esta venta"):"$0.00";
  var cc=document.getElementById("confCambio");if(cc)cc.textContent=dinero(cambio);
  var cn=document.getElementById("confCambioNota");if(cn)cn.textContent=pago==="Mixto"?(cambio>0?("Cubierto "+dinero(cubierto)+" − Total "+dinero(total)):(falta>0?("Faltan "+dinero(falta)+" por cubrir"):"Cubierto exacto, sin cambio")):(pago==="Efectivo"?(rec>0?("Recibido "+dinero(rec)+" − Total "+dinero(total)):"Importe exacto, sin cambio"):("Sin cambio en "+pago));
