@@ -865,6 +865,27 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
   <p class="inicio-pie">KUPO POS V1.6.0 · Punto de venta inteligente</p>
  </div>
 </div>
+<div id="pantallaSetup" class="inicio oculto">
+ <div class="inicio-tarjeta">
+  <h2 style="text-align:center">Configuración inicial</h2>
+  <div class="inicio-negocio"><b id="inicioNegocioSetup">Mi negocio</b><span>PRIMERA VEZ · V1.6.0</span></div>
+  <p style="color:#555;text-align:center">Es la primera vez que se usa esta licencia. Crea el usuario del dueño: queda como Administrador y con este usuario y PIN se entra a la caja.</p>
+  <form onsubmit="guardarSetupDueno(event)">
+  <label for="sNombre">Nombre completo del dueño</label>
+  <input id="sNombre" type="text" placeholder="Ej. María López" autocomplete="off">
+  <label for="sUsuario">Usuario</label>
+  <input id="sUsuario" type="text" placeholder="Ej. maria" autocomplete="off">
+  <label for="sPin">PIN de 6 dígitos</label>
+  <input id="sPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+  <label for="sPin2">Confirmar PIN</label>
+  <input id="sPin2" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="off">
+  <button class="btn-inicio" type="submit">Crear mi usuario y entrar</button>
+  </form>
+  <p class="msg" id="msgSetup"></p>
+  <button class="secundario" type="button" onclick="mostrarPasoLicencia()">Cambiar licencia</button>
+  <p class="inicio-pie">KUPO POS V1.6.0 · Punto de venta inteligente</p>
+ </div>
+</div>
 <div id="app" class="oculto">
 
 <header>
@@ -1985,7 +2006,7 @@ function cargarDatosLicencia(){
  const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
  ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
- cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
+ cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
  opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false});
  if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false};
  opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true};
@@ -2349,7 +2370,7 @@ function probarImpresionBT(){
 
 /* Interfaz 3.2 · Cajeros y permisos */
 const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones","mensajes"]};
-let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[{id:1,nombre:"Eduardo Benitez",usuario:"Administrador",pin:"123456",rol:"Administrador",estado:"Activo"}]);
+let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
 let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
@@ -3319,8 +3340,56 @@ function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
 function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;if((c.tipo||"dinero")==="productos"){toast("Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal));return}toast("Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" · Ventas "+dinero(c.ventasTotal)+" · Gastos "+dinero(c.gastos)+" · Total en caja "+dinero(c.totalCaja));}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
-function mostrarPasoLicencia(){var _cl=document.getElementById("claveLicencia");if(_cl)_cl.value="";var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.6.0";}
-function mostrarPasoLogin(){document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");}
+function mostrarPasoLicencia(){var _cl=document.getElementById("claveLicencia");if(_cl)_cl.value="";var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.6.0";}
+function mostrarPasoLogin(){var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");}
+/* v91 (Lalo 2026-11-20): configuración inicial del dueño. Antes, cada
+   licencia nueva sembraba en silencio un cajero de ejemplo ("Eduardo
+   Benitez", usuario Administrador, PIN 123456) que no se puede eliminar
+   ni renombrar. Ahora, si la licencia no tiene un dueño (ningún cajero
+   real), al validarla se pide el nombre, usuario y PIN del dueño y ese
+   cajero queda como Administrador. Las licencias que ya tienen cajeros
+   no ven esta pantalla. */
+function esCajeroDemo(c){return !!(c&&c.nombre==="Eduardo Benitez"&&c.usuario==="Administrador"&&c.pin==="123456");}
+function licenciaSinDueno(){if(!cajeros||!cajeros.length)return true;return !cajeros.some(function(c){return c&&c.usuario&&!esCajeroDemo(c);});}
+function mostrarPasoSetup(){
+ var nb=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
+ var n=document.getElementById("inicioNegocioSetup");if(n)n.textContent=nb;
+ var m=document.getElementById("msgSetup");if(m){m.textContent="";m.className="msg";}
+ document.getElementById("pantallaSetup").classList.remove("oculto");
+ document.getElementById("pantallaLogin").classList.add("oculto");
+ document.getElementById("pantallaLicencia").classList.add("oculto");
+}
+function guardarSetupDueno(ev){
+ if(ev)ev.preventDefault();
+ var m=document.getElementById("msgSetup");
+ var nombre=(document.getElementById("sNombre").value||"").trim();
+ var usuario=(document.getElementById("sUsuario").value||"").trim();
+ var pin=(document.getElementById("sPin").value||"").trim();
+ var pin2=(document.getElementById("sPin2").value||"").trim();
+ if(!nombre){m.textContent="Escribe el nombre completo del dueño.";m.className="msg error";return}
+ if(!usuario){m.textContent="Escribe un usuario para el dueño.";m.className="msg error";return}
+ if(!/^\d{6}$/.test(pin)){m.textContent="El PIN debe tener 6 dígitos.";m.className="msg error";return}
+ if(pin!==pin2){m.textContent="Los PIN no coinciden. Escríbelos igual.";m.className="msg error";return}
+ var guardados=leerPorLicencia("kupoPosV146Cajeros",null);
+ if(Array.isArray(guardados)&&guardados.some(function(c){return c&&c.usuario&&!esCajeroDemo(c);})){cajeros=guardados;mostrarPasoLogin();return}
+ if(cajeros.some(function(c){return c&&c.usuario&&c.usuario.toLowerCase()===usuario.toLowerCase()&&!esCajeroDemo(c);})){m.textContent="Ese usuario ya existe. Elige otro usuario.";m.className="msg error";return}
+ cajeros=cajeros.filter(function(c){return !esCajeroDemo(c);});
+ var nuevo={id:Date.now()+uid++,nombre:nombre,usuario:usuario,pin:pin,rol:"Administrador",estado:"Activo"};
+ cajeros.push(nuevo);
+ sesionActual={nombre:nombre,usuario:usuario,rol:"Administrador",activa:true,licencia:licenciaActual(),inicio:Date.now()};
+ guardarCajeros();
+ if(typeof encolarCajeroNube==="function")encolarCajeroNube(nuevo);
+ document.getElementById("pantallaSetup").classList.add("oculto");
+ document.getElementById("pantallaLogin").classList.add("oculto");
+ document.getElementById("pantallaLicencia").classList.add("oculto");
+ document.getElementById("app").classList.remove("oculto");
+ aplicarPermisosMenu();mostrarVista("ventas");
+ if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();
+ if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();
+ actualizarAvisoGracia(true);
+ toast("¡Listo! Bienvenido, "+nombre+".");
+}
+
 /* Contratar (revisión 2026-11-14): planes y funciones se muestran solo al tocar el título, para que activar la licencia sea lo primero y más sencillo. */
 function toggleContratar(){var d=document.getElementById("detallesContratar");var f=document.getElementById("flechaContratar");if(!d)return;var cerrado=d.classList.toggle("oculto");if(f)f.textContent=cerrado?"▾":"▴";}
 const CLAVES_PRUEBA=["KUPO-7F2A-91BC","KUPO-3D8E-44F1","KUPO-9A1C-77D2"];
@@ -3637,7 +3706,7 @@ function guardarLicenciaLocalDesdeNube(nube){
 function entrarConLicencia(c,lic){
  localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();
  if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let nh=document.getElementById("nombreNegocio");if(nh)nh.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent=textoEstadoLicencia(lic);let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
- const m=document.getElementById("msgLicencia");let _v=(lic&&(lic.vencimiento||lic.fecha_vencimiento))||"";if(estadoPorVencimiento(_v,lic?lic.estado:"")==="Gracia"){m.textContent="✅ Licencia validada — "+lic.negocio+" · "+textoAvisoGracia(_v);}else{m.textContent="✅ Licencia validada — "+lic.negocio;}m.className="msg ok";mostrarPasoLogin();
+ const m=document.getElementById("msgLicencia");let _v=(lic&&(lic.vencimiento||lic.fecha_vencimiento))||"";if(estadoPorVencimiento(_v,lic?lic.estado:"")==="Gracia"){m.textContent="✅ Licencia validada — "+lic.negocio+" · "+textoAvisoGracia(_v);}else{m.textContent="✅ Licencia validada — "+lic.negocio;}m.className="msg ok";if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}
 }
 function validarLicenciaLocal(c){
  const m=document.getElementById("msgLicencia");
@@ -3702,7 +3771,7 @@ function entrar(){
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
@@ -3728,7 +3797,7 @@ function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textCo
  let licOk=false;
  if(nube.disponible){let _e=!!nube.existe?estadoLicenciaNube(nube.lic):"";licOk=_e==="Activa"||_e==="Gracia";if(licOk)guardarLicenciaLocalDesdeNube(nube.lic);}
  else{let lg=leerLicenciasCompartidas().find(x=>x.clave===licGuardada);let _e=lg?estadoLicencia(lg):"";licOk=_e==="Activa"||_e==="Gracia";}
- if(licOk){if(sesionValida()){entrarDirecto();}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;mostrarPasoLogin();}}
+ if(licOk){if(sesionValida()){entrarDirecto();}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}}}
  else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";}
 })();
 const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
