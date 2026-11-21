@@ -3184,7 +3184,7 @@ function toggleCajero(id){
 function eliminarCajero(id){
  const c=cajeros.find(x=>x.id===id);if(!c)return;
  if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador elimina cajeros.");return}
- if(c.rol==="Administrador"){toast("No se puede eliminar al Administrador.");return}
+ if(c.rol==="Administrador"&&!cajeros.some(function(x){return x.id!==id&&x.rol==="Administrador"&&x.estado==="Activo"})){toast("No se puede eliminar al único Administrador activo.");return}
  if(sesionActual&&sesionActual.usuario===c.usuario){toast("No puedes eliminar tu propia sesión.");return}
  if(!confirm("¿Eliminar al cajero "+c.nombre+" ("+c.usuario+")? Ya no podrá entrar."))return;
  if(typeof encolarBorradoNube==="function")encolarBorradoNube("cajeros",c);
