@@ -144,6 +144,8 @@ main h1{font-size:34px;margin-bottom:14px}
 .badge{background:#fff3bf;border-radius:16px;padding:4px 12px;font-size:13px;font-weight:800}
 .panel .sub{color:#555;font-size:14px;margin:8px 0}
 .panel .fecha{font-weight:700;margin:10px 0}
+/* v106 (Lalo 2026-11-21): la cabecera del ticket va centrada. */
+#panelVenta .panel-cuerpo h2,#panelVenta .panel-cuerpo .sub,#panelVenta .panel-cuerpo .fecha,#panelVenta .panel-cuerpo .caja-estado{text-align:center}
 .negocio-box{background:#eef2f6;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin-bottom:14px}
 .negocio-box b{font-size:14px}
 .negocio-box input{width:100%;border:0;background:transparent;font-size:13px;color:#333;border-bottom:1px dashed #aaa;margin-top:2px}
@@ -1540,21 +1542,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <!-- Lalo 2026-11-12 19:31: las líneas del ticket van ARRIBA. Antes quedaban debajo de cliente/negocio/almacén (~300px) y en horizontal corto no se veían sin bajar. -->
 <div class="ticket-encabezado"><span>ARTÍCULOS DE ESTA VENTA</span><span>Importe</span></div>
 <div id="ticket" style="margin-top:10px"></div>
-<details class="datos-venta"><summary>👤 Cliente, negocio y almacén</summary>
-<label style="font-size:13px;font-weight:800">👤 Cliente</label>
-<input type="text" id="clienteVenta" value="Cliente general" aria-label="Cliente de la venta" oninput="guardarClienteVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
-<label style="font-size:13px;font-weight:800">📲 WhatsApp del cliente (opcional)</label>
-<input type="tel" id="whatsappVenta" inputmode="tel" placeholder="Ej. 951 123 4567" aria-label="WhatsApp del cliente" oninput="guardarWhatsAppVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
-<div class="negocio-box">
-<b id="negocioBox">MI NEGOCIO</b><br>
-<span id="direccionNegocio">Palizada, Campeche</span><br>
-<span id="telefonoNegocio">951 943 3938</span>
-</div>
-<p style="font-size:12px;color:#666;margin:6px 0 0">Los datos del negocio solo se cambian en 🎟 Personalizar ticket.</p>
-<label style="font-size:13px;font-weight:800">🏬 Almacén para vender</label>
-<select id="ventaAlmacenSel" onchange="cambiarAlmacenVenta(this.value)" style="width:100%;margin:4px 0 2px"></select>
-<p style="font-size:12px;color:#666;margin:0 0 6px">El stock se descuenta de este almacén al cobrar.</p>
-</details>
+<!-- v106 (Lalo 2026-11-21): la sección Cliente, negocio y almacén se quitó del ticket; por ahora no se usa almacén ni WhatsApp en la venta. -->
 </div>
 <div class="panel-pie">
 <div class="totales">
@@ -1831,8 +1819,8 @@ function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta()
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll("#confPagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();}
-function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
-function guardarWhatsAppVenta(){const v=(document.getElementById("whatsappVenta").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var cn=document.getElementById("confWhatsAppNumero");if(cn&&cn.value!==v)cn.value=v;}
+function guardarClienteVenta(){var _el=document.getElementById("clienteVenta");if(!_el)return;const v=(_el.value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
+function guardarWhatsAppVenta(){var _el=document.getElementById("whatsappVenta");if(!_el)return;const v=(_el.value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var cn=document.getElementById("confWhatsAppNumero");if(cn&&cn.value!==v)cn.value=v;}
 /* WhatsApp en la pantalla de pagos (Lalo 2026-11-17): el número del modal
    de cobro y el de la venta son el mismo (localStorage kupoPosV146WhatsAppVenta). */
 function guardarWhatsAppCobro(){const v=(document.getElementById("confWhatsAppNumero").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var wv=document.getElementById("whatsappVenta");if(wv&&wv.value!==v)wv.value=v;}
@@ -3303,7 +3291,7 @@ function enviarTicketWhatsApp(v){
  var venta=v||ventas[ventas.length-1];
  if(!venta){toast("Aún no hay ventas para enviar por WhatsApp.");return}
  var numero=String((venta.whatsapp||"").trim()||whatsappVentaActual||"").trim();
- if(!numero){toast("Escribe el WhatsApp del cliente en la venta para enviarle el ticket.");var det=document.querySelector("details.datos-venta");if(det)det.open=true;var inp=document.getElementById("whatsappVenta");if(inp)inp.focus();return}
+ if(!numero){toast("Escribe el WhatsApp del cliente al cobrar para enviarle el ticket.");return}
  var wa=normalizarWhatsAppMX(numero);
  if(wa.length!==12||wa.indexOf("52")!==0){toast("El WhatsApp debe tener 10 dígitos (ej. 951 123 4567).");return}
  window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(textoTicketPlano(venta)),"_blank");

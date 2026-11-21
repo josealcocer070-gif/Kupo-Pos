@@ -159,6 +159,8 @@ main h1{font-size:34px;margin-bottom:14px}
 .badge{background:#fff3bf;border-radius:16px;padding:4px 12px;font-size:13px;font-weight:800}
 .panel .sub{color:#555;font-size:14px;margin:8px 0}
 .panel .fecha{font-weight:700;margin:10px 0}
+/* v106 (Lalo 2026-11-21): la cabecera del ticket va centrada. */
+#panelVenta .panel-cuerpo h2,#panelVenta .panel-cuerpo .sub,#panelVenta .panel-cuerpo .fecha,#panelVenta .panel-cuerpo .caja-estado{text-align:center}
 .negocio-box{background:#eef2f6;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;margin-bottom:14px}
 .negocio-box b{font-size:14px}
 .negocio-box input{width:100%;border:0;background:transparent;font-size:13px;color:#333;border-bottom:1px dashed #aaa;margin-top:2px}
@@ -2018,21 +2020,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="ticket-scan"><button type="button" class="btn-scan-ticket" onclick="escanearCodigo()">📷 SCAN</button><button type="button" class="btn-ver-catalogo" onclick="abrirCatalogo()">☰ Catálogo</button><button type="button" class="btn-msg-ticket" id="btnMensajesVentasMovil" onclick="mostrarVista('mensajes')" aria-label="Mensajes">💬<span class="badge-msg" id="badgeMsgVentasMovil">0</span></button></div>
 <div class="ticket-encabezado"><span>ARTÍCULOS DE ESTA VENTA</span><span>Importe</span></div>
 <div id="ticket" style="margin-top:10px"></div>
-<details class="datos-venta"><summary>👤 Cliente, negocio y almacén</summary>
-<label style="font-size:13px;font-weight:800">👤 Cliente</label>
-<input type="text" id="clienteVenta" value="Cliente general" aria-label="Cliente de la venta" oninput="guardarClienteVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
-<label style="font-size:13px;font-weight:800">📲 WhatsApp del cliente (opcional)</label>
-<input type="tel" id="whatsappVenta" inputmode="tel" placeholder="Ej. 951 123 4567" aria-label="WhatsApp del cliente" oninput="guardarWhatsAppVenta()" style="width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:10px;font-size:15px">
-<div class="negocio-box">
-<b id="negocioBox">MI NEGOCIO</b><br>
-<span id="direccionNegocio">Palizada, Campeche</span><br>
-<span id="telefonoNegocio">951 943 3938</span>
-</div>
-<p style="font-size:12px;color:#666;margin:6px 0 0">Los datos del negocio solo se cambian en 🎟 Personalizar ticket.</p>
-<label style="font-size:13px;font-weight:800">🏬 Almacén para vender</label>
-<select id="ventaAlmacenSel" onchange="cambiarAlmacenVenta(this.value)" style="width:100%;margin:4px 0 2px"></select>
-<p style="font-size:12px;color:#666;margin:0 0 6px">El stock se descuenta de este almacén al cobrar.</p>
-</details>
+<!-- v106 (Lalo 2026-11-21): la sección Cliente, negocio y almacén se quitó del ticket; por ahora no se usa almacén ni WhatsApp en la venta. -->
 <button type="button" class="btn-whatsapp" style="width:100%;margin-top:12px;padding:14px 16px;font-size:15px" onclick="enviarTicketWhatsApp()"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> 📲 Enviar ticket por WhatsApp</button>
 <button type="button" class="secundario" style="width:100%;margin-top:12px;padding:14px 16px;font-size:15px" onclick="recuperarVentaEnEspera()">⏯ Recuperar venta en espera</button>
 <p id="btEstadoVentas" style="font-size:13px;font-weight:700;margin:12px 0 6px">🖨 Impresora Bluetooth: no conectada.</p>
@@ -2393,8 +2381,8 @@ function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta()
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll("#confPagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();}
-function guardarClienteVenta(){const v=(document.getElementById("clienteVenta").value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
-function guardarWhatsAppVenta(){const v=(document.getElementById("whatsappVenta").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var cn=document.getElementById("confWhatsAppNumero");if(cn&&cn.value!==v)cn.value=v;}
+function guardarClienteVenta(){var _el=document.getElementById("clienteVenta");if(!_el)return;const v=(_el.value||"").trim();clienteVentaActual=v||"Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}renderTicket();}
+function guardarWhatsAppVenta(){var _el=document.getElementById("whatsappVenta");if(!_el)return;const v=(_el.value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var cn=document.getElementById("confWhatsAppNumero");if(cn&&cn.value!==v)cn.value=v;}
 /* WhatsApp en la pantalla de pagos (Lalo 2026-11-17): el número del modal
    de cobro y el de la venta son el mismo (localStorage kupoPosV146WhatsAppVenta). */
 function guardarWhatsAppCobro(){const v=(document.getElementById("confWhatsAppNumero").value||"").trim();whatsappVentaActual=v;try{localStorage.setItem("kupoPosV146WhatsAppVenta",whatsappVentaActual)}catch(e){}var wv=document.getElementById("whatsappVenta");if(wv&&wv.value!==v)wv.value=v;}
@@ -3872,7 +3860,7 @@ function enviarTicketWhatsApp(v){
  var venta=v||ventas[ventas.length-1];
  if(!venta){toast("Aún no hay ventas para enviar por WhatsApp.");return}
  var numero=String((venta.whatsapp||"").trim()||whatsappVentaActual||"").trim();
- if(!numero){toast("Escribe el WhatsApp del cliente en la venta para enviarle el ticket.");var det=document.querySelector("details.datos-venta");if(det)det.open=true;var inp=document.getElementById("whatsappVenta");if(inp)inp.focus();return}
+ if(!numero){toast("Escribe el WhatsApp del cliente al cobrar para enviarle el ticket.");return}
  var wa=normalizarWhatsAppMX(numero);
  if(wa.length!==12||wa.indexOf("52")!==0){toast("El WhatsApp debe tener 10 dígitos (ej. 951 123 4567).");return}
  window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(textoTicketPlano(venta)),"_blank");
