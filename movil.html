@@ -1363,6 +1363,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️<span class="badge-sync" id="badgeSync">0</span></button>
+<button type="button" class="btn-tema" id="btnReconectarBT" onclick="reconectarImpresoraBT()" aria-label="Reconectar impresora Bluetooth" title="Reconectar impresora">🔄</button>
 <button type="button" class="btn-tema" id="btnTema" onclick="cambiarTema()" aria-label="Cambiar a modo noche">🌙</button>
 <button type="button" class="btn-campana" id="btnCampana" onclick="abrirAvisos()" aria-label="Avisos del negocio">🔔<span class="badge-avisos" id="badgeAvisos">0</span></button>
 <button type="button" class="btn-perfil" id="btnPerfil" onclick="abrirSesion()" aria-label="Mi sesión">👤</button>
@@ -2035,7 +2036,6 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" class="btn-whatsapp" style="width:100%;margin-top:12px;padding:14px 16px;font-size:15px" onclick="enviarTicketWhatsApp()"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> 📲 Enviar ticket por WhatsApp</button>
 <button type="button" class="secundario" style="width:100%;margin-top:12px;padding:14px 16px;font-size:15px" onclick="recuperarVentaEnEspera()">⏯ Recuperar venta en espera</button>
 <p id="btEstadoVentas" style="font-size:13px;font-weight:700;margin:12px 0 6px">🖨 Impresora Bluetooth: no conectada.</p>
-<button type="button" id="btnReconectarBT" class="secundario" style="width:100%;padding:14px 16px;font-size:15px" onclick="reconectarImpresoraBT()">🔄 Reconectar impresora</button>
 </div>
 <div class="panel-pie">
 <div class="totales">
@@ -3016,7 +3016,7 @@ function actualizarEstadoBT(){
  var txt;
  if(!btSoportado())txt="🖨 Impresora Bluetooth: este navegador no permite Bluetooth web (usa Chrome en Android). El ticket saldrá con la ventana de imprimir de siempre.";
  else if(btConectada())txt="✅ Impresora Bluetooth conectada: "+btImpresora.nombre+" — el ticket saldrá solo al cobrar, sin ventana.";
- else txt="🖨 Impresora Bluetooth: no conectada — toca 🔄 Reconectar impresora.";
+ else txt="🖨 Impresora Bluetooth: no conectada — toca 🔄 arriba.";
  var e1=document.getElementById("btEstado");if(e1)e1.textContent=txt;
  var e2=document.getElementById("btEstadoVentas");if(e2)e2.textContent=txt;
  var b=document.getElementById("btnDesconectarBT");if(b)b.style.display=btConectada()?"":"none";
@@ -3027,8 +3027,8 @@ function actualizarEstadoBT(){
    volver a conectar. Antes, el reintento automático era un solo intento
    y fallaba en silencio, así que cada recarga dejaba la impresora
    desconectada. Ahora reintenta 3 veces (la impresora tarda en despertar),
-   vuelve a intentar sola cada minuto y en Ventas hay un botón
-   "Reconectar impresora" que abre la lista ya filtrada a la impresora
+   vuelve a intentar sola cada minuto y en el encabezado hay un icono
+   🔄 que abre la lista ya filtrada a la impresora
    guardada. */
 var _btReconectando=false;
 function intentarReconectarBT(){
