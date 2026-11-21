@@ -974,11 +974,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </form>
 <p style="margin-top:8px;font-size:13px;color:#555">Los productos de ejemplo se pueden editar o eliminar. Toca ✏️ o 🗑 en cada tarjeta.</p>
 </div>
-<div class="buscar">
-<input id="buscar" placeholder="🔍 Buscar producto o código..." oninput="render()" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarPrimeroBusqueda()}"><button type="button" class="btn-scan" onclick="escanearCodigo()" title="Escanear código de barras">📷 SCAN</button>
-<select id="filtro" onchange="render()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option></select>
-</div>
-<p class="ayuda-lector-pc">⌨️ Lector de códigos USB / Bluetooth: conecta el lector, escanea el producto y se agrega solo a la venta, sin tocar nada. El código del producto va en Productos → Código / SKU.</p>
+<!-- Barra de búsqueda de Ventas quitada por Lalo (2026-11-21, v104): solo quedan las pastillas de categorías; el SCAN de cámara del ticket sigue funcionando. -->
 <div class="categorias" id="categoriasTabs" role="tablist" aria-label="Categorías de productos"></div>
 <div class="grid" id="grid"></div>
 </div>
@@ -1775,7 +1771,7 @@ function escanearCodigo(){const b=document.getElementById("buscar");if(!b)return
    escribe el código en el buscador y termina con Enter; aquí se agrega solo el
    producto, sin tocar nada. Prioridad: 1) SKU exacto (= código de barras del
    producto), 2) nombre exacto, 3) SKU parcial, 4) nombre parcial. */
-function agregarPrimeroBusqueda(){const q=(document.getElementById("buscar").value||"").trim().toLowerCase();if(!q)return;const disp=function(x){return !x.pausado&&x.stock>0};const p=catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase().includes(q)})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
+function agregarPrimeroBusqueda(){const _b=document.getElementById("buscar");if(!_b)return;const q=(_b.value||"").trim().toLowerCase();if(!q)return;const disp=function(x){return !x.pausado&&x.stock>0};const p=catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase()===q})||catalogo.find(function(x){return disp(x)&&(x.sku||"").toLowerCase().includes(q)})||catalogo.find(function(x){return disp(x)&&(x.nombre||"").toLowerCase().includes(q)});if(!p){toast("No se encontró ningún producto con ese código o nombre.");return}agregar(p.id);document.getElementById("buscar").value="";render();document.getElementById("buscar").focus();}
 function redirigirLectorABuscador(e){if(typeof vistaActual!=="undefined"&&vistaActual!=="ventas")return false;if(window.innerWidth<=1020)return false;var tg=e.target||{};if(tg.tagName==="INPUT"||tg.tagName==="SELECT"||tg.tagName==="TEXTAREA"||tg.isContentEditable)return false;var modal=document.getElementById("modalConfirmar");if(modal&&!modal.classList.contains("oculto"))return false;var app=document.getElementById("app");if(!app||app.classList.contains("oculto"))return false;if(!e.key||e.key.length!==1)return false;var b=document.getElementById("buscar");if(!b)return false;b.focus();b.value=(b.value||"")+e.key;try{b.dispatchEvent(new Event("input",{bubbles:true}))}catch(_){}if(e.preventDefault)e.preventDefault();return true;}
 if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",redirigirLectorABuscador);
 /* Atajos de caja en PC: en fase de captura para que corran antes que el
@@ -1783,8 +1779,8 @@ if(typeof document!=="undefined"&&document.addEventListener)document.addEventLis
 if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",manejarAtajosTeclado,true);
 function render(){
  llenarSelectVentaAlmacen();renderCategorias();actualizarDatalistCategorias();
- const q=(document.getElementById("buscar").value||"").toLowerCase();
- const f=document.getElementById("filtro").value;
+ const _b=document.getElementById("buscar");const q=_b?(_b.value||"").toLowerCase():"";
+ const _f=document.getElementById("filtro");const f=_f?_f.value:"todos";
  const grid=document.getElementById("grid");grid.innerHTML="";
  catalogo.filter(p=>p.nombre.toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q)).filter(p=>categoriaActual==="todas"||(p.categoria||"General")===categoriaActual).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
   const d=document.createElement("div");d.className="card";
