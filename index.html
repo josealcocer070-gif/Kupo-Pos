@@ -89,6 +89,26 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #navHistCortes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)!important}
 #navImportar .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)!important}
 .insignia-nuevo{background:#f5b800;color:#0b4a6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
+#btnChatKupi{position:fixed;right:18px;bottom:18px;width:64px;height:64px;border-radius:50%;background:#f5b800;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;z-index:200;padding:0;overflow:hidden}
+#btnChatKupi img{width:100%;height:100%;object-fit:cover;display:block}
+#panelChatKupi{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
+#panelChatKupi.oculto{display:none!important}
+.kupi-encabezado{background:#0b4a6e;color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px}
+.kupi-encabezado img{width:44px;height:44px;border-radius:50%;border:2px solid #f5b800;object-fit:cover;background:#fff;flex:none}
+.kupi-encabezado b{font-size:17px;display:block;line-height:1.1}
+.kupi-encabezado span{font-size:12px;color:#9be15d}
+.kupi-encabezado>button{margin-left:auto;background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px 8px}
+#kupiMensajes{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f4f8fb}
+.kupi-fila-bot{display:flex;gap:6px;align-items:flex-end;max-width:94%}
+.kupi-mini{width:30px;height:30px;border-radius:50%;border:2px solid #f5b800;object-fit:cover;flex:none;background:#fff}
+.kupi-msg{max-width:88%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.45}
+.kupi-msg.bot{background:#fff;border:1px solid #dfe5ea;border-bottom-left-radius:4px}
+.kupi-msg.yo{background:#0b4a6e;color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.kupi-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid #e5e5e5;background:#fff}
+.kupi-chips button{background:#fff8e1;border:1px solid #f5b800;color:#0b4a6e;border-radius:20px;padding:6px 10px;font-size:12px;cursor:pointer}
+.kupi-entrada{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e5e5;background:#fff}
+.kupi-entrada input{flex:1;border:1px solid #c9d4dc;border-radius:20px;padding:9px 12px;font-size:14px;min-width:0}
+.kupi-entrada>button{background:#f5b800;border:none;border-radius:50%;width:40px;height:40px;font-size:17px;cursor:pointer;color:#0b4a6e;flex:none}
 #navTicket .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
 #navAdminLic .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#90a4ae,#37474f)!important}
@@ -1242,6 +1262,12 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <h2>📅 Últimos 7 días</h2>
 <div id="listaRep7dias"></div>
 </div>
+
+<div id="secPronostico">
+<h2>🔮 Pronóstico de la semana</h2>
+<p style="color:#555;font-size:13px;margin-bottom:10px">Kupi calcula esto con tus ventas pasadas: qué días se vende más y cuánto preparar la próxima semana.</p>
+<div id="contPronostico"></div>
+</div>
 <p id="notaRepCajero" style="color:#555;font-size:13px"></p>
 </div>
 
@@ -1830,7 +1856,7 @@ function render(){
  });
  renderTicket();renderTableroVentas();
  if(vistaActual==="productos")renderProductos();
- actualizarBadgeSync();
+ actualizarBadgeSync();actualizarBotonKupi();
 }
 
 function renderTableroVentas(){
@@ -2983,6 +3009,7 @@ function renderReportes(){
  }
  const nota=document.getElementById("notaRepCajero");
  if(nota)nota.textContent=r.esAdmin?"":"Eres Cajero: aquí solo ves tus ventas de hoy. Los últimos 7 días y las ventas de todos los cajeros solo las ve el Administrador.";
+ renderPronostico();
 }
 
 function mostrarVista(v){
@@ -3310,6 +3337,166 @@ function impProcesarFilas(filas){var limpias=(filas||[]).filter(function(r){retu
 function renderImportar(){var listos=impFilas.filter(function(x){return x.estado==="listo"});var errores=impFilas.filter(function(x){return x.estado==="error"});var dups=impFilas.filter(function(x){return x.estado==="duplicado"});var e1=document.getElementById("impListos");if(e1)e1.textContent=listos.length;var e2=document.getElementById("impErrores");if(e2)e2.textContent=errores.length;var e3=document.getElementById("impDuplicados");if(e3)e3.textContent=dups.length;var e4=document.getElementById("impTotal");if(e4)e4.textContent=impFilas.length;var na=document.getElementById("impNombreArchivo");if(na)na.textContent=impArchivoNombre?("📄 "+impArchivoNombre):"";var vac=document.getElementById("impVacio");if(vac)vac.classList.toggle("oculto",impFilas.length>0);var vp=document.getElementById("impVistaPrevia");if(vp)vp.classList.toggle("oculto",!impFilas.length);var btn=document.getElementById("btnImportarExcel");if(btn){btn.disabled=!listos.length;btn.textContent="📥 Importar "+listos.length+" producto"+(listos.length===1?"":"s")}var cuerpo=document.getElementById("impCuerpoPrevia");if(cuerpo){cuerpo.innerHTML=impFilas.map(function(f){var est=f.estado==="listo"?'<span class="estado disponible">● Listo</span>':(f.estado==="duplicado"?'<span class="estado pausado">⧉ Duplicado</span>':'<span class="estado" style="background:#fdecea;color:#b3261e">✖ '+escHtml(f.error)+'</span>');return '<tr style="'+(f.estado==="error"?"background:#fdecea;":"")+(f.estado==="duplicado"?"background:#fff8e1;":"")+'"><td style="padding:8px;border-bottom:1px solid #eee">'+escHtml(f.codigo||"—")+'</td><td style="padding:8px;border-bottom:1px solid #eee"><b>'+escHtml(f.nombre||"—")+'</b>'+(f.presentacion?' <small style="color:#555">'+escHtml(f.presentacion)+'</small>':"")+'</td><td style="text-align:right;padding:8px;border-bottom:1px solid #eee">'+(isNaN(f.precio)?"—":dinero(f.precio))+'</td><td style="text-align:right;padding:8px;border-bottom:1px solid #eee">'+(isNaN(f.stock)?"—":f.stock)+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+escHtml(f.categoria)+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+est+'</td></tr>'}).join("")}var nd=document.getElementById("impNotaDuplicados");if(nd)nd.textContent=dups.length?("Los duplicados ya existen en el catálogo y no se importan. Si el archivo no trae la columna Stock, el producto queda con stock 0."):"Si el archivo no trae la columna Stock, el producto queda con stock 0."}
 function importarExcel(){var listos=impFilas.filter(function(x){return x.estado==="listo"});if(!listos.length){toast("No hay productos listos para importar.");return}if(!confirm("¿Importar "+listos.length+" producto"+(listos.length===1?"":"s")+" al catálogo?"))return;var n=0;listos.forEach(function(f){var nid=Date.now()+uid++;var sku=f.codigo||("SKU-"+String(Math.floor(100000+Math.random()*900000)));var intentos=0;while(catalogo.some(function(p){return String(p.sku||"")===sku})&&intentos<20){sku="SKU-"+String(Math.floor(100000+Math.random()*900000));intentos++}var stock=(opcionesSistema.sinStock===true)?0:redondearCant(f.stock||0);var pr={id:nid,nombre:f.nombre,precio:f.precio,stock:stock,emoji:"",categoria:f.categoria||"General",unidad:"pieza",sku:sku,costo:Math.round(f.precio*0.6*100)/100,stockMin:5,foto:"",presentacion:f.presentacion||"",codigoBarras:f.barras||""};catalogo.push(pr);stockAlmacen[nid]={};var pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;if(typeof encolarProductoNube==="function")encolarProductoNube(pr);n++});sincronizarStock();guardar();render();impFilas=[];impArchivoNombre="";var inp=document.getElementById("archivoExcel");if(inp)inp.value="";renderImportar();toast("Se importaron "+n+" productos al catálogo.")}
 function limpiarImportar(){impFilas=[];impArchivoNombre="";var i=document.getElementById("archivoExcel");if(i)i.value="";renderImportar()}
+/* v112: Pronóstico de la semana + Kupi, el chatbot IA (Lalo 2026-11-21).
+   Todo se calcula EN LOCAL con los datos del negocio: sin clave de API
+   y sin llamadas externas, así funciona sin internet. La mascota K va
+   vendida en base64 (256 px) para no depender de ningún archivo externo. */
+var MASCOTA_KUPI="data:image/webp;base64,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";
+var DIAS_SEMANA_KUPI=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+var KUPI_SALUDO="¡Hola! Soy Kupi, tu asesor de IA. ¿En qué te ayudo?";
+function kupiNormTxt(s){return String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," ")}
+function calcularPronostico(){
+ var porDia={};var fechasConVenta={};
+ (ventas||[]).forEach(function(v){
+  var d=new Date(v.fecha);if(isNaN(d.getTime()))return;
+  var dw=d.getDay();var clave=fechaLocalDe(d);
+  if(!porDia[dw])porDia[dw]={fechas:{},total:0,unidades:0,ventas:0,prod:{}};
+  var P=porDia[dw];P.fechas[clave]=1;fechasConVenta[clave]=1;
+  P.total+=Number(v.total)||0;P.ventas++;
+  (v.items||[]).forEach(function(l){
+   var cant=Number(l.cant)||0;P.unidades+=cant;
+   var p=catalogo.find(function(x){return x.id===l.id});
+   var key=l.id;
+   if(!P.prod[key])P.prod[key]={nombre:p?p.nombre:"Producto",cantidad:0,unidad:unidadDe(p)};
+   P.prod[key].cantidad+=cant;
+  });
+ });
+ var orden=[1,2,3,4,5,6,0];
+ var dias=orden.map(function(i){
+  var P=porDia[i]||{fechas:{},total:0,unidades:0,ventas:0,prod:{}};
+  var nDias=Object.keys(P.fechas).length;
+  var top=Object.values(P.prod).map(function(t){return {nombre:t.nombre,cantidad:t.cantidad,unidad:t.unidad,prom:nDias?t.cantidad/nDias:0}}).sort(function(a,b){return b.cantidad-a.cantidad}).slice(0,3);
+  return {dia:i,nombre:DIAS_SEMANA_KUPI[i],diasObs:nDias,ventas:P.ventas,promTotal:nDias?P.total/nDias:0,promUnidades:nDias?P.unidades/nDias:0,top:top};
+ });
+ var promSemana=dias.reduce(function(a,d){return a+d.promTotal},0);
+ var mejor=dias.slice().sort(function(a,b){return b.promTotal-a.promTotal})[0];
+ var nDiasConVenta=Object.keys(fechasConVenta).length;
+ return {dias:dias,diasConVenta:nDiasConVenta,totalVentas:(ventas||[]).length,promSemana:promSemana,mejor:mejor,aprendiendo:nDiasConVenta<7};
+}
+function renderPronostico(){
+ var cont=document.getElementById("contPronostico");if(!cont)return;
+ var pr=calcularPronostico();
+ if(!pr.totalVentas){
+  cont.innerHTML='<div class="vacio-accion">🔮<b>Aún no hay ventas para pronosticar</b>Vende algo en Ventas y Kupi irá aprendiendo de tus días fuertes.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div>';
+  return;
+ }
+ var h="";
+ if(pr.aprendiendo)h+='<p style="background:#fff8e1;border:1px solid #f5b800;border-radius:8px;padding:10px 12px;font-size:13px">🌱 <b>Kupi está aprendiendo:</b> llevas '+pr.diasConVenta+(pr.diasConVenta===1?" día":" días")+' con ventas. El pronóstico se afina con cada venta; entre más días, más exacto.</p>';
+ h+='<div class="resumen"><div class="tarjeta"><small>ESPERADO LA PRÓXIMA SEMANA</small><b style="font-size:22px">'+dineroMiles(pr.promSemana)+'</b></div><div class="tarjeta"><small>TU DÍA MÁS FUERTE</small><b>'+escHtml(pr.mejor.nombre)+'</b></div><div class="tarjeta"><small>PROMEDIO ESE DÍA</small><b>'+dineroMiles(pr.mejor.promTotal)+'</b></div></div>';
+ h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Día</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Promedio</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Lo que más se vende</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Prepara</th></tr></thead><tbody>';
+ pr.dias.forEach(function(d){
+  var top1=d.top[0];
+  var prepara="—";
+  if(d.diasObs&&top1){var sug=Math.max(1,Math.ceil(top1.prom));prepara=textoCantidadU(sug,top1.unidad)+" de "+escHtml(top1.nombre)}
+  h+='<tr><td style="padding:8px;border-bottom:1px solid #eee"><b>'+escHtml(d.nombre)+'</b>'+(d.diasObs?' <small style="color:#555">('+d.diasObs+(d.diasObs===1?" día":" días")+')</small>':"")+'</td><td style="text-align:right;padding:8px;border-bottom:1px solid #eee">'+(d.diasObs?dineroMiles(d.promTotal):"—")+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+(top1?escHtml(top1.nombre):"Sin datos aún")+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+prepara+'</td></tr>';
+ });
+ h+='</tbody></table></div>';
+ cont.innerHTML=h;
+}
+var kupiSaludado=false;
+function esAdminKupi(){return (sesionActual&&sesionActual.rol)==="Administrador"}
+function actualizarBotonKupi(){
+ var b=document.getElementById("btnChatKupi");if(!b)return;
+ var img=document.getElementById("imgBtnKupi");if(img&&!img.getAttribute("src"))img.src=MASCOTA_KUPI;
+ var enc=document.getElementById("imgKupiEnc");if(enc&&!enc.getAttribute("src"))enc.src=MASCOTA_KUPI;
+ b.style.display=esAdminKupi()?"":"none";
+ if(!esAdminKupi()){var p=document.getElementById("panelChatKupi");if(p)p.classList.add("oculto")}
+}
+function toggleChatKupi(){
+ if(!esAdminKupi()){toast("⛔ Kupi solo está para el Administrador.");return}
+ var p=document.getElementById("panelChatKupi");if(!p)return;
+ var abrir=p.classList.contains("oculto");
+ p.classList.toggle("oculto");
+ if(abrir){
+  if(!kupiSaludado){kupiSaludado=true;kupiAgregarMsg("bot",KUPI_SALUDO)}
+  var inp=document.getElementById("kupiEntrada");if(inp)inp.focus();
+ }
+}
+function kupiAgregarMsg(quien,texto){
+ var caja=document.getElementById("kupiMensajes");if(!caja)return;
+ if(quien==="bot"){
+  var fila=document.createElement("div");fila.className="kupi-fila-bot";
+  var av=document.createElement("img");av.className="kupi-mini";av.src=MASCOTA_KUPI;av.alt="Kupi";
+  var bur=document.createElement("div");bur.className="kupi-msg bot";bur.innerHTML=texto;
+  fila.appendChild(av);fila.appendChild(bur);caja.appendChild(fila);
+ }else{
+  var bur2=document.createElement("div");bur2.className="kupi-msg yo";bur2.textContent=texto;
+  caja.appendChild(bur2);
+ }
+ caja.scrollTop=caja.scrollHeight;
+}
+function kupiPreguntar(texto){
+ if(!texto||!String(texto).trim())return;
+ kupiAgregarMsg("yo",String(texto).trim());
+ var inp=document.getElementById("kupiEntrada");if(inp)inp.value="";
+ setTimeout(function(){kupiAgregarMsg("bot",responderKupi(texto))},350);
+}
+function kupiEnviar(){var i=document.getElementById("kupiEntrada");if(i)kupiPreguntar(i.value)}
+function kupiChip(t){kupiPreguntar(t)}
+function kupiAyuda(){
+ return "Puedo ayudarte con:<br>• ¿Cuánto vendí hoy?<br>• ¿Cómo va la semana?<br>• ¿Cuál es mi producto más vendido?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?";
+}
+function kupiRespHoy(){
+ var r=resumenReportes();
+ if(!r.num)return "Hoy aún no hay ventas. ¡Vende algo en Ventas y me avisas! 😊";
+ var t="Hoy vendiste <b>"+dineroMiles(r.total)+"</b> en "+r.num+(r.num===1?" venta":" ventas")+". El ticket promedio es de "+dineroMiles(r.promedio)+".";
+ if(r.masVendido)t+="<br>Lo que más se vendió hoy: <b>"+escHtml(r.masVendido.nombre)+"</b> ("+textoCantidadU(r.masVendido.cantidad,r.masVendido.unidad||"pieza")+").";
+ return t;
+}
+function kupiRespSemana(){
+ var r=resumenReportes();
+ var tot=r.dias.reduce(function(a,d){return a+(Number(d.total)||0)},0);
+ var num=r.dias.reduce(function(a,d){return a+(Number(d.num)||0)},0);
+ if(!num)return "En los últimos 7 días no hay ventas registradas.";
+ var mejor=r.dias.slice().sort(function(a,b){return b.total-a.total})[0];
+ return "En los últimos 7 días vendiste <b>"+dineroMiles(tot)+"</b> en "+num+(num===1?" venta":" ventas")+". Tu mejor día fue <b>"+escHtml(mejor.etiqueta)+"</b> con "+dineroMiles(mejor.total)+".";
+}
+function kupiRespMasVendido(){
+ var porProd={};
+ (ventas||[]).forEach(function(v){(v.items||[]).forEach(function(l){
+  var p=catalogo.find(function(x){return x.id===l.id});
+  var key=l.id;
+  if(!porProd[key])porProd[key]={nombre:p?p.nombre:"Producto",cantidad:0,unidad:unidadDe(p)};
+  porProd[key].cantidad+=Number(l.cant)||0;
+ })});
+ var top=Object.values(porProd).sort(function(a,b){return b.cantidad-a.cantidad});
+ if(!top.length)return "Aún no hay ventas registradas, así que no sé cuál es tu producto más vendido. ¡Vende algo y me preguntas de nuevo! 😊";
+ var t="Tu producto más vendido es <b>"+escHtml(top[0].nombre)+"</b> ("+textoCantidadU(top[0].cantidad,top[0].unidad||"pieza")+" en total).";
+ if(top[1])t+="<br>Después va <b>"+escHtml(top[1].nombre)+"</b> ("+textoCantidadU(top[1].cantidad,top[1].unidad||"pieza")+").";
+ return t;
+}
+function kupiRespStock(){
+ if(opcionesSistema.sinStock===true)return "Este negocio tiene apagado el control de stock (opción Sin stock), así que no llevo registro de faltantes.";
+ var ag=catalogo.filter(function(p){return !p.pausado&&(Number(p.stock)||0)<=0});
+ var bj=catalogo.filter(function(p){return !p.pausado&&(Number(p.stock)||0)>0&&(Number(p.stock)||0)<=(p.stockMin==null?5:p.stockMin)});
+ if(!ag.length&&!bj.length)return "¡Todo en orden! Ningún producto está por acabarse. 🎉";
+ var t="";
+ if(ag.length)t+="⚠️ <b>Agotados:</b> "+ag.slice(0,5).map(function(p){return escHtml(p.nombre)}).join(", ")+(ag.length>5?" y "+(ag.length-5)+" más":"")+".";
+ if(bj.length)t+=(t?"<br>":"")+"🔶 <b>Por acabarse:</b> "+bj.slice(0,5).map(function(p){return escHtml(p.nombre)+" (quedan "+textoCantidadU(Number(p.stock)||0,unidadDe(p))+")"}).join(", ")+(bj.length>5?" y "+(bj.length-5)+" más":"")+".";
+ return t;
+}
+function kupiRespPronostico(){
+ var pr=calcularPronostico();
+ if(!pr.totalVentas)return "Aún no tengo ventas para pronosticar. Cuando vendas unos días, te diré qué día se vende más y cuánto preparar. 😊";
+ var t="La próxima semana espero unos <b>"+dineroMiles(pr.promSemana)+"</b> en total. Tu día más fuerte es el <b>"+escHtml(pr.mejor.nombre)+"</b> (promedio de "+dineroMiles(pr.mejor.promTotal)+" por día).";
+ var top1=pr.mejor.top[0];
+ if(top1&&pr.mejor.diasObs){var sug=Math.max(1,Math.ceil(top1.prom));t+="<br>Ese día prepara "+textoCantidadU(sug,top1.unidad)+" de <b>"+escHtml(top1.nombre)+"</b>."}
+ if(pr.aprendiendo)t+="<br><i>Estoy aprendiendo: llevas "+pr.diasConVenta+(pr.diasConVenta===1?" día":" días")+" con ventas, el pronóstico se afina con cada venta.</i>";
+ return t;
+}
+function responderKupi(pregunta){
+ var q=kupiNormTxt(pregunta);
+ var tiene=function(){for(var i=0;i<arguments.length;i++){if(q.indexOf(arguments[i])!==-1)return true}return false};
+ if(tiene("gracias"))return "¡De nada! 😊 Aquí estoy para lo que necesites de tu negocio.";
+ if(tiene("pronostico","como viene la semana","que viene","preparar","proxima semana","siguiente semana"))return kupiRespPronostico();
+ if(tiene("acabando","se acaba","stock bajo","que falta","por acabarse","se esta acabando","quedan","agotado","faltante"))return kupiRespStock();
+ if(tiene("mas vendido","mejor producto","que se vende mas","lo que mas se vende","mas se vende"))return kupiRespMasVendido();
+ if(tiene("hoy","cuanto vendi","cuanto se vendio","ventas de hoy","cuanto llevo","cuanto he vendido"))return kupiRespHoy();
+ if(tiene("semana","ultimos 7 dias","esta semana","ultima semana","como va la semana"))return kupiRespSemana();
+ if(tiene("hola","buenos dias","buenas tardes","buenas noches","que tal","que onda","saludos"))return KUPI_SALUDO+" Pregúntame cuánto vendiste hoy, qué se está acabando o cómo viene la semana. 😊";
+ if(tiene("ayuda","que puedes","que sabes","que haces","como funcionas","para que sirves"))return kupiAyuda();
+ return "No te entendí 🤔 pero te puedo ayudar con esto:<br>• ¿Cuánto vendí hoy?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?<br>• ¿Cuál es mi producto más vendido?";
+}
 function generarCodigoProducto(){var code="";var intentos=0;do{code="SKU-"+String(Math.floor(100000+Math.random()*900000));intentos++}while(catalogo.some(function(p){return String(p.sku||"")===code})&&intentos<20);var inp=document.getElementById("pSku");if(inp)inp.value=code;toast("Código generado: "+code);}
 function guardarProducto(e){e.preventDefault();
  const id=document.getElementById("pId").value;
@@ -4240,5 +4427,12 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<button type="button" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
+<div id="panelChatKupi" class="oculto">
+<div class="kupi-encabezado"><img id="imgKupiEnc" alt="Kupi"><div><b>Kupi</b><span>● En línea</span></div><button type="button" onclick="toggleChatKupi()" aria-label="Cerrar el chat">✕</button></div>
+<div id="kupiMensajes"></div>
+<div class="kupi-chips"><button type="button" onclick="kupiChip('¿Cuánto vendí hoy?')">¿Cuánto vendí hoy?</button><button type="button" onclick="kupiChip('¿Qué se está acabando?')">¿Qué se está acabando?</button><button type="button" onclick="kupiChip('¿Cómo viene la semana?')">¿Cómo viene la semana?</button></div>
+<div class="kupi-entrada"><input id="kupiEntrada" type="text" placeholder="Escribe tu pregunta..." autocomplete="off" onkeydown="if(event.key==='Enter')kupiEnviar()"><button type="button" onclick="kupiEnviar()" aria-label="Enviar">➤</button></div>
+</div>
 </body>
 </html>
