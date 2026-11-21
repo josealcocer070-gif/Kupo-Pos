@@ -921,7 +921,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button class="acc" onclick="recuperarVentaEnEspera()">⏯ Recuperar venta en espera</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
 <button class="acc" id="btnMensajesVentas" onclick="mostrarVista('mensajes')">💬 Mensajes <span class="badge-msg" id="badgeMsgVentas">0</span></button>
-<button class="acc btn-whatsapp" id="btnWhatsAppVentas" onclick="enviarTicketWhatsApp()"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> 📲 Enviar ticket por WhatsApp</button>
+<button class="acc" id="btnAbrirCajonVentas" onclick="abrirCajonBT()">💵 Abrir cajón</button>
 <p id="btEstadoVentas" style="font-size:13px;font-weight:700;margin:0;width:100%">🖨 Impresora Bluetooth: no conectada.</p>
 <button type="button" id="btnReconectarBT" class="acc" onclick="reconectarImpresoraBT()">🔄 Reconectar impresora</button>
 </div>
@@ -1003,7 +1003,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div><label>Precio $</label><input id="pPrecio" type="number" min="0" step="0.01" placeholder="0.00" required></div>
 <div id="campoPStock"><label>Stock</label><input id="pStock" type="number" min="0" step="0.01" placeholder="0" required></div>
  <div><label>Unidad de venta</label><select id="pUnidad"><option value="pieza">Pieza</option><option value="kilo">Kilo</option><option value="metro">Metro</option><option value="litro">Litro</option></select></div>
-<div><label>Categoría</label><input id="pCategoria" list="listaCategorias" value="General"><datalist id="listaCategorias"><option value="Panadería"></option><option value="Comida"></option><option value="Bebida"></option><option value="Postres"></option><option value="General"></option></datalist></div>
+<div><label>Categoría</label><input id="pCategoria" list="listaCategorias" value="General"><datalist id="listaCategorias"></datalist></div>
 <div><label>Código / SKU (código de barras)</label><input id="pSku" placeholder="Ej. SKU-001 o código de barras EAN-13"><button type="button" class="secundario" style="width:100%;margin-top:8px;min-height:52px" onclick="generarCodigoProducto()">🎲 Generar código</button></div>
 <div><label>Costo $</label><input id="pCosto" type="number" min="0" step="0.01" placeholder="0.00"></div>
 <div id="campoPStockMin"><label>Stock mínimo (alerta)</label><input id="pStockMin" type="number" min="0" step="0.01" placeholder="5"></div>
@@ -1287,7 +1287,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" onclick="conectarImpresoraBT()">📶 Conectar impresora Bluetooth</button>
 <button type="button" class="secundario" id="btnDesconectarBT" onclick="desconectarImpresoraBT()" style="display:none">Desconectar</button>
 <button type="button" class="secundario" onclick="probarImpresionBT()">🧾 Probar ticket por Bluetooth</button>
-<button type="button" class="secundario" onclick="abrirCajonBT()">💵 Abrir cajón ahora</button>
+<button class="btn-whatsapp" id="btnWhatsAppVentas" onclick="enviarTicketWhatsApp()"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> 📲 Enviar ticket por WhatsApp</button>
 </div>
 <label class="perm-fila"><span>💵 Abrir el cajón de dinero al cobrar en efectivo (solo por Bluetooth)</span><span class="interruptor"><input type="checkbox" id="tAbrirCajon" checked onchange="guardarAbrirCajon()"><span class="deslizador"></span></span></label>
 <p style="font-size:12px;color:#666;margin-top:6px">El cajón se abre solo cuando la venta es en efectivo o mixta y la impresora está conectada por Bluetooth. El cajón va conectado a la impresora con su cable. Sin impresora Bluetooth, el cajón no se puede abrir desde KUPO.</p>
@@ -1755,6 +1755,7 @@ function toast(m){let t=document.createElement("div");t.className="toast";t.text
 let categoriaActual="todas";
 function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c=p.categoria||"General";if(seen.indexOf(c)===-1)seen.push(c)});return seen}
 function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
+function actualizarDatalistCategorias(){var dl=document.getElementById("listaCategorias");if(!dl)return;var cats=categoriasCatalogo();if(cats.indexOf("General")===-1)cats.push("General");dl.innerHTML=cats.map(function(c){return '<option value="'+c.replace(/"/g,"&quot;")+'"></option>'}).join("")}
 function elegirCategoria(c){categoriaActual=c;render()}
 function escanearCodigo(){const b=document.getElementById("buscar");if(!b)return;b.focus();b.select();toast("Escanea el código con el lector, o escríbelo y presiona Enter.");}
 /* Lector de códigos de barras USB/Bluetooth en PC: el lector actúa como teclado,
@@ -1768,7 +1769,7 @@ if(typeof document!=="undefined"&&document.addEventListener)document.addEventLis
    redireccionador del lector (Ctrl+S / Ctrl+K no deben escribirse en el buscador). */
 if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("keydown",manejarAtajosTeclado,true);
 function render(){
- llenarSelectVentaAlmacen();renderCategorias();
+ llenarSelectVentaAlmacen();renderCategorias();actualizarDatalistCategorias();
  const q=(document.getElementById("buscar").value||"").toLowerCase();
  const f=document.getElementById("filtro").value;
  const grid=document.getElementById("grid");grid.innerHTML="";
@@ -2577,7 +2578,7 @@ function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
  mostrar("navProductos",tienePermiso("productos"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
- mostrar("btnMensajesVentas",verMensajesChat()&&esAdmin);mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);var _bw=document.getElementById("btnWhatsAppVentas");if(_bw){if(esAdmin)_bw.style.removeProperty("display");else _bw.style.setProperty("display","none","important");}
+ mostrar("btnMensajesVentas",verMensajesChat()&&esAdmin);mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.style.display=tienePermiso(b.getAttribute("data-nav"))?"":"none"});
  document.querySelectorAll('#menuMovil button[data-nav="mensajes"]').forEach(function(b){b.style.display=verMensajesChat()?"":"none";});
  const _sec=document.querySelector("aside .sec");if(_sec)_sec.style.display=(tienePermiso("ticket")||tienePermiso("cajeros")||tienePermiso("multi")||esAdmin)?"":"none";
