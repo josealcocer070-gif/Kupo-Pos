@@ -3171,7 +3171,7 @@ function guardarCajero(ev){
  if(!/^\d{6}$/.test(pin)){toast("El PIN debe tener 6 dígitos.");return}
  if(cajeros.some(c=>c.usuario.toLowerCase()===usuario.toLowerCase())){toast("Ese usuario ya existe. Elige otro usuario.");return}
  cajeros.push({id:Date.now()+uid++,nombre:nombre,usuario:usuario,pin:pin,rol:rol,estado:"Activo"});
- guardarCajeros();if(typeof encolarCajeroNube==="function")encolarCajeroNube(cajeros[cajeros.length-1]);renderCajeros();limpiarCajero();
+ guardarCajeros();if(typeof encolarCajeroNube==="function")encolarCajeroNube(cajeros[cajeros.length-1]);renderCajeros();limpiarCajero();if(typeof subirPinNube==="function")subirPinNube(usuario,pin);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();
  toast("Cajero creado: "+nombre+" ("+usuario+" · "+rol+"). Ya puede entrar con su usuario y PIN.");
 }
 function limpiarCajero(){const f=document.querySelector("#vistaCajeros form");if(f)f.reset();}
@@ -3199,7 +3199,7 @@ function cambiarPinCajero(id){
  const nuevo=prompt("PIN nuevo de 6 dígitos para "+c.nombre+" ("+c.usuario+"):");
  if(nuevo===null)return;
  if(!/^\d{6}$/.test(nuevo.trim())){toast("El PIN debe tener 6 dígitos.");return}
- c.pin=nuevo.trim();guardarCajeros();renderCajeros();
+ c.pin=nuevo.trim();guardarCajeros();renderCajeros();if(typeof subirPinNube==="function")subirPinNube(c.usuario,nuevo.trim());
  toast("PIN de "+c.nombre+" cambiado.");
 }
 function cambiarMiPin(ev){
@@ -3212,7 +3212,7 @@ function cambiarMiPin(ev){
  if(actual!==yo.pin){toast("El PIN actual no coincide.");return}
  if(!/^\d{6}$/.test(nuevo)){toast("El PIN nuevo debe tener 6 dígitos.");return}
  if(nuevo!==nuevo2){toast("El PIN nuevo no coincide con la repetición.");return}
- yo.pin=nuevo;guardarCajeros();
+ yo.pin=nuevo;guardarCajeros();if(typeof subirPinNube==="function")subirPinNube(yo.usuario,nuevo);
  if(yo.usuario==="Administrador")localStorage.setItem("kupoPosV146Pin",nuevo);
  ev.target.reset();
  toast("Tu PIN fue cambiado. Usa el nuevo PIN la próxima vez que entres.");
@@ -3269,7 +3269,7 @@ function confirmarRestablecerPin(){
  const n2=(document.getElementById("restPinNuevo2").value||"").trim();
  if(!/^\d{6}$/.test(n1)){m.textContent="El PIN nuevo debe tener 6 dígitos.";m.className="msg error";return}
  if(n1!==n2){m.textContent="El PIN nuevo no coincide con la repetición.";m.className="msg error";return}
- c.pin=n1;guardarCajeros();limpiarBloqueoPin(c.usuario);
+ c.pin=n1;guardarCajeros();limpiarBloqueoPin(c.usuario);if(typeof subirPinNube==="function")subirPinNube(c.usuario,n1);
  cerrarRestablecerPin();
  toast("PIN de "+c.nombre+" restablecido. Ya puede entrar con su PIN nuevo.");
 }
@@ -4164,7 +4164,7 @@ function guardarSetupDueno(ev){
  cajeros.push(nuevo);
  sesionActual={nombre:nombre,usuario:usuario,rol:"Administrador",activa:true,licencia:licenciaActual(),inicio:Date.now()};
  guardarCajeros();
- if(typeof encolarCajeroNube==="function")encolarCajeroNube(nuevo);
+ if(typeof encolarCajeroNube==="function")encolarCajeroNube(nuevo);if(typeof subirPinNube==="function")subirPinNube(usuario,pin);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();
  document.getElementById("pantallaSetup").classList.add("oculto");
  document.getElementById("pantallaLogin").classList.add("oculto");
  document.getElementById("pantallaLicencia").classList.add("oculto");
@@ -4222,6 +4222,28 @@ function pendientesNubeCount(){const q=leerPendientesNube();return q.ventas.leng
 function encolarNube(tipo,registro){const q=leerPendientesNube();const lista=q[tipo]||[];const i=lista.findIndex(function(x){return x.nubeId===registro.nubeId});if(i>=0)lista[i]=registro;else lista.push(registro);q[tipo]=lista;guardarPendientesNube(q);if(typeof actualizarBadgeSync==="function")actualizarBadgeSync();return q}
 function encolarVentaNube(v){if(!v)return;if(!v.nubeId)v.nubeId=nubeId();encolarNube("ventas",{nubeId:v.nubeId,licencia_clave:licenciaActual(),folio:String(v.folio).padStart(4,"0"),total:Number(v.total)||0,forma_pago:v.pago||"",fecha:v.fecha||new Date().toISOString(),cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",almacen:v.almacen||"",items:(v.items||[]).map(function(l){const pr=(typeof catalogo!=="undefined"?catalogo.find(function(x){return x.id===l.id})||{}:{});return{id:l.id,nombre:pr.nombre||"Producto",unidad:unidadDe(pr),cant:l.cant,precio:l.precio}})});}
 function encolarCajeroNube(c){if(!c)return;if(!c.nubeId)c.nubeId=nubeId();encolarNube("cajeros",{nubeId:c.nubeId,licencia_clave:licenciaActual(),nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.estado==="Activo",permisos:c.permisos||{}});if(typeof guardarCajeros==="function"){try{guardarCajeros()}catch(e){}}}
+
+/* v102 (Lalo 2026-11-20): PIN del cajero en la nube, versión SEGURA. El PIN
+   nunca sube en texto plano: la nube guarda solo su hash bcrypt (columna
+   pin_hash) y la verificación se hace en el servidor con la RPC
+   verificar_pin_cajero. La app nunca lee la columna pin_hash. Si el SQL
+   aún no se corrió en Supabase, las RPC no existen y todo degrada con
+   gracia al PIN local de cada aparato. */
+async function verificarPinNube(usuario,pin){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
+ try{
+  const r=await kupoSupabase.rpc("verificar_pin_cajero",{p_licencia:licenciaActual(),p_usuario:usuario,p_pin:pin});
+  if(r.error||typeof r.data==="undefined"||r.data===null)return false;
+  return r.data===true;
+ }catch(e){return false}
+}
+function subirPinNube(usuario,pin){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return;
+ try{
+  const pr=kupoSupabase.rpc("guardar_pin_cajero",{p_licencia:licenciaActual(),p_usuario:usuario,p_pin:pin});
+  if(pr&&typeof pr.catch==="function")pr.catch(function(){});
+ }catch(e){}
+}
 async function descargarCajerosNube(){
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
  const clave=licenciaActual();if(!clave)return false;
@@ -4538,7 +4560,7 @@ function guardarBloqueoPin(b){try{localStorage.setItem("kupoPosV146BloqueoPin",J
 function textoBloqueoPin(hasta){const s=Math.ceil((hasta-Date.now())/1000);if(s<=60)return s+" segundo"+(s===1?"":"s");const m=Math.ceil(s/60);return m+" minuto"+(m===1?"":"s");}
 function registrarPinIncorrecto(usuario){const b=leerBloqueoPin();const k=usuario.toLowerCase();const r=b[k]||{intentos:0,hasta:0};if(r.hasta&&r.hasta>Date.now())return r;r.intentos=(r.intentos||0)+1;if(r.intentos>=PIN_MAX_INTENTOS){r.hasta=Date.now()+PIN_BLOQUEO_MS;r.intentos=0;}b[k]=r;guardarBloqueoPin(b);return r;}
 function limpiarBloqueoPin(usuario){const b=leerBloqueoPin();const k=usuario.toLowerCase();if(b[k]){delete b[k];guardarBloqueoPin(b);}}
-function entrar(){
+async function entrar(){
  vibrarPin();
  const usuario=(document.getElementById("usuarioLogin").value||"").trim();
  const pin=document.getElementById("pinLogin").value;
@@ -4550,7 +4572,7 @@ function entrar(){
  if(c.estado!=="Activo"){m.textContent="Este cajero está pausado. Pide al Administrador que lo active.";m.className="msg error";limpiarPin();return}
  const bl=(leerBloqueoPin()[usuario.toLowerCase()]||{});
  if(bl.hasta&&bl.hasta>Date.now()){m.textContent="Demasiados intentos. Este usuario está bloqueado. Intenta de nuevo en "+textoBloqueoPin(bl.hasta)+".";m.className="msg error";limpiarPin();return}
- if(pin!==c.pin){const r=registrarPinIncorrecto(usuario);if(r.hasta&&r.hasta>Date.now()){m.textContent="PIN incorrecto. Demasiados intentos: este usuario queda bloqueado por 5 minutos.";}else{const q=PIN_MAX_INTENTOS-r.intentos;m.textContent="PIN incorrecto. Inténtalo de nuevo. Te quedan "+q+" intento"+(q===1?"":"s")+".";}m.className="msg error";limpiarPin();return}
+ if(pin!==c.pin){var okNube=false;try{okNube=await verificarPinNube(usuario,pin);}catch(e){okNube=false;}if(!okNube){const r=registrarPinIncorrecto(usuario);if(r.hasta&&r.hasta>Date.now()){m.textContent="PIN incorrecto. Demasiados intentos: este usuario queda bloqueado por 5 minutos.";}else{const q=PIN_MAX_INTENTOS-r.intentos;m.textContent="PIN incorrecto. Inténtalo de nuevo. Te quedan "+q+" intento"+(q===1?"":"s")+".";}m.className="msg error";limpiarPin();return}c.pin=pin;guardarCajeros();}
  limpiarBloqueoPin(usuario);
  sesionActual={nombre:c.nombre,usuario:c.usuario,rol:c.rol,activa:true,licencia:licenciaActual(),inicio:Date.now()};
  guardarCajeros();
