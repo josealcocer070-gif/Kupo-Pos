@@ -89,7 +89,7 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #navHistCortes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)!important}
 #navImportar .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)!important}
 .insignia-nuevo{background:#f5b800;color:#0b4a6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
-#btnChatKupi{position:fixed;right:18px;bottom:18px;width:64px;height:64px;border-radius:50%;background:#f5b800;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;z-index:200;padding:0;overflow:hidden}
+#btnChatKupi{position:fixed;right:18px;bottom:18px;width:64px;height:64px;border-radius:50%;background:#f5b800;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;z-index:200;padding:0;overflow:hidden;touch-action:none}
 #btnChatKupi img{width:100%;height:100%;object-fit:cover;display:block}
 #panelChatKupi{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
 #panelChatKupi.oculto{display:none!important}
@@ -109,6 +109,15 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 .kupi-entrada{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e5e5;background:#fff}
 .kupi-entrada input{flex:1;border:1px solid #c9d4dc;border-radius:20px;padding:9px 12px;font-size:14px;min-width:0}
 .kupi-entrada>button{background:#f5b800;border:none;border-radius:50%;width:40px;height:40px;font-size:17px;cursor:pointer;color:#0b4a6e;flex:none}
+html[data-tema="noche"] #panelChatKupi{background:var(--sup);border-color:var(--borde2)}
+html[data-tema="noche"] #kupiMensajes{background:var(--fondo)}
+html[data-tema="noche"] .kupi-msg.bot{background:var(--sup2);border-color:var(--borde2);color:var(--texto)}
+html[data-tema="noche"] .kupi-chips{background:var(--sup);border-top-color:var(--borde2)}
+html[data-tema="noche"] .kupi-chips button{background:var(--sup2);border-color:#f5b800;color:var(--texto)}
+html[data-tema="noche"] .kupi-entrada{background:var(--sup);border-top-color:var(--borde2)}
+html[data-tema="noche"] .kupi-entrada input{background:var(--entrada);border-color:var(--borde);color:var(--texto)}
+html[data-tema="noche"] .kupi-entrada input::placeholder{color:var(--texto3)}
+html[data-tema="noche"] .kupi-aprendiendo{background:#3a2f00!important;border-color:#f5b800!important;color:#ffe9a8}
 #navTicket .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
 #navAdminLic .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#90a4ae,#37474f)!important}
@@ -1856,7 +1865,7 @@ function render(){
  });
  renderTicket();renderTableroVentas();
  if(vistaActual==="productos")renderProductos();
- actualizarBadgeSync();actualizarBotonKupi();
+ actualizarBadgeSync();actualizarBotonKupi();actualizarInsigniaImportar();
 }
 
 function renderTableroVentas(){
@@ -3046,6 +3055,7 @@ function mostrarVista(v){
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
  document.getElementById("navImportar").classList.toggle("activo",v==="importar");
+ if(v==="importar")marcarImportarVisto();
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
  document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
  document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
@@ -3381,7 +3391,7 @@ function renderPronostico(){
   return;
  }
  var h="";
- if(pr.aprendiendo)h+='<p style="background:#fff8e1;border:1px solid #f5b800;border-radius:8px;padding:10px 12px;font-size:13px">🌱 <b>Kupi está aprendiendo:</b> llevas '+pr.diasConVenta+(pr.diasConVenta===1?" día":" días")+' con ventas. El pronóstico se afina con cada venta; entre más días, más exacto.</p>';
+ if(pr.aprendiendo)h+='<p class="kupi-aprendiendo" style="background:#fff8e1;border:1px solid #f5b800;border-radius:8px;padding:10px 12px;font-size:13px">🌱 <b>Kupi está aprendiendo:</b> llevas '+pr.diasConVenta+(pr.diasConVenta===1?" día":" días")+' con ventas. El pronóstico se afina con cada venta; entre más días, más exacto.</p>';
  h+='<div class="resumen"><div class="tarjeta"><small>ESPERADO LA PRÓXIMA SEMANA</small><b style="font-size:22px">'+dineroMiles(pr.promSemana)+'</b></div><div class="tarjeta"><small>TU DÍA MÁS FUERTE</small><b>'+escHtml(pr.mejor.nombre)+'</b></div><div class="tarjeta"><small>PROMEDIO ESE DÍA</small><b>'+dineroMiles(pr.mejor.promTotal)+'</b></div></div>';
  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Día</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Promedio</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Lo que más se vende</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Prepara</th></tr></thead><tbody>';
  pr.dias.forEach(function(d){
@@ -3401,8 +3411,10 @@ function actualizarBotonKupi(){
  var enc=document.getElementById("imgKupiEnc");if(enc&&!enc.getAttribute("src"))enc.src=MASCOTA_KUPI;
  b.style.display=esAdminKupi()?"":"none";
  if(!esAdminKupi()){var p=document.getElementById("panelChatKupi");if(p)p.classList.add("oculto")}
+ kupiAplicarPos();kupiInitArrastre();
 }
 function toggleChatKupi(){
+ if(kupiClickBloqueado){kupiClickBloqueado=false;return}
  if(!esAdminKupi()){toast("⛔ Kupi solo está para el Administrador.");return}
  var p=document.getElementById("panelChatKupi");if(!p)return;
  var abrir=p.classList.contains("oculto");
@@ -3496,6 +3508,64 @@ function responderKupi(pregunta){
  if(tiene("hola","buenos dias","buenas tardes","buenas noches","que tal","que onda","saludos"))return KUPI_SALUDO+" Pregúntame cuánto vendiste hoy, qué se está acabando o cómo viene la semana. 😊";
  if(tiene("ayuda","que puedes","que sabes","que haces","como funcionas","para que sirves"))return kupiAyuda();
  return "No te entendí 🤔 pero te puedo ayudar con esto:<br>• ¿Cuánto vendí hoy?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?<br>• ¿Cuál es mi producto más vendido?";
+}
+/* v113 (Lalo 2026-11-21): 1) insignia "Nuevo" de Importar Excel se oculta
+   al abrir el apartado (se guarda por aparato); 2) botón de Kupi arrastrable
+   con Pointer Events (mouse y dedo), posición guardada por aparato;
+   3) Kupi legible en modo noche (ver CSS). */
+var KUPI_MOVER_UMBRAL=8;
+var kupiClickBloqueado=false;
+function importarYaVisto(){try{return localStorage.getItem("kupoPosV146ImportarVisto")==="1"}catch(e){return false}}
+function actualizarInsigniaImportar(){
+ var ins=document.querySelector("#navImportar .insignia-nuevo");
+ if(ins)ins.style.display=importarYaVisto()?"none":"";
+}
+function marcarImportarVisto(){
+ try{localStorage.setItem("kupoPosV146ImportarVisto","1")}catch(e){}
+ actualizarInsigniaImportar();
+}
+function kupiLeerPos(){
+ try{var p=JSON.parse(localStorage.getItem("kupoPosV146KupiPos")||"null");if(p&&isFinite(p.x)&&isFinite(p.y))return p}catch(e){}
+ return null;
+}
+function kupiGuardarPos(x,y){
+ try{localStorage.setItem("kupoPosV146KupiPos",JSON.stringify({x:Math.round(x),y:Math.round(y)}))}catch(e){}
+}
+function kupiLimitarPos(x,y){
+ var b=document.getElementById("btnChatKupi");
+ var w=b?b.offsetWidth||64:64,h=b?b.offsetHeight||64:64;
+ return {x:Math.max(0,Math.min(x,window.innerWidth-w)),y:Math.max(0,Math.min(y,window.innerHeight-h))};
+}
+function kupiAplicarPos(){
+ var b=document.getElementById("btnChatKupi");if(!b)return;
+ var p=kupiLeerPos();if(!p)return;
+ var q=kupiLimitarPos(p.x,p.y);
+ b.style.left=q.x+"px";b.style.top=q.y+"px";b.style.right="auto";b.style.bottom="auto";
+}
+function kupiInitArrastre(){
+ var b=document.getElementById("btnChatKupi");if(!b||b._kupiArrastre)return;
+ b._kupiArrastre=true;
+ var ini=null;
+ b.addEventListener("pointerdown",function(e){
+  if(!esAdminKupi())return;
+  ini={x:e.clientX,y:e.clientY,bx:b.getBoundingClientRect().left,by:b.getBoundingClientRect().top,movido:false};
+  try{b.setPointerCapture(e.pointerId)}catch(err){}
+ });
+ b.addEventListener("pointermove",function(e){
+  if(!ini)return;
+  var dx=e.clientX-ini.x,dy=e.clientY-ini.y;
+  if(!ini.movido&&Math.sqrt(dx*dx+dy*dy)<KUPI_MOVER_UMBRAL)return;
+  ini.movido=true;
+  var q=kupiLimitarPos(ini.bx+dx,ini.by+dy);
+  b.style.left=q.x+"px";b.style.top=q.y+"px";b.style.right="auto";b.style.bottom="auto";
+ });
+ b.addEventListener("pointerup",function(){
+  if(!ini)return;
+  if(ini.movido){kupiGuardarPos(parseFloat(b.style.left)||0,parseFloat(b.style.top)||0);kupiClickBloqueado=true;}
+  ini=null;
+ });
+ b.addEventListener("pointercancel",function(){ini=null});
+ window.addEventListener("resize",function(){kupiAplicarPos()});
 }
 function generarCodigoProducto(){var code="";var intentos=0;do{code="SKU-"+String(Math.floor(100000+Math.random()*900000));intentos++}while(catalogo.some(function(p){return String(p.sku||"")===code})&&intentos<20);var inp=document.getElementById("pSku");if(inp)inp.value=code;toast("Código generado: "+code);}
 function guardarProducto(e){e.preventDefault();
