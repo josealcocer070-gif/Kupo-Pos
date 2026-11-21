@@ -1183,7 +1183,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaReportes" class="oculto">
 <h1>📈 Reportes</h1>
 <p style="color:#555;margin-bottom:14px"><span id="fechaReportes"></span> · Así va el negocio, en palabras simples.</p>
-<div style="margin-bottom:14px"><button type="button" onclick="renderReportes()">🔄 Actualizar</button> <button type="button" onclick="mostrarVista('ventas')">🧾 Ir a Ventas</button></div>
+<div style="margin-bottom:14px"><button type="button" onclick="actualizarReportes()">🔄 Actualizar</button> <button type="button" onclick="mostrarVista('ventas')">🧾 Ir a Ventas</button></div>
 <h2>💰 Hoy</h2>
 <div class="resumen">
 <div class="tarjeta"><small>VENDIDO HOY</small><b id="resRepHoyTotal" style="font-size:26px">$0.00</b></div>
@@ -2901,6 +2901,12 @@ function resumenReportes(){
  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const clave=fechaLocalDe(d);const delDia=ventas.filter(function(v){return fechaLocalDe(new Date(v.fecha))===clave});dias.push({etiqueta:etiquetaDiaRep(d),fechaCorta:d.toLocaleDateString("es-MX",{day:"numeric",month:"short"}),total:delDia.reduce(function(a,v){return a+(Number(v.total)||0)},0),num:delDia.length})}
  const max7=Math.max.apply(null,dias.map(function(x){return x.total}).concat([0]));
  return {esAdmin:esAdmin,total:total,num:num,promedio:num?total/num:0,efectivo:efectivo,tarjeta:tarjeta,top:top,masVendido:top[0]||null,cajerosHoy:cajerosHoy,dias:dias,max7:max7};
+}
+function actualizarReportes(){
+ try{var g=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"[]");if(Array.isArray(g))ventas=g;}catch(e){}
+ renderReportes();
+ var r=resumenReportes();
+ toast("✅ Datos actualizados · "+dineroMiles(r.total)+" hoy · "+r.num+(r.num===1?" venta":" ventas"));
 }
 function renderReportes(){
  const r=resumenReportes();
