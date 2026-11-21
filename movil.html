@@ -95,6 +95,8 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #navCorte .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#c5a3ff,#7b4fd0)!important}
 #navReportes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8fb8ff,#3d5afe)!important}
 #navHistCortes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)!important}
+#navImportar .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)!important}
+.insignia-nuevo{background:#f5b800;color:#0b4a6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
 #navTicket .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
 #navAdminLic .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#90a4ae,#37474f)!important}
@@ -710,6 +712,7 @@ body.venta-movil-abierta .panel{bottom:180px!important}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="xlsx.full.min.js"></script>
 
 <style id="android-ios">
 /* ===== Adaptación 100% Android y iOS (Lalo, 2026-11-13) =====
@@ -770,7 +773,7 @@ aside nav a{min-height:48px!important}
    Aqui cada vista oculta usa ID+clase (1,1,0), que si gana a ese
    display:flex. Solo se ve el apartado activo. No toca logica,
    licencias, login PIN, confirmacion, SCAN, localStorage ni Supabase. */
-#vistaVentas.oculto,#vistaProductos.oculto,#vistaEntradas.oculto,#vistaGastos.oculto,#vistaCortes.oculto,#vistaHistorial.oculto,#vistaTicket.oculto,#vistaCotizaciones.oculto,#vistaAdminLic.oculto,#vistaCajeros.oculto,#vistaMulti.oculto{display:none!important}
+#vistaVentas.oculto,#vistaProductos.oculto,#vistaEntradas.oculto,#vistaGastos.oculto,#vistaCortes.oculto,#vistaHistorial.oculto,#vistaTicket.oculto,#vistaCotizaciones.oculto,#vistaAdminLic.oculto,#vistaCajeros.oculto,#vistaMulti.oculto,#vistaImportar.oculto{display:none!important}
 #vistaVentas:not(.oculto){display:flex!important;flex-direction:column!important}
 #panelVenta.oculto,#accionesRapidas.oculto{display:none!important}
 #app.oculto,body.movil-ventas #app.oculto,body.vista-ventas #app.oculto{display:none!important}
@@ -1418,6 +1421,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <a id="navCorte" onclick="mostrarVista('cortes')"><span class="icono-3d">📊</span> Corte diario</a>
 <a id="navReportes" onclick="mostrarVista('reportes')"><span class="icono-3d">📈</span> Reportes</a>
 <a id="navHistCortes" onclick="irHistorialCortes()"><span class="icono-3d">🕐</span> Historial de cortes</a>
+<a id="navImportar" onclick="mostrarVista('importar')"><span class="icono-3d">📥</span> Importar Excel <span class="insignia-nuevo">Nuevo</span></a>
 <a id="navMensajes" onclick="mostrarVista('mensajes')"><span class="icono-3d">💬</span> Mensajes <span class="badge-msg" id="badgeMsgMenu">0</span></a>
 </nav>
 <div class="sec">SISTEMA</div>
@@ -1497,6 +1501,42 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <select id="filtroProd" onchange="renderProductos()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option><option value="pausados">Pausados</option></select>
 </div>
 <div class="prod-lista" id="listaProductos"></div>
+</div>
+
+
+<div id="vistaImportar" class="oculto">
+<h1>📥 Importar Excel</h1>
+<p style="color:#555;margin-bottom:14px">Carga muchos productos de una vez desde un archivo Excel. Descarga la plantilla, llénala y súbela: revisas la vista previa y luego importas. Los productos nuevos se agregan al catálogo y se sincronizan a la nube como siempre.</p>
+<div class="resumen">
+<div class="tarjeta"><small>LISTOS PARA IMPORTAR</small><b id="impListos">0</b></div>
+<div class="tarjeta"><small>CON ERROR</small><b class="alerta" id="impErrores">0</b></div>
+<div class="tarjeta"><small>DUPLICADOS</small><b id="impDuplicados">0</b></div>
+<div class="tarjeta"><small>TOTAL EN ARCHIVO</small><b id="impTotal">0</b></div>
+</div>
+<div class="form-prod">
+<h2>1 · Descargar la plantilla</h2>
+<p style="font-size:13px;color:#555">La plantilla trae las columnas: Código, Producto, Presentación, Precio sugerido (MXN), Stock, Categoría y Código de barras. El Stock es opcional: si el archivo no lo trae, el producto queda con stock 0 y se le agrega después en Productos.</p>
+<button type="button" onclick="descargarPlantillaExcel()">⬇️ Descargar plantilla Excel</button>
+<h2 style="margin-top:18px">2 · Subir el archivo</h2>
+<p style="font-size:13px;color:#555">Acepta archivos .xlsx, .xls y .csv. Nada se guarda hasta que revises la vista previa y toques Importar.</p>
+<input id="archivoExcel" type="file" accept=".xlsx,.xls,.csv" style="position:absolute;opacity:0;width:1px;height:1px" onchange="leerArchivoExcel(event)">
+<button type="button" class="secundario" onclick="document.getElementById('archivoExcel').click()">📂 Elegir archivo Excel o CSV</button>
+<span id="impNombreArchivo" style="font-size:13px;color:#555;margin-left:8px"></span>
+</div>
+<div id="impVacio" class="vacio-accion">📥<b>Aún no hay archivo cargado</b>Descarga la plantilla, llénala con tus productos y súbela aquí para ver la vista previa.</div>
+<div id="impVistaPrevia" class="oculto">
+<h2 style="margin:16px 0 8px">Vista previa</h2>
+<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">
+<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Código</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Producto</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Precio</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Stock</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Categoría</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Estado</th></tr></thead>
+<tbody id="impCuerpoPrevia"></tbody>
+</table></div>
+<p id="impNotaDuplicados" style="font-size:13px;color:#555"></p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+<button type="button" id="btnImportarExcel" onclick="importarExcel()" disabled>📥 Importar 0 productos</button>
+<button type="button" class="secundario" onclick="limpiarImportar()">Limpiar</button>
+<button type="button" class="secundario" onclick="mostrarVista('productos')">📦 Ver Productos</button>
+</div>
+</div>
 </div>
 
 <div id="vistaEntradas" class="oculto">
@@ -3152,18 +3192,18 @@ function probarImpresionBT(){
 }
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones","mensajes"]};
+const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones","mensajes"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
 let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
-const VISTAS_PERMISO=[["productos","📦 Productos"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
+const VISTAS_PERMISO=[["productos","📦 Productos"],["importar","📥 Importar Excel"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
 function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};const esAdminP=(sesionActual&&sesionActual.rol)==="Administrador";box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label class="perm-fila"><span>'+v[1]+'</span><span class="interruptor"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+(esAdminP?"":" disabled")+' onchange="guardarPermisosCajero()"><span class="deslizador"></span></span></label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se sincronizan a la nube para todas las sucursales (con internet y sesión del Administrador en este navegador).</p>';if(!esAdminP){box.insertAdjacentHTML("beforeend",'<p style="font-size:12px;color:#666">Solo el Administrador cambia permisos.</p>');}}
 function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia permisos.");return}c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();if(typeof encolarCajeroNube==="function")encolarCajeroNube(c);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",tienePermiso("productos"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
+ mostrar("navProductos",tienePermiso("productos"));mostrar("navImportar",tienePermiso("importar"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
  mostrar("btnMensajesVentas",verMensajesChat()&&esAdmin);mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.style.display=tienePermiso(b.getAttribute("data-nav"))?"":"none"});
  document.querySelectorAll('#menuMovil button[data-nav="mensajes"]').forEach(function(b){b.style.display=verMensajesChat()?"":"none";});
@@ -3519,6 +3559,7 @@ function mostrarVista(v){
  document.getElementById("fondoMenu").classList.remove("visible");
  document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("vistaProductos").classList.toggle("oculto",v!=="productos");
+ document.getElementById("vistaImportar").classList.toggle("oculto",v!=="importar");
  document.getElementById("vistaEntradas").classList.toggle("oculto",v!=="entradas");
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
  document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
@@ -3535,6 +3576,7 @@ function mostrarVista(v){
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
+ document.getElementById("navImportar").classList.toggle("activo",v==="importar");
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
  document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
  document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
@@ -3547,7 +3589,7 @@ function mostrarVista(v){
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
  var _nm=document.getElementById("navMensajes");if(_nm)_nm.classList.toggle("activo",v==="mensajes");
  document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");/* Apartados 2026-11-13: el menu lateral se cierra siempre al cambiar de apartado, tambien en modo escritorio del celular/tablet, para que no tape el apartado activo. */
- if(v==="productos")renderProductos(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
+ if(v==="productos")renderProductos(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -3804,6 +3846,24 @@ function renderProductos(){
   lista.appendChild(d);
  });
 }
+/* v111: apartado Importar Excel (Lalo 2026-11-21): cargar inventario desde
+   un archivo .xlsx/.xls/.csv con vista previa y validación. SheetJS va
+   vendida en xlsx.full.min.js para que funcione sin internet. */
+var impFilas=[];
+var impArchivoNombre="";
+function impNormTxt(s){return String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," ")}
+function impNum(v){if(v==null||v==="")return NaN;if(typeof v==="number")return v;var t=String(v).replace(/[$\s]/g,"");if(t.indexOf(",")!==-1&&t.indexOf(".")!==-1)t=t.replace(/,/g,"");else if(t.indexOf(",")!==-1)t=t.replace(",",".");return Number(t)}
+function impParsePrecio(v){return impNum(v)}
+function impParseStock(v){if(v==null||v==="")return 0;var n=impNum(v);return isNaN(n)?NaN:Math.max(0,redondearCant(n))}
+var IMP_COLS={codigo:["codigo","sku","clave"],producto:["producto","nombre"],presentacion:["presentacion"],precio:["precio","precio sugerido (mxn)","precio sugerido","precio mxn"],stock:["stock","existencia","cantidad"],categoria:["categoria"],codigoBarras:["codigo de barras","codigo barras","ean","ean-13","barcode"]};
+function impMapearColumnas(filaEnc){var mapa={};Object.keys(IMP_COLS).forEach(function(k){for(var i=0;i<filaEnc.length;i++){if(IMP_COLS[k].indexOf(impNormTxt(filaEnc[i]))!==-1){mapa[k]=i;break}}});return mapa}
+function impParseCSV(texto){var primera=(texto.split(/\r?\n/)[0]||"");var nComa=(primera.match(/,/g)||[]).length;var nPunto=(primera.match(/;/g)||[]).length;var sep=nPunto>nComa?";":",";var filas=[],fila=[],campo="",entre=false;for(var i=0;i<texto.length;i++){var c=texto[i];if(entre){if(c==='"'){if(texto[i+1]==='"'){campo+='"';i++}else{entre=false}}else{campo+=c}}else{if(c==='"')entre=true;else if(c===sep){fila.push(campo);campo=""}else if(c==="\n"){fila.push(campo);filas.push(fila);fila=[];campo=""}else if(c!=="\r")campo+=c}}if(campo!==""||fila.length){fila.push(campo);filas.push(fila)}return filas}
+function descargarPlantillaExcel(){if(typeof XLSX==="undefined"){toast("No se pudo cargar el generador de Excel (xlsx.full.min.js).");return}var wb=XLSX.utils.book_new();var ws=XLSX.utils.aoa_to_sheet([["Código","Producto","Presentación","Precio sugerido (MXN)","Stock","Categoría","Código de barras"]]);ws["!cols"]=[{wch:12},{wch:32},{wch:18},{wch:22},{wch:10},{wch:18},{wch:20}];XLSX.utils.book_append_sheet(wb,ws,"Catálogo");XLSX.writeFile(wb,"plantilla-importar-kupo-pos.xlsx");toast("Plantilla descargada: plantilla-importar-kupo-pos.xlsx")}
+function leerArchivoExcel(ev){var inp=ev.target;var f=inp.files&&inp.files[0];if(!f)return;impArchivoNombre=f.name;var nombre=(f.name||"").toLowerCase();if(nombre.indexOf(".csv")!==-1){var rd=new FileReader();rd.onload=function(e){impProcesarFilas(impParseCSV(String(e.target.result||"")))};rd.onerror=function(){toast("No se pudo leer el archivo CSV.")};rd.readAsText(f);return}if(typeof XLSX==="undefined"){toast("No se pudo cargar el lector de Excel (xlsx.full.min.js). Revisa la conexión e inténtalo de nuevo.");return}var rd2=new FileReader();rd2.onload=function(e){try{var wb=XLSX.read(e.target.result,{type:"array"});var hoja=wb.Sheets[wb.SheetNames[0]];var filas=XLSX.utils.sheet_to_json(hoja,{header:1,defval:"",raw:true});impProcesarFilas(filas)}catch(err){toast("No se pudo leer el archivo Excel. Revisa que sea .xlsx o .xls válido.")}};rd2.onerror=function(){toast("No se pudo leer el archivo.")};rd2.readAsArrayBuffer(f)}
+function impProcesarFilas(filas){var limpias=(filas||[]).filter(function(r){return r&&r.some(function(c){return String(c==null?"":c).trim()!==""})});if(!limpias.length){toast("El archivo está vacío.");return}var mapa=impMapearColumnas(limpias[0]);if(mapa.producto==null||mapa.precio==null){toast("No se encontró el encabezado. El archivo debe traer las columnas Código, Producto, Precio, Stock y Categoría (usa la plantilla).");impFilas=[];renderImportar();return}var existentes={};catalogo.forEach(function(p){if(p.sku)existentes[impNormTxt(p.sku)]=1;existentes["n:"+impNormTxt(p.nombre)]=1});var vistos={};impFilas=limpias.slice(1).map(function(r,i){var g=function(k){var c=mapa[k];return c==null?"":(r[c]==null?"":r[c])};var nombreP=String(g("producto")).trim();var precio=impParsePrecio(g("precio"));var stock=impParseStock(g("stock"));var codigo=String(g("codigo")).trim();var categoria=String(g("categoria")).trim()||"General";var presentacion=String(g("presentacion")).trim();var barras=String(g("codigoBarras")).trim();var f={fila:i+2,codigo:codigo,nombre:nombreP,presentacion:presentacion,precio:precio,stock:stock,categoria:categoria,barras:barras,estado:"listo",error:""};if(!nombreP){f.estado="error";f.error="Falta el nombre"}else if(isNaN(precio)||precio<=0){f.estado="error";f.error="Precio inválido"}else if(isNaN(stock)){f.estado="error";f.error="Stock inválido"}else{var clave=codigo?impNormTxt(codigo):("n:"+impNormTxt(nombreP));if(existentes[clave]||vistos[clave]){f.estado="duplicado";f.error="Ya existe en el catálogo"}else{vistos[clave]=1}}return f});renderImportar();var listos=impFilas.filter(function(x){return x.estado==="listo"}).length;toast("Archivo leído: "+listos+" listos para importar de "+impFilas.length+" filas.")}
+function renderImportar(){var listos=impFilas.filter(function(x){return x.estado==="listo"});var errores=impFilas.filter(function(x){return x.estado==="error"});var dups=impFilas.filter(function(x){return x.estado==="duplicado"});var e1=document.getElementById("impListos");if(e1)e1.textContent=listos.length;var e2=document.getElementById("impErrores");if(e2)e2.textContent=errores.length;var e3=document.getElementById("impDuplicados");if(e3)e3.textContent=dups.length;var e4=document.getElementById("impTotal");if(e4)e4.textContent=impFilas.length;var na=document.getElementById("impNombreArchivo");if(na)na.textContent=impArchivoNombre?("📄 "+impArchivoNombre):"";var vac=document.getElementById("impVacio");if(vac)vac.classList.toggle("oculto",impFilas.length>0);var vp=document.getElementById("impVistaPrevia");if(vp)vp.classList.toggle("oculto",!impFilas.length);var btn=document.getElementById("btnImportarExcel");if(btn){btn.disabled=!listos.length;btn.textContent="📥 Importar "+listos.length+" producto"+(listos.length===1?"":"s")}var cuerpo=document.getElementById("impCuerpoPrevia");if(cuerpo){cuerpo.innerHTML=impFilas.map(function(f){var est=f.estado==="listo"?'<span class="estado disponible">● Listo</span>':(f.estado==="duplicado"?'<span class="estado pausado">⧉ Duplicado</span>':'<span class="estado" style="background:#fdecea;color:#b3261e">✖ '+escHtml(f.error)+'</span>');return '<tr style="'+(f.estado==="error"?"background:#fdecea;":"")+(f.estado==="duplicado"?"background:#fff8e1;":"")+'"><td style="padding:8px;border-bottom:1px solid #eee">'+escHtml(f.codigo||"—")+'</td><td style="padding:8px;border-bottom:1px solid #eee"><b>'+escHtml(f.nombre||"—")+'</b>'+(f.presentacion?' <small style="color:#555">'+escHtml(f.presentacion)+'</small>':"")+'</td><td style="text-align:right;padding:8px;border-bottom:1px solid #eee">'+(isNaN(f.precio)?"—":dinero(f.precio))+'</td><td style="text-align:right;padding:8px;border-bottom:1px solid #eee">'+(isNaN(f.stock)?"—":f.stock)+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+escHtml(f.categoria)+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+est+'</td></tr>'}).join("")}var nd=document.getElementById("impNotaDuplicados");if(nd)nd.textContent=dups.length?("Los duplicados ya existen en el catálogo y no se importan. Si el archivo no trae la columna Stock, el producto queda con stock 0."):"Si el archivo no trae la columna Stock, el producto queda con stock 0."}
+function importarExcel(){var listos=impFilas.filter(function(x){return x.estado==="listo"});if(!listos.length){toast("No hay productos listos para importar.");return}if(!confirm("¿Importar "+listos.length+" producto"+(listos.length===1?"":"s")+" al catálogo?"))return;var n=0;listos.forEach(function(f){var nid=Date.now()+uid++;var sku=f.codigo||("SKU-"+String(Math.floor(100000+Math.random()*900000)));var intentos=0;while(catalogo.some(function(p){return String(p.sku||"")===sku})&&intentos<20){sku="SKU-"+String(Math.floor(100000+Math.random()*900000));intentos++}var stock=(opcionesSistema.sinStock===true)?0:redondearCant(f.stock||0);var pr={id:nid,nombre:f.nombre,precio:f.precio,stock:stock,emoji:"",categoria:f.categoria||"General",unidad:"pieza",sku:sku,costo:Math.round(f.precio*0.6*100)/100,stockMin:5,foto:"",presentacion:f.presentacion||"",codigoBarras:f.barras||""};catalogo.push(pr);stockAlmacen[nid]={};var pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;if(typeof encolarProductoNube==="function")encolarProductoNube(pr);n++});sincronizarStock();guardar();render();impFilas=[];impArchivoNombre="";var inp=document.getElementById("archivoExcel");if(inp)inp.value="";renderImportar();toast("Se importaron "+n+" productos al catálogo.")}
+function limpiarImportar(){impFilas=[];impArchivoNombre="";var i=document.getElementById("archivoExcel");if(i)i.value="";renderImportar()}
 function generarCodigoProducto(){var code="";var intentos=0;do{code="SKU-"+String(Math.floor(100000+Math.random()*900000));intentos++}while(catalogo.some(function(p){return String(p.sku||"")===code})&&intentos<20);var inp=document.getElementById("pSku");if(inp)inp.value=code;toast("Código generado: "+code);}
 function guardarProducto(e){e.preventDefault();
  const id=document.getElementById("pId").value;
