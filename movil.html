@@ -1321,7 +1321,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
   <input id="usuarioLogin" type="text" value="Administrador" autocomplete="off">
   <label for="pinLogin">PIN de 6 dígitos</label>
   <div class="pin-puntos" id="pinPuntos">○○○○○○</div>
-  <div class="pin-campo"><input id="pinLogin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" oninput="actualizarPuntosPin();vibrarPin()" autocomplete="off"><button type="button" class="btn-ver-pin" id="btnVerPin" onclick="alternarVerPin()" aria-label="Ver PIN">👁️</button></div>
+  <div class="pin-campo"><input id="pinLogin" type="password" inputmode="numeric" onfocus="sinTecladoSistema(this)" maxlength="6" placeholder="••••••" oninput="actualizarPuntosPin();vibrarPin()" autocomplete="off"><button type="button" class="btn-ver-pin" id="btnVerPin" onclick="alternarVerPin()" aria-label="Ver PIN">👁️</button></div>
   <div class="teclado">
    <button type="button" onclick="teclaPin('1')">1</button><button type="button" onclick="teclaPin('2')">2</button><button type="button" onclick="teclaPin('3')">3</button>
    <button type="button" onclick="teclaPin('4')">4</button><button type="button" onclick="teclaPin('5')">5</button><button type="button" onclick="teclaPin('6')">6</button>
@@ -4587,6 +4587,19 @@ function actualizarPuntosPin(){const v=document.getElementById("pinLogin").value
 /* Ver el PIN en el login (Lalo, 2026-11-14): el ojito muestra/oculta los dígitos. */
 function alternarVerPin(){var i=document.getElementById("pinLogin");var b=document.getElementById("btnVerPin");if(!i)return;if(i.type==="password"){i.type="text";if(b)b.textContent="🙈";}else{i.type="password";if(b)b.textContent="👁️";}}
 function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
+function ajustarTecladoPin(){
+ var i=document.getElementById("pinLogin");
+ var t=document.querySelector(".teclado");
+ if(!i||!t)return;
+ i.setAttribute("inputmode",getComputedStyle(t).display!=="none"?"none":"numeric");
+}
+function sinTecladoSistema(i){
+ ajustarTecladoPin();
+ var t=document.querySelector(".teclado");
+ if(t&&getComputedStyle(t).display!=="none"){i.blur();}
+}
+ajustarTecladoPin();
+window.addEventListener("resize",ajustarTecladoPin);
 function teclaPin(d){vibrarPin();const i=document.getElementById("pinLogin");if(i.value.length<6){i.value+=d;actualizarPuntosPin();}}
 function borrarPin(){vibrarPin();const i=document.getElementById("pinLogin");i.value=i.value.slice(0,-1);actualizarPuntosPin();}
 function limpiarPin(){vibrarPin();var i=document.getElementById("pinLogin");i.value="";if(i.type!=="password")i.type="password";var b=document.getElementById("btnVerPin");if(b)b.textContent="👁️";actualizarPuntosPin();}
