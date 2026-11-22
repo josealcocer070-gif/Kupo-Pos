@@ -2191,7 +2191,7 @@ function cargarTicketConfig(){
  const nb=g("negocioBox"); if(nb)nb.textContent=(ticketConfig.negocio||"Mi negocio").toUpperCase();
  const dn=g("direccionNegocio"); if(dn)dn.textContent=ticketConfig.direccion||"";
  const tn=g("telefonoNegocio"); if(tn)tn.textContent=ticketConfig.telefono||"";
- mostrarLogoPreview(); renderTicketPreview(); renderTerminales(); aplicarOpcionesSistema();
+ mostrarLogoPreview(); renderTicketPreview(); renderTerminales(); aplicarOpcionesSistema(); prepararLogoTicket();
 }
 function renderTicketPreview(){
  const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
@@ -2221,7 +2221,7 @@ function guardarTicketConfig(ev){
  ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
- guardar(); cargarTicketConfig();
+ guardar(); cargarTicketConfig(); prepararLogoTicket();
  toast("Personalización del ticket guardada. El ticket de Ventas ya usa estos datos.");
 }
 function restablecerTicketConfig(){
@@ -2236,7 +2236,7 @@ function cambiarPapelTicket(){
  ticketConfig.papel=sel.value||"80 mm";
  const rp=document.getElementById("resPapelTerm"); if(rp)rp.textContent=ticketConfig.papel;
  const tp=document.getElementById("termPapel"); if(tp)tp.value=ticketConfig.papel;
- guardar(); renderTicketPreview();
+ guardar(); renderTicketPreview(); prepararLogoTicket();
  toast("Ancho del ticket: "+ticketConfig.papel+". La vista previa y la impresión usan ese ancho.");
 }
 let logoDefectoEncabezado="";
@@ -2261,7 +2261,7 @@ function subirLogoNegocio(ev){
   const dataUrl=rd.result; let done=false;
   const usar=function(url){
    if(done)return; done=true;
-   ticketConfig.logo=url; guardar(); mostrarLogoPreview(); renderTicketPreview();
+   ticketConfig.logo=url; guardar(); mostrarLogoPreview(); renderTicketPreview(); prepararLogoTicket();
    toast("Logo del negocio guardado. Ya sale en el encabezado y arriba en el ticket.");
   };
   const img=new Image();
@@ -2284,7 +2284,7 @@ function subirLogoNegocio(ev){
 function quitarLogoNegocio(){
  if(!ticketConfig.logo){toast("No hay logo que quitar.");return}
  if(!confirm("¿Quitar el logo del negocio del encabezado y del ticket?"))return;
- ticketConfig.logo=""; guardar(); mostrarLogoPreview(); renderTicketPreview();
+ ticketConfig.logo=""; guardar(); mostrarLogoPreview(); renderTicketPreview(); prepararLogoTicket();
  toast("Logo quitado. Arriba vuelve el logo de KUPO y el ticket solo muestra el nombre del negocio.");
 }
 function ticketImpresoHTML(v){
@@ -2423,12 +2423,77 @@ function fechaHoraTicket(v){
  if(isNaN(d.getTime()))d=new Date();
  return d.toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"})+" · "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
 }
+/* v120 (Lalo 2026-11-22): logo del negocio en el ticket impreso por Bluetooth.
+   El logo ya salía en el ticket HTML y en la imagen PNG; faltaba la impresora
+   térmica, que solo entiende puntos (GS v 0). La imagen se convierte una vez
+   a puntos y se guarda en caché; si aún no está lista, el ticket se imprime
+   sin logo, como antes. El logo es el de Personalizar ticket (ticketConfig.logo)
+   y respeta el interruptor "Mostrar logo". La conversión detecta si el fondo
+   es claro u oscuro: con fondo claro se imprimen los trazos oscuros o de
+   color, con fondo oscuro se imprimen las partes claras (el pollito amarillo
+   sobre fondo negro sale como figura oscura sobre el papel). */
+var logoTicketRaster={ancho:0,src:"",str:""};
+function rasterGSv0(px,w,h){
+ var xb=Math.ceil(w/8);
+ var xL=xb&0xFF,xH=(xb>>8)&0xFF,yL=h&0xFF,yH=(h>>8)&0xFF;
+ function lum(i){return 0.299*px[i]+0.587*px[i+1]+0.114*px[i+2];}
+ function tinta(i){return 255-Math.min(px[i],px[i+1],px[i+2]);}
+ var esq=0,muestras=[[0,0],[w-1,0],[0,h-1],[w-1,h-1],[Math.floor(w/2),0],[Math.floor(w/2),h-1],[0,Math.floor(h/2)],[w-1,Math.floor(h/2)]];
+ muestras.forEach(function(p){esq+=tinta((p[1]*w+p[0])*4);});
+ var fondoOscuro=(esq/muestras.length)>110;
+ var out="\x1Dv0\x00"+String.fromCharCode(xL,xH,yL,yH);
+ for(var y=0;y<h;y++){
+  for(var b=0;b<xb;b++){
+   var byte=0;
+   for(var bit=0;bit<8;bit++){
+    var x=b*8+bit; if(x>=w)continue;
+    var i=(y*w+x)*4;
+    var punto=fondoOscuro?(lum(i)>110):(tinta(i)>110);
+    if(punto)byte|=(0x80>>bit);
+   }
+   out+=String.fromCharCode(byte);
+  }
+ }
+ return out;
+}
+function cajaContenido(px,w,h){
+ function tinta(i){return 255-Math.min(px[i],px[i+1],px[i+2]);}
+ var x0=w,y0=h,x1=-1,y1=-1;
+ for(var y=0;y<h;y++)for(var x=0;x<w;x++){if(tinta((y*w+x)*4)>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}
+ if(x1<0)return null;
+ var m=6;
+ x0=Math.max(0,x0-m);y0=Math.max(0,y0-m);x1=Math.min(w-1,x1+m);y1=Math.min(h-1,y1+m);
+ return {x:x0,y:y0,w:x1-x0+1,h:y1-y0+1};
+}
+async function prepararLogoTicket(){
+ try{
+  if(ticketConfig.mostrarLogo===false||!ticketConfig.logo){logoTicketRaster={ancho:0,src:"",str:""};return;}
+  var dots=(ticketConfig.papel||"80 mm")==="58 mm"?280:360;
+  if(logoTicketRaster.ancho===dots&&logoTicketRaster.src===ticketConfig.logo)return;
+  var img=await cargarImagenTicket(ticketConfig.logo);
+  if(!img){logoTicketRaster={ancho:0,src:"",str:""};return;}
+  var maxNat=600,nw=Math.min(maxNat,img.naturalWidth),nh=Math.max(1,Math.round(img.naturalHeight*nw/img.naturalWidth));
+  var c0=document.createElement("canvas");c0.width=nw;c0.height=nh;
+  var x0=c0.getContext("2d");if(!x0)return;
+  x0.fillStyle="#fff";x0.fillRect(0,0,nw,nh);x0.drawImage(img,0,0,nw,nh);
+  var d0=x0.getImageData(0,0,nw,nh).data;
+  var caja=cajaContenido(d0,nw,nh)||{x:0,y:0,w:nw,h:nh};
+  var w=dots,h=Math.max(1,Math.round(caja.h*w/caja.w));
+  if(h>220){h=220;w=Math.max(1,Math.round(caja.w*h/caja.h));}
+  var c=document.createElement("canvas");c.width=w;c.height=h;
+  var ctx=c.getContext("2d");if(!ctx)return;
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);ctx.drawImage(c0,caja.x,caja.y,caja.w,caja.h,0,0,w,h);
+  var data=ctx.getImageData(0,0,w,h).data;
+  logoTicketRaster={ancho:dots,src:ticketConfig.logo,str:rasterGSv0(data,w,h)};
+ }catch(e){logoTicketRaster={ancho:0,src:"",str:""};}
+}
 function ticketESCPosBytes(v){
  var ancho=(ticketConfig.papel||"80 mm")==="58 mm"?32:48;
  var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),iva=base-(base/1.16);
  var fechaTxt=fechaHoraTicket(v);
  var out="";
  out+="\x1B@";
+ if(ticketConfig.mostrarLogo!==false&&logoTicketRaster.str&&logoTicketRaster.ancho===((ticketConfig.papel||"80 mm")==="58 mm"?280:360))out+="\x1Ba\x01"+logoTicketRaster.str+"\n";
  out+="\x1Ba\x01\x1BE\x01"+envolverNombreTicket(ticketConfig.negocio||"Mi negocio",ancho).map(function(l){return btCentrar(l,ancho);}).join("")+"\x1BE\x00";
  out+="\x1Ba\x01"+btCentrar(ticketConfig.direccion||"",ancho)+btCentrar(ticketConfig.telefono||"",ancho);
  out+=btCentrar(fechaTxt,ancho);
