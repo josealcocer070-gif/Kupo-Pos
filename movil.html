@@ -359,6 +359,7 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 .ticket-80 img{max-width:130px;background:#fff}
 .ticket-80 hr{border:0;border-top:1px dashed #999;margin:8px 0}
 .ticket-80 .t-line{display:flex;justify-content:space-between;gap:8px;text-align:left}
+.ticket-80 .t-centro{text-align:center}
 .ticket-80 .t-total{font-weight:700;font-size:15px}
 .ticket-80 .t-titulo{font-weight:700;font-size:16px}
 .ticket-80.papel58{width:218px;font-size:12px;padding:12px 8px}
@@ -2743,21 +2744,21 @@ function renderTicketPreview(){
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio"><br>':"";
  const total=70, iva=total-(total/1.16);
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(folio+1).padStart(4,"0")+"<br>"):"";
- const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
+ const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-centro">IVA (16%): '+dinero(iva)+'</div>'):"";
  box.innerHTML=logo
   +'<div class="t-titulo">'+envolverNombreTicket(ticketConfig.negocio||"Mi negocio",(ticketConfig.papel||"80 mm")==="58 mm"?32:48).map(function(l){return escHtml(l);}).join("<br>")+'</div>'
   +escHtml(ticketConfig.direccion||"")+'<br>'+escHtml(ticketConfig.telefono||"")+'<br>'
   +fechaHoraTicket(null)+'<br>'+folioTxt
   +(sesionActual?('ATENDIÓ: '+escHtml(nombreEnTurno().toUpperCase())+'<br>'):'')
   +'<hr>'
-  +'<div class="t-line"><span>2 × Pan Bolillo</span><span>$30.00</span></div>'
-  +'<div class="t-line"><span>1 × Croissant Artesanal</span><span>$40.00</span></div>'
+  +'<div class="t-centro">2 × Pan Bolillo</div><div class="t-centro">$15.00 c/u · $30.00</div>'
+  +'<div class="t-centro">1 × Croissant Artesanal</div><div class="t-centro">$40.00 c/u · $40.00</div>'
   +'<hr>'
   +ivaTxt
-  +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>Pago: Efectivo</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>Recibido</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>Cambio</span><span>'+dinero(0)+'</span></div>'
+  +'<div class="t-centro t-total">TOTAL '+dinero(total)+'</div>'
+  +'<div class="t-centro">Pago: Efectivo '+dinero(total)+'</div>'
+  +'<div class="t-centro">Recibido '+dinero(total)+'</div>'
+  +'<div class="t-centro">Cambio '+dinero(0)+'</div>'
   +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez</small>';
 }
 function guardarTicketConfig(ev){
@@ -2833,11 +2834,11 @@ function quitarLogoNegocio(){
 }
 function ticketImpresoHTML(v){
  const total=v.total||0, base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total, descMonto=Math.min(Number(v.descuento)||0,base), iva=base-(base/1.16);
- const descTxt=(descMonto>0)?('<div class="t-line"><span>'+(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+'</span><span>−'+dinero(descMonto)+'</span></div>'):"";
+ const descTxt=(descMonto>0)?('<div class="t-centro">'+(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+': −'+dinero(descMonto)+'</div>'):"";
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio" style="max-width:130px"><br>':"";
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(v.folio).padStart(4,"0")+"<br>"):"";
- const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
- const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-line"><span>'+(p?textoCantidad(p,l.cant):l.cant)+' × '+escHtml(p?p.nombre:"Producto")+'</span><span>'+dinero(l.cant*l.precio)+'</span></div>'}).join("");
+ const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-centro">IVA (16%): '+dinero(iva)+'</div>'):"";
+ const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-centro">'+(p?textoCantidad(p,l.cant):l.cant)+' × '+escHtml(p?p.nombre:"Producto")+'</div><div class="t-centro">'+dinero(l.precio)+' c/u · '+dinero(l.cant*l.precio)+'</div>'}).join("");
  const fechaTxt=fechaHoraTicket(v);
  const atendioTxt=nombreCajeroVenta(v);
  return logo
@@ -2848,10 +2849,10 @@ function ticketImpresoHTML(v){
   +'<hr>'+lineas+'<hr>'
   +ivaTxt
   +descTxt
-  +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>Pago: '+escHtml(v.pago||"Efectivo")+'</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>Recibido</span><span>'+dinero(recibidoVenta(v))+'</span></div>'
-  +'<div class="t-line"><span>Cambio</span><span>'+dinero(v.cambio||0)+'</span></div>'
+  +'<div class="t-centro t-total">TOTAL '+dinero(total)+'</div>'
+  +'<div class="t-centro">Pago: '+escHtml(v.pago||"Efectivo")+' '+dinero(total)+'</div>'
+  +'<div class="t-centro">Recibido '+dinero(recibidoVenta(v))+'</div>'
+  +'<div class="t-centro">Cambio '+dinero(v.cambio||0)+'</div>'
   +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez</small>';
 }
 function imprimirTicketVenta(v){return false;/* v117: sin impresión física en el celular. */
@@ -2860,7 +2861,7 @@ function imprimirTicketVenta(v){return false;/* v117: sin impresión física en 
  try{
   const w=window.open("","_blank","width=340,height=600");
   if(!w)return false;
-  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket #'+String(v.folio).padStart(4,"0")+'</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px;color:#111}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}hr{border-top:1px dashed #999}</style></head><body><div class="ticket-80">'+ticketImpresoHTML(v)+'</div></body></html>');
+  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket #'+String(v.folio).padStart(4,"0")+'</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px;color:#111}.t-line{display:flex;justify-content:space-between}.t-centro{text-align:center}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}hr{border-top:1px dashed #999}</style></head><body><div class="ticket-80">'+ticketImpresoHTML(v)+'</div></body></html>');
   w.document.close(); w.focus(); w.print(); return true;
  }catch(e){return false}
 }
@@ -2891,7 +2892,7 @@ function probarImpresion(){return;/* v117: sin impresión física en el celular.
  if(typeof window!=="undefined"&&typeof window.open==="function"){
   try{
    const w=window.open("","_blank","width=340,height=600");
-   if(w){w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket de prueba</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px}hr{border-top:1px dashed #999}.t-line{display:flex;justify-content:space-between}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}</style></head><body>'+document.getElementById("vistaPreviaTicket").innerHTML+'<hr><small>Terminal: '+escHtml(activa.nombre)+' · '+escHtml(activa.marca)+' · '+escHtml(activa.papel)+' · ESC/POS · Papel '+(ticketConfig.papel||"80 mm")+'</small></body></html>');w.document.close();w.focus();w.print();}
+   if(w){w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ticket de prueba</title><style>body{font-family:monospace;text-align:center;width:'+(ticketConfig.papel||"80 mm")+';margin:0 auto;font-size:13px}hr{border-top:1px dashed #999}.t-line{display:flex;justify-content:space-between}.t-centro{text-align:center}.t-total{font-weight:700;font-size:15px}.t-titulo{font-weight:700;font-size:16px}</style></head><body>'+document.getElementById("vistaPreviaTicket").innerHTML+'<hr><small>Terminal: '+escHtml(activa.nombre)+' · '+escHtml(activa.marca)+' · '+escHtml(activa.papel)+' · ESC/POS · Papel '+(ticketConfig.papel||"80 mm")+'</small></body></html>');w.document.close();w.focus();w.print();}
   }catch(e){/* si el navegador bloquea la ventana, el aviso de arriba ya confirma la prueba */}
  }
  toast("Ticket de prueba enviado a "+activa.nombre+" ("+activa.marca+", "+activa.papel+").");
@@ -2916,7 +2917,10 @@ function btSinAcentos(s){return String(s==null?"":s).normalize("NFD").replace(/[
 function btLineaIzqDer(izq,der,ancho){izq=btSinAcentos(izq);der=btSinAcentos(der);var espacios=ancho-izq.length-der.length;if(espacios<1){izq=izq.slice(0,Math.max(0,ancho-der.length-1));espacios=1}return izq+new Array(espacios+1).join(" ")+der+"\n"}
 function btCentrar(txt,ancho){txt=btSinAcentos(txt);if(txt.length>=ancho)return txt.slice(0,ancho)+"\n";var pad=Math.floor((ancho-txt.length)/2);return new Array(pad+1).join(" ")+txt+"\n"}
 
-/* v118 (Lalo 2026-11-22): ticket pulido con el modelo de Palizada (80 mm
+/* v119 (Lalo 2026-11-22): ticket todo centrado — las líneas de productos,
+   IVA, TOTAL, Pago, Recibido y Cambio ahora van centradas como el
+   encabezado y el pie (foto del folio #0031).
+   v118 (Lalo 2026-11-22): ticket pulido con el modelo de Palizada (80 mm
    #1600). El nombre se parte en 2 líneas equilibradas sin cortar palabras
    (a 58 mm "Pollos Rancheros El Pollon Suc. Jonuta" ya no pierde "Jonuta");
    ATENDIÓ lleva el nombre del cajero; sin Subtotal; sin versión del sistema;
@@ -2971,14 +2975,14 @@ function ticketESCPosBytes(v){
  if(atendio)out+=btCentrar("ATENDIÓ: "+atendio.toUpperCase(),ancho);
  out+="\x1Ba\x00";
  out+=new Array(ancho+1).join("-")+"\n";
- (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);out+=btSinAcentos(cantTxt+" x "+nombre).slice(0,ancho)+"\n";out+=btLineaIzqDer("  "+dinero(l.precio)+" c/u",dinero(l.cant*l.precio),ancho);});
+ (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);out+=btCentrar(cantTxt+" x "+nombre,ancho);out+=btCentrar(dinero(l.precio)+" c/u - "+dinero(l.cant*l.precio),ancho);});
  out+=new Array(ancho+1).join("-")+"\n";
-  if(ticketConfig.mostrarIva!==false)out+=btLineaIzqDer("IVA (16%)",dinero(iva),ancho);
- if(descMonto>0)out+=btLineaIzqDer(btSinAcentos(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento"),"-"+dinero(descMonto),ancho);
- out+="\x1D!\x11"+btLineaIzqDer("TOTAL",dinero(total),Math.floor(ancho/2))+"\x1D!\x00";
- out+=btLineaIzqDer("Pago: "+(v.pago||"Efectivo"),dinero(total),ancho);
- out+=btLineaIzqDer("Recibido",dinero(recibidoVenta(v)),ancho);
- out+=btLineaIzqDer("Cambio",dinero(v.cambio||0),ancho);
+  if(ticketConfig.mostrarIva!==false)out+=btCentrar("IVA (16%): "+dinero(iva),ancho);
+ if(descMonto>0)out+=btCentrar((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+": -"+dinero(descMonto),ancho);
+ out+="\x1D!\x11"+btCentrar("TOTAL "+dinero(total),Math.floor(ancho/2))+"\x1D!\x00";
+ out+=btCentrar("Pago: "+(v.pago||"Efectivo")+" "+dinero(total),ancho);
+ out+=btCentrar("Recibido "+dinero(recibidoVenta(v)),ancho);
+ out+=btCentrar("Cambio "+dinero(v.cambio||0),ancho);
  out+=new Array(ancho+1).join("-")+"\n";
  out+="\x1Ba\x01"+btCentrar(ticketConfig.mensaje||"¡Gracias por su compra!",ancho);
  out+=btCentrar("Un producto de Grupo Benitez",ancho);
@@ -4176,26 +4180,28 @@ function textoTicketPlano(v){
  if(!v)return"";
  var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),iva=base-(base/1.16);
  var fechaTxt=fechaHoraTicket(v);
+ var anchoTxt=(ticketConfig.papel||"80 mm")==="58 mm"?32:48;
+ function centrarTxt(t){t=String(t||"");if(t.length>=anchoTxt)return t.slice(0,anchoTxt);var pad=Math.floor((anchoTxt-t.length)/2);return new Array(pad+1).join(" ")+t;}
  var lineas=[];
- envolverNombreTicket(ticketConfig.negocio||"Mi negocio",(ticketConfig.papel||"80 mm")==="58 mm"?32:48).forEach(function(l){lineas.push(l);});
- if(ticketConfig.direccion)lineas.push(ticketConfig.direccion);
- if(ticketConfig.telefono)lineas.push(ticketConfig.telefono);
- lineas.push(fechaTxt);
+ envolverNombreTicket(ticketConfig.negocio||"Mi negocio",anchoTxt).forEach(function(l){lineas.push(centrarTxt(l));});
+ if(ticketConfig.direccion)lineas.push(centrarTxt(ticketConfig.direccion));
+ if(ticketConfig.telefono)lineas.push(centrarTxt(ticketConfig.telefono));
+ lineas.push(centrarTxt(fechaTxt));
  var atendio=nombreCajeroVenta(v);
- if(ticketConfig.mostrarFolio!==false)lineas.push("Folio #"+String(v.folio).padStart(4,"0"));
- if(atendio)lineas.push("ATENDIÓ: "+atendio.toUpperCase());
+ if(ticketConfig.mostrarFolio!==false)lineas.push(centrarTxt("Folio #"+String(v.folio).padStart(4,"0")));
+ if(atendio)lineas.push(centrarTxt("ATENDIÓ: "+atendio.toUpperCase()));
  lineas.push("------------------------------");
- (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);lineas.push(cantTxt+" x "+nombre);lineas.push("  "+dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio));});
+ (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);lineas.push(centrarTxt(cantTxt+" x "+nombre));lineas.push(centrarTxt(dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio)));});
  lineas.push("------------------------------");
- if(ticketConfig.mostrarIva!==false)lineas.push("IVA (16%): "+dinero(iva));
- if(descMonto>0)lineas.push((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):("Descuento"))+": −"+dinero(descMonto));
- lineas.push("TOTAL: "+dinero(total));
- lineas.push("Pago: "+(v.pago||"Efectivo")+" · "+dinero(total));
- lineas.push("Recibido: "+dinero(recibidoVenta(v)));
- lineas.push("Cambio: "+dinero(v.cambio||0));
+ if(ticketConfig.mostrarIva!==false)lineas.push(centrarTxt("IVA (16%): "+dinero(iva)));
+ if(descMonto>0)lineas.push(centrarTxt((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):("Descuento"))+": −"+dinero(descMonto)));
+ lineas.push(centrarTxt("TOTAL: "+dinero(total)));
+ lineas.push(centrarTxt("Pago: "+(v.pago||"Efectivo")+" · "+dinero(total)));
+ lineas.push(centrarTxt("Recibido: "+dinero(recibidoVenta(v))));
+ lineas.push(centrarTxt("Cambio: "+dinero(v.cambio||0)));
  lineas.push("------------------------------");
- lineas.push(ticketConfig.mensaje||"¡Gracias por su compra!");
- lineas.push("Un producto de Grupo Benítez");
+ lineas.push(centrarTxt(ticketConfig.mensaje||"¡Gracias por su compra!"));
+ lineas.push(centrarTxt("Un producto de Grupo Benítez"));
  return lineas.join("\n");
 }
 function normalizarWhatsAppMX(num){
@@ -4266,16 +4272,16 @@ async function dibujarTicketCanvas(v){
   var p=catalogo.find(function(x){return x.id===l.id});
   var nombre=p?p.nombre:"Producto";
   var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);
-  linea(cantTxt+" x "+nombre,20,false);
-  linea("  "+dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio),20,false);
+  centro(cantTxt+" x "+nombre,20,false);
+  centro(dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio),20,false);
  });
  separador();
- if(ticketConfig.mostrarIva!==false)izqDer("IVA (16%)",dinero(iva),20,false);
- if(descMonto>0)izqDer(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento","−"+dinero(descMonto),20,false);
- izqDer("TOTAL",dinero(total),32,true);
- izqDer("Pago: "+(v.pago||"Efectivo"),dinero(total),20,false);
- izqDer("Recibido",dinero(recibidoVenta(v)),20,false);
- izqDer("Cambio",dinero(v.cambio||0),20,false);
+ if(ticketConfig.mostrarIva!==false)centro("IVA (16%): "+dinero(iva),20,false);
+ if(descMonto>0)centro((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+": −"+dinero(descMonto),20,false);
+ centro("TOTAL "+dinero(total),32,true);
+ centro("Pago: "+(v.pago||"Efectivo")+" "+dinero(total),20,false);
+ centro("Recibido "+dinero(recibidoVenta(v)),20,false);
+ centro("Cambio "+dinero(v.cambio||0),20,false);
  separador();
  centro(ticketConfig.mensaje||"¡Gracias por su compra!",20,false);
  centro("Un producto de Grupo Benítez",17,false);
