@@ -2320,6 +2320,10 @@ function toast(m){let t=document.createElement("div");t.className="toast";t.text
    Avisos con datos reales del dispositivo (catalogo, stock, ventas de hoy).
    Sin inventar datos, sin crear ventas, sin tocar PINs ni logica de cobro. */
 function contarAvisos(){
+ /* v116 (Lalo 2026-11-21): con Sin stock la licencia no maneja
+    inventario, así que no hay avisos de stock: la campanita queda
+    en 0 y el panel muestra "Sin avisos por ahora". */
+ if(opcionesSistema.sinStock===true)return {agotados:[],bajos:[],total:0};
  const agotados=catalogo.filter(function(p){return p.stock<=0});
  const bajos=catalogo.filter(function(p){return !p.pausado&&p.stock>0&&p.stock<=(p.stockMin==null?5:p.stockMin)});
  return {agotados:agotados,bajos:bajos,total:agotados.length+bajos.length};
