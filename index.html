@@ -2207,7 +2207,7 @@ function renderTicketPreview(){
   +(sesionActual?('ATENDIÓ: '+escHtml(nombreEnTurno().toUpperCase())+'<br>'):'')
   +'<hr>'
   +'<div class="t-centro">2 × Pan Bolillo</div><div class="t-centro">$15.00 c/u · $30.00</div>'
-  +'<div class="t-centro">1 × Croissant Artesanal</div><div class="t-centro">$40.00 c/u · $40.00</div>'
+  +'<div class="t-centro">1 × Croissant Artesanal</div><div class="t-centro">$40.00</div>'
   +'<hr>'
   +ivaTxt
   +'<div class="t-centro t-total">TOTAL '+dinero(total)+'</div>'
@@ -2293,7 +2293,7 @@ function ticketImpresoHTML(v){
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio" style="max-width:130px"><br>':"";
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(v.folio).padStart(4,"0")+"<br>"):"";
  const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-centro">IVA (16%): '+dinero(iva)+'</div>'):"";
- const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-centro">'+(p?textoCantidad(p,l.cant):l.cant)+' × '+escHtml(p?p.nombre:"Producto")+'</div><div class="t-centro">'+dinero(l.precio)+' c/u · '+dinero(l.cant*l.precio)+'</div>'}).join("");
+ const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-centro">'+(p?textoCantidad(p,l.cant):l.cant)+' × '+escHtml(p?p.nombre:"Producto")+'</div><div class="t-centro">'+lineaPrecioTicket(l," · ")+'</div>'}).join("");
  const fechaTxt=fechaHoraTicket(v);
  const atendioTxt=nombreCajeroVenta(v);
  return logo
@@ -2419,6 +2419,13 @@ function recibidoVenta(v){
 /* v122 (Lalo 2026-11-22): en pago Mixto el ticket muestra el desglose
    (Efectivo y Tarjeta por separado) en vez de "Recibido $total", que se
    leía como si todo fuera efectivo. Sin desglose guardado, cae al formato viejo. */
+/* v123 (Lalo 2026-11-22): con cantidad 1 el precio se repetía ("$40.00 c/u - $40.00");
+   ahora sale una sola vez. Con cantidad mayor sigue el desglose c/u - total. */
+function lineaPrecioTicket(l,sep){
+ var cant=Number(l.cant||0),precio=Number(l.precio||0);
+ if(cant===1)return dinero(precio);
+ return dinero(precio)+" c/u"+(sep||" - ")+dinero(cant*precio);
+}
 function lineasPagoTicket(v){
  var total=(v&&v.total)||0;
  if(v&&v.pago==="Mixto"){
@@ -2512,7 +2519,7 @@ function ticketESCPosBytes(v){
  if(atendio)out+=btCentrar("ATENDIÓ: "+atendio.toUpperCase(),ancho);
  out+="\x1Ba\x00";
  out+=new Array(ancho+1).join("-")+"\n";
- (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);out+=btCentrar(cantTxt+" x "+nombre,ancho);out+=btCentrar(dinero(l.precio)+" c/u - "+dinero(l.cant*l.precio),ancho);});
+ (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);out+=btCentrar(cantTxt+" x "+nombre,ancho);out+=btCentrar(lineaPrecioTicket(l," - "),ancho);});
  out+=new Array(ancho+1).join("-")+"\n";
   if(ticketConfig.mostrarIva!==false)out+=btCentrar("IVA (16%): "+dinero(iva),ancho);
  if(descMonto>0)out+=btCentrar((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+": -"+dinero(descMonto),ancho);
@@ -3722,7 +3729,7 @@ function textoTicketPlano(v){
  if(ticketConfig.mostrarFolio!==false)lineas.push(centrarTxt("Folio #"+String(v.folio).padStart(4,"0")));
  if(atendio)lineas.push(centrarTxt("ATENDIÓ: "+atendio.toUpperCase()));
  lineas.push("------------------------------");
- (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);lineas.push(centrarTxt(cantTxt+" x "+nombre));lineas.push(centrarTxt(dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio)));});
+ (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);lineas.push(centrarTxt(cantTxt+" x "+nombre));lineas.push(centrarTxt(lineaPrecioTicket(l,"  ·  ")));});
  lineas.push("------------------------------");
  if(ticketConfig.mostrarIva!==false)lineas.push(centrarTxt("IVA (16%): "+dinero(iva)));
  if(descMonto>0)lineas.push(centrarTxt((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):("Descuento"))+": −"+dinero(descMonto)));
@@ -3802,7 +3809,7 @@ async function dibujarTicketCanvas(v){
   var nombre=p?p.nombre:"Producto";
   var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);
   centro(cantTxt+" x "+nombre,20,false);
-  centro(dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio),20,false);
+  centro(lineaPrecioTicket(l,"  ·  "),20,false);
  });
  separador();
  if(ticketConfig.mostrarIva!==false)centro("IVA (16%): "+dinero(iva),20,false);
