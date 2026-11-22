@@ -4133,6 +4133,114 @@ async function reintentarPinsNube(){
  if(fallos>0&&typeof toast==="function")toast("⚠️ No se pudieron subir los PIN de "+fallos+" cajero(s) a la nube.");
  return subidos;
 }
+/* v115 (Lalo 2026-11-21): descarga automática de productos y ventas.
+   La app solo subía a la nube; cada aparato tenía su propio catálogo y
+   sus ventas. En el celular se veían los 6 productos de ejemplo y los
+   reportes en $0. Ahora, al sincronizar y al validar la licencia (con
+   internet), se bajan los productos y las ventas de la licencia actual.
+   Orden: primero se sube lo pendiente (el flujo actual) y luego se
+   descarga; la nube manda en conflicto (por producto_id / nube_id).
+   Los productos de ejemplo (EJEMPLO, ids 1-6) se quitan solo cuando la
+   nube trae productos reales; los productos locales que no están en la
+   nube se conservan. Sin internet no se hace nada. La descarga no
+   necesita la sesión del Administrador (lectura anónima por licencia,
+   como descargarCajerosNube): en el celular, donde se entra con PIN,
+   también funciona. */
+function idProductoNube(pid){var s=String(pid==null?"":pid);return /^\d+$/.test(s)?Number(s):s}
+async function descargarProductosNube(){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevos:0,actualizados:0};
+ var clave=licenciaActual();if(!clave||clave==="SIN-LICENCIA")return{nuevos:0,actualizados:0};
+ try{
+  var r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado").eq("licencia_clave",clave).limit(500);
+  if(r.error||!r.data)return{nuevos:0,actualizados:0};
+  var nuevos=0,actualizados=0,tocoStock=false;
+  var nubeIds={};
+  r.data.forEach(function(x){nubeIds[String(x.producto_id)]=true;});
+  var ap=null;try{ap=almacenPrincipal();}catch(e){ap=null;}
+  for(var i=0;i<r.data.length;i++){
+   var x=r.data[i];var id=idProductoNube(x.producto_id);
+   var stock=Number(x.stock)||0;
+   var loc=catalogo.find(function(p){return String(p.id)===String(id)});
+   if(!loc){
+    catalogo.push({id:id,nombre:x.nombre||"Producto",precio:Number(x.precio)||0,stock:stock,emoji:x.emoji||"📦",categoria:x.categoria||"General",unidad:x.unidad||"pieza",sku:"SKU-"+String(id).slice(-6),costo:Math.round((Number(x.precio)||0)*0.6*100)/100,stockMin:5,foto:"",pausado:!!x.pausado,nubeId:x.nube_id||null});
+    nuevos++;
+   }else{
+    var ch=false;
+    if(loc.nombre!==x.nombre){loc.nombre=x.nombre;ch=true;}
+    if(Number(loc.precio)!==(Number(x.precio)||0)){loc.precio=Number(x.precio)||0;ch=true;}
+    if((loc.categoria||"General")!==(x.categoria||"General")){loc.categoria=x.categoria||"General";ch=true;}
+    if((loc.unidad||"pieza")!==(x.unidad||"pieza")){loc.unidad=x.unidad||"pieza";ch=true;}
+    if((loc.emoji||"")!==(x.emoji||"")){loc.emoji=x.emoji||"";ch=true;}
+    if(!!loc.pausado!==!!x.pausado){loc.pausado=!!x.pausado;ch=true;}
+    if(x.nube_id&&!loc.nubeId){loc.nubeId=x.nube_id;ch=true;}
+    if(Number(loc.stock)!==stock){loc.stock=stock;ch=true;}
+    if(ch)actualizados++;
+   }
+   if(ap){try{if(!stockAlmacen[id])stockAlmacen[id]={};stockAlmacen[id][ap.id]=stock;tocoStock=true;}catch(e){}}
+  }
+  if(r.data.length>0){
+   var idsEjemplo={};(typeof EJEMPLO!=="undefined"?EJEMPLO:[]).forEach(function(p){idsEjemplo[p.id]=true;});
+   var quitados=[];
+   catalogo=catalogo.filter(function(p){
+    if(idsEjemplo[p.id]&&!nubeIds[String(p.id)]){quitados.push(p.id);return false;}
+    return true;
+   });
+   quitados.forEach(function(pid){try{delete stockAlmacen[pid];}catch(e){}try{ticket=ticket.filter(function(l){return String(l.id)!==String(pid);});}catch(e){}});
+  }
+  if(tocoStock){try{if(typeof sincronizarStock==="function")sincronizarStock();}catch(e){}}
+  return{nuevos:nuevos,actualizados:actualizados};
+ }catch(e){return{nuevos:0,actualizados:0};}
+}
+async function descargarVentasNube(){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevas:0,actualizadas:0};
+ var clave=licenciaActual();if(!clave||clave==="SIN-LICENCIA")return{nuevas:0,actualizadas:0};
+ try{
+  var r=await kupoSupabase.from("ventas").select("nube_id,licencia_clave,folio,total,forma_pago,fecha,cajero,almacen,items").eq("licencia_clave",clave).order("fecha",{ascending:false}).limit(500);
+  if(r.error||!r.data)return{nuevas:0,actualizadas:0};
+  var nuevas=0,actualizadas=0,maxFolio=0;
+  var porId={};ventas.forEach(function(v){if(v.nubeId)porId[v.nubeId]=v;});
+  for(var i=0;i<r.data.length;i++){
+   var x=r.data[i];if(!x.nube_id)continue;
+   var fol=parseInt(x.folio,10)||0;if(fol>maxFolio)maxFolio=fol;
+   var items=(x.items||[]).map(function(l){return{id:idProductoNube(l.id),cant:Number(l.cant)||0,precio:Number(l.precio)||0};});
+   var loc=porId[x.nube_id];
+   if(!loc){
+    ventas.push({folio:fol,total:Number(x.total)||0,pago:x.forma_pago||"",fecha:x.fecha||new Date().toISOString(),items:items,almacen:x.almacen||"",cajero:x.cajero||"",cajeroNombre:x.cajero||"",nubeId:x.nube_id});
+    porId[x.nube_id]=true;nuevas++;
+   }else{
+    var ch=false;
+    if(Number(loc.total)!==(Number(x.total)||0)){loc.total=Number(x.total)||0;ch=true;}
+    if((loc.pago||"")!==(x.forma_pago||"")){loc.pago=x.forma_pago||"";ch=true;}
+    if((loc.fecha||"")!==(x.fecha||"")){loc.fecha=x.fecha||"";ch=true;}
+    if((loc.almacen||"")!==(x.almacen||"")){loc.almacen=x.almacen||"";ch=true;}
+    if(JSON.stringify(loc.items||[])!==JSON.stringify(items)){loc.items=items;ch=true;}
+    if(ch)actualizadas++;
+   }
+  }
+  if(nuevas>0){try{ventas.sort(function(a,b){return new Date(a.fecha)-new Date(b.fecha);});}catch(e){}}
+  if(maxFolio>0&&typeof folio!=="undefined"&&maxFolio>folio)folio=maxFolio;
+  return{nuevas:nuevas,actualizadas:actualizadas};
+ }catch(e){return{nuevas:0,actualizadas:0};}
+}
+async function descargarNube(opciones){
+ var silencioso=!!(opciones&&opciones.silencioso);
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{productos:0,ventas:0,productosActualizados:0,ventasActualizadas:0};
+ var np={nuevos:0,actualizados:0},nv={nuevas:0,actualizadas:0};
+ try{np=await descargarProductosNube();}catch(e){np={nuevos:0,actualizados:0};}
+ try{nv=await descargarVentasNube();}catch(e){nv={nuevas:0,actualizadas:0};}
+ var res={productos:np.nuevos||0,ventas:nv.nuevas||0,productosActualizados:np.actualizados||0,ventasActualizadas:nv.actualizadas||0};
+ if(res.productos>0||res.ventas>0){
+  try{if(typeof guardar==="function")guardar();}catch(e){}
+  try{if(typeof render==="function")render();}catch(e){}
+  if(!silencioso&&typeof toast==="function"){
+   var partes=[];
+   if(res.productos>0)partes.push(res.productos+" producto"+(res.productos===1?"":"s"));
+   if(res.ventas>0)partes.push(res.ventas+" venta"+(res.ventas===1?"":"s"));
+   toast("☁️ Descargados de la nube: "+partes.join(" y ")+".");
+  }
+ }
+ return res;
+}
 async function descargarCajerosNube(){
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
  const clave=licenciaActual();if(!clave)return false;
@@ -4183,9 +4291,9 @@ async function intentarSincronizarNube(){
  if(sincronizandoNube)return false;
  const q=leerPendientesNube();
  const total=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length;
- if(!total)return false;
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
- if(!(await sesionSupabaseActiva()))return false;
+ if(!total){if(typeof descargarNube==="function"){try{await descargarNube()}catch(e){}}return true;}
+ if(!(await sesionSupabaseActiva())){if(typeof descargarNube==="function"){try{await descargarNube()}catch(e){}}return false;}
  sincronizandoNube=true;
  try{
   for(const b of q.borrados.slice()){
@@ -4200,6 +4308,7 @@ async function intentarSincronizarNube(){
   for(const m of q.movimientos.slice()){const r=await kupoSupabase.from("movimientos_inventario").upsert({nube_id:m.nubeId,licencia_clave:m.licencia_clave,producto_id:m.producto_id,producto_nombre:m.producto_nombre,fecha:m.fecha,tipo:m.tipo,cambio:m.cambio,stock:m.stock,cajero:m.cajero,cajero_nombre:m.cajero_nombre,rol:m.rol,almacen:m.almacen,proveedor:m.proveedor,nota:m.nota},{onConflict:"nube_id"});if(!r.error){q.movimientos=q.movimientos.filter(function(x){return x.nubeId!==m.nubeId});if(typeof marcarMovimientoSubido==="function")marcarMovimientoSubido(m.nubeId);}}
   guardarPendientesNube(q);
   if(typeof reintentarPinsNube==="function"){try{await reintentarPinsNube()}catch(e){}}
+  if(typeof descargarNube==="function"){try{await descargarNube()}catch(e){}}
   if(typeof actualizarBadgeSync==="function")actualizarBadgeSync();
   if(typeof guardar==="function"){try{guardar()}catch(e){}}
   const quedan=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length;
@@ -4214,7 +4323,7 @@ function pendientesNubeTotal(){try{var q=leerPendientesNube();return q.ventas.le
 function actualizarBadgeSync(){var b=document.getElementById("badgeSync");if(!b)return;var n=pendientesNubeTotal();b.textContent=n;b.classList.toggle("con-pendientes",n>0)}
 async function sincronizarAhora(){
  if(sincronizandoNube){toast("☁️ Ya se está sincronizando…");return}
- if(pendientesNubeTotal()===0){toast("✅ Todo sincronizado, no hay nada pendiente.");actualizarBadgeSync();return}
+ if(pendientesNubeTotal()===0){if(typeof navigator!=="undefined"&&!navigator.onLine){toast("Sin internet, se sincronizará solo cuando vuelva.");actualizarBadgeSync();return}var _d115={productos:0,ventas:0};if(typeof descargarNube==="function"){try{_d115=await descargarNube()||_d115;}catch(e){}}if(!((_d115.productos||0)+(_d115.ventas||0)))toast("✅ Todo sincronizado, no hay nada pendiente.");actualizarBadgeSync();return}
  if(typeof navigator!=="undefined"&&!navigator.onLine){toast("Sin internet, se sincronizará solo cuando vuelva.");return}
  if(typeof sesionSupabaseActiva==="function"&&!(await sesionSupabaseActiva())){toast("La sincronización necesita la sesión del Administrador en este navegador.");return}
  var ok=await intentarSincronizarNube();
@@ -4436,7 +4545,7 @@ function guardarLicenciaLocalDesdeNube(nube){
 function entrarConLicencia(c,lic){
  localStorage.setItem("kupoPosV146Licencia",c);cargarDatosLicencia();
  if(lic.negocio){localStorage.setItem("kupoPosV146Negocio",lic.negocio);let nb=document.getElementById("negocioBox");if(nb)nb.textContent=lic.negocio.toUpperCase();let nh=document.getElementById("nombreNegocio");if(nh)nh.textContent=lic.negocio;let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent=textoEstadoLicencia(lic);let n2=document.getElementById("inicioNegocio2");if(n2)n2.textContent=lic.negocio}
- const m=document.getElementById("msgLicencia");let _v=(lic&&(lic.vencimiento||lic.fecha_vencimiento))||"";if(estadoPorVencimiento(_v,lic?lic.estado:"")==="Gracia"){m.textContent="✅ Licencia validada — "+lic.negocio+" · "+textoAvisoGracia(_v);}else{m.textContent="✅ Licencia validada — "+lic.negocio;}m.className="msg ok";if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}
+ const m=document.getElementById("msgLicencia");let _v=(lic&&(lic.vencimiento||lic.fecha_vencimiento))||"";if(estadoPorVencimiento(_v,lic?lic.estado:"")==="Gracia"){m.textContent="✅ Licencia validada — "+lic.negocio+" · "+textoAvisoGracia(_v);}else{m.textContent="✅ Licencia validada — "+lic.negocio;}m.className="msg ok";if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}
 }
 function validarLicenciaLocal(c){
  const m=document.getElementById("msgLicencia");
@@ -4547,7 +4656,7 @@ function trasCarga(fn){var espera=Math.max(0,1300-(Date.now()-_cargaInicio));set
  let licOk=false;
  if(nube.disponible){let _e=!!nube.existe?estadoLicenciaNube(nube.lic):"";licOk=_e==="Activa"||_e==="Gracia";if(licOk)guardarLicenciaLocalDesdeNube(nube.lic);}
  else{let lg=leerLicenciasCompartidas().find(x=>x.clave===licGuardada);let _e=lg?estadoLicencia(lg):"";licOk=_e==="Activa"||_e==="Gracia";}
- if(licOk){if(sesionValida()){trasCarga(entrarDirecto);}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;trasCarga(function(){if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}});}}
+ if(licOk){if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(sesionValida()){trasCarga(entrarDirecto);}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;trasCarga(function(){if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}});}}
  else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();trasCarga(function(){document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";mostrarPasoLicencia();});}
 })().catch(function(){trasCarga(function(){mostrarPasoLicencia();});});
 const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
