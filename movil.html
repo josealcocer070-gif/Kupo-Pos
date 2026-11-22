@@ -2850,9 +2850,7 @@ function ticketImpresoHTML(v){
   +ivaTxt
   +descTxt
   +'<div class="t-centro t-total">TOTAL '+dinero(total)+'</div>'
-  +'<div class="t-centro">Pago: '+escHtml(v.pago||"Efectivo")+' '+dinero(total)+'</div>'
-  +'<div class="t-centro">Recibido '+dinero(recibidoVenta(v))+'</div>'
-  +'<div class="t-centro">Cambio '+dinero(v.cambio||0)+'</div>'
+  +lineasPagoTicket(v).map(function(l){return '<div class="t-centro">'+escHtml(l)+'</div>';}).join("")
   +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez</small>';
 }
 function imprimirTicketVenta(v){return false;/* v117: sin impresión física en el celular. */
@@ -2956,6 +2954,18 @@ function recibidoVenta(v){
  if(v&&v.pago==="Mixto")return (Number(v.mixtoEfectivo)||0)+(Number(v.mixtoTarjeta)||0);
  return total+(Number(v&&v.cambio)||0);
 }
+/* v122 (Lalo 2026-11-22): en pago Mixto el ticket muestra el desglose
+   (Efectivo y Tarjeta por separado) en vez de "Recibido $total", que se
+   leía como si todo fuera efectivo. Sin desglose guardado, cae al formato viejo. */
+function lineasPagoTicket(v){
+ var total=(v&&v.total)||0;
+ if(v&&v.pago==="Mixto"){
+  var ef=Number(v.mixtoEfectivo)||0,tj=Number(v.mixtoTarjeta)||0;
+  if(ef+tj>0)return ["Pago: Mixto","Efectivo: "+dinero(ef),"Tarjeta: "+dinero(tj),"Cambio: "+dinero(v.cambio||0)];
+  return ["Pago: Mixto "+dinero(total),"Recibido: "+dinero(total+(Number(v.cambio)||0)),"Cambio: "+dinero(v.cambio||0)];
+ }
+ return ["Pago: "+(v.pago||"Efectivo")+" "+dinero(total),"Recibido: "+dinero(recibidoVenta(v)),"Cambio: "+dinero(v.cambio||0)];
+}
 function fechaHoraTicket(v){
  var d=(v&&v.fecha)?new Date(v.fecha):new Date();
  if(isNaN(d.getTime()))d=new Date();
@@ -2980,9 +2990,7 @@ function ticketESCPosBytes(v){
   if(ticketConfig.mostrarIva!==false)out+=btCentrar("IVA (16%): "+dinero(iva),ancho);
  if(descMonto>0)out+=btCentrar((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+": -"+dinero(descMonto),ancho);
  out+="\x1D!\x11"+btCentrar("TOTAL "+dinero(total),Math.floor(ancho/2))+"\x1D!\x00";
- out+=btCentrar("Pago: "+(v.pago||"Efectivo")+" "+dinero(total),ancho);
- out+=btCentrar("Recibido "+dinero(recibidoVenta(v)),ancho);
- out+=btCentrar("Cambio "+dinero(v.cambio||0),ancho);
+ lineasPagoTicket(v).forEach(function(l){out+=btCentrar(l,ancho);});
  out+=new Array(ancho+1).join("-")+"\n";
  out+="\x1Ba\x01"+btCentrar(ticketConfig.mensaje||"¡Gracias por su compra!",ancho);
  out+=btCentrar("Un producto de Grupo Benitez",ancho);
@@ -4196,9 +4204,7 @@ function textoTicketPlano(v){
  if(ticketConfig.mostrarIva!==false)lineas.push(centrarTxt("IVA (16%): "+dinero(iva)));
  if(descMonto>0)lineas.push(centrarTxt((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):("Descuento"))+": −"+dinero(descMonto)));
  lineas.push(centrarTxt("TOTAL: "+dinero(total)));
- lineas.push(centrarTxt("Pago: "+(v.pago||"Efectivo")+" · "+dinero(total)));
- lineas.push(centrarTxt("Recibido: "+dinero(recibidoVenta(v))));
- lineas.push(centrarTxt("Cambio: "+dinero(v.cambio||0)));
+ lineasPagoTicket(v).forEach(function(l){lineas.push(centrarTxt(l));});
  lineas.push("------------------------------");
  lineas.push(centrarTxt(ticketConfig.mensaje||"¡Gracias por su compra!"));
  lineas.push(centrarTxt("Un producto de Grupo Benítez"));
@@ -4279,9 +4285,7 @@ async function dibujarTicketCanvas(v){
  if(ticketConfig.mostrarIva!==false)centro("IVA (16%): "+dinero(iva),20,false);
  if(descMonto>0)centro((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+": −"+dinero(descMonto),20,false);
  centro("TOTAL "+dinero(total),32,true);
- centro("Pago: "+(v.pago||"Efectivo")+" "+dinero(total),20,false);
- centro("Recibido "+dinero(recibidoVenta(v)),20,false);
- centro("Cambio "+dinero(v.cambio||0),20,false);
+ lineasPagoTicket(v).forEach(function(l){centro(l,20,false);});
  separador();
  centro(ticketConfig.mensaje||"¡Gracias por su compra!",20,false);
  centro("Un producto de Grupo Benítez",17,false);
