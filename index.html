@@ -2623,7 +2623,7 @@ function btEscribir(bytes){
   if(i>=bytes.length)return Promise.resolve();
   var trozo=bytes.slice(i,i+20);i+=20;
   var p=(typeof ch.writeValueWithoutResponse==="function")?ch.writeValueWithoutResponse(trozo):ch.writeValue(trozo);
-  return Promise.resolve(p).then(function(){return new Promise(function(r){setTimeout(r,15)})}).then(paso);
+  return Promise.resolve(p).then(function(){return new Promise(function(r){setTimeout(r,5)})}).then(paso); /* v121: pausa entre piezas de 15 ms a 5 ms — el ticket con logo (~9,000 bytes en piezas de 20) tardaba ~7 s solo en pausas; ahora ~2.3 s. Mismo tamaño seguro de 20 bytes (Lalo 2026-11-22) */
  }
  return paso();
 }
