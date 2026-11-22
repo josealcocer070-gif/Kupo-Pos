@@ -3404,7 +3404,7 @@ function renderPronostico(){
  cont.innerHTML=h;
 }
 var kupiSaludado=false;
-function esAdminKupi(){return (sesionActual&&sesionActual.rol)==="Administrador"}
+function esAdminKupi(){return sesionValida()&&sesionActual.rol==="Administrador"}
 function actualizarBotonKupi(){
  var b=document.getElementById("btnChatKupi");if(!b)return;
  var img=document.getElementById("imgBtnKupi");if(img&&!img.getAttribute("src"))img.src=MASCOTA_KUPI;
@@ -3965,8 +3965,8 @@ function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
 function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;imprimirCorteSilenciosa(c);}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
-function mostrarPasoLicencia(){var _cl=document.getElementById("claveLicencia");if(_cl)_cl.value="";var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.7.0";}
-function mostrarPasoLogin(){var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");actualizarBotonOlvido();}
+function mostrarPasoLicencia(){var _cl=document.getElementById("claveLicencia");if(_cl)_cl.value="";var _app=document.getElementById("app");if(_app)_app.classList.add("oculto");document.getElementById("pantallaLicencia").classList.remove("oculto");document.getElementById("pantallaLogin").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");let s1=document.getElementById("inicioSucursal");if(s1)s1.textContent="SIN LICENCIA ACTIVA · V1.7.0";if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();}
+function mostrarPasoLogin(){var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");actualizarBotonOlvido();if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();}
 /* v91 (Lalo 2026-11-20): configuración inicial del dueño. Antes, cada
    licencia nueva sembraba en silencio un cajero de ejemplo ("Eduardo
    Benitez", usuario Administrador, PIN 123456) que no se puede eliminar
@@ -3983,6 +3983,7 @@ function mostrarPasoSetup(){
  document.getElementById("pantallaSetup").classList.remove("oculto");
  document.getElementById("pantallaLogin").classList.add("oculto");
  document.getElementById("pantallaLicencia").classList.add("oculto");
+ if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();
 }
 function guardarSetupDueno(ev){
  if(ev)ev.preventDefault();
@@ -4076,12 +4077,61 @@ async function verificarPinNube(usuario,pin){
   return r.data===true;
  }catch(e){return false}
 }
-function subirPinNube(usuario,pin){
- if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return;
+/* v114 (Lalo 2026-11-21): la subida del PIN a la nube ya no falla en silencio.
+   La RPC guardar_pin_cajero exige sesión Supabase Auth (auth.uid() no nulo)
+   en esta página; sin ella devolvía false y el error se tragaba, así que el
+   PIN nunca llegaba a la nube y el celular no podía entrar (María abre bien
+   en la tablet porque su PIN está guardado local en ese aparato, pero en el
+   celular depende del hash en la nube). Ahora se pide la sesión y se refresca
+   el token antes de llamar la RPC, y si no hay sesión o la RPC falla, se
+   avisa con un toast claro en vez de fallar en silencio. */
+async function asegurarSesionAuth(){
+ if(!kupoSupabase||!kupoSupabase.auth||typeof kupoSupabase.auth.getSession!=="function")return false;
  try{
-  const pr=kupoSupabase.rpc("guardar_pin_cajero",{p_licencia:licenciaActual(),p_usuario:usuario,p_pin:pin});
-  if(pr&&typeof pr.catch==="function")pr.catch(function(){});
- }catch(e){}
+  var r=await kupoSupabase.auth.getSession();
+  if(!(r&&r.data&&r.data.session))return false;
+  if(typeof kupoSupabase.auth.refreshSession==="function"){
+   try{
+    var rf=await kupoSupabase.auth.refreshSession();
+    if(rf&&rf.data&&rf.data.session)return true;
+   }catch(e){}
+   var r2=await kupoSupabase.auth.getSession();
+   return !!(r2&&r2.data&&r2.data.session);
+  }
+  return true;
+ }catch(e){return false}
+}
+async function enviarPinNube(usuario,pin){
+ try{
+  var r=await kupoSupabase.rpc("guardar_pin_cajero",{p_licencia:licenciaActual(),p_usuario:usuario,p_pin:pin});
+  return !(!r||r.error||r.data===false);
+ }catch(e){return false}
+}
+async function subirPinNube(usuario,pin,opciones){
+ var silencioso=!!(opciones&&opciones.silencioso);
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
+ if(!(await asegurarSesionAuth())){
+  if(!silencioso&&typeof toast==="function")toast("⚠️ El PIN no se subió a la nube: falta la sesión del Administrador en este navegador. Abre el Admin con tu correo y contraseña y vuelve a guardar el PIN.");
+  return false;
+ }
+ var ok=await enviarPinNube(usuario,pin);
+ if(!ok&&!silencioso&&typeof toast==="function")toast("⚠️ El PIN no se subió a la nube. Vuelve a intentarlo al sincronizar.");
+ return ok;
+}
+/* v114: al sincronizar con sesión activa, reintenta subir los PIN de los
+   cajeros locales que tengan PIN (la RPC hace upsert, es idempotente). */
+async function reintentarPinsNube(){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return 0;
+ if(!(await asegurarSesionAuth()))return 0;
+ var subidos=0,fallos=0;
+ var lista=(typeof cajeros!=="undefined"?cajeros:[]).filter(function(c){return c&&c.usuario&&typeof c.pin==="string"&&/^\d{6}$/.test(c.pin)});
+ for(var i=0;i<lista.length;i++){
+  var ok=false;
+  try{ok=await enviarPinNube(lista[i].usuario,lista[i].pin)}catch(e){ok=false}
+  if(ok)subidos++;else fallos++;
+ }
+ if(fallos>0&&typeof toast==="function")toast("⚠️ No se pudieron subir los PIN de "+fallos+" cajero(s) a la nube.");
+ return subidos;
 }
 async function descargarCajerosNube(){
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
@@ -4149,6 +4199,7 @@ async function intentarSincronizarNube(){
   for(const pr of q.productos.slice()){const r=await kupoSupabase.from("productos").upsert({nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado},{onConflict:"licencia_clave,producto_id"});if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
   for(const m of q.movimientos.slice()){const r=await kupoSupabase.from("movimientos_inventario").upsert({nube_id:m.nubeId,licencia_clave:m.licencia_clave,producto_id:m.producto_id,producto_nombre:m.producto_nombre,fecha:m.fecha,tipo:m.tipo,cambio:m.cambio,stock:m.stock,cajero:m.cajero,cajero_nombre:m.cajero_nombre,rol:m.rol,almacen:m.almacen,proveedor:m.proveedor,nota:m.nota},{onConflict:"nube_id"});if(!r.error){q.movimientos=q.movimientos.filter(function(x){return x.nubeId!==m.nubeId});if(typeof marcarMovimientoSubido==="function")marcarMovimientoSubido(m.nubeId);}}
   guardarPendientesNube(q);
+  if(typeof reintentarPinsNube==="function"){try{await reintentarPinsNube()}catch(e){}}
   if(typeof actualizarBadgeSync==="function")actualizarBadgeSync();
   if(typeof guardar==="function"){try{guardar()}catch(e){}}
   const quedan=q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length;
@@ -4214,11 +4265,37 @@ function renderMensajes(){
   var hoy=new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long"});
   lista.innerHTML='<div class="chat-dia">Hoy · '+escHtml(hoy)+'</div>'+todos.map(function(m){
    var mio=m.remitente===yo;
-   return '<div class="chat-msg '+(mio?"propio":"entrante")+(m.pendiente?" pendiente":"")+'"><span class="quien">'+escHtml(mio?"Tú · "+m.remitente_rol:m.remitente+" · "+m.remitente_rol)+'</span>'+escHtml(m.texto)+'<span class="hora">'+horaChat(m.creado_en)+(m.pendiente?" · enviando…":"")+'</span></div>';
+   return '<div class="chat-msg '+(mio?"propio":"entrante")+(m.pendiente?" pendiente":"")+'"><span class="quien">'+escHtml(mio?"Tú · "+m.remitente_rol:m.remitente+" · "+m.remitente_rol)+'</span>'+escHtml(m.texto)+'<span class="hora">'+horaChat(m.creado_en)+(m.pendiente?" · enviando…":(mio?" · recibido":""))+'</span></div>';
   }).join("");
  }
  lista.scrollTop=lista.scrollHeight;
  actualizarBadgeMensajes();
+}
+/* v114 (Lalo 2026-11-21): conciliar la cola pendiente del chat con la nube.
+   Un mensaje que ya está en la nube no debe seguir en la cola (para no
+   reinsertarlo duplicado) ni verse como "enviando…". Se compara por
+   remitente + texto + hora cercana (la copia local es unos segundos
+   anterior a la de la nube). Sin esto, una copia pendiente de otro perfil
+   en el mismo aparato se quedaba en "enviando…" aunque el mensaje ya
+   estaba entregado. */
+function mensajeYaEnNube(m,nube){
+ for(var i=0;i<(nube||[]).length;i++){
+  var n=nube[i];
+  if(n&&n.remitente===m.remitente&&n.texto===m.texto){
+   var t1=new Date(m.creado_en).getTime(),t2=new Date(n.creado_en).getTime();
+   if(isFinite(t1)&&isFinite(t2)&&t2-t1>=-120000&&t2-t1<=300000)return true;
+  }
+ }
+ return false;
+}
+function conciliarPendientesChat(nube){
+ var q=leerMensajesPendientes();if(!q.length)return;
+ var quedan=q.filter(function(p){return !mensajeYaEnNube(p,nube)});
+ if(quedan.length===q.length)return;
+ guardarMensajesPendientes(quedan);
+ var ids={};
+ quedan.forEach(function(x){if(x.idLocal)ids[x.idLocal]=true});
+ mensajesChat=mensajesChat.filter(function(x){return !x.pendiente||!x.idLocal||ids[x.idLocal];});
 }
 async function cargarMensajes(){
  if(!kupoSupabase)return;
@@ -4227,6 +4304,7 @@ async function cargarMensajes(){
   if(r.error)throw r.error;
   var nube=(r.data||[]).slice().reverse();
   mensajesChat=nube.concat(leerMensajesPendientes());
+  conciliarPendientesChat(nube);
   renderMensajes();
  }catch(e){renderMensajes();}
 }
@@ -4243,12 +4321,16 @@ async function enviarMensajeChat(){
 async function reenviarMensajesPendientes(){
  var q=leerMensajesPendientes();if(!q.length)return;
  if(!kupoSupabase||(typeof navigator!=="undefined"&&!navigator.onLine))return;
+ var nube=[];
+ try{var rs=await kupoSupabase.from("mensajes").select("id,licencia_clave,remitente,remitente_rol,texto,creado_en").eq("licencia_clave",licenciaActual()).order("creado_en",{ascending:false}).limit(100);if(!rs.error&&rs.data)nube=rs.data;}catch(e){nube=[];}
  var quedan=[];
  for(var i=0;i<q.length;i++){
   var m=q[i];
+  if(mensajeYaEnNube(m,nube)){var loc0=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc0)loc0.pendiente=false;continue;}
   try{
    var r=await kupoSupabase.from("mensajes").insert({licencia_clave:m.licencia_clave,remitente:m.remitente,remitente_rol:m.remitente_rol,texto:m.texto});
-   if(r.error)quedan.push(m);
+   if(r.error){quedan.push(m);}
+   else{var loc=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc)loc.pendiente=false;}
   }catch(e){quedan.push(m);}
  }
  guardarMensajesPendientes(quedan);
@@ -4260,6 +4342,7 @@ function recibirMensajeChat(m){
  if(mensajesChat.some(function(x){return x.id&&x.id===m.id}))return;
  var yo=nombreRemitenteChat();
  mensajesChat=mensajesChat.filter(function(x){return !(x.pendiente&&x.remitente===yo&&x.texto===m.texto);});
+ conciliarPendientesChat([m]);
  mensajesChat.push(m);
  renderMensajes();
  if(vistaActual==="mensajes"){marcarMensajesLeidos();}
@@ -4431,7 +4514,7 @@ async function entrar(){
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
