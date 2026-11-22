@@ -89,7 +89,7 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #navHistCortes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)!important}
 #navImportar .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)!important}
 .insignia-nuevo{background:#f5b800;color:#0b4a6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
-#btnChatKupi{position:fixed;right:18px;bottom:18px;width:64px;height:64px;border-radius:50%;background:#f5b800;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;z-index:200;padding:0;overflow:hidden;touch-action:none}
+#btnChatKupi{width:40px;height:40px;min-width:40px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);cursor:pointer;padding:0;overflow:hidden;flex:0 0 auto}
 #btnChatKupi img{width:100%;height:100%;object-fit:cover;display:block}
 #panelChatKupi{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
 #panelChatKupi.oculto{display:none!important}
@@ -686,7 +686,7 @@ body{background:var(--fondo);color:var(--texto)}
   header{padding-left:8px!important;padding-right:8px!important;gap:4px!important}
   header .avatar{width:36px!important;height:36px!important}
   header .negocio b{font-size:15px!important}
-  .btn-tema{width:32px;height:32px;min-width:32px;font-size:17px}
+  .btn-tema{width:32px;height:32px;min-width:32px;font-size:17px}#btnChatKupi{width:32px;height:32px;min-width:32px}
 }
 /* ===== Noche: superficies y textos ===== */
 html[data-tema="noche"] .card,html[data-tema="noche"] .resumen .tarjeta,html[data-tema="noche"] .prod-row,
@@ -950,6 +950,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-tema" id="btnMenuAcciones" onclick="toggleMenuAcciones(event)" aria-label="Acciones rápidas" title="Acciones rápidas">☰</button>
+<button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
+<button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar">🔄</button>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️ <span class="sync-texto">Sincronizar</span><span class="badge-sync" id="badgeSync">0</span></button>
 <button type="button" class="btn-tema" id="btnReconectarBT" onclick="reconectarImpresoraBT()" aria-label="Reconectar impresora Bluetooth" title="Reconectar impresora">🔄</button>
 <button type="button" class="btn-tema" id="btnTema" onclick="cambiarTema()" aria-label="Cambiar a modo noche">🌙</button>
@@ -2126,6 +2128,8 @@ function cambiarOpcionSistema(clave,valor){
  if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos"&&clave!=="sinStock")return;
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
+ guardarFechaOpcionesNube(Date.now());
+ if(typeof subirOpcionesNube==="function"){try{subirOpcionesNube();}catch(e){}}
  aplicarOpcionesSistema();
  if(clave==="sinStock"){renderCortes();render();if(typeof aplicarPermisosMenu==="function")aplicarPermisosMenu();}
  if(clave==="sinStock"&&valor&&vistaActual==="entradas")mostrarVista("ventas");
@@ -3411,10 +3415,8 @@ function actualizarBotonKupi(){
  var enc=document.getElementById("imgKupiEnc");if(enc&&!enc.getAttribute("src"))enc.src=MASCOTA_KUPI;
  b.style.display=esAdminKupi()?"":"none";
  if(!esAdminKupi()){var p=document.getElementById("panelChatKupi");if(p)p.classList.add("oculto")}
- kupiAplicarPos();kupiInitArrastre();
 }
 function toggleChatKupi(){
- if(kupiClickBloqueado){kupiClickBloqueado=false;return}
  if(!esAdminKupi()){toast("⛔ Kupi solo está para el Administrador.");return}
  var p=document.getElementById("panelChatKupi");if(!p)return;
  var abrir=p.classList.contains("oculto");
@@ -3512,9 +3514,9 @@ function responderKupi(pregunta){
 /* v113 (Lalo 2026-11-21): 1) insignia "Nuevo" de Importar Excel se oculta
    al abrir el apartado (se guarda por aparato); 2) botón de Kupi arrastrable
    con Pointer Events (mouse y dedo), posición guardada por aparato;
-   3) Kupi legible en modo noche (ver CSS). */
-var KUPI_MOVER_UMBRAL=8;
-var kupiClickBloqueado=false;
+   3) Kupi legible en modo noche (ver CSS).
+   v117 (Lalo 2026-11-22): Kupi deja de ser flotante/arrastrable y queda fijo
+   en el encabezado junto al menú de acciones rápidas. */
 function importarYaVisto(){try{return localStorage.getItem("kupoPosV146ImportarVisto")==="1"}catch(e){return false}}
 function actualizarInsigniaImportar(){
  var ins=document.querySelector("#navImportar .insignia-nuevo");
@@ -3523,49 +3525,6 @@ function actualizarInsigniaImportar(){
 function marcarImportarVisto(){
  try{localStorage.setItem("kupoPosV146ImportarVisto","1")}catch(e){}
  actualizarInsigniaImportar();
-}
-function kupiLeerPos(){
- try{var p=JSON.parse(localStorage.getItem("kupoPosV146KupiPos")||"null");if(p&&isFinite(p.x)&&isFinite(p.y))return p}catch(e){}
- return null;
-}
-function kupiGuardarPos(x,y){
- try{localStorage.setItem("kupoPosV146KupiPos",JSON.stringify({x:Math.round(x),y:Math.round(y)}))}catch(e){}
-}
-function kupiLimitarPos(x,y){
- var b=document.getElementById("btnChatKupi");
- var w=b?b.offsetWidth||64:64,h=b?b.offsetHeight||64:64;
- return {x:Math.max(0,Math.min(x,window.innerWidth-w)),y:Math.max(0,Math.min(y,window.innerHeight-h))};
-}
-function kupiAplicarPos(){
- var b=document.getElementById("btnChatKupi");if(!b)return;
- var p=kupiLeerPos();if(!p)return;
- var q=kupiLimitarPos(p.x,p.y);
- b.style.left=q.x+"px";b.style.top=q.y+"px";b.style.right="auto";b.style.bottom="auto";
-}
-function kupiInitArrastre(){
- var b=document.getElementById("btnChatKupi");if(!b||b._kupiArrastre)return;
- b._kupiArrastre=true;
- var ini=null;
- b.addEventListener("pointerdown",function(e){
-  if(!esAdminKupi())return;
-  ini={x:e.clientX,y:e.clientY,bx:b.getBoundingClientRect().left,by:b.getBoundingClientRect().top,movido:false};
-  try{b.setPointerCapture(e.pointerId)}catch(err){}
- });
- b.addEventListener("pointermove",function(e){
-  if(!ini)return;
-  var dx=e.clientX-ini.x,dy=e.clientY-ini.y;
-  if(!ini.movido&&Math.sqrt(dx*dx+dy*dy)<KUPI_MOVER_UMBRAL)return;
-  ini.movido=true;
-  var q=kupiLimitarPos(ini.bx+dx,ini.by+dy);
-  b.style.left=q.x+"px";b.style.top=q.y+"px";b.style.right="auto";b.style.bottom="auto";
- });
- b.addEventListener("pointerup",function(){
-  if(!ini)return;
-  if(ini.movido){kupiGuardarPos(parseFloat(b.style.left)||0,parseFloat(b.style.top)||0);kupiClickBloqueado=true;}
-  ini=null;
- });
- b.addEventListener("pointercancel",function(){ini=null});
- window.addEventListener("resize",function(){kupiAplicarPos()});
 }
 function generarCodigoProducto(){var code="";var intentos=0;do{code="SKU-"+String(Math.floor(100000+Math.random()*900000));intentos++}while(catalogo.some(function(p){return String(p.sku||"")===code})&&intentos<20);var inp=document.getElementById("pSku");if(inp)inp.value=code;toast("Código generado: "+code);}
 function guardarProducto(e){e.preventDefault();
@@ -4003,6 +3962,7 @@ function guardarSetupDueno(ev){
  var nuevo={id:Date.now()+uid++,nombre:nombre,usuario:usuario,pin:pin,rol:"Administrador",estado:"Activo"};
  cajeros.push(nuevo);
  sesionActual={nombre:nombre,usuario:usuario,rol:"Administrador",activa:true,licencia:licenciaActual(),inicio:Date.now()};
+  marcarSesionVivo();
  guardarCajeros();
  if(typeof encolarCajeroNube==="function")encolarCajeroNube(nuevo);if(typeof subirPinNube==="function")subirPinNube(usuario,pin);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();
  document.getElementById("pantallaSetup").classList.add("oculto");
@@ -4151,7 +4111,8 @@ async function descargarProductosNube(){
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevos:0,actualizados:0};
  var clave=licenciaActual();if(!clave||clave==="SIN-LICENCIA")return{nuevos:0,actualizados:0};
  try{
-  var r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado").eq("licencia_clave",clave).limit(500);
+  var r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado,foto").eq("licencia_clave",clave).limit(500);
+  if(r.error&&/foto/i.test((r.error&&r.error.message)||"")){r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado").eq("licencia_clave",clave).limit(500);}
   if(r.error||!r.data)return{nuevos:0,actualizados:0};
   var nuevos=0,actualizados=0,tocoStock=false;
   var nubeIds={};
@@ -4162,7 +4123,7 @@ async function descargarProductosNube(){
    var stock=Number(x.stock)||0;
    var loc=catalogo.find(function(p){return String(p.id)===String(id)});
    if(!loc){
-    catalogo.push({id:id,nombre:x.nombre||"Producto",precio:Number(x.precio)||0,stock:stock,emoji:x.emoji||"📦",categoria:x.categoria||"General",unidad:x.unidad||"pieza",sku:"SKU-"+String(id).slice(-6),costo:Math.round((Number(x.precio)||0)*0.6*100)/100,stockMin:5,foto:"",pausado:!!x.pausado,nubeId:x.nube_id||null});
+    catalogo.push({id:id,nombre:x.nombre||"Producto",precio:Number(x.precio)||0,stock:stock,emoji:x.emoji||"📦",categoria:x.categoria||"General",unidad:x.unidad||"pieza",sku:"SKU-"+String(id).slice(-6),costo:Math.round((Number(x.precio)||0)*0.6*100)/100,stockMin:5,foto:(x.foto||""),pausado:!!x.pausado,nubeId:x.nube_id||null});
     nuevos++;
    }else{
     var ch=false;
@@ -4172,6 +4133,7 @@ async function descargarProductosNube(){
     if((loc.unidad||"pieza")!==(x.unidad||"pieza")){loc.unidad=x.unidad||"pieza";ch=true;}
     if((loc.emoji||"")!==(x.emoji||"")){loc.emoji=x.emoji||"";ch=true;}
     if(!!loc.pausado!==!!x.pausado){loc.pausado=!!x.pausado;ch=true;}
+    if(x.foto&&loc.foto!==x.foto){loc.foto=x.foto;ch=true;}
     if(x.nube_id&&!loc.nubeId){loc.nubeId=x.nube_id;ch=true;}
     if(Number(loc.stock)!==stock){loc.stock=stock;ch=true;}
     if(ch)actualizados++;
@@ -4222,20 +4184,65 @@ async function descargarVentasNube(){
   return{nuevas:nuevas,actualizadas:actualizadas};
  }catch(e){return{nuevas:0,actualizadas:0};}
 }
+
+/* v117 (Lalo 2026-11-22): opciones por licencia en la nube (tabla
+   opciones_licencia, ver sintonia-v117.sql). Last-write-wins por updated_at:
+   gana la fecha más reciente entre este aparato y la nube. Si la tabla aún
+   no existe (el SQL no se ha corrido) todo falla en silencio y el
+   comportamiento local queda intacto. Sin internet no hace nada. */
+function leerFechaOpcionesNube(){try{var v=leerPorLicencia("kupoPosV146OpcionesFecha",0);return Number(v)||0}catch(e){return 0}}
+function guardarFechaOpcionesNube(t){try{guardarPorLicencia("kupoPosV146OpcionesFecha",Number(t)||0)}catch(e){}}
+async function subirOpcionesNube(){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
+ var clave=licenciaActual();if(!clave)return false;
+ try{
+  var ahora=Date.now();
+  var r=await kupoSupabase.from("opciones_licencia").upsert({licencia_clave:clave,opciones:opcionesSistema,updated_at:new Date(ahora).toISOString()},{onConflict:"licencia_clave"});
+  if(r.error)return false;
+  guardarFechaOpcionesNube(ahora);
+  return true;
+ }catch(e){return false}
+}
+async function sincronizarOpcionesNube(){
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return false;
+ var clave=licenciaActual();if(!clave)return false;
+ try{
+  var r=await kupoSupabase.from("opciones_licencia").select("opciones,updated_at").eq("licencia_clave",clave).limit(1);
+  if(r.error||!r.data)return false;
+  var fechaLocal=leerFechaOpcionesNube();
+  if(!r.data.length){if(fechaLocal>0){try{await subirOpcionesNube()}catch(e){}}return false;}
+  var fila=r.data[0];
+  var fechaNube=0;try{fechaNube=new Date(fila.updated_at).getTime()||0}catch(e){fechaNube=0;}
+  if(fechaLocal>fechaNube){try{await subirOpcionesNube()}catch(e){}return false;}
+  if(fechaNube>fechaLocal&&fila.opciones&&typeof fila.opciones==="object"){
+   var claves=["corteProductos","multiAlmacen","chatInterno","descuentos","sinStock"];
+   var cambio=false;
+   claves.forEach(function(k){if(typeof fila.opciones[k]==="boolean"&&opcionesSistema[k]!==fila.opciones[k]){opcionesSistema[k]=fila.opciones[k];cambio=true;}});
+   if(cambio){guardarOpcionesSistema();aplicarOpcionesSistema();if(typeof render==="function")render();}
+   guardarFechaOpcionesNube(fechaNube);
+   return cambio;
+  }
+  return false;
+ }catch(e){return false}
+}
 async function descargarNube(opciones){
  var silencioso=!!(opciones&&opciones.silencioso);
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{productos:0,ventas:0,productosActualizados:0,ventasActualizadas:0};
- var np={nuevos:0,actualizados:0},nv={nuevas:0,actualizadas:0};
+ var np={nuevos:0,actualizados:0},nv={nuevas:0,actualizadas:0},nc=false,no=false;
  try{np=await descargarProductosNube();}catch(e){np={nuevos:0,actualizados:0};}
  try{nv=await descargarVentasNube();}catch(e){nv={nuevas:0,actualizadas:0};}
- var res={productos:np.nuevos||0,ventas:nv.nuevas||0,productosActualizados:np.actualizados||0,ventasActualizadas:nv.actualizadas||0};
- if(res.productos>0||res.ventas>0){
+ try{if(typeof descargarCajerosNube==="function")nc=await descargarCajerosNube();}catch(e){nc=false;}
+ try{if(typeof sincronizarOpcionesNube==="function")no=await sincronizarOpcionesNube();}catch(e){no=false;}
+ var res={productos:np.nuevos||0,ventas:nv.nuevas||0,productosActualizados:np.actualizados||0,ventasActualizadas:nv.actualizadas||0,cajeros:nc?1:0,opciones:no?1:0};
+ if(res.productos>0||res.ventas>0||res.cajeros>0||res.opciones>0){
   try{if(typeof guardar==="function")guardar();}catch(e){}
   try{if(typeof render==="function")render();}catch(e){}
   if(!silencioso&&typeof toast==="function"){
    var partes=[];
    if(res.productos>0)partes.push(res.productos+" producto"+(res.productos===1?"":"s"));
    if(res.ventas>0)partes.push(res.ventas+" venta"+(res.ventas===1?"":"s"));
+   if(res.cajeros>0)partes.push("cajeros actualizados");
+   if(res.opciones>0)partes.push("opciones actualizadas");
    toast("☁️ Descargados de la nube: "+partes.join(" y ")+".");
   }
  }
@@ -4272,12 +4279,55 @@ async function descargarCajerosNube(){
     if(typeof x.activo==="boolean"&&q.cajeros[qi].activo!==x.activo){q.cajeros[qi].activo=x.activo;qCambio=true;}
    }
   }
+  /* v117 (Lalo 2026-11-22): propagación de borrados hechos en OTRO aparato.
+     Se lleva la lista de cajeros vistos en la nube (por licencia); un cajero
+     local que YA se había visto en la nube y ya no está en ella fue borrado
+     en otro aparato y se quita aquí. Los cajeros locales que nunca se vieron
+     en la nube (los extras que Lalo limpia él mismo) NO se tocan. Al quitarlo
+     también se saca su pendiente de la cola para que no resucite. */
+  var vistosEnNube=r.data.map(function(x){return (x.usuario||"").toLowerCase()}).filter(function(u){return !!u});
+  var vistosAntes=leerPorLicencia("kupoPosV146CajerosEnNube",[])||[];
+  var vistosAntesSet={};vistosAntes.forEach(function(u){vistosAntesSet[String(u).toLowerCase()]=true;});
+  var enNubeSet={};vistosEnNube.forEach(function(u){enNubeSet[u]=true;});
+  var antesCajeros=cajeros.length;
+  cajeros=cajeros.filter(function(c){var u=(c.usuario||"").toLowerCase();if(!u)return true;if(vistosAntesSet[u]&&!enNubeSet[u]&&!borrados.has(u))return false;return true;});
+  if(cajeros.length!==antesCajeros){
+   cambio=true;
+   var q2=leerPendientesNube();var nq=(q2.cajeros||[]).filter(function(y){var u=(y.usuario||"").toLowerCase();return !(vistosAntesSet[u]&&!enNubeSet[u]);});
+   if(nq.length!==(q2.cajeros||[]).length){q2.cajeros=nq;guardarPendientesNube(q2);}
+  }
+  guardarPorLicencia("kupoPosV146CajerosEnNube",vistosEnNube);
   if(qCambio)guardarPendientesNube(q);
   if(cambio){guardarCajeros();aplicarPermisosMenu();if(typeof renderCajeros==="function"&&typeof vistaActual!=="undefined"&&vistaActual==="cajeros")renderCajeros();}
   return cambio;
  }catch(e){return false}
 }
-function encolarProductoNube(pr){if(!pr)return;if(!pr.nubeId)pr.nubeId=nubeId();encolarNube("productos",{nubeId:pr.nubeId,licencia_clave:licenciaActual(),producto_id:String(pr.id),nombre:pr.nombre,precio:Number(pr.precio)||0,stock:redondearCant(pr.stock||0),unidad:unidadDe(pr),categoria:pr.categoria||"General",emoji:pr.emoji||"📦",pausado:!!pr.pausado});if(typeof guardar==="function"){try{guardar()}catch(e){}}}
+
+/* v117: las fotos de producto son etiquetas de 1080×1080; al subir se reducen
+   a 512 px JPEG 0.8 para que la sincronización sea ligera. Si la foto ya es
+   chica se sube tal cual. La compresión es asíncrona: se encola primero la
+   foto original y al terminar se re-encola la comprimida (encolarNube
+   reescribe por nubeId, así que reemplaza a la primera). */
+function comprimirFotoNube(dataUrl,cb){
+ try{
+  if(typeof Image==="undefined"||typeof document==="undefined"||!document.createElement){if(cb)cb(null);return;}
+  var img=new Image();
+  img.onload=function(){
+   try{
+    var max=512,w=img.width||0,h=img.height||0;
+    if(!w||!h){if(cb)cb(null);return;}
+    var esc=Math.min(1,max/Math.max(w,h));
+    var cv=document.createElement("canvas");cv.width=Math.max(1,Math.round(w*esc));cv.height=Math.max(1,Math.round(h*esc));
+    var cx=cv.getContext("2d");if(!cx){if(cb)cb(null);return;}
+    cx.drawImage(img,0,0,cv.width,cv.height);
+    if(cb)cb(cv.toDataURL("image/jpeg",0.8));
+   }catch(e){if(cb)cb(null);}
+  };
+  img.onerror=function(){if(cb)cb(null);};
+  img.src=dataUrl;
+ }catch(e){if(cb)cb(null);}
+}
+function encolarProductoNube(pr){if(!pr)return;if(!pr.nubeId)pr.nubeId=nubeId();var _foto=(pr.foto||"");var _carga={nubeId:pr.nubeId,licencia_clave:licenciaActual(),producto_id:String(pr.id),nombre:pr.nombre,precio:Number(pr.precio)||0,stock:redondearCant(pr.stock||0),unidad:unidadDe(pr),categoria:pr.categoria||"General",emoji:pr.emoji||"📦",pausado:!!pr.pausado};if(_foto)_carga.foto=_foto;encolarNube("productos",_carga);if(_foto&&_foto.length>120000&&typeof comprimirFotoNube==="function"){try{comprimirFotoNube(_foto,function(chica){if(!chica||chica===_foto||chica.length>=_foto.length)return;pr.foto=chica;encolarProductoNube(pr);});}catch(e){}}if(typeof guardar==="function"){try{guardar()}catch(e){}}}
 function encolarMovimientoNube(m){if(!m)return;if(!m.nubeId)m.nubeId=nubeId();encolarNube("movimientos",{nubeId:m.nubeId,licencia_clave:licenciaActual(),producto_id:String(m.productoId),producto_nombre:m.nombre||"",fecha:m.fecha||new Date().toISOString(),tipo:m.tipo||"",cambio:Number(m.cambio)||0,stock:Number(m.stock)||0,cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",cajero_nombre:m.cajero||"",rol:m.rol||"",almacen:m.almacen||"",proveedor:m.proveedor||"",nota:m.nota||""});}
 function marcarMovimientoSubido(nubeId){if(!nubeId)return false;var h=null;try{h=historialProducto.find(function(x){return x.nubeId===nubeId})}catch(e){}if(h&&!h.subidoNube){h.subidoNube=true;return true}return false}
 function encolarHistorialLocalNube(){if(typeof historialProducto==="undefined"||!historialProducto.length)return 0;var n=0;historialProducto.forEach(function(h){if(!h.subidoNube){if(!h.nubeId)h.nubeId=nubeId();encolarMovimientoNube(h);n++}});return n}
@@ -4304,7 +4354,7 @@ async function intentarSincronizarNube(){
   }
   for(const v of q.ventas.slice()){const r=await kupoSupabase.from("ventas").upsert({nube_id:v.nubeId,licencia_clave:v.licencia_clave,folio:v.folio,total:v.total,forma_pago:v.forma_pago,fecha:v.fecha,cajero:v.cajero,almacen:v.almacen,items:v.items},{onConflict:"nube_id"});if(!r.error)q.ventas=q.ventas.filter(function(x){return x.nubeId!==v.nubeId});}
   for(const c of q.cajeros.slice()){let r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo,permisos:c.permisos||{}},{onConflict:"licencia_clave,usuario"});if(r.error&&/permisos/i.test(r.error.message||"")){r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo},{onConflict:"licencia_clave,usuario"});}if(!r.error)q.cajeros=q.cajeros.filter(function(x){return x.nubeId!==c.nubeId});}
-  for(const pr of q.productos.slice()){const r=await kupoSupabase.from("productos").upsert({nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado},{onConflict:"licencia_clave,producto_id"});if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
+  for(const pr of q.productos.slice()){var _up={nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado};if(pr.foto)_up.foto=pr.foto;var r=await kupoSupabase.from("productos").upsert(_up,{onConflict:"licencia_clave,producto_id"});if(r.error&&/foto/i.test((r.error&&r.error.message)||"")){delete _up.foto;r=await kupoSupabase.from("productos").upsert(_up,{onConflict:"licencia_clave,producto_id"});}if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
   for(const m of q.movimientos.slice()){const r=await kupoSupabase.from("movimientos_inventario").upsert({nube_id:m.nubeId,licencia_clave:m.licencia_clave,producto_id:m.producto_id,producto_nombre:m.producto_nombre,fecha:m.fecha,tipo:m.tipo,cambio:m.cambio,stock:m.stock,cajero:m.cajero,cajero_nombre:m.cajero_nombre,rol:m.rol,almacen:m.almacen,proveedor:m.proveedor,nota:m.nota},{onConflict:"nube_id"});if(!r.error){q.movimientos=q.movimientos.filter(function(x){return x.nubeId!==m.nubeId});if(typeof marcarMovimientoSubido==="function")marcarMovimientoSubido(m.nubeId);}}
   guardarPendientesNube(q);
   if(typeof reintentarPinsNube==="function"){try{await reintentarPinsNube()}catch(e){}}
@@ -4321,9 +4371,39 @@ async function intentarSincronizarNube(){
 /* Botón Sincronizar del encabezado (Lalo, 2026-11-17): fuerza la subida de la cola pendiente, con aviso claro cuando no se puede (sin internet, sin sesión del Administrador o nada pendiente). */
 function pendientesNubeTotal(){try{var q=leerPendientesNube();return q.ventas.length+q.cajeros.length+q.productos.length+q.borrados.length+q.movimientos.length}catch(e){return 0}}
 function actualizarBadgeSync(){var b=document.getElementById("badgeSync");if(!b)return;var n=pendientesNubeTotal();b.textContent=n;b.classList.toggle("con-pendientes",n>0)}
+
+/* v117 (Lalo 2026-11-22): botón Recargar del encabezado. NO recarga la
+   página: recargar el navegador siempre saca la pantalla completa. En su
+   lugar relee los datos desde localStorage, descarga de la nube, reaplica
+   opciones y permisos y redibuja la vista actual. La venta en curso vive
+   en kupoPosV146Ticket y se guarda en cada cambio, así que no se pierde:
+   primero se guarda el estado en memoria y luego se relee. */
+async function recargarPantalla(){
+ if(!sesionValida()){toast("Inicia sesión para recargar.");return;}
+ try{guardar();}catch(e){}
+ try{
+  var _c=JSON.parse(localStorage.getItem("kupoPosV146Catalogo")||"null");if(Array.isArray(_c))catalogo=_c;
+  var _t=JSON.parse(localStorage.getItem("kupoPosV146Ticket")||"null");if(Array.isArray(_t))ticket=_t;
+  var _v=JSON.parse(localStorage.getItem("kupoPosV146Ventas")||"null");if(Array.isArray(_v))ventas=_v;
+  var _f=JSON.parse(localStorage.getItem("kupoPosV146Folio")||"null");if(typeof _f==="number")folio=_f;
+  var _sa=JSON.parse(localStorage.getItem("kupoPosV146StockAlmacen")||"null");if(_sa&&typeof _sa==="object")stockAlmacen=_sa;
+  var _e=JSON.parse(localStorage.getItem("kupoPosV146Entradas")||"null");if(Array.isArray(_e))entradas=_e;
+  var _g=JSON.parse(localStorage.getItem("kupoPosV146Gastos")||"null");if(Array.isArray(_g))gastos=_g;
+  var _co=JSON.parse(localStorage.getItem("kupoPosV146Cortes")||"null");if(Array.isArray(_co))cortes=_co;
+  var _ct=JSON.parse(localStorage.getItem("kupoPosV146Cotizaciones")||"null");if(Array.isArray(_ct))cotizaciones=_ct;
+ }catch(e){}
+ try{cargarDatosLicencia();}catch(e){}
+ try{if(typeof cargarTicketConfig==="function")cargarTicketConfig();}catch(e){}
+ try{if(typeof aplicarOpcionesSistema==="function")aplicarOpcionesSistema();}catch(e){}
+ try{if(typeof aplicarPermisosMenu==="function")aplicarPermisosMenu();}catch(e){}
+ try{if(typeof actualizarPillConexion==="function")actualizarPillConexion();}catch(e){}
+ try{if(typeof descargarNube==="function")await descargarNube({silencioso:true});}catch(e){}
+ try{if(typeof render==="function")render();}catch(e){}
+ toast("Pantalla actualizada ✅");
+}
 async function sincronizarAhora(){
  if(sincronizandoNube){toast("☁️ Ya se está sincronizando…");return}
- if(pendientesNubeTotal()===0){if(typeof navigator!=="undefined"&&!navigator.onLine){toast("Sin internet, se sincronizará solo cuando vuelva.");actualizarBadgeSync();return}var _d115={productos:0,ventas:0};if(typeof descargarNube==="function"){try{_d115=await descargarNube()||_d115;}catch(e){}}if(!((_d115.productos||0)+(_d115.ventas||0)))toast("✅ Todo sincronizado, no hay nada pendiente.");actualizarBadgeSync();return}
+ if(pendientesNubeTotal()===0){if(typeof navigator!=="undefined"&&!navigator.onLine){toast("Sin internet, se sincronizará solo cuando vuelva.");actualizarBadgeSync();return}var _d115={productos:0,ventas:0};if(typeof descargarNube==="function"){try{_d115=await descargarNube()||_d115;}catch(e){}}if(!((_d115.productos||0)+(_d115.ventas||0)+(_d115.cajeros||0)+(_d115.opciones||0)))toast("✅ Todo sincronizado, no hay nada pendiente.");actualizarBadgeSync();return}
  if(typeof navigator!=="undefined"&&!navigator.onLine){toast("Sin internet, se sincronizará solo cuando vuelva.");return}
  if(typeof sesionSupabaseActiva==="function"&&!(await sesionSupabaseActiva())){toast("La sincronización necesita la sesión del Administrador en este navegador.");return}
  var ok=await intentarSincronizarNube();
@@ -4619,11 +4699,12 @@ async function entrar(){
  if(pin!==c.pin){var okNube=false;try{okNube=await verificarPinNube(usuario,pin);}catch(e){okNube=false;}if(!okNube){const r=registrarPinIncorrecto(usuario);if(r.hasta&&r.hasta>Date.now()){m.textContent="PIN incorrecto. Demasiados intentos: este usuario queda bloqueado por 5 minutos.";}else{const q=PIN_MAX_INTENTOS-r.intentos;m.textContent="PIN incorrecto. Inténtalo de nuevo. Te quedan "+q+" intento"+(q===1?"":"s")+".";}m.className="msg error";limpiarPin();return}c.pin=pin;guardarCajeros();}
  limpiarBloqueoPin(usuario);
  sesionActual={nombre:c.nombre,usuario:c.usuario,rol:c.rol,activa:true,licencia:licenciaActual(),inicio:Date.now()};
+ marcarSesionVivo();
  guardarCajeros();
  document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");
  aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();toast("Turno cerrado. Inicia sesión para volver a entrar.");}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
@@ -4638,8 +4719,16 @@ document.getElementById("fecha").textContent=new Date().toLocaleDateString("es-M
 /* Sesión persistente: solo vale una sesión que se abrió con PIN (activa:true),
    del cajero que sigue existiendo y Activo, y de la misma licencia. Sin PIN
    (o tras Cerrar turno, que borra la sesión) se pide PIN de nuevo. */
+/* v117 (Lalo 2026-11-22): la sesión NO sobrevive a cerrar el navegador.
+   Mientras la app está abierta se escribe una marca de "vivo" cada 30 s;
+   al arrancar, si pasaron más de 5 min sin marca, la sesión guardada se
+   invalida y se pide PIN aunque siga siendo válida. Una recarga rápida
+   (menos de 5 min) conserva la sesión. */
+function sesionVivoVigente(){try{var v=Number(localStorage.getItem("kupoPosV146Vivo")||0);if(!v)return false;return (Date.now()-v)<=5*60*1000;}catch(e){return false}}
+function marcarSesionVivo(){try{if(sesionActual&&sesionActual.activa===true)localStorage.setItem("kupoPosV146Vivo",String(Date.now()));}catch(e){}}
+function invalidarSesionPorVivo(){sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}}
 function sesionValida(){if(!sesionActual||sesionActual.activa!==true||!sesionActual.usuario||!sesionActual.rol)return false;if(sesionActual.licencia&&sesionActual.licencia!==licenciaActual())return false;const c=cajeros.find(function(x){return x.usuario&&sesionActual.usuario&&x.usuario.toLowerCase()===sesionActual.usuario.toLowerCase()});return !!(c&&c.estado==="Activo");}
-function entrarDirecto(){limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();actualizarAvisoGracia(true);}
+function entrarDirecto(){marcarSesionVivo();limpiarPin();document.getElementById("msgLogin").textContent="";document.getElementById("pantallaLicencia").classList.add("oculto");document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();actualizarAvisoGracia(true);}
 /* Licencia guardada: si hay internet, manda la nube; sin internet, el respaldo local. */
 /* v96 (Lalo 2026-11-20): al recargar salía la pantalla de la licencia
    mientras se validaba la guardada (la validación es asíncrona y con
@@ -4656,7 +4745,7 @@ function trasCarga(fn){var espera=Math.max(0,1300-(Date.now()-_cargaInicio));set
  let licOk=false;
  if(nube.disponible){let _e=!!nube.existe?estadoLicenciaNube(nube.lic):"";licOk=_e==="Activa"||_e==="Gracia";if(licOk)guardarLicenciaLocalDesdeNube(nube.lic);}
  else{let lg=leerLicenciasCompartidas().find(x=>x.clave===licGuardada);let _e=lg?estadoLicencia(lg):"";licOk=_e==="Activa"||_e==="Gracia";}
- if(licOk){if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(sesionValida()){trasCarga(entrarDirecto);}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;trasCarga(function(){if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}});}}
+ if(licOk){if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(sesionValida()&&!sesionVivoVigente())invalidarSesionPorVivo();if(sesionValida()){trasCarga(entrarDirecto);}else{const _u=document.getElementById("usuarioLogin");if(_u&&sesionActual&&sesionActual.usuario)_u.value=sesionActual.usuario;trasCarga(function(){if(licenciaSinDueno()){mostrarPasoSetup();}else{mostrarPasoLogin();}});}}
  else{localStorage.removeItem("kupoPosV146Licencia");cargarDatosLicencia();trasCarga(function(){document.getElementById("msgLicencia").textContent="La licencia guardada ya no es válida en KUPO Admin. Valida una licencia activa.";document.getElementById("msgLicencia").className="msg error";mostrarPasoLicencia();});}
 })().catch(function(){trasCarga(function(){mostrarPasoLicencia();});});
 const negInicio2=document.getElementById("inicioNegocio2");if(negInicio2&&savedNegocio)negInicio2.textContent=savedNegocio;
@@ -4673,6 +4762,8 @@ if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener(
 function actualizarPillConexion(){var p=document.getElementById("pillConexion");if(!p)return;var enLinea=(typeof navigator!=="undefined"&&navigator.onLine!==false);p.textContent=enLinea?"📶 Conectado":"📶 Sin conexión";p.classList.toggle("sin-conexion",!enLinea);}
 if(typeof window!=="undefined"&&window.addEventListener){window.addEventListener("online",actualizarPillConexion);window.addEventListener("offline",actualizarPillConexion);}
 actualizarPillConexion();
+/* v117: marca de "vivo" de la sesión cada 30 s (ver sesionVivoVigente). */
+setInterval(marcarSesionVivo,30000);
 setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof cargarMensajes==="function")cargarMensajes();},3000);
 /* Bluetooth: intentar reconectar sola la impresora que ya se había elegido. */
 setTimeout(function(){if(typeof intentarReconectarBT==="function")intentarReconectarBT();},2000);
@@ -4689,7 +4780,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<button type="button" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <div id="panelChatKupi" class="oculto">
 <div class="kupi-encabezado"><img id="imgKupiEnc" alt="Kupi"><div><b>Kupi</b><span>● En línea</span></div><button type="button" onclick="toggleChatKupi()" aria-label="Cerrar el chat">✕</button></div>
 <div id="kupiMensajes"></div>
