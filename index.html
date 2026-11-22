@@ -91,6 +91,12 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 .insignia-nuevo{background:#f5b800;color:#0b4a6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
 #btnChatKupi{width:40px;height:40px;min-width:40px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);cursor:pointer;padding:0;overflow:hidden;flex:0 0 auto}
 #btnChatKupi img{width:100%;height:100%;object-fit:cover;display:block}
+/* v118 (Lalo 2026-11-22, con foto de la tablet en vivo): Recargar y Reconectar
+   impresora son gemelos 3D: mismo tamaño que los demás botones del encabezado,
+   mismo degradado con brillo arriba, sombra abajo y borde interior claro,
+   el icono blanco con relieve. Solo cambia lo que hacen al tocarlos. */
+#btnRecargar,#btnReconectarBT{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#45c3d5,#1d5f5e)!important;border:1px solid rgba(255,255,255,.55)!important;box-shadow:0 3px 7px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.55)!important;color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.55)!important}
+#btnRecargar:hover,#btnReconectarBT:hover{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.05) 45%),linear-gradient(135deg,#5ccfdd,#247a78)!important}
 #panelChatKupi{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
 #panelChatKupi.oculto{display:none!important}
 .kupi-encabezado{background:#0b4a6e;color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px}
@@ -173,13 +179,13 @@ main h1{font-size:34px;margin-bottom:14px}
 .totales .row.total{color:#fff;border-top:1px solid rgba(255,255,255,.35);margin-top:6px;padding-top:8px}
 .totales .total b{color:#f5b800}
 /* Panel derecho fijo en PC: solo el catálogo se mueve; la lista de la venta hace scroll dentro del panel y Subtotal/TOTAL/Cobrar quedan siempre visibles abajo */
-@media(min-width:1151px){.panel{max-height:calc(100vh - 72px);display:flex;flex-direction:column;overflow:hidden}.panel #ticket{flex:1 1 auto;overflow-y:auto;min-height:60px}}
+@media(min-width:1151px){.panel{max-height:calc(100vh - 72px);max-height:calc(100svh - 72px);display:flex;flex-direction:column;overflow:hidden}.panel #ticket{flex:1 1 auto;overflow-y:auto;min-height:60px}}
 
 .card .mini{margin-top:8px}
 .card .mini button{background:none;border:0;color:#0d6cb5;cursor:pointer;font-size:13px;text-decoration:underline}
-.panel{background:#fff;border-left:1px solid #dfe5ea;padding:18px;position:sticky;top:72px;min-height:calc(100vh - 72px)}
+.panel{background:#fff;border-left:1px solid #dfe5ea;padding:18px;position:sticky;top:72px;min-height:calc(100vh - 72px);min-height:calc(100svh - 72px)}
 /* Legibilidad PC (2026-11-14): cuando las acciones rápidas ocupan dos filas, el panel se pega más abajo para no quedar debajo de ellas. */
-@media(min-width:1151px) and (max-width:1795px){.panel{top:118px;min-height:calc(100vh - 118px);max-height:calc(100vh - 118px)}}
+@media(min-width:1151px) and (max-width:1795px){.panel{top:118px;min-height:calc(100vh - 118px);min-height:calc(100svh - 118px);max-height:calc(100vh - 118px);max-height:calc(100svh - 118px)}}
 .panel h2{font-size:24px}
 .badge{background:#fff3bf;border-radius:16px;padding:4px 12px;font-size:13px;font-weight:800}
 .panel .sub{color:#555;font-size:14px;margin:8px 0}
@@ -233,7 +239,17 @@ main h1{font-size:34px;margin-bottom:14px}
 .oculto{display:none!important}
 .aviso-gracia{background:#fff3cd;border:1px solid #f5b800;border-left:6px solid #f5b800;color:#5a3d00;font-weight:700;font-size:13px;line-height:1.45;padding:9px 12px;margin:8px 12px 0;border-radius:8px}
 html[data-tema="noche"] .aviso-gracia{background:#3a2f00;border-color:#f5b800;color:#ffe9a8}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#12233a;color:#fff;padding:12px 18px;border-radius:12px;z-index:50;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;top:76px;transform:translateX(-50%);background:#12233a;color:#fff;padding:12px 18px;border-radius:12px;z-index:50;max-width:90vw;text-align:center}
+/* v118 (Lalo 2026-11-22): Recargar avisa cuando hay una versión nueva del
+   sistema. El aviso NO recarga solo: Lalo toca "Aplicar actualización" y
+   ahí sí se recarga la página (se sale de la pantalla completa). */
+.aviso-actualizacion{position:fixed;left:50%;top:150px;transform:translateX(-50%);z-index:90;background:#fff8e1;border:2px solid #f5b800;border-radius:14px;padding:12px 14px;max-width:92vw;width:520px;box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:15px;line-height:1.4;color:#12233a}
+.aviso-actualizacion .aviso-botones{display:flex;gap:10px;margin-top:10px}
+.aviso-actualizacion .aviso-botones button{flex:1;border-radius:22px;padding:12px 8px;font-size:16px;font-weight:800;cursor:pointer}
+.aviso-actualizacion .aviso-aplicar{background:var(--dorado);border:0;color:#12233a}
+.aviso-actualizacion .aviso-ahora{background:#fff;border:2px solid #c9d4dc;color:var(--azul)}
+html[data-tema="noche"] .aviso-actualizacion{background:#3a2f00;color:#ffe082;border-color:#f5b800}
+html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;color:#ffe082;border-color:#f5b800}
 @media(max-width:1150px){.layout{grid-template-columns:1fr}.panel{grid-column:1/-1;position:static;border-left:0;border-top:1px solid #dfe5ea}.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){
  header .menu-btn{font-size:24px}
@@ -431,7 +447,7 @@ html[data-tema="noche"] .aviso-gracia{background:#3a2f00;border-color:#f5b800;co
  /* Panel de venta: oculto en móvil; se abre como hoja inferior */
  .panel{display:none}
  body.venta-movil-abierta .panel{display:block;position:fixed;left:0;right:0;bottom:136px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
- .toast{bottom:160px}
+ .toast{top:88px}
  /* Barra fija de Venta en curso (solo en Ventas, solo móvil) */
  body.movil-ventas #barraVentaMovil{display:flex}
  #barraVentaMovil{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;border-top:2px solid #dfe5ea;box-shadow:0 -4px 16px rgba(0,0,0,.12);align-items:center;gap:10px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))}
@@ -462,7 +478,7 @@ html[data-tema="noche"] .aviso-gracia{background:#3a2f00;border-color:#f5b800;co
 header .negocio b{width:420px;max-width:62vw;font-size:19px}
 /* Ticket 60% catálogo / 40% venta en PC (V1.5.0): horizontal en escritorio, también en modo escritorio del celular, desde 761px): solo el catálogo se mueve; el panel derecho queda fijo, la lista de la venta hace scroll dentro y TOTAL/Cobrar siempre visibles abajo. En móvil real no se toca la barra inferior ya hecha. */
 @media(min-width:761px){
- body.vista-ventas #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+ body.vista-ventas #app{display:flex;flex-direction:column;height:100vh;height:100dvh;height:100svh;overflow:hidden}
  body.vista-ventas #app header,body.vista-ventas #app .acciones{flex:0 0 auto}
  body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%);flex:1 1 auto;min-height:0;align-items:stretch;overflow:hidden}
  body.vista-ventas .layout:not(.sin-panel) main{height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
@@ -484,7 +500,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
    en escritorio angosto (sin encoger el layout) y pie compacto con scroll
    propio en horizontal corto. En móvil real (<=760px) no cambia nada. */
 @media(min-width:761px){
-  body.vista-ventas #app{height:100vh;height:100dvh;max-height:940px;overflow:hidden}
+  body.vista-ventas #app{height:100vh;height:100dvh;height:100svh;max-height:940px;overflow:hidden}
   body.vista-ventas .layout:not(.sin-panel){grid-template-columns:minmax(0,60%) minmax(0,40%)!important}
   body.vista-ventas .layout:not(.sin-panel) .panel{max-height:none!important;height:100%}
 }
@@ -529,7 +545,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
    arrepiente, Regresar sin cobrar, sin descontar stock ni registrar venta. */
 .modal-confirmar{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);align-items:flex-start;justify-content:center;padding:18px 12px;overflow-y:auto}
 .modal-confirmar.abierto{display:flex}
-.conf-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:14px 20px;box-shadow:0 12px 40px rgba(0,0,0,.35);margin:auto 0}
+.conf-tarjeta{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:14px 20px;box-shadow:0 12px 40px rgba(0,0,0,.35);margin:auto 0;display:flex;flex-direction:column;max-height:calc(100vh - 36px);max-height:calc(100svh - 36px);overflow-y:auto}
 .conf-tarjeta h2{font-size:24px;color:var(--azul);margin-bottom:4px}
 /* v98: modal Restablecer PIN (los botones .btn-inicio y .secundario solo existen bajo .inicio) */
 #modalRestablecerPin .conf-tarjeta label{display:block;font-weight:700;margin:12px 0 4px}
@@ -556,6 +572,8 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .conf-cambio small{display:block;font-size:12px;color:#555;margin-top:4px}
 .conf-aviso{font-size:13px;color:#666;text-align:center;margin:6px 0 10px}
 .conf-botones{display:flex;gap:12px}
+/* v118: en Confirmar cobro los botones quedan fijos al pie de la tarjeta mientras el contenido rueda por dentro. */
+#modalConfirmar .conf-botones{position:sticky;bottom:0;background:inherit;padding:12px 0 14px;margin-top:6px;z-index:2}
 .conf-botones button{flex:1;border-radius:26px;padding:18px 12px;font-size:19px;font-weight:800;cursor:pointer}
 .conf-regresar{background:#fff;border:2px solid #c9d4dc;color:#12233a}
 .conf-confirmar{background:var(--dorado);border:0;color:#12233a}
@@ -2178,22 +2196,24 @@ function renderTicketPreview(){
  const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
  box.classList.toggle("papel58",(ticketConfig.papel||"80 mm")==="58 mm");
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio"><br>':"";
- const total=70, sub=total/1.16, iva=total-sub;
+ const total=70, iva=total-(total/1.16);
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(folio+1).padStart(4,"0")+"<br>"):"";
  const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
  box.innerHTML=logo
-  +'<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div>'
+  +'<div class="t-titulo">'+envolverNombreTicket(ticketConfig.negocio||"Mi negocio",(ticketConfig.papel||"80 mm")==="58 mm"?32:48).map(function(l){return escHtml(l);}).join("<br>")+'</div>'
   +escHtml(ticketConfig.direccion||"")+'<br>'+escHtml(ticketConfig.telefono||"")+'<br>'
-  +new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"})+'<br>'+folioTxt
+  +fechaHoraTicket(null)+'<br>'+folioTxt
+  +(sesionActual?('ATENDIÓ: '+escHtml(nombreEnTurno().toUpperCase())+'<br>'):'')
   +'<hr>'
   +'<div class="t-line"><span>2 × Pan Bolillo</span><span>$30.00</span></div>'
   +'<div class="t-line"><span>1 × Croissant Artesanal</span><span>$40.00</span></div>'
   +'<hr>'
-  +'<div class="t-line"><span>Subtotal</span><span>'+dinero(sub)+'</span></div>'
   +ivaTxt
   +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>Efectivo</span><span>'+dinero(total)+'</span></div>'
-  +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez · V1.7.0</small>';
+  +'<div class="t-line"><span>Pago: Efectivo</span><span>'+dinero(total)+'</span></div>'
+  +'<div class="t-line"><span>Recibido</span><span>'+dinero(total)+'</span></div>'
+  +'<div class="t-line"><span>Cambio</span><span>'+dinero(0)+'</span></div>'
+  +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez</small>';
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
@@ -2267,24 +2287,27 @@ function quitarLogoNegocio(){
  toast("Logo quitado. Arriba vuelve el logo de KUPO y el ticket solo muestra el nombre del negocio.");
 }
 function ticketImpresoHTML(v){
- const total=v.total||0, base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total, descMonto=Math.min(Number(v.descuento)||0,base), sub=base/1.16, iva=base-sub;
+ const total=v.total||0, base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total, descMonto=Math.min(Number(v.descuento)||0,base), iva=base-(base/1.16);
  const descTxt=(descMonto>0)?('<div class="t-line"><span>'+(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento")+'</span><span>−'+dinero(descMonto)+'</span></div>'):"";
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio" style="max-width:130px"><br>':"";
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(v.folio).padStart(4,"0")+"<br>"):"";
  const ivaTxt=ticketConfig.mostrarIva!==false?('<div class="t-line"><span>IVA (16%)</span><span>'+dinero(iva)+'</span></div>'):"";
  const lineas=(v.items||[]).map(function(l){const p=catalogo.find(function(x){return x.id===l.id});return '<div class="t-line"><span>'+(p?textoCantidad(p,l.cant):l.cant)+' × '+escHtml(p?p.nombre:"Producto")+'</span><span>'+dinero(l.cant*l.precio)+'</span></div>'}).join("");
- const fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ const fechaTxt=fechaHoraTicket(v);
+ const atendioTxt=nombreCajeroVenta(v);
  return logo
-  +'<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div>'
+  +'<div class="t-titulo">'+envolverNombreTicket(ticketConfig.negocio||"Mi negocio",(ticketConfig.papel||"80 mm")==="58 mm"?32:48).map(function(l){return escHtml(l);}).join("<br>")+'</div>'
   +escHtml(ticketConfig.direccion||"")+'<br>'+escHtml(ticketConfig.telefono||"")+'<br>'
   +fechaTxt+'<br>'+folioTxt
+  +(atendioTxt?('ATENDIÓ: '+escHtml(atendioTxt.toUpperCase())+'<br>'):"")
   +'<hr>'+lineas+'<hr>'
-  +'<div class="t-line"><span>Subtotal</span><span>'+dinero(sub)+'</span></div>'
   +ivaTxt
   +descTxt
   +'<div class="t-line t-total"><span>TOTAL</span><span>'+dinero(total)+'</span></div>'
-  +'<div class="t-line"><span>'+escHtml(v.pago||"Efectivo")+'</span><span>'+dinero(total)+'</span></div>'
-  +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez · V1.7.0</small>';
+  +'<div class="t-line"><span>Pago: '+escHtml(v.pago||"Efectivo")+'</span><span>'+dinero(total)+'</span></div>'
+  +'<div class="t-line"><span>Recibido</span><span>'+dinero(recibidoVenta(v))+'</span></div>'
+  +'<div class="t-line"><span>Cambio</span><span>'+dinero(v.cambio||0)+'</span></div>'
+  +'<hr>'+escHtml(ticketConfig.mensaje||"")+'<br><small>Un producto de Grupo Benítez</small>';
 }
 function imprimirTicketVenta(v){
  if(!v)return false;
@@ -2354,29 +2377,73 @@ function btConectada(){return !!(btImpresora.caracteristica&&btImpresora.device&
 function btSinAcentos(s){return String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ñ/g,"n").replace(/Ñ/g,"N").replace(/[¡¿]/g,"").replace(/[^\x20-\x7E]/g,"")}
 function btLineaIzqDer(izq,der,ancho){izq=btSinAcentos(izq);der=btSinAcentos(der);var espacios=ancho-izq.length-der.length;if(espacios<1){izq=izq.slice(0,Math.max(0,ancho-der.length-1));espacios=1}return izq+new Array(espacios+1).join(" ")+der+"\n"}
 function btCentrar(txt,ancho){txt=btSinAcentos(txt);if(txt.length>=ancho)return txt.slice(0,ancho)+"\n";var pad=Math.floor((ancho-txt.length)/2);return new Array(pad+1).join(" ")+txt+"\n"}
+
+/* v118 (Lalo 2026-11-22): ticket pulido con el modelo de Palizada (80 mm
+   #1600). El nombre se parte en 2 líneas equilibradas sin cortar palabras
+   (a 58 mm "Pollos Rancheros El Pollon Suc. Jonuta" ya no pierde "Jonuta");
+   ATENDIÓ lleva el nombre del cajero; sin Subtotal; sin versión del sistema;
+   Pago, Recibido y Cambio siempre. Jonuta sin logo: el ticket es puro texto. */
+function envolverNombreTicket(nombre,ancho){
+ var palabras=String(nombre||"Mi negocio").split(/\s+/).filter(function(w){return w.length;});
+ if(!palabras.length)return["Mi negocio"];
+ var unido=palabras.join(" ");
+ if(unido.length<=ancho)return[unido];
+ var mejor=null;
+ for(var i=1;i<palabras.length;i++){
+  var a=palabras.slice(0,i).join(" "),b=palabras.slice(i).join(" ");
+  if(a.length>ancho||b.length>ancho)continue;
+  var dif=Math.abs(a.length-b.length);
+  if(!mejor||dif<mejor.dif)mejor={dif:dif,lineas:[a,b]};
+ }
+ if(mejor)return mejor.lineas;
+ var out=[],resto=unido;
+ while(resto.length>ancho){out.push(resto.slice(0,ancho));resto=resto.slice(ancho);}
+ if(resto)out.push(resto);
+ return out;
+}
+function nombreCajeroVenta(v){
+ if(!v)return"";
+ if(v.cajeroNombre&&v.cajeroNombre!==v.cajero)return v.cajeroNombre;
+ var cs=(typeof cajeros!=="undefined"?cajeros:[]);
+ var c=cs.find(function(x){return x.usuario&&v.cajero&&String(x.usuario).toLowerCase()===String(v.cajero).toLowerCase();});
+ if(c&&c.nombre)return c.nombre;
+ return v.cajeroNombre||v.cajero||"";
+}
+function recibidoVenta(v){
+ var total=(v&&v.total)||0;
+ if(v&&v.pago==="Mixto")return (Number(v.mixtoEfectivo)||0)+(Number(v.mixtoTarjeta)||0);
+ return total+(Number(v&&v.cambio)||0);
+}
+function fechaHoraTicket(v){
+ var d=(v&&v.fecha)?new Date(v.fecha):new Date();
+ if(isNaN(d.getTime()))d=new Date();
+ return d.toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"})+" · "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+}
 function ticketESCPosBytes(v){
  var ancho=(ticketConfig.papel||"80 mm")==="58 mm"?32:48;
- var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),sub=base/1.16,iva=base-sub;
- var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),iva=base-(base/1.16);
+ var fechaTxt=fechaHoraTicket(v);
  var out="";
  out+="\x1B@";
- out+="\x1Ba\x01\x1BE\x01"+btCentrar(ticketConfig.negocio||"Mi negocio",ancho)+"\x1BE\x00";
+ out+="\x1Ba\x01\x1BE\x01"+envolverNombreTicket(ticketConfig.negocio||"Mi negocio",ancho).map(function(l){return btCentrar(l,ancho);}).join("")+"\x1BE\x00";
  out+="\x1Ba\x01"+btCentrar(ticketConfig.direccion||"",ancho)+btCentrar(ticketConfig.telefono||"",ancho);
  out+=btCentrar(fechaTxt,ancho);
+ var atendio=nombreCajeroVenta(v);
  if(ticketConfig.mostrarFolio!==false)out+=btCentrar("Folio #"+String(v.folio).padStart(4,"0"),ancho);
+ if(atendio)out+=btCentrar("ATENDIÓ: "+atendio.toUpperCase(),ancho);
  out+="\x1Ba\x00";
  out+=new Array(ancho+1).join("-")+"\n";
  (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);out+=btSinAcentos(cantTxt+" x "+nombre).slice(0,ancho)+"\n";out+=btLineaIzqDer("  "+dinero(l.precio)+" c/u",dinero(l.cant*l.precio),ancho);});
  out+=new Array(ancho+1).join("-")+"\n";
- out+=btLineaIzqDer("Subtotal",dinero(sub),ancho);
- if(ticketConfig.mostrarIva!==false)out+=btLineaIzqDer("IVA (16%)",dinero(iva),ancho);
+  if(ticketConfig.mostrarIva!==false)out+=btLineaIzqDer("IVA (16%)",dinero(iva),ancho);
  if(descMonto>0)out+=btLineaIzqDer(btSinAcentos(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento"),"-"+dinero(descMonto),ancho);
  out+="\x1D!\x11"+btLineaIzqDer("TOTAL",dinero(total),Math.floor(ancho/2))+"\x1D!\x00";
- out+=btLineaIzqDer(v.pago||"Efectivo",dinero(total),ancho);
- if(v.cambio&&v.cambio>0)out+=btLineaIzqDer("Cambio",dinero(v.cambio),ancho);
+ out+=btLineaIzqDer("Pago: "+(v.pago||"Efectivo"),dinero(total),ancho);
+ out+=btLineaIzqDer("Recibido",dinero(recibidoVenta(v)),ancho);
+ out+=btLineaIzqDer("Cambio",dinero(v.cambio||0),ancho);
  out+=new Array(ancho+1).join("-")+"\n";
  out+="\x1Ba\x01"+btCentrar(ticketConfig.mensaje||"¡Gracias por su compra!",ancho);
- out+=btCentrar("Un producto de Grupo Benitez - V1.7.0",ancho);
+ out+=btCentrar("Un producto de Grupo Benitez",ancho);
  out+="\n\n\n\x1DV\x00";
  var bytes=new Uint8Array(out.length);for(var i=0;i<out.length;i++){bytes[i]=out.charCodeAt(i)&0xFF}return bytes;
 }
@@ -3565,26 +3632,28 @@ function reimprimir(){const v=ventas[ventas.length-1];if(!v){toast("Aún no hay 
    Bluetooth/ESC-POS, en texto plano y sin códigos de control. */
 function textoTicketPlano(v){
  if(!v)return"";
- var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),sub=base/1.16,iva=base-sub;
- var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),iva=base-(base/1.16);
+ var fechaTxt=fechaHoraTicket(v);
  var lineas=[];
- lineas.push(ticketConfig.negocio||"Mi negocio");
+ envolverNombreTicket(ticketConfig.negocio||"Mi negocio",(ticketConfig.papel||"80 mm")==="58 mm"?32:48).forEach(function(l){lineas.push(l);});
  if(ticketConfig.direccion)lineas.push(ticketConfig.direccion);
  if(ticketConfig.telefono)lineas.push(ticketConfig.telefono);
  lineas.push(fechaTxt);
+ var atendio=nombreCajeroVenta(v);
  if(ticketConfig.mostrarFolio!==false)lineas.push("Folio #"+String(v.folio).padStart(4,"0"));
+ if(atendio)lineas.push("ATENDIÓ: "+atendio.toUpperCase());
  lineas.push("------------------------------");
  (v.items||[]).forEach(function(l){var p=catalogo.find(function(x){return x.id===l.id});var nombre=p?p.nombre:"Producto";var cantTxt=p?textoCantidad(p,l.cant):String(l.cant);lineas.push(cantTxt+" x "+nombre);lineas.push("  "+dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio));});
  lineas.push("------------------------------");
- lineas.push("Subtotal: "+dinero(sub));
  if(ticketConfig.mostrarIva!==false)lineas.push("IVA (16%): "+dinero(iva));
  if(descMonto>0)lineas.push((v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):("Descuento"))+": −"+dinero(descMonto));
  lineas.push("TOTAL: "+dinero(total));
- lineas.push((v.pago||"Efectivo")+": "+dinero(total));
- if(v.cambio&&v.cambio>0)lineas.push("Cambio: "+dinero(v.cambio));
+ lineas.push("Pago: "+(v.pago||"Efectivo")+" · "+dinero(total));
+ lineas.push("Recibido: "+dinero(recibidoVenta(v)));
+ lineas.push("Cambio: "+dinero(v.cambio||0));
  lineas.push("------------------------------");
  lineas.push(ticketConfig.mensaje||"¡Gracias por su compra!");
- lineas.push("Un producto de Grupo Benítez · V1.7.0");
+ lineas.push("Un producto de Grupo Benítez");
  return lineas.join("\n");
 }
 function normalizarWhatsAppMX(num){
@@ -3631,8 +3700,8 @@ function cargarImagenTicket(src){
 async function dibujarTicketCanvas(v){
  if(!v)return null;
  var ANCHO=480,PAD=24,W=ANCHO-PAD*2;
- var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),sub=base/1.16,iva=base-sub;
- var fechaTxt=v.fecha?new Date(v.fecha).toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+ var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),iva=base-(base/1.16);
+ var fechaTxt=fechaHoraTicket(v);
  var logoImg=null;
  if(ticketConfig.mostrarLogo!==false&&ticketConfig.logo){logoImg=await cargarImagenTicket(ticketConfig.logo);}
  var canvas=document.createElement("canvas");
@@ -3649,6 +3718,7 @@ async function dibujarTicketCanvas(v){
  if(ticketConfig.telefono)centro(ticketConfig.telefono,20,false);
  centro(fechaTxt,20,false);
  if(ticketConfig.mostrarFolio!==false)centro("Folio #"+String(v.folio).padStart(4,"0"),20,false);
+ var at=nombreCajeroVenta(v);if(at)centro("ATENDIÓ: "+at.toUpperCase(),20,false);
  separador();
  (v.items||[]).forEach(function(l){
   var p=catalogo.find(function(x){return x.id===l.id});
@@ -3658,15 +3728,15 @@ async function dibujarTicketCanvas(v){
   linea("  "+dinero(l.precio)+" c/u  ·  "+dinero(l.cant*l.precio),20,false);
  });
  separador();
- izqDer("Subtotal",dinero(sub),20,false);
  if(ticketConfig.mostrarIva!==false)izqDer("IVA (16%)",dinero(iva),20,false);
  if(descMonto>0)izqDer(v.descuentoTipo==="%"?("Descuento ("+(v.descuentoValor||0)+"%)"):"Descuento","−"+dinero(descMonto),20,false);
  izqDer("TOTAL",dinero(total),32,true);
- izqDer(v.pago||"Efectivo",dinero(total),20,false);
- if(v.cambio&&v.cambio>0)izqDer("Cambio",dinero(v.cambio),20,false);
+ izqDer("Pago: "+(v.pago||"Efectivo"),dinero(total),20,false);
+ izqDer("Recibido",dinero(recibidoVenta(v)),20,false);
+ izqDer("Cambio",dinero(v.cambio||0),20,false);
  separador();
  centro(ticketConfig.mensaje||"¡Gracias por su compra!",20,false);
- centro("Un producto de Grupo Benítez · V1.7.0",17,false);
+ centro("Un producto de Grupo Benítez",17,false);
  /* Alto total: se mide con la envoltura antes de dibujar. */
  var H=PAD;
  filas.forEach(function(f){
@@ -4378,6 +4448,26 @@ function actualizarBadgeSync(){var b=document.getElementById("badgeSync");if(!b)
    opciones y permisos y redibuja la vista actual. La venta en curso vive
    en kupoPosV146Ticket y se guarda en cada cambio, así que no se pierde:
    primero se guarda el estado en memoria y luego se relee. */
+
+/* v118 (Lalo 2026-11-22): Recargar también avisa si hay una versión nueva
+   del sistema. El aviso NO recarga solo: solo aparece y Lalo decide tocar
+   "Aplicar actualización" (eso sí recarga la página y se sale de la
+   pantalla completa, hay que volver a entrarle). verificarActualizacion
+   es comprobable con una registración simulada ({waiting} o {waiting:null}). */
+function mostrarAvisoActualizacion(){
+ if(document.getElementById("avisoActualizacion"))return;
+ var d=document.createElement("div");
+ d.className="aviso-actualizacion";d.id="avisoActualizacion";
+ d.innerHTML='🆕 <b>Hay una versión nueva del sistema.</b><br><span style="font-weight:600">Toca «Aplicar actualización» para usarla. Al aplicar se sale de la pantalla completa y hay que volver a entrarle.</span><div class="aviso-botones"><button type="button" class="aviso-aplicar" onclick="aplicarActualizacion()">⬇️ Aplicar actualización</button><button type="button" class="aviso-ahora" onclick="cerrarAvisoActualizacion()">Ahora no</button></div>';
+ document.body.appendChild(d);
+}
+function cerrarAvisoActualizacion(){var d=document.getElementById("avisoActualizacion");if(d)d.remove();}
+function aplicarActualizacion(){location.reload();}
+function verificarActualizacion(registro){
+ if(!registro||!registro.waiting)return false;
+ mostrarAvisoActualizacion();
+ return true;
+}
 async function recargarPantalla(){
  if(!sesionValida()){toast("Inicia sesión para recargar.");return;}
  try{guardar();}catch(e){}
@@ -4400,6 +4490,18 @@ async function recargarPantalla(){
  try{if(typeof descargarNube==="function")await descargarNube({silencioso:true});}catch(e){}
  try{if(typeof render==="function")render();}catch(e){}
  toast("Pantalla actualizada ✅");
+ /* v118: avisar si hay una versión nueva publicada (sin recargar solo). */
+ try{
+  if("serviceWorker" in navigator&&navigator.serviceWorker&&navigator.serviceWorker.getRegistration){
+   navigator.serviceWorker.getRegistration().then(function(reg){
+    if(!reg)return;
+    var p=null;
+    try{p=reg.update();}catch(e){}
+    if(p&&p.then){p.then(function(){verificarActualizacion(reg);}).catch(function(){verificarActualizacion(reg);});}
+    else{verificarActualizacion(reg);}
+   }).catch(function(){});
+  }
+ }catch(e){}
 }
 async function sincronizarAhora(){
  if(sincronizandoNube){toast("☁️ Ya se está sincronizando…");return}
