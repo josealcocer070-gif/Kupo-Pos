@@ -1354,7 +1354,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <select id="tPapel" onchange="cambiarPapelTicket()"><option>80 mm</option><option>58 mm</option></select>
 <label>Mensaje de pie de ticket</label>
 <input id="tMensaje" value="¡Gracias por su compra!">
-<label>Logo del negocio (encabezado y ticket)</label>
+<label>Logo del negocio (solo ticket)</label>
 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
 <img id="tLogoPreview" alt="Logo del negocio" style="max-width:120px;max-height:80px;display:none;background:#fff;border:1px solid #dfe5ea;border-radius:10px;padding:6px">
 <span id="tLogoVacio" style="font-size:13px;color:#666">Sin logo — arriba se ve el logo de KUPO y el ticket solo muestra el nombre del negocio en texto.</span>
@@ -1364,7 +1364,19 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" class="secundario" onclick="quitarLogoNegocio()">Quitar logo</button>
 </div>
 <input type="file" id="tLogoArchivo" accept="image/jpeg,image/png,image/*" style="display:none" onchange="subirLogoNegocio(event)">
-<p style="font-size:12px;color:#666">El logo se guarda solo en este dispositivo (localStorage, base64). No se sube a ningún servidor. Se ve en el encabezado (recortado en cuadro) y arriba en el ticket.</p>
+<p style="font-size:12px;color:#666">El logo se guarda solo en este dispositivo (localStorage, base64). No se sube a ningún servidor. Solo sale arriba en el ticket.</p>
+<label>Logo del encabezado (a color)</label>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<img id="tLogoEncPreview" alt="Logo del encabezado" style="max-width:120px;max-height:80px;display:none;background:#fff;border:1px solid #dfe5ea;border-radius:10px;padding:6px">
+<span id="tLogoEncVacio" style="font-size:13px;color:#666">Sin logo — arriba se ve la K de KUPO.</span>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+<button type="button" onclick="document.getElementById('tLogoEncArchivo').click()">📷 Subir logo del encabezado (JPG/PNG)</button>
+<button type="button" class="secundario" onclick="quitarLogoEncabezado()">Quitar logo del encabezado</button>
+</div>
+<input type="file" id="tLogoEncArchivo" accept="image/jpeg,image/png,image/*" style="display:none" onchange="subirLogoEncabezado(event)">
+<p style="font-size:12px;color:#666">Este logo sale en el encabezado, a color, en lugar de la K de KUPO. Es independiente del logo del ticket.</p>
+
 <div class="checks">
 <label class="perm-fila"><span>Mostrar logo del negocio en el ticket</span><span class="interruptor"><input type="checkbox" id="tMostrarLogo" checked><span class="deslizador"></span></span></label>
 <label class="perm-fila"><span>Mostrar IVA (16%)</span><span class="interruptor"><input type="checkbox" id="tMostrarIva" checked><span class="deslizador"></span></span></label>
@@ -1416,7 +1428,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 </div>
 <div class="ticket-preview">
-<h2>Vista previa · 80 mm</h2>
+<h2 id="titVistaPrevia">Vista previa · 80 mm</h2>
 <div class="ticket-80" id="vistaPreviaTicket"></div>
 <button class="btn-cobrar" style="margin-top:12px" onclick="probarImpresion()">🖨 Probar impresión</button>
 <p style="font-size:12px;color:#666;margin-top:10px;text-align:center">Imprime un ticket de prueba con los datos personalizados en la terminal activa.</p>
@@ -2229,6 +2241,7 @@ function cargarTicketConfig(){
 function renderTicketPreview(){
  const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
  box.classList.toggle("papel58",(ticketConfig.papel||"80 mm")==="58 mm");
+ const tv=document.getElementById("titVistaPrevia"); if(tv)tv.textContent="Vista previa · "+(ticketConfig.papel||"80 mm");
  const logo=ticketConfig.mostrarLogo!==false&&ticketConfig.logo?'<img src="'+ticketConfig.logo+'" alt="Logo del negocio"><br>':"";
  const total=70, iva=total-(total/1.16);
  const folioTxt=ticketConfig.mostrarFolio!==false?("Folio #"+String(folio+1).padStart(4,"0")+"<br>"):"";
@@ -2251,7 +2264,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig(); prepararLogoTicket();
@@ -2259,7 +2272,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(ya){
  if(!ya){pedirConfirmacion("¿Restablecer los datos del ticket a los valores de ejemplo?","Restablecer",function(){restablecerTicketConfig(true)});return;}
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",logoEncabezado:"",papel:"80 mm",abrirCajon:true};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -2277,10 +2290,12 @@ function aplicarLogoEncabezado(){
  var img=document.getElementById("logoEncabezado");
  if(!img)return;
  if(!logoDefectoEncabezado)logoDefectoEncabezado=img.src;
- img.src=(typeof ticketConfig!=="undefined"&&ticketConfig&&ticketConfig.logo)?ticketConfig.logo:logoDefectoEncabezado;
+ img.src=(typeof ticketConfig!=="undefined"&&ticketConfig&&ticketConfig.logoEncabezado)?ticketConfig.logoEncabezado:logoDefectoEncabezado;
 }
 function mostrarLogoPreview(){
  aplicarLogoEncabezado();
+ const imgE=document.getElementById("tLogoEncPreview"); const vacioE=document.getElementById("tLogoEncVacio");
+ if(imgE&&vacioE){if(ticketConfig.logoEncabezado){imgE.src=ticketConfig.logoEncabezado; imgE.style.display=""; vacioE.style.display="none";}else{imgE.removeAttribute("src"); imgE.style.display="none"; vacioE.style.display="";}}
  const img=document.getElementById("tLogoPreview"); const vacio=document.getElementById("tLogoVacio");
  if(!img||!vacio)return;
  if(ticketConfig.logo){img.src=ticketConfig.logo; img.style.display=""; vacio.style.display="none";}
@@ -2295,7 +2310,7 @@ function subirLogoNegocio(ev){
   const usar=function(url){
    if(done)return; done=true;
    ticketConfig.logo=url; guardar(); mostrarLogoPreview(); renderTicketPreview(); prepararLogoTicket();
-   toast("Logo del negocio guardado. Ya sale en el encabezado y arriba en el ticket.");
+   toast("Logo del negocio guardado. Ya sale arriba en el ticket.");
   };
   const img=new Image();
   img.onload=function(){
@@ -2314,11 +2329,45 @@ function subirLogoNegocio(ev){
  rd.readAsDataURL(f);
  if(ev.target)ev.target.value="";
 }
+function subirLogoEncabezado(ev){
+ const f=ev&&ev.target&&ev.target.files&&ev.target.files[0]; if(!f)return;
+ if(!f.type||f.type.indexOf("image/")!==0){toast("Elige una imagen JPG o PNG.");return}
+ const rd=new FileReader();
+ rd.onload=function(){
+  const dataUrl=rd.result; let done=false;
+  const usar=function(url){
+   if(done)return; done=true;
+   ticketConfig.logoEncabezado=url; guardar(); mostrarLogoPreview(); renderTicketPreview();
+   toast("Logo del encabezado guardado. Ya sale arriba, a color, en lugar de la K de KUPO.");
+  };
+  const img=new Image();
+  img.onload=function(){
+   try{
+    const c=document.createElement("canvas"); const ctx=c.getContext&&c.getContext("2d");
+    if(!ctx||!img.naturalWidth){usar(dataUrl);return}
+    const max=300, w=Math.min(max,img.naturalWidth), h=Math.max(1,Math.round(img.naturalHeight*w/img.naturalWidth));
+    c.width=w; c.height=h; ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+    usar(c.toDataURL("image/jpeg",0.85));
+   }catch(e){usar(dataUrl)}
+  };
+  img.onerror=function(){usar(dataUrl)}
+  img.src=dataUrl;
+  setTimeout(function(){usar(dataUrl)},800);
+ };
+ rd.readAsDataURL(f);
+ if(ev.target)ev.target.value="";
+}
+function quitarLogoEncabezado(ya){
+ if(!ticketConfig.logoEncabezado){toast("No hay logo del encabezado que quitar.");return}
+ if(!ya){pedirConfirmacion("¿Quitar el logo del encabezado? Arriba volverá la K de KUPO.","Quitar",function(){quitarLogoEncabezado(true)});return;}
+ ticketConfig.logoEncabezado=""; guardar(); mostrarLogoPreview(); renderTicketPreview();
+ toast("Logo del encabezado quitado. Arriba vuelve la K de KUPO.");
+}
 function quitarLogoNegocio(ya){
  if(!ticketConfig.logo){toast("No hay logo que quitar.");return}
- if(!ya){pedirConfirmacion("¿Quitar el logo del negocio del encabezado y del ticket?","Quitar",function(){quitarLogoNegocio(true)});return;}
+ if(!ya){pedirConfirmacion("¿Quitar el logo del negocio del ticket?","Quitar",function(){quitarLogoNegocio(true)});return;}
  ticketConfig.logo=""; guardar(); mostrarLogoPreview(); renderTicketPreview(); prepararLogoTicket();
- toast("Logo quitado. Arriba vuelve el logo de KUPO y el ticket solo muestra el nombre del negocio.");
+ toast("Logo quitado. El ticket solo muestra el nombre del negocio.");
 }
 function ticketImpresoHTML(v){
  const total=v.total||0, base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total, descMonto=Math.min(Number(v.descuento)||0,base), iva=base-(base/1.16);
