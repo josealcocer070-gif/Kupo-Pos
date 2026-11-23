@@ -488,7 +488,7 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
  #barraVentaMovil .barra-total small{display:block;font-size:11px;color:#666;font-weight:700;letter-spacing:1px}
  #barraVentaMovil .barra-total b{font-size:26px;color:var(--dorado2);white-space:nowrap}
  #barraVentaMovil .barra-cobrar{background:var(--dorado);border:0;border-radius:22px;padding:14px 20px;font-size:18px;font-weight:800;cursor:pointer;white-space:nowrap}
- /* Menú inferior fijo: 5 accesos */
+ /* Menú inferior fijo (v133): 4 accesos — Ventas, Corte, Reportes, Mensajes */
  #menuMovil{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
  #menuMovil button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
  #menuMovil button span{font-size:21px;line-height:1}
@@ -694,9 +694,8 @@ body.movil-ventas #barraVentaMovil{display:flex!important}
 #barraVentaMovil .barra-total small{display:block;font-size:11px;color:#666;font-weight:700;letter-spacing:1px}
 #barraVentaMovil .barra-total b{font-size:26px;color:var(--dorado2);white-space:nowrap}
 #barraVentaMovil .barra-cobrar{background:var(--dorado);border:0;border-radius:22px;padding:14px 20px;font-size:18px;font-weight:800;cursor:pointer;white-space:nowrap}
-/* Menú inferior fijo: 5 accesos */
+/* Menú inferior fijo (v133): 4 accesos — Ventas, Corte, Reportes, Mensajes */
 #menuMovil{display:flex!important;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
-#menuMovil{display:none!important}
 #menuMovil button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
 #menuMovil button span{font-size:21px;line-height:1}
 #menuMovil button.activo{background:rgba(255,255,255,.22)}
@@ -760,7 +759,7 @@ header::after{content:"🔔  👤";font-size:24px!important;line-height:1;white-
 #vistaVentas .btn-agregar::after{content:"+";font-size:32px!important;font-weight:800!important;line-height:1}
 #vistaVentas .btn-agregar:disabled{background:#d7dde3!important;color:#8a94a0!important}
 /* Barra de venta: tarjeta azul oscuro, TOTAL dorado grande y Cobrar amarillo */
-#barraVentaMovil{left:12px!important;right:12px!important;bottom:12px!important;background:#0b2a5e!important;border:0!important;border-radius:20px!important;padding:12px!important;gap:10px!important;box-shadow:0 8px 22px rgba(11,42,94,.35)!important} /* Lalo 2026-11-15: el botón Cobrar se salía de la barra a 390px; barra más compacta para que siempre quepa */
+#barraVentaMovil{left:12px!important;right:12px!important;bottom:96px!important;background:#0b2a5e!important;border:0!important;border-radius:20px!important;padding:12px!important;gap:10px!important;box-shadow:0 8px 22px rgba(11,42,94,.35)!important} /* Lalo 2026-11-15: el botón Cobrar se salía de la barra a 390px; barra más compacta para que siempre quepa */
 #barraVentaMovil .barra-detalle{flex:0 0 48px!important;width:48px!important;min-height:48px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:50%!important;font-size:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
 #barraVentaMovil .barra-detalle::after{content:"🛒";font-size:22px!important}
 #barraVentaMovil .barra-detalle span,#barraVentaMovil .barra-detalle small{display:none!important}
@@ -770,9 +769,9 @@ header::after{content:"🔔  👤";font-size:24px!important;line-height:1;white-
 #barraVentaMovil .barra-cobrar{flex:0 0 auto!important;background:#f5b800!important;color:#0a2456!important;border-radius:14px!important;min-height:56px!important;padding:12px 14px!important;font-size:0!important;font-weight:800!important}
 #barraVentaMovil .barra-cobrar::before{content:"🛍️ Cobrar venta";font-size:17px!important;font-weight:800!important;color:#0a2456!important}
 body.venta-movil-abierta .panel{bottom:180px!important}
-/* Menú inferior: azul noche, pestaña activa en dorado */
-#menuMovil{height:72px!important;background:#0a2456!important}
-#menuMovil button{color:#fff!important;font-size:11px!important}
+/* Menú inferior (v133, mockup aprobado por Lalo 2026-11-23): barra clara, inactivos en gris, pestaña activa en dorado */
+#menuMovil{height:72px!important;background:#ffffff!important}
+#menuMovil button{color:#8a94a6!important;font-size:11px!important}
 #menuMovil button span{font-size:24px!important}
 #menuMovil button.activo{background:transparent!important;color:#f5b800!important}
 /* Se conserva lo útil del bloque anterior: botones grandes y confirmación */
@@ -833,7 +832,7 @@ header{top:calc(12px + env(safe-area-inset-top,0px))!important;margin-top:calc(1
 /* Barra de inicio de iOS (gesto) y barra de navegación de Android:
    menú inferior y barra de venta suben lo que mide el safe-area */
 #menuMovil{height:calc(72px + env(safe-area-inset-bottom,0px))!important;padding-bottom:env(safe-area-inset-bottom,0px)!important}
-#barraVentaMovil{bottom:calc(12px + env(safe-area-inset-bottom,0px))!important}
+#barraVentaMovil{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
 body.venta-movil-abierta .panel{bottom:calc(180px + env(safe-area-inset-bottom,0px))!important}
 .toast{top:calc(88px + env(safe-area-inset-top,0px))!important}
 main{padding-bottom:calc(176px + env(safe-area-inset-bottom,0px))!important}
@@ -867,7 +866,7 @@ aside nav a{min-height:48px!important}
 /* Barra TOTAL/Cobrar: solo en Ventas, nunca tapada por el menu inferior.
    El menu mide 72px + safe-area; la barra queda a 96px + safe-area y
    con z-index por encima del menu, para que el TOTAL se vea completo. */
-#barraVentaMovil{display:none!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;z-index:65!important}
+#barraVentaMovil{display:none!important;bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;z-index:65!important}
 body.movil-ventas #barraVentaMovil{display:flex!important}
 body.venta-movil-abierta .panel{bottom:calc(196px + env(safe-area-inset-bottom,0px))!important}
 main{padding-bottom:calc(216px + env(safe-area-inset-bottom,0px))!important}
@@ -1202,6 +1201,10 @@ html[data-tema="noche"] .ticket-preview,html[data-tema="noche"] .term-row,html[d
 html[data-tema="noche"] .conf-tarjeta,html[data-tema="noche"] .scan-tarjeta,html[data-tema="noche"] .panel,
 html[data-tema="noche"] .panel-pie,html[data-tema="noche"] .acciones,html[data-tema="noche"] .ticket-encabezado,
 html[data-tema="noche"] .ent-menu,html[data-tema="noche"] .conf-mixto{background:var(--sup);border-color:var(--borde2)}
+/* v133: en modo noche el menú inferior vuelve a azul noche con la activa en dorado. */
+html[data-tema="noche"] #menuMovil{background:#0a2456!important}
+html[data-tema="noche"] #menuMovil button{color:#fff!important}
+html[data-tema="noche"] #menuMovil button.activo{color:#f5b800!important}
 html[data-tema="noche"] .negocio-box,html[data-tema="noche"] .ticket-vacio,html[data-tema="noche"] .vacio-accion,
 html[data-tema="noche"] .contratar .plan,html[data-tema="noche"] .teclado button,html[data-tema="noche"] .chat-dia,
 html[data-tema="noche"] .ent-elegido,html[data-tema="noche"] #listaProdEnt .cot-prod.sel,
@@ -1461,7 +1464,6 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️<span class="badge-sync" id="badgeSync">0</span></button>
-<button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar">🔄</button>
 <button type="button" class="btn-tema" id="btnReconectarBT" onclick="reconectarImpresoraBT()" aria-label="Reconectar impresora Bluetooth" title="Reconectar impresora">🔄</button>
 <button type="button" class="btn-tema" id="btnTema" onclick="cambiarTema()" aria-label="Cambiar a modo noche">🌙</button>
@@ -1507,21 +1509,14 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <nav>
 <a class="activo" id="navVentas" onclick="mostrarVista('ventas')"><span class="icono-3d">🧾</span> Ventas</a>
 <a id="navProductos" onclick="mostrarVista('productos')"><span class="icono-3d">📦</span> Productos</a>
-<a id="navCotizaciones" onclick="mostrarVista('cotizaciones')"><span class="icono-3d">📋</span> Cotizaciones</a>
-<a id="navEntradas" onclick="mostrarVista('entradas')"><span class="icono-3d">➕</span> Entradas</a>
-<a id="navGastos" onclick="mostrarVista('gastos')"><span class="icono-3d">💲</span> Gastos</a>
 <a id="navCorte" onclick="mostrarVista('cortes')"><span class="icono-3d">📊</span> Corte diario</a>
 <a id="navReportes" onclick="mostrarVista('reportes')"><span class="icono-3d">📈</span> Reportes</a>
 <a id="navHistCortes" onclick="irHistorialCortes()"><span class="icono-3d">🕐</span> Historial de cortes</a>
-<a id="navImportar" onclick="mostrarVista('importar')"><span class="icono-3d">📥</span> Importar Excel <span class="insignia-nuevo">Nuevo</span></a>
 <a id="navMensajes" onclick="mostrarVista('mensajes')"><span class="icono-3d">💬</span> Mensajes <span class="badge-msg" id="badgeMsgMenu">0</span></a>
 </nav>
 <div class="sec">SISTEMA</div>
 <nav>
-<a id="navTicket" onclick="mostrarVista('ticket')"><span class="icono-3d">🎟</span> Personalizar ticket</a>
 <a id="navCajeros" onclick="mostrarVista('cajeros')"><span class="icono-3d">🛡</span> Cajeros y permisos</a>
-<a id="navAdminLic" onclick="mostrarVista('adminlic')"><span class="icono-3d">⚙️</span> Administrador de licencia</a>
-<a id="navMulti" onclick="mostrarVista('multi')"><span class="icono-3d">🏬</span> Multi-almacén</a>
 </nav>
 <div class="sec">ACCIONES</div>
 <nav>
@@ -1558,7 +1553,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 <div id="vistaProductos" class="oculto">
 <h1>Productos</h1>
-<p id="descProductos" style="color:#555;margin-bottom:14px">Inventario del negocio. Lo que cambies aquí se refleja en Ventas: si el stock llega a 0, el producto ya no se puede agregar a la venta, y al cobrar baja el stock.</p>
+<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. En el celular no se crean ni se cambian productos; eso se hace en la versión de PC.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL PRODUCTOS</small><b id="resTotal">0</b></div>
 <div class="tarjeta"><small>DISPONIBLES</small><b id="resDisp">0</b></div>
@@ -1567,7 +1562,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="tarjeta" id="tarjStockBajo"><small>STOCK BAJO</small><b class="alerta" id="resStockBajo">0</b></div>
 <div class="tarjeta"><small>MARGEN PROMEDIO</small><b id="resMargen">0%</b></div>
 </div>
-<div class="form-prod">
+<!-- v133: en la móvil Productos es solo consulta; el formulario de alta/edición queda oculto (sigue en el DOM para no romper las funciones que lo referencian). -->
+<div class="form-prod" style="display:none">
 <h2 id="tituloFormProd">+ Nuevo producto</h2>
 <form onsubmit="guardarProducto(event)">
 <input type="hidden" id="pId">
@@ -1730,7 +1726,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaCortes" class="oculto">
 <h1>Corte diario</h1>
 <p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · <span id="textoCorteDiario">Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.</span></p>
-<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px">📦<b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.<br><button type="button" onclick="mostrarVista('adminlic')">⚙️ Activarlo en Administrador de licencia</button></div>
+<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px">📦<b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.</div>
 <div class="form-prod" id="secCorteDinero">
 <h2>💰 Corte de dinero</h2>
 <div class="resumen">
@@ -1792,7 +1788,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 <div id="secPronostico">
 <h2>🔮 Pronóstico de la semana</h2>
-<p style="color:#555;font-size:13px;margin-bottom:10px">Kupi calcula esto con tus ventas pasadas: qué días se vende más y cuánto preparar la próxima semana.</p>
+<p style="color:#555;font-size:13px;margin-bottom:10px">El pronóstico se calcula con tus ventas pasadas: qué días se vende más y cuánto preparar la próxima semana.</p>
 <div id="contPronostico"></div>
 </div>
 <h2>💰 Hoy</h2>
@@ -2003,7 +1999,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <label class="perm-fila"><span>🚫 Sin stock <span id="estSinStock" style="color:#666">· Desactivado</span></span><span class="interruptor"><input type="checkbox" id="optSinStock" onchange="cambiarOpcionSistema('sinStock',this.checked)"><span class="deslizador"></span></span></label>
 </div>
 <p id="textoAyudaOpciones" style="font-size:12px;color:#666">Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. Multi-almacén desactivado: no aparece en el menú. Los datos de ticket, cajeros y terminales de este negocio también son por licencia.</p>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button><button type="button" id="btnIrMulti" class="secundario" onclick="mostrarVista('multi')">🏬 Ir a Multi-almacén</button></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button type="button" id="btnIrCorteProd" onclick="mostrarVista('cortes')">📦 Ir a Corte diario</button></div>
 </div>
 <div class="form-prod"><h2>📦 Corte por productos</h2>
 <p style="font-size:14px;color:#555">Activado: en Corte diario se hacen 2 cortes por separado, uno de dinero y uno de productos, cada uno con su propio botón, folio y lugar en el historial. Es para negocios como la pollería, que no manejan entradas y llevan 2 cortes.</p>
@@ -2183,16 +2179,15 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <!-- Lalo 2026-11-12 19:31: en el panel solo queda Cobrar. Forma de pago, efectivo recibido y cambio se escogen en la pantalla de confirmación. -->
 <button class="btn-cobrar" onclick="mostrarConfirmacionCobro()">Cobrar venta</button>
-<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.7.0: Ventas, Productos, Entradas, Gastos, Corte diario, Historial de cortes, Personalizar ticket, Cajeros y permisos, Administrador de licencia y Multi-almacén sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
+<p style="font-size:12px;color:#666;margin-top:10px;text-align:center">KUPO POS V1.7.0: Ventas, Productos (consulta), Corte diario, Historial de cortes, Reportes, Mensajes y Cajeros y permisos sincronizados con Ventas. Los datos se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 </div>
 </section>
 </div>
 <nav id="menuMovil" aria-label="Menú móvil">
- <button type="button" data-nav="ventas" class="activo" onclick="mostrarVista('ventas')"><span>🧾</span>Ventas</button>
- <button type="button" data-nav="productos" onclick="mostrarVista('productos')"><span>📦</span>Productos</button>
+ <button type="button" data-nav="ventas" class="activo" onclick="mostrarVista('ventas')"><span>🛒</span>Ventas</button>
+ <button type="button" data-nav="cortes" onclick="mostrarVista('cortes')"><span>💰</span>Corte</button>
+ <button type="button" data-nav="reportes" onclick="mostrarVista('reportes')"><span>📊</span>Reportes</button>
  <button type="button" data-nav="mensajes" onclick="mostrarVista('mensajes')"><span>💬</span>Mensajes<span class="badge-msg" id="badgeMsgBar">0</span></button>
- <button type="button" data-nav="cortes" onclick="mostrarVista('cortes')"><span>📊</span>Corte</button>
- <button type="button" onclick="toggleMenu()"><span>☰</span>Más</button>
 </nav>
 <div id="barraVentaMovil">
  <button type="button" class="barra-detalle" onclick="abrirCatalogo()">🛒 <span id="barraArticulos">0 artículos</span><small>Abrir catálogo</small></button>
@@ -2441,7 +2436,7 @@ function abrirAvisos(){
 function cerrarAvisos(){document.getElementById("modalAvisos").classList.remove("abierto")}
 function irAProducto(id){
  cerrarAvisos();mostrarVista("productos");
- if(!(sesionActual&&sesionActual.rol==="Cajero")){try{editarProducto(id)}catch(e){}}
+ /* v133: en la móvil Productos es solo consulta; ya no se abre el editor al tocar un aviso. */
 }
 function abrirSesion(){
  const s=sesionActual||{};
@@ -2773,7 +2768,7 @@ function aplicarOpcionesSistema(){
  var ta=document.getElementById("tarjAgot"); if(ta)ta.style.display=opcionesSistema.sinStock===true?"none":"";
  var tv=document.getElementById("tarjValor"); if(tv)tv.style.display=opcionesSistema.sinStock===true?"none":"";
  var tsb=document.getElementById("tarjStockBajo"); if(tsb)tsb.style.display=opcionesSistema.sinStock===true?"none":"";
- var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Lo que cambies aquí se refleja en Ventas. Esta licencia no maneja stock: los productos siempre están disponibles y al cobrar no se descuenta nada.":"Inventario del negocio. Lo que cambies aquí se refleja en Ventas: si el stock llega a 0, el producto ya no se puede agregar a la venta, y al cobrar baja el stock.";
+ var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. En el celular no se crean ni se cambian productos; eso se hace en la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. En el celular no se crean ni se cambian productos; eso se hace en la versión de PC.";
  var fp=document.getElementById("filtroProd"); if(fp){var oa=fp.querySelector('option[value="agotados"]'); if(oa)oa.style.display=opcionesSistema.sinStock===true?"none":""; if(opcionesSistema.sinStock===true&&fp.value==="agotados"){fp.value="todos";if(typeof renderProductos==="function")renderProductos();}}
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
@@ -3827,7 +3822,12 @@ function renderReportes(){
  renderPronostico();
 }
 
+/* v133: en la móvil ya no existen los botones de los apartados solo-PC; este ayudante evita que mostrarVista falle si falta un botón. */
+function navAct(id,on){var e=document.getElementById(id);if(e)e.classList.toggle("activo",on);}
 function mostrarVista(v){
+ /* v133: versión móvil pulida (Lalo 2026-11-23): solo Ventas, Productos (consulta), Cortes, Reportes, Mensajes, Cajeros (Admin) y la barra inferior. Administrador de licencia, Multi-almacén, Personalizar ticket, Cotizaciones, Importar, Entradas y Gastos solo existen en la versión de PC. */
+ var VISTAS_SOLO_PC=["adminlic","multi","ticket","cotizaciones","importar","entradas","gastos"];
+ if(VISTAS_SOLO_PC.indexOf(v)!==-1){toast("📱 Esta función solo está en la versión de PC.");v="ventas";}
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso para esta sección. Pide al Administrador que te active el permiso.");return}
  if(v==="mensajes"&&!chatActivo()&&!esAdminChat()){toast("💬 El chat interno está apagado. Pide al Administrador que lo prenda.");return}
  if(v!=="mensajes"&&mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}
@@ -3860,18 +3860,18 @@ function mostrarVista(v){
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
- document.getElementById("navImportar").classList.toggle("activo",v==="importar");
+ navAct("navImportar",v==="importar");
  if(v==="importar")marcarImportarVisto();
- document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
- document.getElementById("navGastos").classList.toggle("activo",v==="gastos");
+ navAct("navEntradas",v==="entradas");
+ navAct("navGastos",v==="gastos");
  document.getElementById("navCorte").classList.toggle("activo",v==="cortes");
  document.getElementById("navReportes").classList.toggle("activo",v==="reportes");
  document.getElementById("navHistCortes").classList.toggle("activo",v==="historial");
- document.getElementById("navTicket").classList.toggle("activo",v==="ticket");
+ navAct("navTicket",v==="ticket");
  document.getElementById("navCajeros").classList.toggle("activo",v==="cajeros");
- document.getElementById("navMulti").classList.toggle("activo",v==="multi");
- document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
- document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
+ navAct("navMulti",v==="multi");
+ navAct("navAdminLic",v==="adminlic");
+ navAct("navCotizaciones",v==="cotizaciones");
  var _nm=document.getElementById("navMensajes");if(_nm)_nm.classList.toggle("activo",v==="mensajes");
  document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");/* Apartados 2026-11-13: el menu lateral se cierra siempre al cambiar de apartado, tambien en modo escritorio del celular/tablet, para que no tape el apartado activo. */
  if(v==="productos")renderProductos(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
@@ -4122,12 +4122,12 @@ function renderProductos(){
  const _mg=document.getElementById("resMargen");if(_mg)_mg.textContent=catalogo.length?Math.round(catalogo.reduce(function(a,p){return a+margenProducto(p)},0)/catalogo.length)+"%":"0%";
  const estFiltro=f==="disponibles"?"disponible":f==="agotados"?"agotado":f==="pausados"?"pausado":"todos";
  const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>estFiltro==="todos"||estadoDe(p)===estFiltro);
- if(!items.length){lista.innerHTML='<div class="ticket-vacio">📦<br><b>No hay productos con ese filtro</b><br>Agrega uno nuevo con el formulario de arriba.</div>';return}
+ if(!items.length){lista.innerHTML='<div class="ticket-vacio">📦<br><b>No hay productos con ese filtro</b></div>';return}
  items.forEach(p=>{
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";
   const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div><div class="acciones-prod"><button onclick="editarProducto(${p.id})" title="Editar" aria-label="Editar ${escHtml(p.nombre)}">✏️</button><button onclick="togglePausa(${p.id})" title="${p.pausado?"Activar":"Pausar"}" aria-label="${p.pausado?"Activar":"Pausar"} ${escHtml(p.nombre)}">${p.pausado?"▶️":"⏸"}</button><button class="peligro" onclick="eliminar(${p.id})" title="Eliminar" aria-label="Eliminar ${escHtml(p.nombre)}">🗑</button></div></div>`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div>`;
   lista.appendChild(d);
  });
 }
@@ -4189,7 +4189,7 @@ function renderPronostico(){
  var cont=document.getElementById("contPronostico");if(!cont)return;
  var pr=calcularPronostico();
  if(!pr.totalVentas){
-  cont.innerHTML='<div class="vacio-accion">🔮<b>Aún no hay ventas para pronosticar</b>Vende algo en Ventas y Kupi irá aprendiendo de tus días fuertes.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div>';
+  cont.innerHTML='<div class="vacio-accion">🔮<b>Aún no hay ventas para pronosticar</b>Vende algo en Ventas y el pronóstico irá aprendiendo de tus días fuertes.<br><button type="button" onclick="mostrarVista(\'ventas\')">🧾 Ir a Ventas</button></div>';
   return;
  }
  var h="";
@@ -5663,11 +5663,5 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<div id="panelChatKupi" class="oculto">
-<div class="kupi-encabezado"><img id="imgKupiEnc" alt="Kupi"><div><b>Kupi</b><span>● En línea</span></div><button type="button" onclick="toggleChatKupi()" aria-label="Cerrar el chat">✕</button></div>
-<div id="kupiMensajes"></div>
-<div class="kupi-chips"><button type="button" onclick="kupiChip('¿Cuánto vendí hoy?')">¿Cuánto vendí hoy?</button><button type="button" onclick="kupiChip('¿Qué se está acabando?')">¿Qué se está acabando?</button><button type="button" onclick="kupiChip('¿Cómo viene la semana?')">¿Cómo viene la semana?</button></div>
-<div class="kupi-entrada"><input id="kupiEntrada" type="text" placeholder="Escribe tu pregunta..." autocomplete="off" onkeydown="if(event.key==='Enter')kupiEnviar()"><button type="button" onclick="kupiEnviar()" aria-label="Enviar">➤</button></div>
-</div>
 </body>
 </html>
