@@ -64,6 +64,7 @@ header .user span{display:block;font-size:13px;color:#bcd7e6}
 .chat-entrada input:disabled{background:transparent;color:#999}
 .chat-entrada button{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800);color:#0b2a5e;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 3px 7px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
 .chat-entrada button:disabled{opacity:.45;cursor:not-allowed}
+.chat-probar{margin:0 0 12px;border:1px solid #c9d4dc;background:#fff;color:#0b4a6e;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .menu-btn{display:block;background:none;border:0;color:#fff;font-size:26px;cursor:pointer;padding:4px 8px;border-radius:8px}
 .menu-btn:hover{background:rgba(255,255,255,.15)}
 .acciones{background:#fff;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px;border-bottom:1px solid #dfe5ea;position:sticky;top:72px;z-index:15}
@@ -668,7 +669,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 @media(max-width:760px){#pantallaLogin .teclado{display:none!important}}
 @media(pointer:coarse){#pantallaLogin .teclado{display:none!important}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.min.js"></script>
 <script src="xlsx.full.min.js"></script>
 <style id="header-100-zoom">
 /* Encabezado que cabe al 100% de zoom (Lalo, 2026-11-14): a 360px la campana y el perfil se salían 76px a la derecha porque el nombre (máx. 56vw) no dejaba encoger el encabezado; ahora el nombre se recorta con … y todo cabe sin bajar el zoom a 67%. */
@@ -841,6 +842,7 @@ html[data-tema="noche"] .chat-entrada{background:var(--sup2);border-color:var(--
 html[data-tema="noche"] .chat-entrada input{color:var(--texto)}
 html[data-tema="noche"] .chat-msg.fallo{background:#3d1d1d;color:#ffb3b3}
 html[data-tema="noche"] .chat-msg.fallo .hora{color:#ff9a9a}
+html[data-tema="noche"] .chat-probar{background:var(--sup2);border-color:var(--borde2);color:var(--texto)}
 html[data-tema="noche"] .inicio{background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#000 52%)}
 html[data-tema="dia"] .inicio{background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#fff 52%)}
 html[data-tema="noche"] .cambio{background:#0e3a30;border-color:#1d5f5e;color:var(--texto)}
@@ -1528,6 +1530,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaMensajes" class="oculto">
 <div class="chat-cabecera"><h1>💬 Mensajes</h1><span class="chat-toggle" id="chatToggleWrap"><span>Chat interno</span><label class="interruptor"><input type="checkbox" id="optChatActivo" onchange="cambiarChatActivo(this.checked)"><span class="deslizador"></span></label></span></div>
 <p class="chat-nota">Chat del equipo: solo Administrador y Cajeros. Solo texto, sin fotos. Los mensajes se guardan por licencia.</p>
+<button type="button" class="chat-probar" onclick="probarConexionChat()">🔍 Probar conexión</button>
 <p class="chat-nota oculto" id="chatApagado" style="color:#a33">⛔ El chat interno está apagado para los cajeros. Préndelo con el interruptor para que vuelvan a ver Mensajes.</p>
 <div class="chat-lista" id="chatLista"></div>
 <div class="chat-entrada"><input id="chatTexto" maxlength="500" placeholder="Escribe un mensaje…" autocomplete="off" onkeydown="if(event.key==='Enter')enviarMensajeChat()"><button type="button" id="chatEnviar" onclick="enviarMensajeChat()" aria-label="Enviar mensaje">➤</button></div>
@@ -4812,8 +4815,8 @@ function colorRemitenteChat(nombre){
 }
 function marcarFalloChat(){
  var q=leerMensajesPendientes();if(!q.length)return;
- var cambio=false;q.forEach(function(m){if(!m.fallo){m.fallo=true;cambio=true;}});
- if(cambio){guardarMensajesPendientes(q);mensajesChat.forEach(function(x){if(x.pendiente)x.fallo=true;});renderMensajes();}
+ var cambio=false;q.forEach(function(m){if(!m.fallo){m.fallo=true;m.error="sin librería de nube";cambio=true;}});
+ if(cambio){guardarMensajesPendientes(q);mensajesChat.forEach(function(x){if(x.pendiente){x.fallo=true;x.error="sin librería de nube";}});renderMensajes();}
 }
 function reintentarMensajeChat(idLocal){
  var q=leerMensajesPendientes();q.forEach(function(m){if(m.idLocal===idLocal)m.fallo=false;});
@@ -4826,6 +4829,17 @@ function actualizarBadgeMensajes(){
  var leido=ultimoLeidoChat(),yo=nombreRemitenteChat(),n=0;
  mensajesChat.forEach(function(m){if(!m.pendiente&&m.remitente!==yo&&m.creado_en&&new Date(m.creado_en).getTime()>leido)n++;});
  ["badgeMsgMenu","badgeMsgBar","badgeMsgVentas","badgeMsgVentasMovil"].forEach(function(id){var b=document.getElementById(id);if(!b)return;b.textContent=n;b.classList.toggle("con-nuevos",n>0);});
+}
+/* v132: botón "Probar conexión" — dice en claro si la nube responde, para no adivinar por qué no sale un mensaje. */
+async function probarConexionChat(){
+ asegurarSupabase();
+ var enLinea=(typeof navigator!=="undefined"&&navigator.onLine!==false);
+ if(!kupoSupabase){toast("🔍 Nube: la librería no cargó ("+(enLinea?"hay internet según el aparato":"sin internet según el aparato")+"). Recarga la página.");return;}
+ try{
+  var r=await kupoSupabase.from("mensajes").select("id").eq("licencia_clave",licenciaActual()).limit(1);
+  if(r.error){toast("🔍 Nube: responde con error: "+(r.error.message||"error"));return;}
+  toast("🔍 Nube OK · internet: "+(enLinea?"sí":"no (según el aparato)")+" · mensajes en la nube: "+((r.data||[]).length));
+ }catch(e){toast("🔍 Nube: no responde ("+((e&&(e.message||e.code))||"error")+").");}
 }
 function renderMensajes(){
  var lista=document.getElementById("chatLista");if(!lista)return;
@@ -4843,7 +4857,7 @@ function renderMensajes(){
   lista.innerHTML='<div class="chat-dia">Hoy · '+escHtml(hoy)+'</div>'+todos.map(function(m){
    var mio=m.remitente===yo;
    var fallo=!!(m.pendiente&&m.fallo);
-   return '<div class="chat-msg '+(mio?"propio":"entrante")+(m.pendiente?" pendiente":"")+(fallo?" fallo":"")+'"'+(fallo&&m.idLocal?' onclick="reintentarMensajeChat(\''+m.idLocal+'\')"':"")+'><span class="quien">'+(mio?"":'<span class="avatar" style="background:'+colorRemitenteChat(m.remitente)+'">'+escHtml((m.remitente||"?").charAt(0).toUpperCase())+'</span>')+escHtml(mio?"Tú":m.remitente)+' <span class="rol">· '+escHtml(m.remitente_rol||"")+'</span></span>'+escHtml(m.texto)+'<span class="hora">'+horaChat(m.creado_en)+(m.pendiente?(fallo?" · ⚠️ no se envió · toca para reintentar":" · ⏳ enviando…"):(mio?" · ✓ enviado":""))+'</span></div>';
+   return '<div class="chat-msg '+(mio?"propio":"entrante")+(m.pendiente?" pendiente":"")+(fallo?" fallo":"")+'"'+(fallo&&m.idLocal?' onclick="reintentarMensajeChat(\''+m.idLocal+'\')"':"")+'><span class="quien">'+(mio?"":'<span class="avatar" style="background:'+colorRemitenteChat(m.remitente)+'">'+escHtml((m.remitente||"?").charAt(0).toUpperCase())+'</span>')+escHtml(mio?"Tú":m.remitente)+' <span class="rol">· '+escHtml(m.remitente_rol||"")+'</span></span>'+escHtml(m.texto)+'<span class="hora">'+horaChat(m.creado_en)+(m.pendiente?(fallo?" · ⚠️ no se envió · toca para reintentar"+(m.error?" · "+escHtml(m.error):""):" · ⏳ enviando…"):(mio?" · ✓ enviado":""))+'</span></div>';
   }).join("");
  }
  lista.scrollTop=lista.scrollHeight;
@@ -4903,22 +4917,21 @@ async function reenviarMensajesPendientes(){
  try{
  var q=leerMensajesPendientes();if(!q.length)return;
  asegurarSupabase();
- if(!kupoSupabase){marcarFalloChat();return;}
- if(typeof navigator!=="undefined"&&!navigator.onLine)return;
+ if(!kupoSupabase){marcarFalloChat();toast("💬 No se pudo cargar la librería de la nube, revisa el internet y toca el mensaje para reintentar.");return;}
  var nube=[];
  try{var rs=await kupoSupabase.from("mensajes").select("id,licencia_clave,remitente,remitente_rol,texto,creado_en").eq("licencia_clave",licenciaActual()).order("creado_en",{ascending:false}).limit(100);if(!rs.error&&rs.data)nube=rs.data;}catch(e){nube=[];}
- var quedan=[];var falloEnvio=false;
+ var quedan=[];var falloEnvio=false;var ultimoError="";
  for(var i=0;i<q.length;i++){
   var m=q[i];
-  if(mensajeYaEnNube(m,nube)){var loc0=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc0){loc0.pendiente=false;loc0.fallo=false;}continue;}
+  if(mensajeYaEnNube(m,nube)){var loc0=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc0){loc0.pendiente=false;loc0.fallo=false;loc0.error="";}continue;}
   try{
    var r=await kupoSupabase.from("mensajes").insert({licencia_clave:m.licencia_clave,remitente:m.remitente,remitente_rol:m.remitente_rol,texto:m.texto});
-   if(r.error){quedan.push(m);m.fallo=true;falloEnvio=true;var locF=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(locF)locF.fallo=true;}
-   else{var loc=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc){loc.pendiente=false;loc.fallo=false;}}
-  }catch(e){quedan.push(m);m.fallo=true;falloEnvio=true;var locF2=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(locF2)locF2.fallo=true;}
+   if(r.error){var em1=(r.error.message||r.error.code||"error al enviar");quedan.push(m);m.fallo=true;m.error=String(em1).slice(0,60);falloEnvio=true;ultimoError=m.error;var locF=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(locF){locF.fallo=true;locF.error=m.error;}}
+   else{var loc=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc){loc.pendiente=false;loc.fallo=false;loc.error="";}}
+  }catch(e){var em2=((e&&(e.message||e.code))||"error al enviar");quedan.push(m);m.fallo=true;m.error=String(em2).slice(0,60);falloEnvio=true;ultimoError=m.error;var locF2=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(locF2){locF2.fallo=true;locF2.error=m.error;}}
  }
  guardarMensajesPendientes(quedan);
- if(falloEnvio&&!(window.__kupoChatErrorToast&&Date.now()-window.__kupoChatErrorToast<60000)){window.__kupoChatErrorToast=Date.now();toast("💬 No se pudo enviar el mensaje, se reintentará solo. Toca el mensaje para reintentarlo.");}
+ if(falloEnvio&&!(window.__kupoChatErrorToast&&Date.now()-window.__kupoChatErrorToast<60000)){window.__kupoChatErrorToast=Date.now();toast("💬 No se pudo enviar"+(ultimoError?": "+ultimoError:"")+". Se reintentará solo.");}
  if(quedan.length<q.length){cargarMensajes();}
  else{renderMensajes();}
  }finally{__kupoReenviando=false;}
