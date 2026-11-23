@@ -1287,6 +1287,17 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <h1>📈 Reportes</h1>
 <p style="color:#555;margin-bottom:14px"><span id="fechaReportes"></span> · Así va el negocio, en palabras simples.</p>
 <div style="margin-bottom:14px"><button type="button" onclick="actualizarReportes()">🔄 Actualizar</button> <button type="button" onclick="mostrarVista('ventas')">🧾 Ir a Ventas</button></div>
+<div id="secRep7dias">
+<h2>📅 Últimos 7 días</h2>
+<p id="resumenSemana" style="color:#0b4a6e;font-size:14px;margin-bottom:8px"></p>
+<div id="listaRep7dias"></div>
+</div>
+
+<div id="secPronostico">
+<h2>🔮 Pronóstico de la semana</h2>
+<p style="color:#555;font-size:13px;margin-bottom:10px">Kupi calcula esto con tus ventas pasadas: qué días se vende más y cuánto preparar la próxima semana.</p>
+<div id="contPronostico"></div>
+</div>
 <h2>💰 Hoy</h2>
 <div class="resumen">
 <div class="tarjeta"><small>VENDIDO HOY</small><b id="resRepHoyTotal" style="font-size:26px">$0.00</b></div>
@@ -1301,19 +1312,6 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <h2 id="titRepCajeros">👤 Ventas por cajero hoy</h2>
 <div id="listaRepCajeros"></div>
 <p id="notaRepCajeros" style="color:#555;font-size:13px"></p>
-<div id="secRep7dias">
-<h2>📅 Últimos 7 días</h2>
-<p style="color:#555;font-size:13px;margin-bottom:8px">Cada vela es un día: el cuerpo va de la <b>primera venta</b> del día a la <b>última</b>; lo de arriba es la venta más grande y lo de abajo la más chica. <b style="color:#16a34a">Verde</b> = el día cerró mejor de lo que empezó; <b style="color:#dc2626">rojo</b> = cerró peor. Las barritas de abajo son cuántas ventas hubo ese día. La línea punteada es el promedio por día.</p>
-<canvas id="graficaTrading" width="880" height="310" style="width:100%;height:auto;display:block;background:#fff;border:1px solid #e5e5e5;border-radius:12px"></canvas>
-<p id="resumenGraficaTrading" style="color:#0b4a6e;font-size:14px;margin:8px 0 14px"></p>
-<div id="listaRep7dias"></div>
-</div>
-
-<div id="secPronostico">
-<h2>🔮 Pronóstico de la semana</h2>
-<p style="color:#555;font-size:13px;margin-bottom:10px">Kupi calcula esto con tus ventas pasadas: qué días se vende más y cuánto preparar la próxima semana.</p>
-<div id="contPronostico"></div>
-</div>
 <p id="notaRepCajero" style="color:#555;font-size:13px"></p>
 </div>
 
@@ -3147,19 +3145,9 @@ function cerrarMenuLateral(){var a=document.querySelector("aside");if(a)a.classL
 function dineroMiles(n){return "$"+Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fechaLocalDe(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function etiquetaDiaRep(d){const hoy=new Date();const ayer=new Date();ayer.setDate(hoy.getDate()-1);if(d.toDateString()===hoy.toDateString())return "Hoy";if(d.toDateString()===ayer.toDateString())return "Ayer";const t=d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"});return t.charAt(0).toUpperCase()+t.slice(1)}
-/* v125 (Lalo 2026-11-23): gráfica estilo trading de los últimos 7 días.
-   Cada día es una vela: apertura = primera venta del día, cierre = última
-   venta, máximo = la venta más grande, mínimo = la más chica. Verde si el
-   día cerró mejor de lo que empezó; rojo si cerró peor. Abajo, barritas
-   con el número de ventas de cada día. Sin librerías: canvas puro, para
-   que funcione sin internet. */
-function velaDia(delDia){
- if(!delDia||!delDia.length)return {apertura:0,cierre:0,max:0,min:0,num:0,total:0};
- var tot=0,mx=0,mn=Infinity;
- delDia.forEach(function(v){var t=Number(v.total)||0;tot+=t;if(t>mx)mx=t;if(t<mn)mn=t});
- return {apertura:Number(delDia[0].total)||0,cierre:Number(delDia[delDia.length-1].total)||0,max:mx,min:mn===Infinity?0:mn,num:delDia.length,total:tot};
-}
-function resumenSemanaTrading(dias){
+/* v126 (Lalo 2026-11-23): Reportes limpio, sin gráfica: los 7 días con sus
+   barritas + el pronóstico arriba, y lo de Hoy abajo del pronóstico. */
+function resumenSemana(dias){
  var conVentas=dias.filter(function(d){return d.num>0});
  if(!conVentas.length)return "Aún no hay ventas en los últimos 7 días.";
  var total=dias.reduce(function(a,d){return a+d.total},0);
@@ -3167,47 +3155,6 @@ function resumenSemanaTrading(dias){
  var mejor=conVentas.slice().sort(function(a,b){return b.total-a.total})[0];
  var hoy=dias[dias.length-1];
  return "En los últimos 7 días vendiste "+dineroMiles(total)+" en "+n+(n===1?" venta":" ventas")+". Tu mejor día fue "+mejor.etiqueta+" con "+dineroMiles(mejor.total)+". Hoy llevas "+dineroMiles(hoy.total)+" en "+hoy.num+(hoy.num===1?" venta":" ventas")+".";
-}
-function dibujarGraficaTrading(dias){
- var cv=document.getElementById("graficaTrading");if(!cv||!dias||!dias.length)return;
- var dpr=window.devicePixelRatio||1;
- var H=310,W=880;
- var cont=cv.parentElement;var wReal=(cont&&cont.clientWidth)||0;
- if(wReal>0)W=Math.max(480,Math.min(wReal,1100));
- cv.width=W*dpr;cv.height=H*dpr;
- var ctx=cv.getContext("2d");if(!ctx)return;
- ctx.setTransform(dpr,0,0,dpr,0,0);
- ctx.clearRect(0,0,W,H);
- var padL=58,padR=12,padT=22,altGraf=220,gapVol=8,altVol=40;
- var maxV=0,maxN=0;
- dias.forEach(function(d){var v=d.vela||{max:0};if(v.max>maxV)maxV=v.max;if(d.num>maxN)maxN=d.num});
- if(maxV<=0)maxV=1;if(maxN<=0)maxN=1;
- var prom=dias.reduce(function(a,d){return a+d.total},0)/7;
- var y=function(val){return padT+altGraf-(val/maxV)*altGraf};
- ctx.font="12px sans-serif";ctx.textAlign="right";ctx.textBaseline="middle";
- [0,0.25,0.5,0.75,1].forEach(function(f){var yy=y(maxV*f);ctx.strokeStyle="#e5e5e5";ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke();ctx.fillStyle="#888";ctx.fillText(dineroMiles(maxV*f),padL-8,yy)});
- ctx.strokeStyle="#0b4a6e";ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(padL,y(prom));ctx.lineTo(W-padR,y(prom));ctx.stroke();ctx.setLineDash([]);
- ctx.textAlign="left";ctx.fillStyle="#0b4a6e";ctx.fillText("promedio "+dineroMiles(prom),padL+4,Math.max(12,y(prom)-10));
- var slot=(W-padL-padR)/dias.length;
- var baseVol=padT+altGraf+gapVol;
- dias.forEach(function(d,i){
-  var xc=padL+i*slot+slot/2,cw=Math.min(46,slot*0.55);
-  var v=d.vela||{apertura:0,cierre:0,max:0,min:0};
-  var col=(v.cierre>=v.apertura)?"#16a34a":"#dc2626";
-  if(d.num===0){
-   ctx.strokeStyle="#9aa3ab";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xc-cw/2,y(0));ctx.lineTo(xc+cw/2,y(0));ctx.stroke();ctx.lineWidth=1;
-   ctx.fillStyle="#9aa3ab";ctx.textAlign="center";ctx.fillText("sin ventas",xc,y(0)-12);
-  }else{
-   ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xc,y(v.max));ctx.lineTo(xc,y(v.min));ctx.stroke();ctx.lineWidth=1;
-   var yA=y(v.apertura),yC=y(v.cierre),top=Math.min(yA,yC),h=Math.max(3,Math.abs(yC-yA));
-   ctx.fillStyle=col;ctx.fillRect(xc-cw/2,top,cw,h);
-   ctx.fillStyle="#0b2a5e";ctx.textAlign="center";ctx.fillText(dineroMiles(d.total),xc,Math.max(12,y(v.max)-10));
-  }
-  var vh=(d.num/maxN)*altVol;
-  ctx.fillStyle=d.num===0?"#d5dbe0":col;
-  ctx.fillRect(xc-cw/2,baseVol+(altVol-vh),cw,vh);
-  ctx.fillStyle="#444";ctx.textAlign="center";ctx.fillText(d.fechaCorta||"",xc,baseVol+altVol+14);
- });
 }
 function resumenReportes(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
@@ -3225,7 +3172,7 @@ function resumenReportes(){
  vHoy.forEach(function(v){const key=(v.cajero||"")||"__sin__";if(!porCaj[key])porCaj[key]={nombre:v.cajeroNombre||v.cajero||"Sin cajero registrado",total:0,num:0};porCaj[key].total+=Number(v.total)||0;porCaj[key].num++});
  const cajerosHoy=Object.values(porCaj).sort(function(a,b){return b.total-a.total});
  const dias=[];
- for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const clave=fechaLocalDe(d);const delDia=ventas.filter(function(v){return fechaLocalDe(new Date(v.fecha))===clave});dias.push({etiqueta:etiquetaDiaRep(d),fechaCorta:d.toLocaleDateString("es-MX",{day:"numeric",month:"short"}),total:delDia.reduce(function(a,v){return a+(Number(v.total)||0)},0),num:delDia.length,vela:velaDia(delDia)})}
+ for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const clave=fechaLocalDe(d);const delDia=ventas.filter(function(v){return fechaLocalDe(new Date(v.fecha))===clave});dias.push({etiqueta:etiquetaDiaRep(d),fechaCorta:d.toLocaleDateString("es-MX",{day:"numeric",month:"short"}),total:delDia.reduce(function(a,v){return a+(Number(v.total)||0)},0),num:delDia.length})}
  const max7=Math.max.apply(null,dias.map(function(x){return x.total}).concat([0]));
  return {esAdmin:esAdmin,total:total,num:num,promedio:num?total/num:0,efectivo:efectivo,tarjeta:tarjeta,top:top,masVendido:top[0]||null,cajerosHoy:cajerosHoy,dias:dias,max7:max7};
 }
@@ -3268,8 +3215,7 @@ function renderReportes(){
  if(r.esAdmin&&lista7){
   lista7.innerHTML=r.dias.map(function(d){const pct=r.max7>0?Math.round(d.total/r.max7*100):0;return '<div style="padding:8px 4px;border-bottom:1px solid #e5e5e5"><div style="display:flex;justify-content:space-between;gap:10px"><span><b>'+escHtml(d.etiqueta)+'</b> <span style="color:#666">('+escHtml(d.fechaCorta)+')</span></span><span><b>'+dineroMiles(d.total)+'</b> · '+d.num+(d.num===1?" venta":" ventas")+'</span></div><div style="background:#eef2f6;border-radius:6px;height:12px;margin-top:6px;overflow:hidden"><div style="background:#1d5f5e;height:12px;border-radius:6px;width:'+pct+'%"></div></div></div>'}).join("");
  }
- window.ultimosDiasGrafica=r.dias;
- if(r.esAdmin){dibujarGraficaTrading(r.dias);var rg=document.getElementById("resumenGraficaTrading");if(rg)rg.textContent=resumenSemanaTrading(r.dias);}
+ if(r.esAdmin){var rs=document.getElementById("resumenSemana");if(rs)rs.textContent=resumenSemana(r.dias);}
  const nota=document.getElementById("notaRepCajero");
  if(nota)nota.textContent=r.esAdmin?"":"Eres Cajero: aquí solo ves tus ventas de hoy. Los últimos 7 días y las ventas de todos los cajeros solo las ve el Administrador.";
  renderPronostico();
@@ -3295,7 +3241,6 @@ function mostrarVista(v){
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
  document.getElementById("vistaCortes").classList.toggle("oculto",v!=="cortes");
  document.getElementById("vistaReportes").classList.toggle("oculto",v!=="reportes");
- if(v==="reportes"&&window.ultimosDiasGrafica&&typeof dibujarGraficaTrading==="function")dibujarGraficaTrading(window.ultimosDiasGrafica);
  document.getElementById("vistaHistorial").classList.toggle("oculto",v!=="historial");
  document.getElementById("vistaTicket").classList.toggle("oculto",v!=="ticket");
  document.getElementById("vistaCajeros").classList.toggle("oculto",v!=="cajeros");
