@@ -134,6 +134,17 @@ html[data-tema="noche"] .kupi-aprendiendo{background:#3a2f00!important;border-co
 #confPagos [data-pago="Tarjeta"] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8ec9ff,#2b7cd3)!important}
 #confPagos [data-pago="Transf."] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8fb8ff,#3d5afe)!important}
 #confPagos [data-pago="Mixto"] .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
+/* v130 (Lalo 2026-11-23): iconos 3D mini para el detalle del corte — misma pastilla con degradado, brillo arriba y sombra que el menú y las formas de pago, más chica para ir dentro del texto. */
+.icono-3d-mini{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c);box-shadow:0 2px 4px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5);font-size:15px;vertical-align:-6px;margin-right:3px;flex:none}
+.icono-3d-mini.f-oro{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)}
+.icono-3d-mini.f-verde{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#9be89b,#2e9e4f)}
+.icono-3d-mini.f-azul{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8ec9ff,#2b7cd3)}
+.icono-3d-mini.f-teal{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#7de3d0,#0f8a7a)}
+.icono-3d-mini.f-coral{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffb199,#e6714c)}
+.icono-3d-mini.f-morado{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#c5a3ff,#7b4fd0)}
+.icono-3d-mini.f-azulrey{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8fb8ff,#3d5afe)}
+.icono-3d-mini.f-gris{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)}
+.icono-3d-mini.f-ambar{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)}
 .fondo{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:25;opacity:0;pointer-events:none;transition:opacity .35s ease}
 .fondo.visible{opacity:1;pointer-events:auto}
 aside nav a{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;color:#fff;text-decoration:none;font-size:15px;cursor:pointer}
@@ -1843,7 +1854,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <div id="modalDetalleCorte" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="detCorteTitulo" onclick="if(event.target===this)cerrarModalDetalleCorte()">
  <div class="conf-tarjeta">
-  <h2 id="detCorteTitulo">🧾 Detalle del corte</h2>
+  <h2 id="detCorteTitulo"><span class="icono-3d-mini f-coral">🧾</span> Detalle del corte</h2>
   <div id="cuerpoDetalleCorte" style="font-size:14px;line-height:1.6"></div>
   <div class="conf-botones" style="margin-top:14px">
    <button type="button" class="conf-confirmar" onclick="reimprimirCorteDetalle()">🖨 Reimprimir</button>
@@ -4203,24 +4214,26 @@ function realizarCorteProductos(){
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
 }
+function ic3d(e,c){return "<span class='icono-3d-mini "+(c||"f-gris")+"'>"+e+"</span>";}
 var detalleCorteId=null;
 function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
  detalleCorteId=id;
  var det=document.getElementById("cuerpoDetalleCorte"); if(!det)return;
  if((c.tipo||"dinero")==="productos"){
-  det.innerHTML="<b>📦 Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
-  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+(opcionesSistema.sinStock===true?"":" · 📥 Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · ✅ Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · 📦 Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza"))).join("<br>")+
-  "<br><b>📊 Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
+  det.innerHTML="<b>"+ic3d("📦","f-azul")+" Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+  (c.productos||[]).map(p=>ic3d(p.emoji||"📦","f-azul")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+(opcionesSistema.sinStock===true?"":" · "+ic3d("📥","f-verde")+" Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · "+ic3d("✅","f-verde")+" Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · "+ic3d("📦","f-gris")+" Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza"))).join("<br>")+
+  "<br><b>"+ic3d("📊","f-azulrey")+" Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
  } else {
-  det.innerHTML="<b>💰 Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
-  "🛒 Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (💵 Efectivo "+dinero(c.efectivo)+" · 💳 Tarjeta "+dinero(c.tarjeta)+" · 🏦 Transf. "+dinero(c.transf)+" · 🔀 Mixto "+dinero(c.mixto)+")<br>"+
-  "🧾 Gastos: "+dinero(c.gastos)+" · 📥 Costo de entradas: "+dinero(c.entradasCosto)+" ("+redondearCant(c.entradasPiezas||0)+")<br>"+
-  "📈 Ganancia: "+dinero(c.ganancia)+" · 💼 Fondo: "+dinero(c.fondo)+" · 🧮 Efectivo esperado: "+dinero(c.efectivoEsperado)+" · ✋ Contado: "+dinero(c.efectivoContado)+" · ⚖️ Diferencia: "+dinero(c.diferencia)+"<br>"+
-  "<b>💰 Total en caja: "+dinero(c.totalCaja)+"</b>";
+  det.innerHTML="<b>"+ic3d("💰","f-oro")+" Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+  ic3d("🛒","f-oro")+" Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" ("+ic3d("💵","f-verde")+" Efectivo "+dinero(c.efectivo)+" · "+ic3d("💳","f-azul")+" Tarjeta "+dinero(c.tarjeta)+" · "+ic3d("🏦","f-azulrey")+" Transf. "+dinero(c.transf)+" · "+ic3d("🔀","f-ambar")+" Mixto "+dinero(c.mixto)+")<br>"+
+  ic3d("🧾","f-coral")+" Gastos: "+dinero(c.gastos)+" · "+ic3d("📥","f-verde")+" Costo de entradas: "+dinero(c.entradasCosto)+" ("+redondearCant(c.entradasPiezas||0)+")<br>"+
+  ic3d("📈","f-azulrey")+" Ganancia: "+dinero(c.ganancia)+" · "+ic3d("💼","f-gris")+" Fondo: "+dinero(c.fondo)+" · "+ic3d("🧮","f-gris")+" Efectivo esperado: "+dinero(c.efectivoEsperado)+" · "+ic3d("✋","f-oro")+" Contado: "+dinero(c.efectivoContado)+" · "+ic3d("⚖️","f-morado")+" Diferencia: "+dinero(c.diferencia)+"<br>"+
+  "<b>"+ic3d("💰","f-oro")+" Total en caja: "+dinero(c.totalCaja)+"</b>";
  }
  var m=document.getElementById("modalDetalleCorte"); if(m)m.classList.add("abierto");
 }
 function cerrarModalDetalleCorte(){var m=document.getElementById("modalDetalleCorte");if(m)m.classList.remove("abierto");}
+function reimprimirCorteDetalle(){if(detalleCorteId!==null&&detalleCorteId!==undefined)reimprimirCorte(detalleCorteId);}
 function reimprimirCorteDetalle(){if(detalleCorteId!==null&&detalleCorteId!==undefined)reimprimirCorte(detalleCorteId);}
 function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;imprimirCorteSilenciosa(c);}
 function irHistorialCortes(){mostrarVista("historial");}
