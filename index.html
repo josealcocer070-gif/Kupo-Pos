@@ -49,7 +49,7 @@ header .user span{display:block;font-size:13px;color:#bcd7e6}
 .chat-msg .hora{display:block;text-align:right;font-size:10px;margin-top:4px;opacity:.65}
 .chat-msg.entrante{align-self:flex-start;background:#fff;border:1px solid #e3e9ed;border-bottom-left-radius:4px;color:#222}
 .chat-msg.entrante .quien{color:#e6714c}
-.chat-msg.propio{align-self:flex-end;background:#0b4a6e;color:#fff;border-bottom-right-radius:4px}
+.chat-msg.propio{align-self:flex-end;background:var(--azul);color:#fff;border-bottom-right-radius:4px}
 .chat-msg.propio .quien{color:#f5b800}
 .chat-msg.pendiente{opacity:.75}
 .chat-vacio{text-align:center;color:#777;padding:26px 10px;font-size:14px}
@@ -88,7 +88,7 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #navReportes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8fb8ff,#3d5afe)!important}
 #navHistCortes .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)!important}
 #navImportar .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)!important}
-.insignia-nuevo{background:#f5b800;color:#0b4a6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
+.insignia-nuevo{background:#f5b800;color:var(--azul);font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
 #btnChatKupi{width:40px;height:40px;min-width:40px;border-radius:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);cursor:pointer;padding:0;overflow:hidden;flex:0 0 auto}
 #btnChatKupi img{width:100%;height:100%;object-fit:cover;display:block}
 /* v118 (Lalo 2026-11-22, con foto de la tablet en vivo): Recargar y Reconectar
@@ -99,7 +99,7 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #btnRecargar:hover,#btnReconectarBT:hover{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.05) 45%),linear-gradient(135deg,#5ccfdd,#247a78)!important}
 #panelChatKupi{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
 #panelChatKupi.oculto{display:none!important}
-.kupi-encabezado{background:#0b4a6e;color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px}
+.kupi-encabezado{background:var(--azul);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px}
 .kupi-encabezado img{width:44px;height:44px;border-radius:50%;border:2px solid #f5b800;object-fit:cover;background:#fff;flex:none}
 .kupi-encabezado b{font-size:17px;display:block;line-height:1.1}
 .kupi-encabezado span{font-size:12px;color:#9be15d}
@@ -109,12 +109,12 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 .kupi-mini{width:30px;height:30px;border-radius:50%;border:2px solid #f5b800;object-fit:cover;flex:none;background:#fff}
 .kupi-msg{max-width:88%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.45}
 .kupi-msg.bot{background:#fff;border:1px solid #dfe5ea;border-bottom-left-radius:4px}
-.kupi-msg.yo{background:#0b4a6e;color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+.kupi-msg.yo{background:var(--azul);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
 .kupi-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 10px;border-top:1px solid #e5e5e5;background:#fff}
-.kupi-chips button{background:#fff8e1;border:1px solid #f5b800;color:#0b4a6e;border-radius:20px;padding:6px 10px;font-size:12px;cursor:pointer}
+.kupi-chips button{background:#fff8e1;border:1px solid #f5b800;color:var(--azul);border-radius:20px;padding:6px 10px;font-size:12px;cursor:pointer}
 .kupi-entrada{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e5e5;background:#fff}
 .kupi-entrada input{flex:1;border:1px solid #c9d4dc;border-radius:20px;padding:9px 12px;font-size:14px;min-width:0}
-.kupi-entrada>button{background:#f5b800;border:none;border-radius:50%;width:40px;height:40px;font-size:17px;cursor:pointer;color:#0b4a6e;flex:none}
+.kupi-entrada>button{background:#f5b800;border:none;border-radius:50%;width:40px;height:40px;font-size:17px;cursor:pointer;color:var(--azul);flex:none}
 html[data-tema="noche"] #panelChatKupi{background:var(--sup);border-color:var(--borde2)}
 html[data-tema="noche"] #kupiMensajes{background:var(--fondo)}
 html[data-tema="noche"] .kupi-msg.bot{background:var(--sup2);border-color:var(--borde2);color:var(--texto)}
@@ -148,14 +148,14 @@ main h1{font-size:34px;margin-bottom:14px}
 .buscar{display:flex;gap:12px;margin-bottom:18px}
 .buscar input{flex:1;border:1px solid #c9d4dc;border-radius:24px;padding:12px 18px;font-size:16px}
 .buscar select{border:1px solid #c9d4dc;border-radius:24px;padding:10px 14px;font-size:15px;background:#fff}
-.btn-scan{flex:0 0 auto;border:2px solid #0b4a6e;background:#0b4a6e;color:#fff;border-radius:24px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;display:none}
+.btn-scan{flex:0 0 auto;border:2px solid var(--azul);background:var(--azul);color:#fff;border-radius:24px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;display:none}
 /* SCAN solo smartphone/tablet (<=1020px), regla de Lalo: en PC no va el botón
    SCAN de cámara, va el lector de códigos de barras USB/Bluetooth, que escribe
    directo en el buscador. En móvil/tablet el SCAN sigue enfocando el buscador
    para lector de códigos o teclear el código. */
 @media(max-width:1020px){.btn-scan{display:block}}
 /* Ayuda del lector en PC: solo visible en PC (>1020px), oculta en móvil/tablet */
-.ayuda-lector-pc{display:none;margin:-6px 0 20px;font-size:14px;line-height:1.55;color:#0b4a6e;font-weight:700}
+.ayuda-lector-pc{display:none;margin:-6px 0 20px;font-size:14px;line-height:1.55;color:var(--azul);font-weight:700}
 @media(min-width:1021px){.ayuda-lector-pc{display:block}}
 @media(max-width:1020px){.ayuda-lector-pc{display:none}}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -170,11 +170,11 @@ main h1{font-size:34px;margin-bottom:14px}
 .btn-agregar:disabled{background:#b9bec4;cursor:not-allowed}
 /* Ventas estilo SICAR X, adaptado a KUPO azul oscuro V1.5.0 (sin verde SICAR) */
 .categorias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin-bottom:4px;scrollbar-width:thin}
-.categorias button{flex:0 0 auto;border:2px solid #0b4a6e;background:#fff;color:#0b4a6e;border-radius:22px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
-.categorias button.activo{background:#0b4a6e;color:#fff}
+.categorias button{flex:0 0 auto;border:2px solid var(--azul);background:#fff;color:var(--azul);border-radius:22px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
+.categorias button.activo{background:var(--azul);color:#fff}
 .categorias button small{font-weight:700;opacity:.75}
 /* Barra de totales azul oscuro: en SICAR es verde; en KUPO es azul, con botón amarillo Cobrar */
-.totales{background:#0b4a6e;color:#fff;border-radius:14px;padding:12px 14px}
+.totales{background:var(--azul);color:#fff;border-radius:14px;padding:12px 14px}
 .totales .row{color:#dcebf3}
 .totales .row.total{color:#fff;border-top:1px solid rgba(255,255,255,.35);margin-top:6px;padding-top:8px}
 .totales .total b{color:#f5b800}
@@ -310,29 +310,29 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 @media(max-width:760px){.resumen{grid-template-columns:repeat(2,1fr)}}
 
 /* Pantalla de inicio · Activación por licencia e inicio de sesión */
-.inicio{min-height:100vh;background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#f2f4f7 52%);display:flex;align-items:center;justify-content:center;padding:24px 14px}
+.inicio{min-height:100vh;background:linear-gradient(180deg,var(--azul),var(--azul2) 52%,#f2f4f7 52%);display:flex;align-items:center;justify-content:center;padding:24px 14px}
 .inicio-tarjeta{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:480px;width:100%;padding:28px 24px;text-align:center}
 @keyframes kupoCarga{0%{opacity:0;transform:scale(.85) rotate(-4deg)}55%{opacity:1;transform:scale(1.06) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}.inicio .inicio-logo{animation:kupoCarga 1s ease both}
 .inicio-logo{width:100%;max-width:340px;margin:14px auto 4px;display:block}
-#pantallaCarga{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,#0b4a6e,#0d5a84 55%,#f2f4f7 55%);display:flex;align-items:center;justify-content:center;padding:24px 14px}
+#pantallaCarga{position:fixed;inset:0;z-index:9999;background:linear-gradient(180deg,var(--azul),var(--azul2) 55%,#f2f4f7 55%);display:flex;align-items:center;justify-content:center;padding:24px 14px}
 #pantallaCarga .carga-tarjeta{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:480px;width:100%;padding:28px 24px;text-align:center}
 #pantallaCarga .inicio-logo{animation:kupoCarga 1s ease both}
 #pantallaCarga .carga-sub{color:#555;font-size:14px;font-weight:700;margin:8px 0 0}
 /* v124: pantalla de carga completa (Lalo, 2026-11-23): bienvenida + logo GB + animación de carga, como el ejemplo que mandó; se muestra al entrar y también después de poner el PIN. */
-#pantallaCarga .carga-bienvenida{color:#0b4a6e;font-size:22px;margin:10px 0 0}
+#pantallaCarga .carga-bienvenida{color:var(--azul);font-size:22px;margin:10px 0 0}
 #pantallaCarga .carga-lista{color:#555;font-size:15px;font-weight:700;margin:4px 0 0}
 #pantallaCarga .carga-gb{display:flex;align-items:center;justify-content:center;gap:8px;color:#12233a;font-size:15px;font-weight:800;margin:14px 0 0}
 #pantallaCarga .carga-gb-img{width:40px;height:40px;border-radius:8px}
-#pantallaCarga .carga-spinner{width:44px;height:44px;border:4px solid #dfe7ec;border-top-color:#0b4a6e;border-radius:50%;animation:cargaGirar 1s linear infinite;margin:20px auto 10px}
+#pantallaCarga .carga-spinner{width:44px;height:44px;border:4px solid #dfe7ec;border-top-color:var(--azul);border-radius:50%;animation:cargaGirar 1s linear infinite;margin:20px auto 10px}
 @keyframes cargaGirar{to{transform:rotate(360deg)}}
-#pantallaCarga .carga-titulo{color:#0b4a6e;font-size:20px;font-weight:800;margin:0}
+#pantallaCarga .carga-titulo{color:var(--azul);font-size:20px;font-weight:800;margin:0}
 #pantallaCarga .carga-puntos{color:#555;font-size:15px;font-weight:700;margin:6px 0 0}
 #pantallaCarga .carga-puntos span{color:#f5b800}
 .inicio-sub{color:#555;font-size:14px}
 .inicio-negocio{margin:14px 0 4px}
 .inicio-negocio b{display:block;font-size:22px;color:var(--azul)}
 .inicio-negocio span{font-size:12px;letter-spacing:1px;color:#666;font-weight:700}
-.inicio .link-admin{display:inline-block;margin:8px 4px 0;padding:10px 16px;border:1px solid #0b4a6e;border-radius:20px;color:#0b4a6e;text-decoration:none;font-weight:700;background:#fff;font-size:14px}
+.inicio .link-admin{display:inline-block;margin:8px 4px 0;padding:10px 16px;border:1px solid var(--azul);border-radius:20px;color:var(--azul);text-decoration:none;font-weight:700;background:#fff;font-size:14px}
 .inicio .link-admin.dorado{background:#f5b800;border-color:#f5b800;color:#12233a}
 .inicio h2{font-size:20px;color:var(--azul);margin:18px 0 6px;text-align:left}
 .inicio label{display:block;text-align:left;font-size:13px;font-weight:700;color:#555;margin:10px 0 4px}
@@ -411,6 +411,11 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 .caj-fila-botones button.peligro{color:#b3261e;border-color:#e5b6b3}
 .caj-fila-botones button:hover{background:#eef6fb}
 @media(max-width:760px){.caj-fila-botones button{flex:1 1 40%}}
+.hist-botones{display:flex;gap:8px;flex-wrap:wrap}
+.hist-botones button{border:1px solid #c9d4dc;background:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;min-height:42px}
+.hist-botones button:hover{background:#eef6fb}
+.muestra-color{border:0;color:#fff;border-radius:20px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+@media(max-width:760px){.hist-botones button{flex:1 1 45%}}
 
 /* ===== Interfaz móvil (<=760px), diferente a PC =====
    PC: 3 columnas, menú hamburguesa, ticket a la derecha.
@@ -478,8 +483,8 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 /* V1.5.0 · Mejoras anti-demo: tablero, foto real, vacíos con acción */
 .tablero .tarjeta b{font-size:22px}
 .vacio-accion{border:2px dashed #c9d4dc;border-radius:12px;text-align:center;padding:22px 12px;color:#555;background:#f7fafc}
-.vacio-accion b{display:block;color:#0b4a6e;font-size:16px;margin:6px 0}
-.vacio-accion button{margin-top:12px;background:#0b4a6e;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
+.vacio-accion b{display:block;color:var(--azul);font-size:16px;margin:6px 0}
+.vacio-accion button{margin-top:12px;background:var(--azul);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer}
 .vacio-accion button.dorado{background:#f5b301;color:#12233a}
 .card .foto img,.prod-row .foto img{width:100%;height:100%;object-fit:cover;display:block}
 .etiqueta-pausado{display:inline-block;background:#fde8e8;color:#b3261e;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;margin-top:4px}
@@ -543,7 +548,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
    panel-cuerpo y los datos (cliente/negocio/almacén) van en un desplegable. */
 .ticket-encabezado{position:sticky;top:0;background:#fff;z-index:2;display:flex;justify-content:space-between;font-weight:800;font-size:13px;padding:6px 0;border-bottom:1px solid #eef2f6}
 .datos-venta{margin-top:12px;border-top:1px solid #eef2f6;padding-top:8px}
-.datos-venta summary{cursor:pointer;font-weight:800;font-size:13px;color:#0b4a6e;padding:6px 0}
+.datos-venta summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--azul);padding:6px 0}
 .conf-pago-titulo{font-weight:800;margin:10px 0 6px;font-size:13px;letter-spacing:.5px}
 .conf-tarjeta .pagos{margin-bottom:4px}
 .conf-recibido-label{display:block;font-size:17px;margin:12px 0 6px;font-weight:800}
@@ -572,7 +577,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .conf-info{flex:1 1 auto;min-width:0}
 .conf-nombre{display:block;font-size:15px;font-weight:800;line-height:1.25}
 .conf-desc{display:block;font-size:12px;color:#666;margin:2px 0;line-height:1.35}
-.conf-cant{font-size:13px;font-weight:700;color:#0b4a6e}
+.conf-cant{font-size:13px;font-weight:700;color:var(--azul)}
 .conf-importe{flex:0 0 auto;font-weight:800;font-size:15px;white-space:nowrap}
 .conf-fila{display:flex;justify-content:space-between;font-size:15px;padding:4px 0}
 .conf-fila.total{font-size:20px;font-weight:800;color:var(--azul);border-top:2px solid #dfe5ea;margin-top:6px;padding-top:10px}
@@ -593,15 +598,15 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 .conf-regresar{background:#fff;border:2px solid #c9d4dc;color:#12233a}
 .conf-confirmar{background:var(--dorado);border:0;color:#12233a}
 .conf-confirmar:hover{background:var(--dorado2)}
-.conf-total-grande{background:#0b4a6e;border-radius:14px;text-align:center;padding:12px 10px 10px;margin:4px 0 10px}
+.conf-total-grande{background:var(--azul);border-radius:14px;text-align:center;padding:12px 10px 10px;margin:4px 0 10px}
 .conf-total-grande span{display:block;font-size:14px;font-weight:800;letter-spacing:2px;color:#cfe6f2}
 .conf-total-grande b{display:block;font-size:58px;line-height:1.05;color:#f5c518}
 .conf-total-grande small{display:block;font-size:13px;color:#dbe9f0;margin-top:4px}
 .conf-estado{border-radius:12px;text-align:center;font-weight:800;font-size:16px;padding:8px;margin:8px 0}
 .conf-estado.ok{background:#eafaf1;color:#0f6a4d;border:2px solid #0f6a4d}
 .conf-estado.falta{background:#fdecea;color:#9b1c1c;border:2px solid #e0a3a3}
-.conf-mixto{border:2px solid #0b4a6e;border-radius:14px;padding:12px;margin:12px 0;text-align:left}
-.conf-mixto h3{font-size:17px;color:#0b4a6e;margin-bottom:4px}
+.conf-mixto{border:2px solid var(--azul);border-radius:14px;padding:12px;margin:12px 0;text-align:left}
+.conf-mixto h3{font-size:17px;color:var(--azul);margin-bottom:4px}
 .conf-mixto-ayuda{font-size:13px;color:#555;margin-bottom:4px}
 .conf-mixto label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px}
 .conf-mixto input[type=number]{width:100%;border:1px solid #c9d4dc;border-radius:10px;padding:12px;font-size:18px;font-weight:700}
@@ -611,7 +616,7 @@ header .negocio b{width:420px;max-width:62vw;font-size:19px}
 /* Atajos de caja (PC, Lalo 2026-11-14): lista de teclas para atender más rápido. */
 .atajo-fila{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 6px;border-top:1px solid #eef2f6;font-size:16px;font-weight:700;color:#12233a}
 .atajo-fila:first-of-type{border-top:0}
-.atajo-tecla{flex:0 0 auto;background:#eef4f8;border:1.5px solid #0b4a6e;border-radius:20px;padding:5px 14px;font-size:14px;font-weight:800;color:#0b4a6e;white-space:nowrap}
+.atajo-tecla{flex:0 0 auto;background:#eef4f8;border:1.5px solid var(--azul);border-radius:20px;padding:5px 14px;font-size:14px;font-weight:800;color:var(--azul);white-space:nowrap}
 .atajo-nota{font-size:13px;color:#666;text-align:left;margin:12px 2px 0;line-height:1.5}
 @media(max-width:760px){
  .conf-tarjeta{padding:18px 14px}
@@ -1122,7 +1127,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="impVistaPrevia" class="oculto">
 <h2 style="margin:16px 0 8px">Vista previa</h2>
 <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px">
-<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Código</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Producto</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Precio</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Stock</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Categoría</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Estado</th></tr></thead>
+<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Código</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Producto</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--azul)">Precio</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--azul)">Stock</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Categoría</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Estado</th></tr></thead>
 <tbody id="impCuerpoPrevia"></tbody>
 </table></div>
 <p id="impNotaDuplicados" style="font-size:13px;color:#555"></p>
@@ -1289,7 +1294,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div style="margin-bottom:14px"><button type="button" onclick="actualizarReportes()">🔄 Actualizar</button> <button type="button" onclick="mostrarVista('ventas')">🧾 Ir a Ventas</button></div>
 <div id="secRep7dias">
 <h2>📅 Últimos 7 días</h2>
-<p id="resumenSemana" style="color:#0b4a6e;font-size:14px;margin-bottom:8px"></p>
+<p id="resumenSemana" style="color:var(--azul);font-size:14px;margin-bottom:8px"></p>
 <div id="listaRep7dias"></div>
 </div>
 
@@ -1376,6 +1381,18 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <input type="file" id="tLogoEncArchivo" accept="image/jpeg,image/png,image/*" style="display:none" onchange="subirLogoEncabezado(event)">
 <p style="font-size:12px;color:#666">Este logo sale en el encabezado, a color, en lugar de la K de KUPO. Es independiente del logo del ticket.</p>
+<label>Color del sistema</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<button type="button" class="muestra-color" style="background:#0b4a6e" onclick="elegirColorSistema('#0b4a6e')">Azul KUPO</button>
+<button type="button" class="muestra-color" style="background:#1d5f5e" onclick="elegirColorSistema('#1d5f5e')">Verde</button>
+<button type="button" class="muestra-color" style="background:#7a2233" onclick="elegirColorSistema('#7a2233')">Vino</button>
+<button type="button" class="muestra-color" style="background:#5b3a8e" onclick="elegirColorSistema('#5b3a8e')">Morado</button>
+<button type="button" class="muestra-color" style="background:#d95d1e" onclick="elegirColorSistema('#d95d1e')">Naranja</button>
+<button type="button" class="muestra-color" style="background:#3a4a56" onclick="elegirColorSistema('#3a4a56')">Gris</button>
+<input type="color" id="tColorSistema" value="#0b4a6e" onchange="cambiarColorSistema(event)" title="Color propio" style="width:44px;height:40px;border:1px solid #c9d4dc;border-radius:10px;background:#fff;padding:2px;cursor:pointer">
+</div>
+<p style="font-size:12px;color:#666">Cambia el color del encabezado, los botones y los acentos de KUPO POS, como en la versión de Manus. El dorado se queda igual.</p>
+
 
 <div class="checks">
 <label class="perm-fila"><span>Mostrar logo del negocio en el ticket</span><span class="interruptor"><input type="checkbox" id="tMostrarLogo" checked><span class="deslizador"></span></span></label>
@@ -2123,7 +2140,7 @@ function guardarCotizacion(e,imprimir){if(e)e.preventDefault();if(!cotBorrador.l
 function renderCotizaciones(){const q=((document.getElementById("buscarCot")||{}).value||"").toLowerCase();const fe=(document.getElementById("filtroCotEstado")||{}).value||"todos";const conEstado=cotizaciones.map(c=>({c:c,estado:estadoCot(c)}));document.getElementById("resCotPendientes").textContent=conEstado.filter(x=>x.estado==="Pendiente").length;document.getElementById("resCotConvertidas").textContent=conEstado.filter(x=>x.estado==="Convertida").length;document.getElementById("resCotVencidas").textContent=conEstado.filter(x=>x.estado==="Vencida").length;document.getElementById("resCotTotal").textContent=cotizaciones.length;const lista=conEstado.filter(function(x){if(fe!=="todos"&&x.estado!==fe)return false;if(q&&(x.c.folio.toLowerCase().indexOf(q)===-1&&x.c.cliente.toLowerCase().indexOf(q)===-1))return false;return true});const tb=document.getElementById("listaCotizaciones");if(!tb)return;if(!lista.length){tb.innerHTML='<tr><td colspan="8" style="color:#888">Sin cotizaciones.</td></tr>'}else{tb.innerHTML=lista.slice().reverse().map(function(x){const c=x.c;const puedeConvertir=x.estado==="Pendiente";return "<tr><td><b>"+escHtml(c.folio)+"</b></td><td>"+fechaBonita(c.fecha)+"</td><td>"+escHtml(c.cliente)+"</td><td>"+c.lineas.length+"</td><td class=\"num\">"+dinero(c.total)+"</td><td>"+fechaBonita(fechaVencimientoCot(c))+"</td><td>"+x.estado+"</td><td><button type=\"button\" onclick=\"verCotizacion('"+c.folio+"')\">Ver</button> "+(puedeConvertir?'<button type="button" onclick="convertirCotizacion(\''+c.folio+'\')">Convertir en venta</button> ':"")+'<button type="button" onclick="imprimirCotizacion(\''+c.folio+'\')">Imprimir</button> <button type="button" onclick="eliminarCotizacion(\''+c.folio+'\')">Eliminar</button></td></tr>'}).join("")}renderBorradorCot()}
 function verCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);const box=document.getElementById("detalleCotizacion");if(!c||!box)return;const t=totalesCot(c.lineas);box.innerHTML='<div class="form-prod"><h2>📋 '+escHtml(c.folio)+' · '+escHtml(c.cliente)+(c.telefono?' · '+escHtml(c.telefono):'')+'</h2><p style="font-size:14px;color:#555">Fecha: '+fechaBonita(c.fecha)+' · Vigencia: '+c.vigenciaDias+' días · Vence: '+fechaBonita(fechaVencimientoCot(c))+' · Estado: <b>'+estadoCot(c)+'</b></p><div class="tabla-wrap"><table class="tabla"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>'+c.lineas.map(l=>"<tr><td>"+escHtml(l.nombre)+"</td><td>"+textoCantidadU(l.cant,l.unidad)+"</td><td>"+dinero(l.precio)+"</td><td>"+dinero(l.cant*l.precio)+"</td></tr>").join("")+'</tbody></table></div><p style="margin-top:10px;font-size:15px">Subtotal: <b>'+dinero(t.subtotal)+'</b> · IVA 16% incluido: <b>'+dinero(t.iva)+'</b> · TOTAL: <b>'+dinero(t.total)+'</b></p><p style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" onclick="imprimirCotizacion(\''+c.folio+'\')">🖨️ Imprimir</button>'+(estadoCot(c)==="Pendiente"?'<button type="button" onclick="convertirCotizacion(\''+c.folio+'\')">🛒 Convertir en venta</button>':"")+'<button type="button" class="secundario" onclick="document.getElementById(\'detalleCotizacion\').innerHTML=\'\'">✕ Cerrar</button></p></div>'}
 function convertirCotizacion(folio,ya){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return;if(estadoCot(c)!=="Pendiente"){toast("Solo se pueden convertir cotizaciones pendientes.");return}const faltan=c.lineas.filter(l=>!catalogo.find(p=>p.id===l.id));if(faltan.length){toast("No se puede convertir: un producto de la cotización ya no está en el catálogo.");return}if(ticket.length&&!ya){pedirConfirmacion("Ya hay una venta en curso. ¿Reemplazarla con los productos de "+folio+"?","Reemplazar",function(){convertirCotizacion(folio,true)});return;}ticket=c.lineas.map(l=>({id:l.id,cant:l.cant,precio:l.precio}));c.estado="Convertida";guardar();mostrarVista("ventas");render();toast("Cotización "+folio+" convertida en venta. El stock se descuenta al cobrar.")}
-function imprimirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return false;if(typeof window==="undefined"||typeof window.open!=="function")return false;try{const t=totalesCot(c.lineas);const w=window.open("","_blank","width=820,height=900");if(!w)return false;const neg=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||"Mi negocio";const dir=(typeof ticketConfig!=="undefined"&&ticketConfig.direccion)||"";const tel=(typeof ticketConfig!=="undefined"&&ticketConfig.telefono)||"";const logo=(typeof ticketConfig!=="undefined"&&ticketConfig.logo&&ticketConfig.mostrarLogo!==false)?ticketConfig.logo:"";const filas=c.lineas.map(function(l,i){return "<tr><td>"+(i+1)+"</td><td>"+textoCantidadU(l.cant,l.unidad)+"</td><td>"+escHtml(l.nombre)+"</td><td class=\"num\">"+dinero(l.precio)+"</td><td class=\"num\">"+dinero(l.cant*l.precio)+"</td></tr>"}).join("");w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotización '+escHtml(c.folio)+'</title><style>@page{size:letter;margin:14mm}body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:0;font-size:13px}.doc{max-width:190mm;margin:0 auto}.enc{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0b4a6e;padding-bottom:10px}.enc h1{margin:0;font-size:22px;color:#0b4a6e}.enc .datos{font-size:12px;color:#444;text-align:right}.logo{max-height:64px;max-width:140px}.titulo{margin:18px 0 4px;font-size:20px;color:#0b4a6e}.folio{font-size:14px;color:#444}.meta{display:flex;justify-content:space-between;gap:12px;margin:14px 0;flex-wrap:wrap}.meta div{font-size:13px;line-height:1.6}.cliente{border:1px solid #ccc;border-radius:6px;padding:10px 12px;margin-bottom:14px}.cliente b{font-size:14px}table{width:100%;border-collapse:collapse;margin-top:6px}th{background:#0b4a6e;color:#fff;text-align:left;padding:8px}td{padding:8px;border-bottom:1px solid #ddd}.num{text-align:right}.totales{margin-left:auto;width:250px;margin-top:12px}.totales div{display:flex;justify-content:space-between;padding:4px 0}.totales .total{font-size:17px;font-weight:700;border-top:2px solid #0b4a6e;padding-top:8px}.notas{margin-top:18px;font-size:12px;color:#555;line-height:1.6}.firma{margin-top:48px;display:flex;justify-content:space-between}.firma div{width:45%;text-align:center;border-top:1px solid #111;padding-top:6px;font-size:12px}.pie{margin-top:24px;text-align:center;font-size:11px;color:#888}</style></head><body><div class="doc"><div class="enc"><div>'+(logo?'<img class="logo" src="'+logo+'" alt="Logo">':"")+'<h1>'+escHtml(neg)+'</h1></div><div class="datos">'+(dir?escHtml(dir)+"<br>":"")+(tel?"Tel/WhatsApp: "+escHtml(tel):"")+'</div></div><div class="titulo">COTIZACIÓN</div><div class="folio">Folio: <b>'+escHtml(c.folio)+'</b> · Estado: '+estadoCot(c)+'</div><div class="meta"><div>Fecha: '+fechaBonita(c.fecha)+'<br>Vigencia: '+c.vigenciaDias+' días</div><div>Válida hasta: <b>'+fechaBonita(fechaVencimientoCot(c))+'</b><br>Precios con IVA incluido</div></div><div class="cliente">Cliente: <b>'+escHtml(c.cliente)+'</b>'+(c.telefono?"<br>Teléfono: "+escHtml(c.telefono):"")+'</div><table><thead><tr><th>#</th><th>Cantidad</th><th>Producto</th><th class="num">Precio unit.</th><th class="num">Importe</th></tr></thead><tbody>'+filas+'</tbody></table><div class="totales"><div><span>Subtotal:</span><span>'+dinero(t.subtotal)+'</span></div><div><span>IVA 16% incluido:</span><span>'+dinero(t.iva)+'</span></div><div class="total"><span>TOTAL:</span><span>'+dinero(t.total)+'</span></div></div><div class="notas">Esta cotización no es un ticket de venta. Los precios incluyen IVA y son válidos hasta el '+fechaBonita(fechaVencimientoCot(c))+'. El stock se descuenta solo cuando la cotización se convierte en venta y se cobra.</div><div class="firma"><div>'+escHtml(neg)+'</div><div>Cliente · Firma de conformidad</div></div><div class="pie">Generado con KUPO POS · '+escHtml(c.folio)+'</div></div></body></html>');w.document.close();w.focus();setTimeout(function(){w.print()},300);return true}catch(e){return false}}
+function imprimirCotizacion(folio){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return false;if(typeof window==="undefined"||typeof window.open!=="function")return false;try{const t=totalesCot(c.lineas);const w=window.open("","_blank","width=820,height=900");if(!w)return false;const neg=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||"Mi negocio";const dir=(typeof ticketConfig!=="undefined"&&ticketConfig.direccion)||"";const tel=(typeof ticketConfig!=="undefined"&&ticketConfig.telefono)||"";const logo=(typeof ticketConfig!=="undefined"&&ticketConfig.logo&&ticketConfig.mostrarLogo!==false)?ticketConfig.logo:"";const filas=c.lineas.map(function(l,i){return "<tr><td>"+(i+1)+"</td><td>"+textoCantidadU(l.cant,l.unidad)+"</td><td>"+escHtml(l.nombre)+"</td><td class=\"num\">"+dinero(l.precio)+"</td><td class=\"num\">"+dinero(l.cant*l.precio)+"</td></tr>"}).join("");w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Cotización '+escHtml(c.folio)+'</title><style>@page{size:letter;margin:14mm}body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:0;padding:0;font-size:13px}.doc{max-width:190mm;margin:0 auto}.enc{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--azul);padding-bottom:10px}.enc h1{margin:0;font-size:22px;color:#0b4a6e}.enc .datos{font-size:12px;color:#444;text-align:right}.logo{max-height:64px;max-width:140px}.titulo{margin:18px 0 4px;font-size:20px;color:#0b4a6e}.folio{font-size:14px;color:#444}.meta{display:flex;justify-content:space-between;gap:12px;margin:14px 0;flex-wrap:wrap}.meta div{font-size:13px;line-height:1.6}.cliente{border:1px solid #ccc;border-radius:6px;padding:10px 12px;margin-bottom:14px}.cliente b{font-size:14px}table{width:100%;border-collapse:collapse;margin-top:6px}th{background:#0b4a6e;color:#fff;text-align:left;padding:8px}td{padding:8px;border-bottom:1px solid #ddd}.num{text-align:right}.totales{margin-left:auto;width:250px;margin-top:12px}.totales div{display:flex;justify-content:space-between;padding:4px 0}.totales .total{font-size:17px;font-weight:700;border-top:2px solid #0b4a6e;padding-top:8px}.notas{margin-top:18px;font-size:12px;color:#555;line-height:1.6}.firma{margin-top:48px;display:flex;justify-content:space-between}.firma div{width:45%;text-align:center;border-top:1px solid #111;padding-top:6px;font-size:12px}.pie{margin-top:24px;text-align:center;font-size:11px;color:#888}</style></head><body><div class="doc"><div class="enc"><div>'+(logo?'<img class="logo" src="'+logo+'" alt="Logo">':"")+'<h1>'+escHtml(neg)+'</h1></div><div class="datos">'+(dir?escHtml(dir)+"<br>":"")+(tel?"Tel/WhatsApp: "+escHtml(tel):"")+'</div></div><div class="titulo">COTIZACIÓN</div><div class="folio">Folio: <b>'+escHtml(c.folio)+'</b> · Estado: '+estadoCot(c)+'</div><div class="meta"><div>Fecha: '+fechaBonita(c.fecha)+'<br>Vigencia: '+c.vigenciaDias+' días</div><div>Válida hasta: <b>'+fechaBonita(fechaVencimientoCot(c))+'</b><br>Precios con IVA incluido</div></div><div class="cliente">Cliente: <b>'+escHtml(c.cliente)+'</b>'+(c.telefono?"<br>Teléfono: "+escHtml(c.telefono):"")+'</div><table><thead><tr><th>#</th><th>Cantidad</th><th>Producto</th><th class="num">Precio unit.</th><th class="num">Importe</th></tr></thead><tbody>'+filas+'</tbody></table><div class="totales"><div><span>Subtotal:</span><span>'+dinero(t.subtotal)+'</span></div><div><span>IVA 16% incluido:</span><span>'+dinero(t.iva)+'</span></div><div class="total"><span>TOTAL:</span><span>'+dinero(t.total)+'</span></div></div><div class="notas">Esta cotización no es un ticket de venta. Los precios incluyen IVA y son válidos hasta el '+fechaBonita(fechaVencimientoCot(c))+'. El stock se descuenta solo cuando la cotización se convierte en venta y se cobra.</div><div class="firma"><div>'+escHtml(neg)+'</div><div>Cliente · Firma de conformidad</div></div><div class="pie">Generado con KUPO POS · '+escHtml(c.folio)+'</div></div></body></html>');w.document.close();w.focus();setTimeout(function(){w.print()},300);return true}catch(e){return false}}
 function eliminarCotizacion(folio,ya){const c=cotizaciones.find(x=>x.folio===folio);if(!c)return;if(!ya){pedirConfirmacion("¿Eliminar la cotización "+folio+" de "+c.cliente+"?","Eliminar",function(){eliminarCotizacion(folio,true)});return;}cotizaciones=cotizaciones.filter(x=>x.folio!==folio);guardar();renderCotizaciones();const box=document.getElementById("detalleCotizacion");if(box)box.innerHTML="";toast("Cotización eliminada: "+folio)}
 
 function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=(opcionesSistema.sinStock===true)?0:redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji="";if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad,sku:"SKU-"+String(nid).slice(-3),costo:Math.round(precio*0.6*100)/100,stockMin:5,foto:""});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();if(typeof encolarProductoNube==="function")encolarProductoNube(catalogo[catalogo.length-1]);toast("Producto agregado: "+nombre);}
@@ -2236,7 +2253,8 @@ function cargarTicketConfig(){
  const nb=g("negocioBox"); if(nb)nb.textContent=(ticketConfig.negocio||"Mi negocio").toUpperCase();
  const dn=g("direccionNegocio"); if(dn)dn.textContent=ticketConfig.direccion||"";
  const tn=g("telefonoNegocio"); if(tn)tn.textContent=ticketConfig.telefono||"";
- mostrarLogoPreview(); renderTicketPreview(); renderTerminales(); aplicarOpcionesSistema(); prepararLogoTicket(); aplicarIvaPantalla();
+ var ci=g("tColorSistema"); if(ci)ci.value=(ticketConfig.colorSistema||"#0b4a6e");
+ mostrarLogoPreview(); renderTicketPreview(); renderTerminales(); aplicarOpcionesSistema(); prepararLogoTicket(); aplicarIvaPantalla(); aplicarColorSistema();
 }
 function renderTicketPreview(){
  const box=document.getElementById("vistaPreviaTicket"); if(!box)return;
@@ -2264,7 +2282,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",colorSistema:ticketConfig.colorSistema||"#0b4a6e",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig(); prepararLogoTicket();
@@ -2272,7 +2290,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(ya){
  if(!ya){pedirConfirmacion("¿Restablecer los datos del ticket a los valores de ejemplo?","Restablecer",function(){restablecerTicketConfig(true)});return;}
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",logoEncabezado:"",papel:"80 mm",abrirCajon:true};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",logoEncabezado:"",colorSistema:"#0b4a6e",papel:"80 mm",abrirCajon:true};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -2292,6 +2310,30 @@ function aplicarLogoEncabezado(){
  if(!logoDefectoEncabezado)logoDefectoEncabezado=img.src;
  img.src=(typeof ticketConfig!=="undefined"&&ticketConfig&&ticketConfig.logoEncabezado)?ticketConfig.logoEncabezado:logoDefectoEncabezado;
 }
+function aclararColor(hex,f){
+ var h=String(hex||"").replace("#","");
+ if(h.length===3)h=h.split("").map(function(c){return c+c}).join("");
+ var n=parseInt(h,16); if(isNaN(n))return "#0d5a84";
+ var r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+ r=Math.round(r+(255-r)*f); g=Math.round(g+(255-g)*f); b=Math.round(b+(255-b)*f);
+ return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function aplicarColorSistema(){
+ var c=(typeof ticketConfig!=="undefined"&&ticketConfig&&ticketConfig.colorSistema)||"#0b4a6e";
+ if(!/^#[0-9a-fA-F]{6}$/.test(c))c="#0b4a6e";
+ var r=document.documentElement; if(!r||!r.style||!r.style.setProperty)return;
+ r.style.setProperty("--azul",c);
+ r.style.setProperty("--azul2",c.toLowerCase()==="#0b4a6e"?"#0d5a84":aclararColor(c,0.18));
+ var m=document.querySelector('meta[name="theme-color"]'); if(m)m.content=c;
+}
+function elegirColorSistema(hex){
+ if(!hex)return;
+ ticketConfig.colorSistema=hex; guardar(); aplicarColorSistema();
+ var inp=document.getElementById("tColorSistema"); if(inp)inp.value=hex;
+ toast("Color del sistema cambiado.");
+}
+function cambiarColorSistema(ev){var v=ev&&ev.target&&ev.target.value; if(v)elegirColorSistema(v);}
+
 function mostrarLogoPreview(){
  aplicarLogoEncabezado();
  const imgE=document.getElementById("tLogoEncPreview"); const vacioE=document.getElementById("tLogoEncVacio");
@@ -3642,7 +3684,7 @@ function renderPronostico(){
  var h="";
  if(pr.aprendiendo)h+='<p class="kupi-aprendiendo" style="background:#fff8e1;border:1px solid #f5b800;border-radius:8px;padding:10px 12px;font-size:13px">🌱 <b>Kupi está aprendiendo:</b> llevas '+pr.diasConVenta+(pr.diasConVenta===1?" día":" días")+' con ventas. El pronóstico se afina con cada venta; entre más días, más exacto.</p>';
  h+='<div class="resumen"><div class="tarjeta"><small>ESPERADO LA PRÓXIMA SEMANA</small><b style="font-size:22px">'+dineroMiles(pr.promSemana)+'</b></div><div class="tarjeta"><small>TU DÍA MÁS FUERTE</small><b>'+escHtml(pr.mejor.nombre)+'</b></div><div class="tarjeta"><small>PROMEDIO ESE DÍA</small><b>'+dineroMiles(pr.mejor.promTotal)+'</b></div></div>';
- h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Día</th><th style="text-align:right;padding:8px;border-bottom:2px solid #0b4a6e">Promedio</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Lo que más se vende</th><th style="text-align:left;padding:8px;border-bottom:2px solid #0b4a6e">Prepara</th></tr></thead><tbody>';
+ h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Día</th><th style="text-align:right;padding:8px;border-bottom:2px solid var(--azul)">Promedio</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Lo que más se vende</th><th style="text-align:left;padding:8px;border-bottom:2px solid var(--azul)">Prepara</th></tr></thead><tbody>';
  pr.dias.forEach(function(d){
   var top1=d.top[0];
   var prepara="—";
@@ -4126,7 +4168,7 @@ function renderHistorial(){
  const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
  if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">🕐<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">📊 Ir a Corte diario</button></div></td></tr>';return}
- lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><button onclick="verDetalleCorte('+c.id+')">Ver detalle</button> <button onclick="reimprimirCorte('+c.id+')">Reimprimir</button></td></tr>'}).join("");
+ lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">👁 Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">🖨 Reimprimir</button></div></td></tr>'}).join("");
 }
 function realizarCorteDinero(){
  const r=resumenCorte();
