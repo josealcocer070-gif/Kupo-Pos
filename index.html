@@ -1339,7 +1339,6 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <thead><tr><th>Fecha y hora</th><th>Folio</th><th>Tipo</th><th class="num">Ventas</th><th class="num">Gastos</th><th class="num">Entradas</th><th class="num">Total en caja</th><th class="num">Diferencia</th><th>Estado</th><th></th></tr></thead>
 <tbody id="listaHistCortes"></tbody>
 </table></div>
-<div id="detalleHistCorte" style="margin-top:12px"></div>
 </div>
 
 <div id="vistaTicket" class="oculto">
@@ -1839,6 +1838,16 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
   <div id="histProdLista"></div>
   <div class="conf-botones" style="margin-top:14px">
    <button type="button" class="conf-confirmar" style="width:100%" onclick="cerrarHistorialProducto()">Entendido</button>
+  </div>
+ </div>
+</div>
+<div id="modalDetalleCorte" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="detCorteTitulo" onclick="if(event.target===this)cerrarModalDetalleCorte()">
+ <div class="conf-tarjeta">
+  <h2 id="detCorteTitulo">🧾 Detalle del corte</h2>
+  <div id="cuerpoDetalleCorte" style="font-size:14px;line-height:1.6"></div>
+  <div class="conf-botones" style="margin-top:14px">
+   <button type="button" class="conf-confirmar" onclick="reimprimirCorteDetalle()">🖨 Reimprimir</button>
+   <button type="button" onclick="cerrarModalDetalleCorte()">Cerrar</button>
   </div>
  </div>
 </div>
@@ -4194,21 +4203,25 @@ function realizarCorteProductos(){
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
 }
+var detalleCorteId=null;
 function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
- var det=document.getElementById("detalleHistCorte")||document.getElementById("detalleCorte"); if(!det)return;
+ detalleCorteId=id;
+ var det=document.getElementById("cuerpoDetalleCorte"); if(!det)return;
  if((c.tipo||"dinero")==="productos"){
   det.innerHTML="<b>📦 Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
-  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+(opcionesSistema.sinStock===true?"":" · Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza"))).join("<br>")+
-  "<br><b>Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
+  (c.productos||[]).map(p=>escHtml(p.emoji||"📦")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+(opcionesSistema.sinStock===true?"":" · 📥 Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · ✅ Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · 📦 Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza"))).join("<br>")+
+  "<br><b>📊 Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
  } else {
   det.innerHTML="<b>💰 Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
-  "Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (Efectivo "+dinero(c.efectivo)+" · Tarjeta "+dinero(c.tarjeta)+" · Transf. "+dinero(c.transf)+" · Mixto "+dinero(c.mixto)+")<br>"+
-  "Gastos: "+dinero(c.gastos)+" · Costo de entradas: "+dinero(c.entradasCosto)+" ("+redondearCant(c.entradasPiezas||0)+")<br>"+
-  "Ganancia: "+dinero(c.ganancia)+" · Fondo: "+dinero(c.fondo)+" · Efectivo esperado: "+dinero(c.efectivoEsperado)+" · Contado: "+dinero(c.efectivoContado)+" · Diferencia: "+dinero(c.diferencia)+"<br>"+
-  "<b>Total en caja: "+dinero(c.totalCaja)+"</b>";
+  "🛒 Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" (💵 Efectivo "+dinero(c.efectivo)+" · 💳 Tarjeta "+dinero(c.tarjeta)+" · 🏦 Transf. "+dinero(c.transf)+" · 🔀 Mixto "+dinero(c.mixto)+")<br>"+
+  "🧾 Gastos: "+dinero(c.gastos)+" · 📥 Costo de entradas: "+dinero(c.entradasCosto)+" ("+redondearCant(c.entradasPiezas||0)+")<br>"+
+  "📈 Ganancia: "+dinero(c.ganancia)+" · 💼 Fondo: "+dinero(c.fondo)+" · 🧮 Efectivo esperado: "+dinero(c.efectivoEsperado)+" · ✋ Contado: "+dinero(c.efectivoContado)+" · ⚖️ Diferencia: "+dinero(c.diferencia)+"<br>"+
+  "<b>💰 Total en caja: "+dinero(c.totalCaja)+"</b>";
  }
- if(det)det.scrollIntoView({behavior:"smooth",block:"nearest"});
+ var m=document.getElementById("modalDetalleCorte"); if(m)m.classList.add("abierto");
 }
+function cerrarModalDetalleCorte(){var m=document.getElementById("modalDetalleCorte");if(m)m.classList.remove("abierto");}
+function reimprimirCorteDetalle(){if(detalleCorteId!==null&&detalleCorteId!==undefined)reimprimirCorte(detalleCorteId);}
 function reimprimirCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;imprimirCorteSilenciosa(c);}
 function irHistorialCortes(){mostrarVista("historial");}
 function cerrarTurno(){salirSesion();}
