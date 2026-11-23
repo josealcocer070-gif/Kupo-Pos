@@ -42,21 +42,27 @@ header .user span{display:block;font-size:13px;color:#bcd7e6}
 .chat-cabecera h1{margin:0}
 .chat-toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#0b2a5e}
 .chat-nota{color:#555;margin:6px 0 14px}
-.chat-lista{display:flex;flex-direction:column;gap:10px;max-height:56vh;overflow-y:auto;padding:4px 2px 10px}
-.chat-dia{align-self:center;background:#dbe4ea;color:#5a6b7a;font-size:11px;font-weight:700;padding:4px 12px;border-radius:12px}
-.chat-msg{max-width:78%;padding:10px 12px;border-radius:14px;font-size:14px;line-height:1.35;word-break:break-word}
-.chat-msg .quien{display:block;font-size:11px;font-weight:800;margin-bottom:3px}
+/* v131 (Lalo 2026-11-23): chat más bonito — burbujas con sombra y brillo 3D, avatar con inicial y color por persona, barra de escribir en pastilla y botón de enviar dorado 3D. */
+.chat-lista{display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;padding:14px 10px;background:linear-gradient(180deg,#eef3f6,#e3ebf0);border-radius:18px}
+.chat-dia{align-self:center;background:#dbe4ea;color:#5a6b7a;font-size:11px;font-weight:700;padding:4px 12px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.chat-msg{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14px;line-height:1.35;word-break:break-word;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.chat-msg .quien{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;margin-bottom:4px}
+.chat-msg .avatar{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:#fff;font-size:12px;font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.45);flex:none}
+.chat-msg .rol{font-weight:700;opacity:.75}
 .chat-msg .hora{display:block;text-align:right;font-size:10px;margin-top:4px;opacity:.65}
-.chat-msg.entrante{align-self:flex-start;background:#fff;border:1px solid #e3e9ed;border-bottom-left-radius:4px;color:#222}
+.chat-msg.entrante{align-self:flex-start;background:#fff;border:1px solid #e3e9ed;border-bottom-left-radius:6px;color:#222}
 .chat-msg.entrante .quien{color:#e6714c}
-.chat-msg.propio{align-self:flex-end;background:var(--azul);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.propio{align-self:flex-end;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 40%),var(--azul);color:#fff;border-bottom-right-radius:6px}
 .chat-msg.propio .quien{color:#f5b800}
-.chat-msg.pendiente{opacity:.75}
-.chat-vacio{text-align:center;color:#777;padding:26px 10px;font-size:14px}
-.chat-entrada{display:flex;gap:10px;align-items:center;margin-top:6px}
-.chat-entrada input{flex:1;min-width:0;border:1px solid #c9d4dc;border-radius:20px;padding:11px 14px;font-size:15px;font-family:inherit}
-.chat-entrada input:disabled{background:#eef1f3;color:#999}
-.chat-entrada button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:#f5b800;color:#0b2a5e;font-size:20px;font-weight:800;cursor:pointer}
+.chat-msg.pendiente{opacity:.8}
+.chat-msg.fallo{border:2px solid #e05252;background:#fdeceb;color:#7a1f1f;cursor:pointer}
+.chat-msg.fallo .hora{color:#a33;opacity:1;font-weight:700}
+.chat-vacio{text-align:center;color:#777;padding:30px 10px;font-size:14px;line-height:1.5}
+.chat-vacio .vacio-ic{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800);box-shadow:0 4px 10px rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.5);font-size:30px;margin-bottom:10px}
+.chat-entrada{display:flex;gap:10px;align-items:center;margin-top:10px;background:#fff;border:1px solid #d5dee4;border-radius:999px;padding:6px 6px 6px 16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.chat-entrada input{flex:1;min-width:0;border:0;outline:none;padding:8px 0;font-size:15px;font-family:inherit;background:transparent}
+.chat-entrada input:disabled{background:transparent;color:#999}
+.chat-entrada button{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800);color:#0b2a5e;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 3px 7px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5)}
 .chat-entrada button:disabled{opacity:.45;cursor:not-allowed}
 .menu-btn{display:block;background:none;border:0;color:#fff;font-size:26px;cursor:pointer;padding:4px 8px;border-radius:8px}
 .menu-btn:hover{background:rgba(255,255,255,.15)}
@@ -830,6 +836,11 @@ html[data-tema="noche"] .sesion-fila{border-color:var(--borde2)}
 /* ===== Noche: chat, avisos y estados ===== */
 html[data-tema="noche"] .chat-msg.entrante{background:var(--sup2);border-color:var(--borde2);color:var(--texto)}
 html[data-tema="noche"] .chat-msg.entrante .quien{color:#ff9a7a}
+html[data-tema="noche"] .chat-lista{background:linear-gradient(180deg,#1b2227,#141a1e)}
+html[data-tema="noche"] .chat-entrada{background:var(--sup2);border-color:var(--borde2)}
+html[data-tema="noche"] .chat-entrada input{color:var(--texto)}
+html[data-tema="noche"] .chat-msg.fallo{background:#3d1d1d;color:#ffb3b3}
+html[data-tema="noche"] .chat-msg.fallo .hora{color:#ff9a9a}
 html[data-tema="noche"] .inicio{background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#000 52%)}
 html[data-tema="dia"] .inicio{background:linear-gradient(180deg,#0b4a6e,#0d5a84 52%,#fff 52%)}
 html[data-tema="noche"] .cambio{background:#0e3a30;border-color:#1d5f5e;color:var(--texto)}
@@ -4316,7 +4327,20 @@ function estadoLicencia(l){return estadoPorVencimiento(l.vencimiento,l.estado)}
 const SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 let kupoSupabase=null;
-try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
+/* v131 (Lalo 2026-11-23): el cliente de la nube se repara solo. Antes se creaba una sola vez al cargar la página: si el CDN no cargaba en ese momento (tablet sin internet al abrir, wifi flojo), kupoSupabase quedaba en null para toda la sesión y TODO lo de la nube fallaba en silencio — los mensajes se quedaban en "enviando…" para siempre. Ahora asegurarSupabase() lo (re)crea cuando hace falta y, si la librería ni siquiera cargó, la vuelve a pedir al CDN. */
+function asegurarSupabase(){
+ if(kupoSupabase)return kupoSupabase;
+ try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
+ if(!kupoSupabase&&typeof document!=="undefined"&&!window.__kupoSbCargando){
+  window.__kupoSbCargando=true;
+  var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=function(){window.__kupoSbCargando=false;asegurarSupabase();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof cargarMensajes==="function")cargarMensajes();};
+  s.onerror=function(){window.__kupoSbCargando=false;};
+  document.head.appendChild(s);
+ }
+ return kupoSupabase;
+}
+asegurarSupabase();
 
 /* Sincronización a la nube (Supabase) — ventas, cajeros, productos y movimientos de inventario.
    Cada registro lleva su clave de licencia (licenciaActual()), así ningún
@@ -4780,6 +4804,24 @@ function guardarMensajesPendientes(q){try{localStorage.setItem(CHAT_PEND_KEY,JSO
 function ultimoLeidoChat(){try{return Number(localStorage.getItem(CHAT_LEIDO_KEY)||0)||0}catch(e){return 0}}
 function marcarMensajesLeidos(){try{localStorage.setItem(CHAT_LEIDO_KEY,String(Date.now()))}catch(e){}actualizarBadgeMensajes()}
 function horaChat(fecha){try{var d=new Date(fecha);return isNaN(d)?"":d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}catch(e){return""}}
+/* v131 (Lalo 2026-11-23): color 3D por remitente en el chat — cada persona tiene su degradado, como las pastillas 3D del menú. */
+function colorRemitenteChat(nombre){
+ var colores=["linear-gradient(135deg,#ffe082,#f5b800)","linear-gradient(135deg,#9be89b,#2e9e4f)","linear-gradient(135deg,#8ec9ff,#2b7cd3)","linear-gradient(135deg,#7de3d0,#0f8a7a)","linear-gradient(135deg,#ffb199,#e6714c)","linear-gradient(135deg,#c5a3ff,#7b4fd0)"];
+ var n=String(nombre||"");var h=0;for(var i=0;i<n.length;i++){h=(h*31+n.charCodeAt(i))%997;}
+ return colores[h%colores.length];
+}
+function marcarFalloChat(){
+ var q=leerMensajesPendientes();if(!q.length)return;
+ var cambio=false;q.forEach(function(m){if(!m.fallo){m.fallo=true;cambio=true;}});
+ if(cambio){guardarMensajesPendientes(q);mensajesChat.forEach(function(x){if(x.pendiente)x.fallo=true;});renderMensajes();}
+}
+function reintentarMensajeChat(idLocal){
+ var q=leerMensajesPendientes();q.forEach(function(m){if(m.idLocal===idLocal)m.fallo=false;});
+ guardarMensajesPendientes(q);
+ mensajesChat.forEach(function(x){if(x.idLocal===idLocal)x.fallo=false;});
+ renderMensajes();
+ reenviarMensajesPendientes();
+}
 function actualizarBadgeMensajes(){
  var leido=ultimoLeidoChat(),yo=nombreRemitenteChat(),n=0;
  mensajesChat.forEach(function(m){if(!m.pendiente&&m.remitente!==yo&&m.creado_en&&new Date(m.creado_en).getTime()>leido)n++;});
@@ -4795,12 +4837,13 @@ function renderMensajes(){
  var btn=document.getElementById("chatEnviar");if(btn)btn.disabled=!activo;
  var yo=nombreRemitenteChat();
  var todos=mensajesChat.slice().sort(function(a,b){return new Date(a.creado_en)-new Date(b.creado_en)});
- if(!todos.length){lista.innerHTML='<div class="chat-vacio">Aún no hay mensajes.<br>Escribe el primero abajo 👇</div>';}
+ if(!todos.length){lista.innerHTML='<div class="chat-vacio"><span class="vacio-ic">💬</span><br>Aún no hay mensajes.<br>Escribe el primero abajo 👇</div>';}
  else{
   var hoy=new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long"});
   lista.innerHTML='<div class="chat-dia">Hoy · '+escHtml(hoy)+'</div>'+todos.map(function(m){
    var mio=m.remitente===yo;
-   return '<div class="chat-msg '+(mio?"propio":"entrante")+(m.pendiente?" pendiente":"")+'"><span class="quien">'+escHtml(mio?"Tú · "+m.remitente_rol:m.remitente+" · "+m.remitente_rol)+'</span>'+escHtml(m.texto)+'<span class="hora">'+horaChat(m.creado_en)+(m.pendiente?" · enviando…":(mio?" · recibido":""))+'</span></div>';
+   var fallo=!!(m.pendiente&&m.fallo);
+   return '<div class="chat-msg '+(mio?"propio":"entrante")+(m.pendiente?" pendiente":"")+(fallo?" fallo":"")+'"'+(fallo&&m.idLocal?' onclick="reintentarMensajeChat(\''+m.idLocal+'\')"':"")+'><span class="quien">'+(mio?"":'<span class="avatar" style="background:'+colorRemitenteChat(m.remitente)+'">'+escHtml((m.remitente||"?").charAt(0).toUpperCase())+'</span>')+escHtml(mio?"Tú":m.remitente)+' <span class="rol">· '+escHtml(m.remitente_rol||"")+'</span></span>'+escHtml(m.texto)+'<span class="hora">'+horaChat(m.creado_en)+(m.pendiente?(fallo?" · ⚠️ no se envió · toca para reintentar":" · ⏳ enviando…"):(mio?" · ✓ enviado":""))+'</span></div>';
   }).join("");
  }
  lista.scrollTop=lista.scrollHeight;
@@ -4833,7 +4876,8 @@ function conciliarPendientesChat(nube){
  mensajesChat=mensajesChat.filter(function(x){return !x.pendiente||!x.idLocal||ids[x.idLocal];});
 }
 async function cargarMensajes(){
- if(!kupoSupabase)return;
+ asegurarSupabase();
+ if(!kupoSupabase){renderMensajes();return;}
  try{
   var r=await kupoSupabase.from("mensajes").select("id,licencia_clave,remitente,remitente_rol,texto,creado_en").eq("licencia_clave",licenciaActual()).order("creado_en",{ascending:false}).limit(100);
   if(r.error)throw r.error;
@@ -4853,24 +4897,31 @@ async function enviarMensajeChat(){
  mensajesChat.push(msg);inp.value="";renderMensajes();
  await reenviarMensajesPendientes();
 }
+var __kupoReenviando=false;
 async function reenviarMensajesPendientes(){
+ if(__kupoReenviando)return;__kupoReenviando=true;
+ try{
  var q=leerMensajesPendientes();if(!q.length)return;
- if(!kupoSupabase||(typeof navigator!=="undefined"&&!navigator.onLine))return;
+ asegurarSupabase();
+ if(!kupoSupabase){marcarFalloChat();return;}
+ if(typeof navigator!=="undefined"&&!navigator.onLine)return;
  var nube=[];
  try{var rs=await kupoSupabase.from("mensajes").select("id,licencia_clave,remitente,remitente_rol,texto,creado_en").eq("licencia_clave",licenciaActual()).order("creado_en",{ascending:false}).limit(100);if(!rs.error&&rs.data)nube=rs.data;}catch(e){nube=[];}
- var quedan=[];
+ var quedan=[];var falloEnvio=false;
  for(var i=0;i<q.length;i++){
   var m=q[i];
-  if(mensajeYaEnNube(m,nube)){var loc0=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc0)loc0.pendiente=false;continue;}
+  if(mensajeYaEnNube(m,nube)){var loc0=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc0){loc0.pendiente=false;loc0.fallo=false;}continue;}
   try{
    var r=await kupoSupabase.from("mensajes").insert({licencia_clave:m.licencia_clave,remitente:m.remitente,remitente_rol:m.remitente_rol,texto:m.texto});
-   if(r.error){quedan.push(m);}
-   else{var loc=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc)loc.pendiente=false;}
-  }catch(e){quedan.push(m);}
+   if(r.error){quedan.push(m);m.fallo=true;falloEnvio=true;var locF=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(locF)locF.fallo=true;}
+   else{var loc=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(loc){loc.pendiente=false;loc.fallo=false;}}
+  }catch(e){quedan.push(m);m.fallo=true;falloEnvio=true;var locF2=mensajesChat.find(function(x){return x.idLocal===m.idLocal});if(locF2)locF2.fallo=true;}
  }
  guardarMensajesPendientes(quedan);
+ if(falloEnvio&&!(window.__kupoChatErrorToast&&Date.now()-window.__kupoChatErrorToast<60000)){window.__kupoChatErrorToast=Date.now();toast("💬 No se pudo enviar el mensaje, se reintentará solo. Toca el mensaje para reintentarlo.");}
  if(quedan.length<q.length){cargarMensajes();}
  else{renderMensajes();}
+ }finally{__kupoReenviando=false;}
 }
 function recibirMensajeChat(m){
  if(!m||m.licencia_clave!==licenciaActual())return;
@@ -4885,7 +4936,7 @@ function recibirMensajeChat(m){
 }
 function suscribirChatMensajes(){
  var lic=licenciaActual();
- if(!kupoSupabase||!lic||lic==="SIN-LICENCIA")return;
+ asegurarSupabase();if(!kupoSupabase||!lic||lic==="SIN-LICENCIA")return;
  if(mensajesChatCanal&&mensajesChatLicencia===lic)return;
  try{
   if(mensajesChatCanal){kupoSupabase.removeChannel(mensajesChatCanal);mensajesChatCanal=null;}
@@ -4903,7 +4954,9 @@ function suscribirChatMensajes(){
    por id, así el aviso sale una sola vez aunque Realtime también lo traiga).
    NO marca nada como leído: eso solo lo hace abrirMensajes(). */
 async function revisarMensajesFondo(){
+ asegurarSupabase();
  if(!kupoSupabase)return;
+ if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();
  var lic=licenciaActual();if(!lic||lic==="SIN-LICENCIA")return;
  if(!verMensajesChat())return;
  if(!mensajesChatCanal||mensajesChatLicencia!==lic){suscribirChatMensajes();}
@@ -5108,6 +5161,8 @@ cargarTicketConfig();
 actualizarEstadoBT();
 /* Nube: reintentar la cola pendiente al abrir y al volver internet. */
 if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener("online",function(){if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof iniciarRevisionMensajesFondo==="function")iniciarRevisionMensajesFondo();});
+/* v131: al volver a la app (de segundo plano o de otra vista) también se repara la nube y se reenvían los mensajes pendientes. */
+if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("visibilitychange",function(){if(!document.hidden){if(typeof asegurarSupabase==="function")asegurarSupabase();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof cargarMensajes==="function")cargarMensajes();}});
 /* v99: la pastilla de conexión refleja el internet real (Lalo 2026-11-20): antes decía "Conectado" siempre, aunque no hubiera internet. */
 function actualizarPillConexion(){var p=document.getElementById("pillConexion");if(!p)return;var enLinea=(typeof navigator!=="undefined"&&navigator.onLine!==false);p.textContent=enLinea?"📶 Conectado":"📶 Sin conexión";p.classList.toggle("sin-conexion",!enLinea);}
 if(typeof window!=="undefined"&&window.addEventListener){window.addEventListener("online",actualizarPillConexion);window.addEventListener("offline",actualizarPillConexion);}
