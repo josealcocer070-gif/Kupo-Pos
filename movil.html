@@ -1085,6 +1085,7 @@ h1,h2{font-weight:800!important}
 #vistaProductos .prod-row .info{flex:1!important;min-width:0!important}
 /* v161: la fila de Productos baja a dos líneas para que quepan Editar/Pausar/Eliminar. */
 #vistaProductos .prod-row{flex-wrap:wrap!important}
+#vistaProductos .prod-row{cursor:pointer!important}
 #vistaProductos .prod-row .info h3{font-size:15px!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important}
 #vistaProductos .prod-row .info .meta{font-size:12px!important;color:#555!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:2px 0 0!important}
 #vistaProductos .prod-row .info .stock-line{font-size:13px!important;font-weight:700!important;color:#0f6a4d!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:2px 0 0!important}
@@ -1094,8 +1095,9 @@ h1,h2{font-weight:800!important}
 #vistaProductos .prod-row .lado{flex:none!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;gap:6px!important}
 #vistaProductos .prod-row .precio{font-size:19px!important;font-weight:800!important;color:var(--dorado2)!important;white-space:nowrap!important}
 #vistaProductos .prod-row .precio small{font-size:12px!important;color:#555!important;font-weight:700!important}
-#vistaProductos .prod-row .acciones-prod{flex-direction:row!important;flex-wrap:nowrap!important;width:auto!important;gap:6px!important}
-#vistaProductos .prod-row .acciones-prod button{flex:none!important;width:42px!important;height:42px!important;min-height:42px!important;padding:0!important;font-size:18px!important;line-height:1!important;border-radius:10px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+/* v162: el menú de opciones ocupa toda la fila, con botones de texto completos (antes eran cuadros de 42px y el texto se montaba) */
+#vistaProductos .prod-row .acciones-prod{flex-direction:row!important;flex-wrap:wrap!important;width:100%!important;gap:8px!important;margin-top:10px!important}
+#vistaProductos .prod-row .acciones-prod button{flex:1 1 0!important;width:auto!important;height:auto!important;min-height:48px!important;padding:10px 6px!important;font-size:14px!important;line-height:1.2!important;border-radius:10px!important}
 #vistaProductos .prod-row .acciones-prod button.peligro{color:#b3261e!important;border-color:#e5b6b3!important}
 </style>
 <style id="campana-perfil">
@@ -1623,7 +1625,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 <div id="vistaProductos" class="oculto">
 <h1>Productos</h1>
-<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.</p>
+<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL PRODUCTOS</small><b id="resTotal">0</b></div>
 <div class="tarjeta"><small>DISPONIBLES</small><b id="resDisp">0</b></div>
@@ -2850,7 +2852,7 @@ function aplicarOpcionesSistema(){
  var ta=document.getElementById("tarjAgot"); if(ta)ta.style.display=opcionesSistema.sinStock===true?"none":"";
  var tv=document.getElementById("tarjValor"); if(tv)tv.style.display=opcionesSistema.sinStock===true?"none":"";
  var tsb=document.getElementById("tarjStockBajo"); if(tsb)tsb.style.display=opcionesSistema.sinStock===true?"none":"";
- var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.";
+ var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.";
  var fp=document.getElementById("filtroProd"); if(fp){var oa=fp.querySelector('option[value="agotados"]'); if(oa)oa.style.display=opcionesSistema.sinStock===true?"none":""; if(opcionesSistema.sinStock===true&&fp.value==="agotados"){fp.value="todos";if(typeof renderProductos==="function")renderProductos();}}
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
@@ -4171,6 +4173,9 @@ function fotoHtml(p){return p.foto?'<img src="'+p.foto+'" alt="'+escHtml(p.nombr
 function margenProducto(p){const c=Number(p.costo)||0;const pr=Number(p.precio)||0;if(pr<=0)return 0;return Math.round((pr-c)/pr*100)}
 function subirFotoProducto(ev){const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=function(){const img=new Image();img.onload=function(){const max=400;let w=img.width,h=img.height;if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s)}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);fotoProductoActual=cv.toDataURL("image/jpeg",0.82);const pv=document.getElementById("pFotoPreview");if(pv){pv.src=fotoProductoActual;pv.style.display=""}};img.src=rd.result};rd.readAsDataURL(f)}
 function quitarFotoProducto(){fotoProductoActual="__SIN_FOTO__";const pv=document.getElementById("pFotoPreview");if(pv){pv.src="";pv.style.display="none"}const inp=document.getElementById("pFotoArchivo");if(inp)inp.value="";const inp2=document.getElementById("pFotoCamara");if(inp2)inp2.value=""}
+/* v162: al tocar un producto se abre su menú de opciones dentro de la tarjeta; al tocar otro, el anterior se cierra */
+var accionesProdAbierto=null;
+function toggleAccionesProd(id){var d=document.getElementById("acciones-prod-"+id);if(!d)return;if(accionesProdAbierto!==null&&accionesProdAbierto!==id){var a=document.getElementById("acciones-prod-"+accionesProdAbierto);if(a)a.style.display="none";}var abierto=d.style.display!=="none";d.style.display=abierto?"none":"flex";accionesProdAbierto=abierto?null:id;}
 function renderProductos(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
  const f=(document.getElementById("filtroProd")||{}).value||"todos";
@@ -4188,9 +4193,9 @@ function renderProductos(){
  if(!items.length){lista.innerHTML='<div class="ticket-vacio">📦<br><b>No hay productos con ese filtro</b></div>';return}
  items.forEach(p=>{
   const est=estadoDe(p);
-  const d=document.createElement("div");d.className="prod-row";
+  const d=document.createElement("div");d.className="prod-row";d.onclick=function(){toggleAccionesProd(p.id);};
   const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div><div class="acciones-prod"><button onclick="editar(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div><div class="acciones-prod" id="acciones-prod-${p.id}" style="display:none" onclick="event.stopPropagation()"><button onclick="editar(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
   lista.appendChild(d);
  });
 }
@@ -4421,7 +4426,7 @@ function editarProducto(id){const p=catalogo.find(x=>x.id===id);if(!p)return;
  document.getElementById("vistaProductos").scrollIntoView({behavior:"smooth"});
 }
 function cancelarEdicion(){document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();quitarFotoProducto();formProdVisible(false);}
-function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();if(typeof encolarProductoNube==="function")encolarProductoNube(p);toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
+function togglePausa(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede pausar o activar productos.");return}const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();if(typeof encolarProductoNube==="function")encolarProductoNube(p);toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
 function recuperarVentaEnEspera(){var raw=null;try{raw=localStorage.getItem("kupoPosV146Espera")}catch(e){}var held=null;try{held=raw?JSON.parse(raw):null}catch(e){held=null}if(!held||!held.length){toast("No hay venta en espera para recuperar.");return}if(ticket.length){toast("Termina o cobra la venta actual antes de recuperar la que está en espera.");return}ticket=held;try{localStorage.removeItem("kupoPosV146Espera")}catch(e){}guardar();render();toast("Venta en espera recuperada. Revisa el ticket y cobra cuando esté lista.");}
