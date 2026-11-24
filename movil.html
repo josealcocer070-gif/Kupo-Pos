@@ -1846,12 +1846,12 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <h2><span class="icono-3d-mini f-oro">💰</span> Cuadre de caja</h2>
 <form onsubmit="event.preventDefault();realizarCorteDinero();">
-<div><label>Fondo inicial de caja $</label><input id="fondoCaja" type="number" min="0" step="0.01" placeholder="0.00" oninput="guardarFondo()"></div>
+<div id="campoFondo"><label>Fondo inicial de caja $</label><input id="fondoCaja" type="number" min="0" step="0.01" placeholder="0.00" oninput="guardarFondo()"></div>
 <div><label>Efectivo esperado $</label><input id="resEfectivoEsperado" type="text" value="$0.00" readonly></div>
 <div><label>Efectivo contado $</label><input id="efectivoContado" type="number" min="0" step="0.01" placeholder="0.00" oninput="actualizarCuadre()"></div>
 <div><label>Diferencia $</label><input id="resDiferencia" type="text" value="$0.00" readonly></div>
 </form>
-<p style="margin-top:10px;font-size:13px;color:#555">Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.</p>
+<p id="notaCuadre" style="margin-top:10px;font-size:13px;color:#555">Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.</p>
 <p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
 <button type="button" onclick="realizarCorteDinero()"><span class="icono-3d-mini f-azul">💾</span> Realizar corte de dinero</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
@@ -2861,9 +2861,9 @@ function cargarDatoLicencia(base,defecto){
  }
  return defecto;
 }
-let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"});
+let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,usaFondo:false,colorSistema:"#0b4a6e"});
 if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"};
-opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true,colorSistema:(typeof opcionesSistema.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(opcionesSistema.colorSistema))?opcionesSistema.colorSistema:"#0b4a6e"};
+opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true,usaFondo:opcionesSistema.usaFondo===true,colorSistema:(typeof opcionesSistema.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(opcionesSistema.colorSistema))?opcionesSistema.colorSistema:"#0b4a6e"};
 function guardarOpcionesSistema(){guardarPorLicencia("kupoPosV146Opciones",opcionesSistema);}
 /* Migración v82: el interruptor del chat vivía en localStorage kupoPosV146ChatActivo; ahora vive en opcionesSistema.chatInterno (por licencia). */
 try{var _chatViejo=localStorage.getItem("kupoPosV146ChatActivo");if(_chatViejo!==null){opcionesSistema.chatInterno=_chatViejo==="true";localStorage.removeItem("kupoPosV146ChatActivo");guardarOpcionesSistema();}}catch(e){}
@@ -2913,7 +2913,7 @@ function programarReintentoOpciones(){
 }
 function cambiarOpcionSistema(clave,valor){
  if(!((sesionActual&&sesionActual.rol)==="Administrador")){toast("⛔ Sin permiso: solo el Administrador puede cambiar las opciones de esta licencia.");aplicarOpcionesSistema();return}
- if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos"&&clave!=="sinStock")return;
+ if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos"&&clave!=="sinStock"&&clave!=="usaFondo")return;
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
  guardarFechaOpcionesNube(Date.now());
@@ -2923,7 +2923,8 @@ function cambiarOpcionSistema(clave,valor){
  if(clave==="sinStock"&&valor&&vistaActual==="entradas")mostrarVista("ventas");
  if(clave==="multiAlmacen"&&!valor&&vistaActual==="multi")mostrarVista("ventas");
  if(clave==="chatInterno"){aplicarPermisosMenu();if(!valor&&vistaActual==="mensajes"&&!esAdminChat())mostrarVista("ventas");}
- toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":clave==="descuentos"?"Descuentos":clave==="sinStock"?"Sin stock":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
+ if(clave==="usaFondo"){renderCortes();}
+ toast((clave==="corteProductos"?"Corte por productos":clave==="multiAlmacen"?"Multi-almacén":clave==="descuentos"?"Descuentos":clave==="sinStock"?"Sin stock":clave==="usaFondo"?"Fondo de caja":"Chat interno")+(valor?" activado ✅":" desactivado.")+" Solo para esta licencia.");
 }
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
@@ -2931,9 +2932,9 @@ function cargarDatosLicencia(){
  ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false,cortesParaCerrar:2});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
- opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"});
+ opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,usaFondo:false,colorSistema:"#0b4a6e"});
  if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"};
- opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true,colorSistema:(typeof opcionesSistema.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(opcionesSistema.colorSistema))?opcionesSistema.colorSistema:"#0b4a6e"};
+ opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true,usaFondo:opcionesSistema.usaFondo===true,colorSistema:(typeof opcionesSistema.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(opcionesSistema.colorSistema))?opcionesSistema.colorSistema:"#0b4a6e"};
  const nb=(ticketConfig&&ticketConfig.negocio)||negDef;
  localStorage.setItem("kupoPosV146Negocio",nb);
  const nbEl=document.getElementById("nombreNegocio"); if(nbEl)nbEl.textContent=nb;
@@ -4741,6 +4742,8 @@ function actualizarBotonPantallaCompleta(){
 document.addEventListener("fullscreenchange",actualizarBotonPantallaCompleta);
 function corteCaja(){mostrarVista("cortes");}
 function esHoyVenta(v){return new Date(v.fecha).toDateString()===new Date().toDateString()}
+/* v186: interruptor de fondo de caja (usaFondo, apagado por defecto). Don David confirmó 2026-11-24 que Jonuta no maneja fondo; el fondo solo cuenta si la licencia lo usa. Apagado, el efectivo esperado y el total en caja no lo suman y el campo no se muestra. */
+function fondoEfectivo(){return opcionesSistema.usaFondo===true?fondoCaja:0;}
 function resumenCorte(){
  const hoy=hoyLocal();
  const vHoy=ventas.filter(esHoyVenta);
@@ -4752,8 +4755,9 @@ function resumenCorte(){
  const gastosHoy=gHoy.reduce((a,g)=>a+g.monto,0);
  const costoEntradas=eHoy.reduce((a,e)=>a+(e.total||0),0);
  const piezasEntradas=eHoy.reduce((a,e)=>a+(e.cantidad||0),0);
- const efectivoEsperado=fondoCaja+(porPago.Efectivo||0)-gastosHoy;
- const totalCaja=fondoCaja+ventasTotal-gastosHoy;
+ const fondoEf=fondoEfectivo();
+ const efectivoEsperado=fondoEf+(porPago.Efectivo||0)-gastosHoy;
+ const totalCaja=fondoEf+ventasTotal-gastosHoy;
  const ganancia=ventasTotal-gastosHoy-costoEntradas;
  return {ventasNum:vHoy.length,ventasTotal,porPago,gastosHoy,costoEntradas,piezasEntradas,efectivoEsperado,totalCaja,ganancia};
 }
@@ -4796,6 +4800,8 @@ function actualizarCuadre(){
 function guardarFondo(){fondoCaja=Number(document.getElementById("fondoCaja").value)||0;fondoFecha=hoyLocal();guardar();renderCortes();}
 function renderCortes(){
  try{resetFondoSiDiaCerrado();}catch(e){}
+ var cf=document.getElementById("campoFondo");if(cf)cf.style.display=opcionesSistema.usaFondo===true?"":"none";
+ var nc=document.getElementById("notaCuadre");if(nc)nc.textContent=opcionesSistema.usaFondo===true?"Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.":"Efectivo esperado = ventas en efectivo − gastos. Total en caja = ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo. Esta licencia no maneja fondo de caja.";
  aplicarOpcionesSistema();
  var esAdminCierre=(sesionActual&&sesionActual.rol)==="Administrador";
  var secCA=document.getElementById("secCierreAuto");if(secCA)secCA.style.display=esAdminCierre?"":"none";
@@ -4876,7 +4882,7 @@ function realizarCorteDinero(ya){
  if(!ya){pedirConfirmacion("¿Sacar el corte de dinero?","Sacar corte",function(){realizarCorteDinero(true)});return;}
  corteFolio++;
  const ahora=new Date();
- const c={id:Date.now()+uid++,tipo:"dinero",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoCaja,efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
+ const c={id:Date.now()+uid++,tipo:"dinero",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoEfectivo(),efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
  cortes.unshift(c);
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
@@ -4891,7 +4897,7 @@ function realizarCorteProductos(ya){
  if(!ya){pedirConfirmacion("¿Sacar el corte de productos?","Sacar corte",function(){realizarCorteProductos(true)});return;}
  corteFolio++;
  const ahora=new Date();
- const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoCaja,efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
+ const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoEfectivo(),efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
@@ -5232,7 +5238,7 @@ async function sincronizarOpcionesNube(){
   var fechaNube=0;try{fechaNube=new Date(fila.updated_at).getTime()||0}catch(e){fechaNube=0;}
   if(fechaLocal>fechaNube){try{await subirOpcionesNube()}catch(e){}return false;}
   if(fechaNube>fechaLocal&&fila.opciones&&typeof fila.opciones==="object"){
-   var claves=["corteProductos","multiAlmacen","chatInterno","descuentos","sinStock"];
+   var claves=["corteProductos","multiAlmacen","chatInterno","descuentos","sinStock","usaFondo"];
    var cambio=false;
    var subirColor=false;
    claves.forEach(function(k){if(typeof fila.opciones[k]==="boolean"&&opcionesSistema[k]!==fila.opciones[k]){opcionesSistema[k]=fila.opciones[k];cambio=true;}});
