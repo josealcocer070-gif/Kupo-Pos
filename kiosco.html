@@ -100,7 +100,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v167</div>
+  <div class="pie">Kiosco KUPO · v168</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -113,7 +113,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v167</div>
+  <div class="pie">Kiosco KUPO · v168</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -165,14 +165,14 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · v167</div>
+  <div class="pie">Kiosco KUPO · v168</div>
 </div>
 <script>
-/* Kiosco KUPO v167 — las lecturas a la nube van sin caché (no-store): si el kiosco leyó "apagado" una vez, ese dato viejo no se puede quedar guardado en el aparato. Saludo según la hora en las primeras pantallas; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
+/* Kiosco KUPO v168 — el kiosco lee SIEMPRE como anónimo (sin sesión guardada): en la tablet y el celular hay sesión de KUPO POS y el kiosco la heredaba, así la nube le respondía como usuario y no le dejaba ver el interruptor. Lecturas sin caché (no-store). Saludo según la hora; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
-try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{global:{fetch:function(url,opts){opts=opts||{};opts.cache="no-store";return fetch(url,opts);}}}); }catch(e){ sb=null; }
+try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:function(url,opts){opts=opts||{};opts.cache="no-store";return fetch(url,opts);}}}); }catch(e){ sb=null; }
 var licencia="";
 var negocioNombre="POLLOS RANCHEROS EL POLLÓN";
 var productos=[];      /* crudos de la nube */
