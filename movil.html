@@ -1419,6 +1419,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
   <p class="inicio-sub">Un producto de Grupo Benítez</p>
   <div class="inicio-negocio"><b id="inicioNegocio2">Mi negocio</b><span>SUCURSAL PRINCIPAL · V1.7.0</span></div>
   <h2 style="text-align:center">Iniciar sesión</h2>
+  <div id="avisoDiaCerrado" class="oculto" style="background:#fff8e1;border:1px solid #f5b800;border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:center;font-size:14px;line-height:1.5"></div>
   <label for="usuarioLogin">Usuario</label>
   <input id="usuarioLogin" type="text" value="Administrador" autocomplete="off">
   <label for="pinLogin">PIN de 6 dígitos</label>
@@ -1755,6 +1756,11 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
 <button type="button" onclick="realizarCorteDinero()">💾 Realizar corte de dinero</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
+<div id="secCierreAuto" style="margin-top:14px;border-top:1px solid #e3e8ec;padding-top:12px">
+<label for="cortesParaCerrarDia">🔒 Cortes para cerrar el día</label>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes al día</span></div>
+<p style="font-size:12px;color:#666">Al guardar este número de cortes en el día, el sistema cierra la sesión solo y queda en inicio de sesión para el día siguiente. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
+</div>
 </div>
 <div class="form-prod" id="secCorteProductos" style="margin-top:16px">
 <h2>📦 Corte de productos</h2>
@@ -2807,7 +2813,7 @@ function cambiarOpcionSistema(clave,valor){
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
  const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
- ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false});
+ ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false,cortesParaCerrar:2});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
  opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false});
@@ -2819,7 +2825,7 @@ function cargarDatosLicencia(){
  const boxEl=document.getElementById("negocioBox"); if(boxEl)boxEl.textContent=nb.toUpperCase();
  aplicarOpcionesSistema();
 }
-let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false});
+let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false,cortesParaCerrar:2});
 let terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
 function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function cargarTicketConfig(){
@@ -2868,7 +2874,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:false,logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",colorSistema:ticketConfig.colorSistema||"#0b4a6e",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:false,logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",colorSistema:ticketConfig.colorSistema||"#0b4a6e",cortesParaCerrar:ticketConfig.cortesParaCerrar||2,papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig();
@@ -2876,7 +2882,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(ya){
  if(!ya){pedirConfirmacion("¿Restablecer los datos del ticket a los valores de ejemplo?","Restablecer",function(){restablecerTicketConfig(true)});return;}
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",logoEncabezado:"",colorSistema:"#0b4a6e",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",logoEncabezado:"",colorSistema:"#0b4a6e",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false,cortesParaCerrar:2};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -4607,6 +4613,9 @@ function actualizarCuadre(){
 function guardarFondo(){fondoCaja=Number(document.getElementById("fondoCaja").value)||0;guardar();renderCortes();}
 function renderCortes(){
  aplicarOpcionesSistema();
+ var esAdminCierre=(sesionActual&&sesionActual.rol)==="Administrador";
+ var secCA=document.getElementById("secCierreAuto");if(secCA)secCA.style.display=esAdminCierre?"":"none";
+ var inpCA=document.getElementById("cortesParaCerrarDia");if(inpCA)inpCA.value=cortesParaCerrar();
  const r=resumenCorte();
  document.getElementById("fechaCorte").textContent=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
  document.getElementById("resCorVentas").textContent=dinero(r.ventasTotal)+" · "+r.ventasNum+" ventas";
@@ -4638,6 +4647,22 @@ function renderHistorial(){
  if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">🕐<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">📊 Ir a Corte diario</button></div></td></tr>';return}
  lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">👁 Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">🖨 Reimprimir</button></div></td></tr>'}).join("");
 }
+/* v136 (Lalo 2026-11-23): cierre automático del día — al guardar el corte
+   número N del día (N configurable en Corte diario, por defecto 2), el
+   sistema cierra la sesión solo y queda en inicio de sesión para el día
+   siguiente. Nada se borra. El Administrador puede reabrir con su PIN en
+   cualquier momento: el bloqueo solo se dispara al guardar el corte N,
+   no al iniciar sesión. Se cuentan todos los cortes del día (dinero y
+   productos), como dice el aviso de Corte: "se hacen 2 cortes: uno de
+   dinero y uno de productos". */
+var cierreAutoPendiente=false;
+function cortesParaCerrar(){var n=parseInt(ticketConfig&&ticketConfig.cortesParaCerrar,10);return (isNaN(n)||n<1)?2:n;}
+function cortesHoy(){var h=hoyLocal();return cortes.filter(function(c){return c.fecha===h;}).length;}
+function mostrarAvisoDiaCerrado(n){var b=document.getElementById("avisoDiaCerrado");if(!b)return;b.innerHTML=ic3d("🔒","f-oro")+" <b>Día cerrado</b><br>Se hicieron los "+n+" cortes de hoy. Inicia sesión para el día siguiente.";b.classList.remove("oculto");}
+function ocultarAvisoDiaCerrado(){var b=document.getElementById("avisoDiaCerrado");if(b)b.classList.add("oculto");}
+function guardarCortesParaCerrar(){if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia este ajuste.");var inp0=document.getElementById("cortesParaCerrarDia");if(inp0)inp0.value=cortesParaCerrar();return;}var inp=document.getElementById("cortesParaCerrarDia");var n=parseInt(inp&&inp.value,10);if(isNaN(n)||n<1)n=2;if(n>10)n=10;ticketConfig.cortesParaCerrar=n;if(inp)inp.value=n;guardar();toast("Cierre automático tras "+n+(n===1?" corte":" cortes")+" al día.");}
+function cerrarDiaAutomatico(){cierreAutoPendiente=true;salirSesion();}
+function revisarCierreAutomatico(){if(cortesHoy()>=cortesParaCerrar())cerrarDiaAutomatico();}
 function realizarCorteDinero(){
  const r=resumenCorte();
  if(!r.ventasNum&&r.gastosHoy===0&&r.piezasEntradas===0){toast("Aún no hay movimientos hoy para cortar.");return}
@@ -4649,6 +4674,7 @@ function realizarCorteDinero(){
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
+ revisarCierreAutomatico();
 }
 function realizarCorte(){realizarCorteDinero();}
 function realizarCorteProductos(){
@@ -4661,6 +4687,7 @@ function realizarCorteProductos(){
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
+ revisarCierreAutomatico();
 }
 function ic3d(e,c){return "<span class='icono-3d-mini "+(c||"f-gris")+"'>"+e+"</span>";}
 var detalleCorteId=null;
@@ -5550,7 +5577,7 @@ async function entrar(){
  var _pc=document.getElementById("pantallaCarga");if(_pc)_pc.style.display="flex";
  setTimeout(function(){var _p2=document.getElementById("pantallaCarga");if(_p2)_p2.style.display="none";document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);},1300);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();if(cierreAutoPendiente){cierreAutoPendiente=false;mostrarAvisoDiaCerrado(cortesHoy());toast("Día cerrado: ya se hicieron los cortes de hoy. Inicia sesión para el día siguiente.");}else{ocultarAvisoDiaCerrado();toast("Turno cerrado. Inicia sesión para volver a entrar.");}}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
