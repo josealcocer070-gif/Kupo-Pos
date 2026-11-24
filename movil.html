@@ -1092,6 +1092,7 @@ h1,h2{font-weight:800!important}
 #vistaProductos .prod-row{flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border-radius:12px!important}
 #vistaProductos .prod-row .foto{width:56px!important;height:56px!important;flex:none!important;border-radius:10px!important;font-size:28px!important}
 #vistaProductos .prod-row .info{flex:1!important;min-width:0!important}
+#vistaProductos .btn-nuevo-prod{width:100%;min-height:52px;margin:12px 0;border:0;border-radius:14px;background:#2e9e4f;color:#fff;font-size:18px;font-weight:700}
 /* v161: la fila de Productos baja a dos líneas para que quepan Editar/Pausar/Eliminar. */
 #vistaProductos .prod-row{flex-wrap:wrap!important}
 #vistaProductos .prod-row{cursor:pointer!important}
@@ -1635,7 +1636,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 <div id="vistaProductos" class="oculto">
 <h1>Productos</h1>
-<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.</p>
+<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede crear, editar o eliminar productos desde aquí.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL PRODUCTOS</small><b id="resTotal">0</b></div>
 <div class="tarjeta"><small>DISPONIBLES</small><b id="resDisp">0</b></div>
@@ -1646,6 +1647,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <!-- v133: en la móvil Productos es solo consulta; el formulario de alta/edición queda oculto (sigue en el DOM para no romper las funciones que lo referencian). -->
 <!-- v161: el Administrador ya puede editar/eliminar desde el celular; el formulario se muestra solo al tocar Editar. -->
+<!-- v181: botón + Nuevo producto (Lalo 2026-11-24): abre el formulario vacío para crear; solo Administrador (nuevoProducto avisa si es Cajero). -->
+<button type="button" class="btn-nuevo-prod" onclick="nuevoProducto()"><span class="icono-3d-mini f-oro">➕</span> Nuevo producto</button>
 <div class="form-prod" style="display:none">
 <h2 id="tituloFormProd">+ Nuevo producto</h2>
 <form onsubmit="guardarProducto(event)">
@@ -2877,7 +2880,7 @@ function aplicarOpcionesSistema(){
  var ta=document.getElementById("tarjAgot"); if(ta)ta.style.display=opcionesSistema.sinStock===true?"none":"";
  var tv=document.getElementById("tarjValor"); if(tv)tv.style.display=opcionesSistema.sinStock===true?"none":"";
  var tsb=document.getElementById("tarjStockBajo"); if(tsb)tsb.style.display=opcionesSistema.sinStock===true?"none":"";
- var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.";
+ var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. Toca un producto para ver sus opciones. El Administrador puede crear, editar o eliminar productos desde aquí.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede crear, editar o eliminar productos desde aquí.";
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
  const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+(opcionesSistema.chatInterno?"Chat interno activado: el patrón y los cajeros se escriben en Mensajes. ":"Chat interno desactivado: los cajeros no ven Mensajes en el menú. ")+(opcionesSistema.descuentos?"Descuentos activados: al cobrar se puede aplicar un descuento en % o en pesos (solo el Administrador). ":"Descuentos desactivados: al cobrar no se puede rebajar el total. ")+(opcionesSistema.sinStock===true?"Sin stock activado: esta licencia no maneja inventario; las ventas no se bloquean por stock y el corte de productos no muestra columnas de stock. ":"")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
@@ -3927,7 +3930,7 @@ function renderReportes(){
 /* v133: en la móvil ya no existen los botones de los apartados solo-PC; este ayudante evita que mostrarVista falle si falta un botón. */
 function navAct(id,on){var e=document.getElementById(id);if(e)e.classList.toggle("activo",on);}
 function mostrarVista(v){
- /* v133: versión móvil pulida (Lalo 2026-11-23): solo Ventas, Productos (consulta), Cortes, Reportes, Mensajes, Cajeros (Admin) y la barra inferior. Administrador de licencia, Multi-almacén, Personalizar ticket, Cotizaciones, Importar, Entradas y Gastos solo existen en la versión de PC. */
+ /* v133: versión móvil pulida (Lalo 2026-11-23): solo Ventas, Productos (crear/editar/eliminar, solo Administrador, desde v181), Cortes, Reportes, Mensajes, Cajeros (Admin) y la barra inferior. Administrador de licencia, Multi-almacén, Personalizar ticket, Cotizaciones, Importar, Entradas y Gastos solo existen en la versión de PC. */
  var VISTAS_SOLO_PC=["adminlic","multi","ticket","cotizaciones","importar","entradas","gastos"];
  if(VISTAS_SOLO_PC.indexOf(v)!==-1){toast("📱 Esta función solo está en la versión de PC.");v="ventas";}
  if(v!=="ventas"&&!tienePermiso(v)){toast("⛔ Sin permiso para esta sección. Pide al Administrador que te active el permiso.");return}
@@ -4509,6 +4512,8 @@ function guardarProducto(e){e.preventDefault();
  guardar();render();renderProductos();
 }
 /* v161: el formulario de producto vive oculto en el móvil; solo se muestra al tocar Editar. */
+/* v181: crear producto desde el móvil (Lalo 2026-11-24): abre el formulario vacío; solo Administrador. */
+function nuevoProducto(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede crear productos.");return}document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();quitarFotoProducto();formProdVisible(true);var _t=document.getElementById("tituloFormProd");if(_t&&_t.scrollIntoView)_t.scrollIntoView({behavior:"smooth",block:"start"});}
 function formProdVisible(v){var f=document.querySelector("#vistaProductos .form-prod");if(f)f.style.display=v?"":"none";}
 function editarProducto(id){const p=catalogo.find(x=>x.id===id);if(!p)return;
  document.getElementById("pId").value=p.id;document.getElementById("pNombre").value=p.nombre;
