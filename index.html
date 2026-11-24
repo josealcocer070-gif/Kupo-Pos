@@ -26,6 +26,8 @@ header .user{text-align:right;line-height:1.2}
 header .user b{font-size:16px}
 header .user span{display:block;font-size:13px;color:#bcd7e6}
 .pill{background:#0f6a4d;border:1px solid #2ea37c;color:#fff;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:700;white-space:nowrap}
+/* v157: reloj discreto en el encabezado (Lalo 2026-11-23, opción A) */
+.reloj-header{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:20px;padding:8px 12px;font-size:13px;font-weight:700;white-space:nowrap}
 .pill.sin-conexion{background:#8a2f2f;border-color:#c05050}
 /* Botón Sincronizar en el encabezado (Lalo, 2026-11-17): fuerza la subida de la cola pendiente a la nube, como el botón del POS de Manus. La insignia dorada muestra cuántos registros faltan y se oculta en 0. */
 .btn-sync{position:relative;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;flex:0 0 auto}
@@ -508,6 +510,7 @@ html[data-tema="noche"] .login-logo-kupo{background:#fff;border-radius:12px;padd
  header .avatar{width:40px;height:40px}
  header .negocio b{width:150px;max-width:48vw;font-size:17px}
  header .pill{display:none}
+ header .reloj-header{display:none}
  header .sucursal{font-size:11px}
  .acciones{display:none!important}
  main{padding:12px 12px 116px}
@@ -1114,7 +1117,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" class="btn-tema" id="btnReconectarBT" onclick="reconectarImpresoraBT()" aria-label="Reconectar impresora Bluetooth" title="Reconectar impresora"><span class="icono-3d-mini f-azul">🔄</span></button>
 <button type="button" class="btn-tema" id="btnTema" onclick="cambiarTema()" aria-label="Cambiar a modo noche"><span class="icono-3d-mini f-morado">🌙</span></button>
 <div class="user"><b id="usuarioActual">Eduardo Benitez</b><span id="rolActual">Administrador</span></div>
-<span class="pill" id="pillConexion">📶 Conectado</span>
+<span class="pill" id="pillConexion">📶 Conectado</span><span class="reloj-header" id="relojHeader" title="Hora actual">--:--</span>
 </header>
 
 <div id="avisoGracia" class="aviso-gracia oculto" role="alert"></div>
@@ -5484,8 +5487,12 @@ if(typeof window!=="undefined"&&window.addEventListener)window.addEventListener(
 if(typeof document!=="undefined"&&document.addEventListener)document.addEventListener("visibilitychange",function(){if(!document.hidden){if(typeof asegurarSupabase==="function")asegurarSupabase();if(typeof reenviarMensajesPendientes==="function")reenviarMensajesPendientes();if(typeof cargarMensajes==="function")cargarMensajes();}});
 /* v99: la pastilla de conexión refleja el internet real (Lalo 2026-11-20): antes decía "Conectado" siempre, aunque no hubiera internet. */
 function actualizarPillConexion(){var p=document.getElementById("pillConexion");if(!p)return;var enLinea=(typeof navigator!=="undefined"&&navigator.onLine!==false);p.textContent=enLinea?"📶 Conectado":"📶 Sin conexión";p.classList.toggle("sin-conexion",!enLinea);}
+/* v157: reloj discreto en el encabezado (Lalo 2026-11-23, opción A) */
+function formatoHora12(d){var h=d.getHours(),m=d.getMinutes(),ap=h>=12?"p. m.":"a. m.";h=h%12;if(h===0)h=12;return h+":"+String(m).padStart(2,"0")+" "+ap;}
+function pintarRelojHeader(){var e=document.getElementById("relojHeader");if(e)e.textContent=formatoHora12(new Date());}
 if(typeof window!=="undefined"&&window.addEventListener){window.addEventListener("online",actualizarPillConexion);window.addEventListener("offline",actualizarPillConexion);}
 actualizarPillConexion();
+pintarRelojHeader();setInterval(pintarRelojHeader,1000);/* v157: el reloj se actualiza solo cada segundo */
 /* v117: marca de "vivo" de la sesión cada 30 s (ver sesionVivoVigente). */
 setInterval(marcarSesionVivo,30000);
 setTimeout(function(){if(typeof encolarHistorialLocalNube==="function")encolarHistorialLocalNube();if(typeof descargarCajerosNube==="function")descargarCajerosNube();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();if(typeof cargarMensajes==="function")cargarMensajes();},3000);
