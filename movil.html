@@ -337,8 +337,9 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 .inicio-tarjeta-login .inicio-negocio b{font-size:26px}
 .inicio-tarjeta-login .inicio-negocio span{font-size:14px}
 .login-dos-columnas{display:flex;gap:18px;align-items:stretch;margin-top:6px}
-.login-logos{flex:0 0 300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;border-right:1px solid #e3e8ec;padding-right:24px}
-.login-logo-kupo{width:100%;max-width:280px;display:block}
+/* v153: el logo se luce como las grandes marcas (columna 420 px, logo 380 px; tarjetas medianas) */
+.login-logos{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;border-right:1px solid #e3e8ec;padding-right:24px}
+.login-logo-kupo{width:100%;max-width:380px;display:block}
 .login-logos-abajo{display:flex;gap:16px;align-items:center;justify-content:center}
 .login-logo-gb{width:96px;display:block}
 .login-logo-wa{display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;background:#25d366;box-shadow:0 3px 10px rgba(37,211,102,.5);flex:0 0 auto}
@@ -347,13 +348,13 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 .perfiles-titulo{text-align:center;color:#555;font-size:18px;margin:0 0 14px}
 #listaPerfiles{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .login-otro-usuario{width:100%;margin-top:10px}
-.perfil-tarjeta{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#f4f8fa;border:1px solid #d7e0e6;border-radius:14px;padding:14px 8px;cursor:pointer}
-.perfil-avatar{width:84px;height:84px;border-radius:50%;background:linear-gradient(180deg,#8ec9ff,#2b7cd3);color:#fff;font-weight:800;font-size:30px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.perfil-tarjeta{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#f4f8fa;border:1px solid #d7e0e6;border-radius:14px;padding:12px 8px;cursor:pointer}
+.perfil-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,#8ec9ff,#2b7cd3);color:#fff;font-weight:800;font-size:23px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .perfil-avatar.admin{background:linear-gradient(180deg,#ffe082,#f5b800);color:#5d4037}
 .perfil-datos{display:flex;flex-direction:column;align-items:center;min-width:0}
-.perfil-datos b{font-size:20px;color:#12303f;text-align:center;line-height:1.25}
-.perfil-datos span{font-size:16px;color:#666}
-.perfil-quitar{position:absolute;top:4px;right:8px;color:#999;font-size:26px;line-height:1;padding:2px 6px;background:none;border:0;cursor:pointer}
+.perfil-datos b{font-size:16px;color:#12303f;text-align:center;line-height:1.25}
+.perfil-datos span{font-size:13px;color:#666}
+.perfil-quitar{position:absolute;top:4px;right:8px;color:#999;font-size:22px;line-height:1;padding:2px 6px;background:none;border:0;cursor:pointer}
 .perfil-elegido{display:flex;align-items:center;gap:16px;background:#eef6fb;border:1px solid #bcd8e8;border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:left}
 .perfil-elegido .perfil-datos{flex:1;align-items:flex-start}
 .perfil-elegido .perfil-datos b{text-align:left}
