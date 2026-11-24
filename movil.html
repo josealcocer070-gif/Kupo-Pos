@@ -47,8 +47,6 @@ header .user span{display:block;font-size:12px;color:#bcd7e6}
 /* Chat interno "Mensajes" (v82, Lalo 2026-11-18): insignia dorada de no leídos. */
 .badge-msg{display:none;min-width:20px;height:20px;border-radius:10px;background:#f5b800;color:#0b2a5e;font-size:11px;font-weight:800;align-items:center;justify-content:center;padding:0 5px;vertical-align:middle;margin-left:6px}
 .badge-msg.con-nuevos{display:inline-flex}
-#menuMovil button{position:relative}
-#menuMovil button .badge-msg{position:absolute;top:3px;right:10px;margin-left:0}
 /* Botón 💬 Mensajes en la fila SCAN/Catálogo (v82c): a la mano en Ventas en el celular. */
 .ticket-scan .btn-msg-ticket{position:relative;flex:0 0 auto!important;background:#0b2a5e!important;color:#fff!important;border:0!important;border-radius:14px!important;padding:16px!important;font-size:22px!important;font-weight:800!important;cursor:pointer!important;min-height:56px!important}
 .ticket-scan .btn-msg-ticket .badge-msg{position:absolute;top:-7px;right:-7px;margin-left:0}
@@ -141,6 +139,8 @@ html[data-tema="noche"] .kupi-entrada input::placeholder{color:var(--texto3)}
 html[data-tema="noche"] .kupi-aprendiendo{background:#3a2f00!important;border-color:#f5b800!important;color:#ffe9a8}
 #navTicket .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
+/* v159: 3D zona 2 Cortes — la pastilla 3D va centrada en títulos, botones y celdas */
+#vistaCortes .icono-3d-mini,#vistaHistorial .icono-3d-mini,#listaHistCortes .icono-3d-mini{vertical-align:middle!important}
 /* v158: encabezado limpio del móvil — acciones en el menú lateral (Lalo 2026-11-23) */
 aside nav a{position:relative}
 aside nav a .badge-sync{position:absolute;top:50%;right:12px;transform:translateY(-50%);min-width:20px;height:20px;border-radius:10px;background:#f5b800;color:#0b2a5e;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 5px}
@@ -488,10 +488,10 @@ html[data-tema="noche"] .login-logo-kupo{background:#fff;border-radius:12px;padd
 /* ===== Interfaz móvil (<=760px), diferente a PC =====
    PC: 3 columnas, menú hamburguesa, ticket a la derecha.
    Móvil: una sola columna, tarjetas y botones grandes,
-   menú inferior fijo y Venta en curso abajo fijo.
+   Venta en curso abajo fija.
    Corrección de Lalo: SIN gráfica; el tablero
    es solo números simples. */
-#menuMovil,#barraVentaMovil{display:none}
+#barraVentaMovil{display:none}
 @media(max-width:760px){
  header{padding:8px 10px;gap:8px}
  header .avatar{width:40px;height:40px}
@@ -530,7 +530,7 @@ html[data-tema="noche"] .login-logo-kupo{background:#fff;border-radius:12px;padd
  .inicio-tarjeta{padding:22px 16px}
  /* Panel de venta: oculto en móvil; se abre como hoja inferior */
  .panel{display:none}
- body.venta-movil-abierta .panel{display:block;position:fixed;left:0;right:0;bottom:136px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
+ body.venta-movil-abierta .panel{display:block;position:fixed;left:0;right:0;bottom:88px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
  .toast{top:88px}
  /* Barra fija de Venta en curso (solo en Ventas, solo móvil) */
  body.movil-ventas #barraVentaMovil{display:flex}
@@ -541,11 +541,6 @@ html[data-tema="noche"] .login-logo-kupo{background:#fff;border-radius:12px;padd
  #barraVentaMovil .barra-total small{display:block;font-size:11px;color:#666;font-weight:700;letter-spacing:1px}
  #barraVentaMovil .barra-total b{font-size:26px;color:var(--dorado2);white-space:nowrap}
  #barraVentaMovil .barra-cobrar{background:var(--dorado);border:0;border-radius:22px;padding:14px 20px;font-size:18px;font-weight:800;cursor:pointer;white-space:nowrap}
- /* Menú inferior fijo (v133): 4 accesos — Ventas, Corte, Reportes, Mensajes */
- #menuMovil{display:flex;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
- #menuMovil button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
- #menuMovil button span{font-size:21px;line-height:1}
- #menuMovil button.activo{background:rgba(255,255,255,.22)}
 }
 
 /* V1.5.0 · Mejoras anti-demo: tablero, foto real, vacíos con acción */
@@ -736,7 +731,7 @@ body.vista-ventas .layout:not(.sin-panel) .panel{position:static!important;heigh
 .inicio-tarjeta{padding:22px 16px}
 /* Panel de venta: oculto; se abre como hoja inferior */
 .panel{display:none!important}
-body.venta-movil-abierta .panel{display:block!important;position:fixed;left:0;right:0;bottom:136px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
+body.venta-movil-abierta .panel{display:block!important;position:fixed;left:0;right:0;bottom:88px;top:auto;z-index:45;max-height:56vh;overflow-y:auto;border-top:3px solid var(--dorado);box-shadow:0 -8px 30px rgba(0,0,0,.28)}
 .toast{top:88px}
 /* Barra fija de Venta en curso (solo en Ventas) */
 body.movil-ventas #barraVentaMovil{display:flex!important}
@@ -747,11 +742,6 @@ body.movil-ventas #barraVentaMovil{display:flex!important}
 #barraVentaMovil .barra-total small{display:block;font-size:11px;color:#666;font-weight:700;letter-spacing:1px}
 #barraVentaMovil .barra-total b{font-size:26px;color:var(--dorado2);white-space:nowrap}
 #barraVentaMovil .barra-cobrar{background:var(--dorado);border:0;border-radius:22px;padding:14px 20px;font-size:18px;font-weight:800;cursor:pointer;white-space:nowrap}
-/* Menú inferior fijo (v133): 4 accesos — Ventas, Corte, Reportes, Mensajes */
-#menuMovil{display:flex!important;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:60;background:var(--azul);box-shadow:0 -4px 16px rgba(0,0,0,.2)}
-#menuMovil button{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:11px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px}
-#menuMovil button span{font-size:21px;line-height:1}
-#menuMovil button.activo{background:rgba(255,255,255,.22)}
 /* Confirmación: que quepa en la pantalla del celular */
 .conf-tarjeta{max-height:92vh;max-height:92dvh;overflow-y:auto}
 .conf-total-grande b{font-size:52px}
@@ -816,7 +806,8 @@ body.movil-ventas #vistaVentas>*{flex-shrink:0!important}
 /* v134: botones del ticket vacío deshabilitados (se cablean en renderTicket). */
 #btnCobrarPanel:disabled,#btnCobrarBarra:disabled,#btnWhatsAppTicket:disabled,#btnRecuperarVenta:disabled,#btnPausarVenta:disabled{opacity:.45!important;cursor:not-allowed!important}
 /* Barra de venta: tarjeta azul oscuro, TOTAL dorado grande y Cobrar amarillo */
-#barraVentaMovil{left:12px!important;right:12px!important;bottom:96px!important;background:#0b2a5e!important;border:0!important;border-radius:20px!important;padding:12px!important;gap:10px!important;box-shadow:0 8px 22px rgba(11,42,94,.35)!important} /* Lalo 2026-11-15: el botón Cobrar se salía de la barra a 390px; barra más compacta para que siempre quepa */
+/* v160: la barra de venta baja al fondo — ya no hay menú inferior debajo */
+#barraVentaMovil{left:12px!important;right:12px!important;bottom:0!important;background:#0b2a5e!important;border:0!important;border-radius:20px!important;padding:12px!important;gap:10px!important;box-shadow:0 8px 22px rgba(11,42,94,.35)!important} /* Lalo 2026-11-15: el botón Cobrar se salía de la barra a 390px; barra más compacta para que siempre quepa */
 #barraVentaMovil .barra-detalle{flex:0 0 48px!important;width:48px!important;min-height:48px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.25)!important;border-radius:50%!important;font-size:0!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important}
 #barraVentaMovil .barra-detalle::after{content:"🛒";font-size:22px!important}
 #barraVentaMovil .barra-detalle span,#barraVentaMovil .barra-detalle small{display:none!important}
@@ -825,12 +816,7 @@ body.movil-ventas #vistaVentas>*{flex-shrink:0!important}
 #barraVentaMovil .barra-total b{font-size:30px!important;color:#f5b800!important}
 #barraVentaMovil .barra-cobrar{flex:0 0 auto!important;background:#f5b800!important;color:#0a2456!important;border-radius:14px!important;min-height:56px!important;padding:12px 14px!important;font-size:0!important;font-weight:800!important}
 #barraVentaMovil .barra-cobrar::before{content:"🛍️ Cobrar venta";font-size:17px!important;font-weight:800!important;color:#0a2456!important}
-body.venta-movil-abierta .panel{bottom:180px!important}
-/* Menú inferior (v133, mockup aprobado por Lalo 2026-11-23): barra clara, inactivos en gris, pestaña activa en dorado */
-#menuMovil{height:72px!important;background:#ffffff!important}
-#menuMovil button{color:#8a94a6!important;font-size:11px!important}
-#menuMovil button span{font-size:24px!important}
-#menuMovil button.activo{background:transparent!important;color:#f5b800!important}
+body.venta-movil-abierta .panel{bottom:88px!important}
 /* Se conserva lo útil del bloque anterior: botones grandes y confirmación */
 .teclado button{min-height:56px!important}
 .conf-total-grande b{font-size:56px!important}
@@ -887,12 +873,11 @@ body.vista-ventas #app{height:100vh;height:100svh;height:100dvh}
 /* Notch / Dynamic Island: el encabezado no queda bajo la barra de estado */
 header{top:calc(12px + env(safe-area-inset-top,0px))!important;margin-top:calc(12px + env(safe-area-inset-top,0px))!important}
 /* Barra de inicio de iOS (gesto) y barra de navegación de Android:
-   menú inferior y barra de venta suben lo que mide el safe-area */
-#menuMovil{height:calc(72px + env(safe-area-inset-bottom,0px))!important;padding-bottom:env(safe-area-inset-bottom,0px)!important}
-#barraVentaMovil{bottom:calc(96px + env(safe-area-inset-bottom,0px))!important}
-body.venta-movil-abierta .panel{bottom:calc(180px + env(safe-area-inset-bottom,0px))!important}
+   la barra de venta sube lo que mide el safe-area */
+#barraVentaMovil{bottom:env(safe-area-inset-bottom,0px)!important}
+body.venta-movil-abierta .panel{bottom:calc(88px + env(safe-area-inset-bottom,0px))!important}
 .toast{top:calc(88px + env(safe-area-inset-top,0px))!important}
-main{padding-bottom:calc(176px + env(safe-area-inset-bottom,0px))!important}
+main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))!important}
 /* Modales: que no queden bajo el notch ni bajo la barra de inicio */
 .modal-confirmar,.modal-scan{padding-top:calc(18px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))!important}
 .conf-tarjeta{max-height:92vh!important;max-height:92svh!important;max-height:92dvh!important}
@@ -901,7 +886,6 @@ main{padding-bottom:calc(176px + env(safe-area-inset-bottom,0px))!important}
    quedan en 44px, el mínimo táctil de Apple para ese tipo de control) */
 button{min-height:48px!important}
 aside nav a{min-height:48px!important}
-#menuMovil button{min-height:48px!important}
 .teclado button{min-height:56px!important}
 .linea .cant button,.cant button{min-width:44px!important;min-height:44px!important;font-size:18px!important}
 .tabla button{min-height:48px!important;display:inline-flex!important;align-items:center!important}
@@ -923,7 +907,7 @@ aside nav a{min-height:48px!important}
 /* Barra TOTAL/Cobrar: solo en Ventas, nunca tapada por el menu inferior.
    El menu mide 72px + safe-area; la barra queda a 96px + safe-area y
    con z-index por encima del menu, para que el TOTAL se vea completo. */
-#barraVentaMovil{display:none!important;bottom:calc(96px + env(safe-area-inset-bottom,0px))!important;z-index:65!important}
+#barraVentaMovil{display:none!important;bottom:env(safe-area-inset-bottom,0px)!important;z-index:65!important}
 body.movil-ventas #barraVentaMovil{display:flex!important}
 body.venta-movil-abierta .panel{bottom:calc(196px + env(safe-area-inset-bottom,0px))!important}
 main{padding-bottom:calc(216px + env(safe-area-inset-bottom,0px))!important}
@@ -952,15 +936,12 @@ header .negocio b::after{font-weight:800!important;letter-spacing:1px}
 #barraVentaMovil .barra-total small{font-weight:800!important}
 #barraVentaMovil .barra-total b{font-size:30px!important;font-weight:800!important}
 #barraVentaMovil .barra-cobrar::before{font-weight:800!important}
-#menuMovil button{font-weight:600!important}
-#menuMovil button.activo{font-weight:800!important}
 h1,h2{font-weight:800!important}
 /* Columna centrada máx. 480px SOLO en escritorio (más de 760px): en el celular la app ocupa el 100% del ancho, sin tope ni márgenes laterales */
 @media (min-width:761px){
   body{background:#0a2456!important}
   main{max-width:480px!important;margin:0 auto!important;background:#e9edf3!important;min-height:100vh}
   header{max-width:480px!important;margin:12px auto 0!important}
-  #menuMovil{max-width:480px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:100%!important}
   #barraVentaMovil{max-width:456px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:calc(100% - 24px)!important}
 }
 </style>
@@ -1005,7 +986,6 @@ h1,h2{font-weight:800!important}
  body.movil-ventas #panelVenta{margin-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}
  /* SCAN grande en el ticket + botón para abrir el catálogo */
  .ticket-scan{display:flex!important;gap:10px!important;margin:10px 0 14px!important}
- .ticket-scan .btn-scan-ticket{flex:1!important;background:#f5b800!important;color:#0a2456!important;border:0!important;border-radius:14px!important;padding:16px!important;font-size:19px!important;font-weight:800!important;cursor:pointer!important;min-height:56px!important}
  .ticket-scan .btn-ver-catalogo{flex:0 0 auto!important;background:#0b2a5e!important;color:#fff!important;border:0!important;border-radius:14px!important;padding:16px 18px!important;font-size:16px!important;font-weight:800!important;cursor:pointer!important;min-height:56px!important}
  /* Botón 🗑️ para quitar una línea del ticket */
  .linea-ticket .linea-quitar{flex:0 0 auto!important;width:44px!important;min-width:44px!important;height:44px!important;background:#fde8e8!important;color:#b3261e!important;border:0!important;border-radius:10px!important;font-size:18px!important;font-weight:800!important;cursor:pointer!important;align-self:center!important}
@@ -1258,10 +1238,6 @@ html[data-tema="noche"] .ticket-preview,html[data-tema="noche"] .term-row,html[d
 html[data-tema="noche"] .conf-tarjeta,html[data-tema="noche"] .scan-tarjeta,html[data-tema="noche"] .panel,
 html[data-tema="noche"] .panel-pie,html[data-tema="noche"] .acciones,html[data-tema="noche"] .ticket-encabezado,
 html[data-tema="noche"] .ent-menu,html[data-tema="noche"] .conf-mixto{background:var(--sup);border-color:var(--borde2)}
-/* v133: en modo noche el menú inferior vuelve a azul noche con la activa en dorado. */
-html[data-tema="noche"] #menuMovil{background:#0a2456!important}
-html[data-tema="noche"] #menuMovil button{color:#fff!important}
-html[data-tema="noche"] #menuMovil button.activo{color:#f5b800!important}
 html[data-tema="noche"] .negocio-box,html[data-tema="noche"] .ticket-vacio,html[data-tema="noche"] .vacio-accion,
 html[data-tema="noche"] .contratar .plan,html[data-tema="noche"] .teclado button,html[data-tema="noche"] .chat-dia,
 html[data-tema="noche"] .ent-elegido,html[data-tema="noche"] #listaProdEnt .cot-prod.sel,
@@ -1818,9 +1794,9 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaCortes" class="oculto">
 <h1>Corte diario</h1>
 <p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · <span id="textoCorteDiario">Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.</span></p>
-<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px">📦<b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.</div>
+<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px"><span class="icono-3d-mini f-azul">📦</span><b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.</div>
 <div class="form-prod" id="secCorteDinero">
-<h2>💰 Corte de dinero</h2>
+<h2><span class="icono-3d-mini f-oro">💰</span> Corte de dinero</h2>
 <div class="resumen">
 <div class="tarjeta"><small>VENTAS DE HOY</small><b id="resCorVentas">$0.00 · 0 ventas</b></div>
 <div class="tarjeta"><small>GASTOS DE HOY (SE RESTAN)</small><b id="resCorGastos">$0.00</b></div>
@@ -1833,7 +1809,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="tarjeta"><small>TRANSFERENCIA</small><b id="resPagoTransf">$0.00</b></div>
 <div class="tarjeta"><small>MIXTO</small><b id="resPagoMixto">$0.00</b></div>
 </div>
-<h2>💰 Cuadre de caja</h2>
+<h2><span class="icono-3d-mini f-oro">💰</span> Cuadre de caja</h2>
 <form onsubmit="event.preventDefault();realizarCorteDinero();">
 <div><label>Fondo inicial de caja $</label><input id="fondoCaja" type="number" min="0" step="0.01" placeholder="0.00" oninput="guardarFondo()"></div>
 <div><label>Efectivo esperado $</label><input id="resEfectivoEsperado" type="text" value="$0.00" readonly></div>
@@ -1842,16 +1818,16 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </form>
 <p style="margin-top:10px;font-size:13px;color:#555">Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.</p>
 <p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
-<button type="button" onclick="realizarCorteDinero()">💾 Realizar corte de dinero</button>
+<button type="button" onclick="realizarCorteDinero()"><span class="icono-3d-mini f-azul">💾</span> Realizar corte de dinero</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
 <div id="secCierreAuto" style="margin-top:14px;border-top:1px solid #e3e8ec;padding-top:12px">
-<label for="cortesParaCerrarDia">🔒 Cortes para cerrar el día</label>
+<label for="cortesParaCerrarDia"><span class="icono-3d-mini f-gris">🔒</span> Cortes para cerrar el día</label>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes al día</span></div>
 <p style="font-size:12px;color:#666">Con el corte de productos activado, la sesión se cierra solo al guardar el corte de productos que complete este número. Sin corte de productos, se cierra con el corte de dinero. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
 </div>
 </div>
 <div class="form-prod" id="secCorteProductos" style="margin-top:16px">
-<h2>📦 Corte de productos</h2>
+<h2><span class="icono-3d-mini f-azul">📦</span> Corte de productos</h2>
 <p id="descCorteProductos" style="color:#555;margin-bottom:14px">Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.</p>
 <div class="resumen">
 <div class="tarjeta"><small>PRODUCTOS VENDIDOS HOY</small><b id="resProdTipos">0 productos</b></div>
@@ -1864,11 +1840,11 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <tbody id="listaCorteProductos"></tbody>
 </table></div>
 <p id="notaEntradasCorte" style="margin-top:10px;font-size:13px;color:#555">Las Entradas siguen en su propia sección para los negocios que sí las manejan; aquí solo se usan para calcular el stock inicial del día.</p>
-<button type="button" onclick="realizarCorteProductos()">📦 Realizar corte de productos</button>
+<button type="button" onclick="realizarCorteProductos()"><span class="icono-3d-mini f-azul">📦</span> Realizar corte de productos</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
 </div>
 <div style="margin-top:16px">
-<button type="button" class="secundario" onclick="irHistorialCortes()">🕐 Ver historial completo de cortes →</button>
+<button type="button" class="secundario" onclick="irHistorialCortes()"><span class="icono-3d-mini f-morado">🕐</span> Ver historial completo de cortes →</button>
 </div>
 </div>
 
@@ -1906,7 +1882,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 
 <div id="vistaHistorial" class="oculto">
-<h1>🕐 Historial de cortes</h1>
+<h1><span class="icono-3d-mini f-morado">🕐</span> Historial de cortes</h1>
 <p style="color:#555;margin-bottom:14px">Todos los cortes cerrados, con su detalle completo: de dinero y de productos, cada uno con su folio. Los cortes se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL DE CORTES</small><b id="resHistTotal">0 cortes</b></div>
@@ -2262,7 +2238,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <p class="fecha">📅 <span id="fecha"></span></p>
 <p class="caja-estado" id="cajaEstado" style="font-size:13px;font-weight:700;color:#0f6a4d;margin:8px 0 0">🟢 Caja abierta</p>
 <!-- Lalo 2026-11-12 19:31: las líneas del ticket van ARRIBA. Antes quedaban debajo de cliente/negocio/almacén (~300px) y en horizontal corto no se veían sin bajar. -->
-<div class="ticket-scan"><button type="button" class="btn-scan-ticket" onclick="escanearCodigo()">📷 SCAN</button><button type="button" class="btn-ver-catalogo" onclick="abrirCatalogo()">☰ Catálogo</button><button type="button" class="btn-msg-ticket" id="btnMensajesVentasMovil" onclick="mostrarVista('mensajes')" aria-label="Mensajes">💬<span class="badge-msg" id="badgeMsgVentasMovil">0</span></button></div>
+<div class="ticket-scan"><button type="button" class="btn-ver-catalogo" onclick="abrirCatalogo()">☰ Catálogo</button><button type="button" class="btn-msg-ticket" id="btnMensajesVentasMovil" onclick="mostrarVista('mensajes')" aria-label="Mensajes">💬<span class="badge-msg" id="badgeMsgVentasMovil">0</span></button></div>
 <div class="ticket-encabezado"><span>ARTÍCULOS DE ESTA VENTA</span><span>Importe</span></div>
 <div id="ticket" style="margin-top:10px"></div>
 <!-- v106 (Lalo 2026-11-21): la sección Cliente, negocio y almacén se quitó del ticket; por ahora no se usa almacén ni WhatsApp en la venta. -->
@@ -2282,12 +2258,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 </section>
 </div>
-<nav id="menuMovil" aria-label="Menú móvil">
- <button type="button" data-nav="ventas" class="activo" onclick="mostrarVista('ventas')"><span>🛒</span>Ventas</button>
- <button type="button" data-nav="cortes" onclick="mostrarVista('cortes')"><span>💰</span>Corte</button>
- <button type="button" data-nav="reportes" onclick="mostrarVista('reportes')"><span>📊</span>Reportes</button>
- <button type="button" data-nav="mensajes" onclick="mostrarVista('mensajes')"><span>💬</span>Mensajes<span class="badge-msg" id="badgeMsgBar">0</span></button>
-</nav>
+<!-- v160 (Lalo 2026-11-23): sin barra inferior — Ventas, Corte, Reportes y Mensajes viven solo en el menú hamburguesa -->
 <div id="barraVentaMovil">
  <button type="button" class="barra-detalle" onclick="abrirCatalogo()">🛒 <span id="barraArticulos">0 artículos</span><small>Abrir catálogo</small></button>
  <div class="barra-total"><small>TOTAL</small><b id="barraTotal">$0.00</b></div>
@@ -4734,8 +4705,8 @@ function renderHistorial(){
  const elC=document.getElementById("resHistCaja"); if(elC)elC.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.totalCaja||0),0));
  const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
- if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">🕐<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">📊 Ir a Corte diario</button></div></td></tr>';return}
- lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">👁 Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">🖨 Reimprimir</button></div></td></tr>'}).join("");
+ if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">'+ic3d("🕐","f-morado")+'<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">'+ic3d("📊","f-azulrey")+' Ir a Corte diario</button></div></td></tr>';return}
+ lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?ic3d("📦","f-azul")+" Productos":ic3d("💰","f-oro")+" Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">'+ic3d("👁","f-azul")+' Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">'+ic3d("🖨","f-azul")+' Reimprimir</button></div></td></tr>'}).join("");
 }
 /* v136 (Lalo 2026-11-23): cierre automático del día — al guardar el corte
    número N del día (N configurable en Corte diario, por defecto 2), el

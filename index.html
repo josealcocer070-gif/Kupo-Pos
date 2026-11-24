@@ -149,6 +149,8 @@ html[data-tema="noche"] .kupi-entrada input::placeholder{color:var(--texto3)}
 html[data-tema="noche"] .kupi-aprendiendo{background:#3a2f00!important;border-color:#f5b800!important;color:#ffe9a8}
 #navTicket .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffd54f,#ff8f00)!important}
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
+/* v159: 3D zona 2 Cortes — la pastilla 3D va centrada en títulos, botones y celdas */
+#vistaCortes .icono-3d-mini,#vistaHistorial .icono-3d-mini,#listaHistCortes .icono-3d-mini{vertical-align:middle!important}
 #navAdminLic .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#90a4ae,#37474f)!important}
 #navMulti .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#80deea,#0097a7)!important}
 /* Iconos 3D de las formas de pago (Lalo, 2026-11-14): misma pastilla 3D, más chica para el botón. */
@@ -1361,9 +1363,9 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaCortes" class="oculto">
 <h1>Corte diario</h1>
 <p style="color:#555;margin-bottom:14px"><span id="fechaCorte"></span> · <span id="textoCorteDiario">Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.</span></p>
-<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px">📦<b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.<br><button type="button" onclick="mostrarVista('adminlic')">⚙️ Activarlo en Administrador de licencia</button></div>
+<div class="vacio-accion" id="avisoCorteProductos" style="margin-bottom:14px"><span class="icono-3d-mini f-azul">📦</span><b>Corte de productos desactivado</b>Para la pollería y negocios así se hacen 2 cortes: uno de dinero y uno de productos.<br><button type="button" onclick="mostrarVista('adminlic')"><span class="icono-3d-mini f-gris">⚙️</span> Activarlo en Administrador de licencia</button></div>
 <div class="form-prod" id="secCorteDinero">
-<h2>💰 Corte de dinero</h2>
+<h2><span class="icono-3d-mini f-oro">💰</span> Corte de dinero</h2>
 <div class="resumen">
 <div class="tarjeta"><small>VENTAS DE HOY</small><b id="resCorVentas">$0.00 · 0 ventas</b></div>
 <div class="tarjeta"><small>GASTOS DE HOY (SE RESTAN)</small><b id="resCorGastos">$0.00</b></div>
@@ -1376,7 +1378,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="tarjeta"><small>TRANSFERENCIA</small><b id="resPagoTransf">$0.00</b></div>
 <div class="tarjeta"><small>MIXTO</small><b id="resPagoMixto">$0.00</b></div>
 </div>
-<h2>💰 Cuadre de caja</h2>
+<h2><span class="icono-3d-mini f-oro">💰</span> Cuadre de caja</h2>
 <form onsubmit="event.preventDefault();realizarCorteDinero();">
 <div><label>Fondo inicial de caja $</label><input id="fondoCaja" type="number" min="0" step="0.01" placeholder="0.00" oninput="guardarFondo()"></div>
 <div><label>Efectivo esperado $</label><input id="resEfectivoEsperado" type="text" value="$0.00" readonly></div>
@@ -1385,16 +1387,16 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </form>
 <p style="margin-top:10px;font-size:13px;color:#555">Efectivo esperado = fondo + ventas en efectivo − gastos. Total en caja = fondo + ventas totales − gastos. Ganancia = ventas − gastos − costo de entradas. Los gastos se pagan en efectivo.</p>
 <p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
-<button type="button" onclick="realizarCorteDinero()">💾 Realizar corte de dinero</button>
+<button type="button" onclick="realizarCorteDinero()"><span class="icono-3d-mini f-azul">💾</span> Realizar corte de dinero</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
 <div id="secCierreAuto" style="margin-top:14px;border-top:1px solid #e3e8ec;padding-top:12px">
-<label for="cortesParaCerrarDia">🔒 Cortes para cerrar el día</label>
+<label for="cortesParaCerrarDia"><span class="icono-3d-mini f-gris">🔒</span> Cortes para cerrar el día</label>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes al día</span></div>
 <p style="font-size:12px;color:#666">Con el corte de productos activado, la sesión se cierra solo al guardar el corte de productos que complete este número. Sin corte de productos, se cierra con el corte de dinero. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
 </div>
 </div>
 <div class="form-prod" id="secCorteProductos" style="margin-top:16px">
-<h2>📦 Corte de productos</h2>
+<h2><span class="icono-3d-mini f-azul">📦</span> Corte de productos</h2>
 <p id="descCorteProductos" style="color:#555;margin-bottom:14px">Productos vendidos hoy, con cantidad y monto, stock inicial, stock vendido y stock restante por producto. El stock inicial se calcula con el stock actual + lo vendido hoy − las entradas de hoy.</p>
 <div class="resumen">
 <div class="tarjeta"><small>PRODUCTOS VENDIDOS HOY</small><b id="resProdTipos">0 productos</b></div>
@@ -1407,11 +1409,11 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <tbody id="listaCorteProductos"></tbody>
 </table></div>
 <p id="notaEntradasCorte" style="margin-top:10px;font-size:13px;color:#555">Las Entradas siguen en su propia sección para los negocios que sí las manejan; aquí solo se usan para calcular el stock inicial del día.</p>
-<button type="button" onclick="realizarCorteProductos()">📦 Realizar corte de productos</button>
+<button type="button" onclick="realizarCorteProductos()"><span class="icono-3d-mini f-azul">📦</span> Realizar corte de productos</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
 </div>
 <div style="margin-top:16px">
-<button type="button" class="secundario" onclick="irHistorialCortes()">🕐 Ver historial completo de cortes →</button>
+<button type="button" class="secundario" onclick="irHistorialCortes()"><span class="icono-3d-mini f-morado">🕐</span> Ver historial completo de cortes →</button>
 </div>
 </div>
 
@@ -1449,7 +1451,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 
 <div id="vistaHistorial" class="oculto">
-<h1>🕐 Historial de cortes</h1>
+<h1><span class="icono-3d-mini f-morado">🕐</span> Historial de cortes</h1>
 <p style="color:#555;margin-bottom:14px">Todos los cortes cerrados, con su detalle completo: de dinero y de productos, cada uno con su folio. Los cortes se guardan en este dispositivo y se sincronizan con la nube cuando hay internet.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL DE CORTES</small><b id="resHistTotal">0 cortes</b></div>
@@ -4393,8 +4395,8 @@ function renderHistorial(){
  const elC=document.getElementById("resHistCaja"); if(elC)elC.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.totalCaja||0),0));
  const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
- if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">🕐<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">📊 Ir a Corte diario</button></div></td></tr>';return}
- lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">👁 Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">🖨 Reimprimir</button></div></td></tr>'}).join("");
+ if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">'+ic3d("🕐","f-morado")+'<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">'+ic3d("📊","f-azulrey")+' Ir a Corte diario</button></div></td></tr>';return}
+ lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?ic3d("📦","f-azul")+" Productos":ic3d("💰","f-oro")+" Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">'+ic3d("👁","f-azul")+' Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">'+ic3d("🖨","f-azul")+' Reimprimir</button></div></td></tr>'}).join("");
 }
 /* v136 (Lalo 2026-11-23): cierre automático del día — al guardar el corte
    número N del día (N configurable en Corte diario, por defecto 2), el
