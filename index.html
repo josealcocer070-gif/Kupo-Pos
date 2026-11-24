@@ -1314,7 +1314,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="secCierreAuto" style="margin-top:14px;border-top:1px solid #e3e8ec;padding-top:12px">
 <label for="cortesParaCerrarDia">🔒 Cortes para cerrar el día</label>
 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes al día</span></div>
-<p style="font-size:12px;color:#666">Al guardar este número de cortes en el día, el sistema cierra la sesión solo y queda en inicio de sesión para el día siguiente. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
+<p style="font-size:12px;color:#666">Con el corte de productos activado, la sesión se cierra solo al guardar el corte de productos que complete este número. Sin corte de productos, se cierra con el corte de dinero. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
 </div>
 </div>
 <div class="form-prod" id="secCorteProductos" style="margin-top:16px">
@@ -4328,6 +4328,11 @@ function renderHistorial(){
    no al iniciar sesión. Se cuentan todos los cortes del día (dinero y
    productos), como dice el aviso de Corte: "se hacen 2 cortes: uno de
    dinero y uno de productos". */
+/* v150 (Lalo 2026-11-23): la salida solo tras el corte de productos —
+   el corte de dinero ya no dispara el cierre automático cuando el corte
+   de productos está activado; sin corte de productos, el de dinero
+   sigue cerrándolo como antes. Confirmación sencilla (estilo eliminar
+   cotización) antes de guardar cada corte. */
 var cierreAutoPendiente=false;
 function cortesParaCerrar(){var n=parseInt(ticketConfig&&ticketConfig.cortesParaCerrar,10);return (isNaN(n)||n<1)?2:n;}
 function cortesHoy(){var h=hoyLocal();return cortes.filter(function(c){return c.fecha===h;}).length;}
@@ -4336,10 +4341,11 @@ function ocultarAvisoDiaCerrado(){var b=document.getElementById("avisoDiaCerrado
 function guardarCortesParaCerrar(){if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia este ajuste.");var inp0=document.getElementById("cortesParaCerrarDia");if(inp0)inp0.value=cortesParaCerrar();return;}var inp=document.getElementById("cortesParaCerrarDia");var n=parseInt(inp&&inp.value,10);if(isNaN(n)||n<1)n=2;if(n>10)n=10;ticketConfig.cortesParaCerrar=n;if(inp)inp.value=n;guardar();toast("Cierre automático tras "+n+(n===1?" corte":" cortes")+" al día.");}
 function cerrarDiaAutomatico(){cierreAutoPendiente=true;salirSesion();}
 function revisarCierreAutomatico(){if(cortesHoy()>=cortesParaCerrar())cerrarDiaAutomatico();}
-function realizarCorteDinero(){
+function realizarCorteDinero(ya){
  const r=resumenCorte();
  if(!r.ventasNum&&r.gastosHoy===0&&r.piezasEntradas===0){toast("Aún no hay movimientos hoy para cortar.");return}
  const contado=Number(document.getElementById("efectivoContado").value)||0;
+ if(!ya){pedirConfirmacion("¿Sacar el corte de dinero?","Sacar corte",function(){realizarCorteDinero(true)});return;}
  corteFolio++;
  const ahora=new Date();
  const c={id:Date.now()+uid++,tipo:"dinero",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoCaja,efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
@@ -4347,13 +4353,14 @@ function realizarCorteDinero(){
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
- revisarCierreAutomatico();
+ if(!opcionesSistema.corteProductos)revisarCierreAutomatico();
 }
 function realizarCorte(){realizarCorteDinero();}
-function realizarCorteProductos(){
+function realizarCorteProductos(ya){
  if(!opcionesSistema.corteProductos){toast("El corte por productos está desactivado para esta licencia. Actívalo en Administrador de licencia.");return}
  const r=resumenCorteProductos();
  if(!r.filas.length){toast("Aún no hay productos vendidos hoy para cortar.");return}
+ if(!ya){pedirConfirmacion("¿Sacar el corte de productos?","Sacar corte",function(){realizarCorteProductos(true)});return;}
  corteFolio++;
  const ahora=new Date();
  const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoCaja,efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
