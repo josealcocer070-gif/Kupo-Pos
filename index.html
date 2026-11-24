@@ -199,8 +199,9 @@ main h1{font-size:34px;margin-bottom:14px}
 .card .stock{font-size:14px;margin:6px 0 10px;color:#333}
 .cant input{width:64px;text-align:center;padding:2px 4px;font-size:14px;border:1px solid #cbd5e1;border-radius:6px}
 .card .stock.bajo{color:#d97706;font-weight:700}
-.btn-agregar{background:#0d6cb5;color:#fff;border:0;border-radius:22px;padding:10px 22px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-agregar{background:#0d6cb5;color:#fff;border:0;border-radius:22px;padding:10px 22px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .12s ease,filter .12s ease}/* v148: animacion al tocar + Agregar en cada tarjeta */
 .btn-agregar:disabled{background:#b9bec4;cursor:not-allowed}
+.btn-agregar:active:not(:disabled){transform:scale(.93);filter:brightness(1.12)}
 /* Ventas estilo SICAR X, adaptado a KUPO azul oscuro V1.5.0 (sin verde SICAR) */
 .categorias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin-bottom:4px;scrollbar-width:thin}
 .categorias button{flex:0 0 auto;border:2px solid var(--azul);background:#fff;color:var(--azul);border-radius:22px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}
