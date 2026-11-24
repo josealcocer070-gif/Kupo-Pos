@@ -1134,7 +1134,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <!-- v143 (Lalo 2026-11-23): el botón de Mensajes queda solo con el ícono, sin el nombre (igual que Sincronizar). -->
 <button type="button" class="btn-sync" id="btnMensajesHeader" onclick="abrirMensajesSeguro()" aria-label="Mensajes" title="Mensajes"><span class="icono-3d-mini f-azul">💬</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
 <!-- v164 (Lalo 2026-11-24): campanita dorada del kiosco — suena cuando llega un pedido, distintivo rojo con los pendientes. -->
-<button type="button" class="btn-sync" id="btnKioscoHeader" onclick="togglePanelKiosco()" aria-label="Pedidos del kiosco" title="Pedidos del kiosco" style="display:none"><span class="icono-3d-mini f-oro">🔔</span><span class="badge-msg" id="badgeKioscoHeader">0</span></button>
+<button type="button" class="btn-sync" id="btnKioscoHeader" onclick="abrirKioscoSeguro()" aria-label="Pedidos del kiosco" title="Pedidos del kiosco" style="display:none"><span class="icono-3d-mini f-oro">🔔</span><span class="badge-msg" id="badgeKioscoHeader">0</span></button>
 <button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar"><span class="icono-3d-mini f-verde">🔄</span></button>
 <!-- v143 (Lalo 2026-11-23): el botón de Sincronizar queda solo con la nube, sin el nombre. -->
@@ -5377,11 +5377,28 @@ function renderPedidosKiosco(){
    '</div></div>';
  }).join("");
 }
+/* v172: campana del kiosco a prueba de fallos (mismo patrón que v141 con Mensajes:
+   en la tablet el toque no abría nada aunque el distintivo marcaba 1 pedido).
+   1) Avisa al tocar, así se ve al instante si el toque llegó. 2) Si la ventana
+   flotante no existe en la página cargada (caché viejo), avisa que hay que
+   recargar. 3) Verifica que el panel quedó abierto y reintenta una vez. */
+function abrirKioscoSeguro(){
+ var p=document.getElementById("panelKioscoFlotante");
+ if(!p){toast("🔔 La pantalla está desactualizada: toca Recargar 🔄 arriba y vuelve a intentar.");return;}
+ if(p.classList.contains("oculto")){
+  toast("🔔 Abriendo pedidos del kiosco…");
+  togglePanelKiosco();
+  if(p.classList.contains("oculto")){togglePanelKiosco();}
+  if(p.classList.contains("oculto")){toast("🔔 No se pudo abrir: toca Recargar 🔄 arriba y vuelve a intentar.");}
+ }else{
+  togglePanelKiosco();
+ }
+}
 function togglePanelKiosco(){
  var p=document.getElementById("panelKioscoFlotante");if(!p)return;
  var abrir=p.classList.contains("oculto");
  var _pmf=document.getElementById("panelMensajesFlotante");if(_pmf)_pmf.classList.add("oculto");
- if(abrir){revisarPedidosKiosco();p.classList.remove("oculto");}else{p.classList.add("oculto");}
+ if(abrir){p.classList.remove("oculto");try{revisarPedidosKiosco();}catch(e){}}else{p.classList.add("oculto");}
 }
 function cobrarPedidoKiosco(id){
  var p=pedidosKiosco.find(function(x){return x.id===id});
