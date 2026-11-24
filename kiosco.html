@@ -77,6 +77,8 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 /* Pantallas de setup / apagado / error */
 .centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center}
 .centro .icono{font-size:72px}
+.centro .saludo{font-size:34px;font-weight:900;color:#0b4a6e;line-height:1.15}
+.centro .saludo-negocio{font-size:15px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#6b7280;margin-top:6px}
 .centro h1{font-size:28px;margin:14px 0 8px}
 .centro p{font-size:18px;color:#4b5563;line-height:1.5;max-width:480px}
 .centro input{width:100%;max-width:420px;padding:16px;font-size:20px;text-align:center;letter-spacing:2px;text-transform:uppercase;border:2px solid #d1d5db;border-radius:14px;margin-top:20px;outline:none}
@@ -91,24 +93,27 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 <div id="pantallaSetup" class="pantalla">
   <div class="centro">
     <div class="icono">🏪</div>
+    <div class="saludo" id="saludoSetup">¡Buenos días!</div>
     <h1>Kiosco KUPO</h1>
     <p>Escribe la clave de licencia del negocio para activar este kiosco. Se guarda solo en esta tablet.</p>
     <input id="inputLicencia" placeholder="KUPO-XXXX-XXXX" maxlength="20" autocomplete="off">
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v164</div>
+  <div class="pie">Kiosco KUPO · v166</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
   <div class="centro">
     <div class="icono">🔒</div>
+    <div class="saludo" id="saludoApagado">¡Buenos días!</div>
+    <div class="saludo-negocio" id="negocioApagado"></div>
     <h1>El kiosco está apagado</h1>
     <p id="textoApagado">Este kiosco aún no está activado. Pídele al cajero que lo active desde el sistema.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v164</div>
+  <div class="pie">Kiosco KUPO · v166</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -155,14 +160,15 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 <div id="pantallaError" class="pantalla">
   <div class="centro">
     <div class="icono">📶</div>
+    <div class="saludo" id="saludoError">¡Buenos días!</div>
     <h1>Sin internet</h1>
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · v164</div>
+  <div class="pie">Kiosco KUPO · v166</div>
 </div>
 <script>
-/* Kiosco KUPO v164 — pide el cliente, cobra el cajero. Sin inventario, sin caja. */
+/* Kiosco KUPO v166 — saludo según la hora en las primeras pantallas (mismo estilo que el login de KUPO POS); pide el cliente, cobra el cajero. Sin inventario, sin caja. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -178,7 +184,9 @@ var EMOJI_CAT={"Pollo":"🍗","Refrescos":"🥤","Complementos":"🍚","Salsas":
 function $(id){ return document.getElementById(id); }
 function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function dinero(n){ return "$"+Math.round(Number(n)||0); }
-function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); }
+function saludoKiosco(){ var h=new Date().getHours(); return h>=5&&h<12?"¡Buenos días!":h>=12&&h<19?"¡Buenas tardes!":"¡Buenas noches!"; }
+function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); }
+function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); pintarSaludo(); }
 function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
 function emojiDe(p){ if(p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
 async function init(){
@@ -193,6 +201,7 @@ async function cargarTodo(){
   negocioNombre=(r1.data.negocio||"KUPO POS").toUpperCase();
   $("nombreNegocio").textContent=negocioNombre;
   $("nombreNegocio2").textContent=negocioNombre;
+  $("negocioApagado").textContent=negocioNombre;
   var r2=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
   if(r2.error){ mostrar("pantallaError"); return; }
   var opt=(r2.data&&r2.data.opciones)||{};

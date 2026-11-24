@@ -169,6 +169,8 @@ html[data-tema="noche"] .kupi-aprendiendo{background:#3a2f00!important;border-co
 #navCajeros .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ef9a9a,#c62828)!important}
 /* v159: 3D zona 2 Cortes — la pastilla 3D va centrada en títulos, botones y celdas */
 /* v164: Kiosco KUPO — interruptor en Admin (apagado por defecto), campanita dorada con distintivo en el encabezado, panel de pedidos con Cobrar (traslada a Ventas) y Poner en espera. */
+/* v165: 3D zona 3 Productos — pastilla 3D en el formulario, Importar Excel, tarjetas (Pausado, Editar, Pausar/Activar, Eliminar) y estado vacío. */
+/* v166: si el interruptor de una opción no llega a la nube, avisar con un toast (el kiosco no se activaba y el toast decía "activado ✅"). */
 #vistaCortes .icono-3d-mini,#vistaHistorial .icono-3d-mini,#listaHistCortes .icono-3d-mini{vertical-align:middle!important}
 #navAdminLic .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#90a4ae,#37474f)!important}
 #navMulti .icono-3d{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#80deea,#0097a7)!important}
@@ -1225,19 +1227,19 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <h2 id="tituloFormProd">+ Nuevo producto</h2>
 <form onsubmit="guardarProducto(event)">
 <input type="hidden" id="pId">
-<div><label>Foto del producto</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"><button type="button" class="secundario" onclick="document.getElementById('pFotoArchivo').click()">🖼️ Subir desde galería</button></div><input id="pFotoArchivo" type="file" accept="image/*" style="display:none" onchange="subirFotoProducto(event)"><img id="pFotoPreview" alt="Foto del producto" style="max-width:120px;max-height:90px;display:none;border-radius:10px;margin-top:8px"><button type="button" class="secundario" onclick="quitarFotoProducto()">Quitar foto</button></div>
+<div><label>Foto del producto</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"><button type="button" class="secundario" onclick="document.getElementById('pFotoArchivo').click()"><span class="icono-3d-mini f-azul">🖼️</span> Subir desde galería</button></div><input id="pFotoArchivo" type="file" accept="image/*" style="display:none" onchange="subirFotoProducto(event)"><img id="pFotoPreview" alt="Foto del producto" style="max-width:120px;max-height:90px;display:none;border-radius:10px;margin-top:8px"><button type="button" class="secundario" onclick="quitarFotoProducto()">Quitar foto</button></div>
 <div><label>Nombre del producto</label><input id="pNombre" placeholder="Ej. Pan Bolillo" required></div>
 <div><label>Precio $</label><input id="pPrecio" type="number" min="0" step="0.01" placeholder="0.00" required></div>
 <div id="campoPStock"><label>Stock</label><input id="pStock" type="number" min="0" step="0.01" placeholder="0" required></div>
  <div><label>Unidad de venta</label><select id="pUnidad"><option value="pieza">Pieza</option><option value="kilo">Kilo</option><option value="metro">Metro</option><option value="litro">Litro</option></select></div>
 <div><label>Categoría</label><input id="pCategoria" list="listaCategorias" value="General"><datalist id="listaCategorias"></datalist></div>
-<div><label>Código / SKU (código de barras)</label><input id="pSku" placeholder="Ej. SKU-001 o código de barras EAN-13"><button type="button" class="secundario" style="width:100%;margin-top:8px;min-height:52px" onclick="generarCodigoProducto()">🎲 Generar código</button></div>
+<div><label>Código / SKU (código de barras)</label><input id="pSku" placeholder="Ej. SKU-001 o código de barras EAN-13"><button type="button" class="secundario" style="width:100%;margin-top:8px;min-height:52px" onclick="generarCodigoProducto()"><span class="icono-3d-mini f-morado">🎲</span> Generar código</button></div>
 <div><label>Costo $</label><input id="pCosto" type="number" min="0" step="0.01" placeholder="0.00"></div>
 <div id="campoPStockMin"><label>Stock mínimo (alerta)</label><input id="pStockMin" type="number" min="0" step="0.01" placeholder="5"></div>
 
 
 <div><label>Estado</label><select id="pEstado"><option value="disponible">Disponible</option><option value="pausado">Pausado</option></select></div>
-<button type="submit">💾 Guardar producto</button>
+<button type="submit"><span class="icono-3d-mini f-verde">💾</span> Guardar producto</button>
 <button type="button" class="secundario" onclick="cancelarEdicion()">Cancelar</button>
 <button type="button" class="secundario" onclick="restablecerEjemplo()">Restablecer ejemplo</button>
 </form>
@@ -1251,7 +1253,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 
 <div id="vistaImportar" class="oculto">
-<h1>📥 Importar Excel</h1>
+<h1><span class="icono-3d-mini f-verde">📥</span> Importar Excel</h1>
 <p style="color:#555;margin-bottom:14px">Carga muchos productos de una vez desde un archivo Excel. Descarga la plantilla, llénala y súbela: revisas la vista previa y luego importas. Los productos nuevos se agregan al catálogo y se sincronizan a la nube como siempre.</p>
 <div class="resumen">
 <div class="tarjeta"><small>LISTOS PARA IMPORTAR</small><b id="impListos">0</b></div>
@@ -1262,11 +1264,11 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="form-prod">
 <h2>1 · Descargar la plantilla</h2>
 <p style="font-size:13px;color:#555">La plantilla trae las columnas: Código, Producto, Presentación, Precio sugerido (MXN), Stock, Categoría y Código de barras. El Stock es opcional: si el archivo no lo trae, el producto queda con stock 0 y se le agrega después en Productos.</p>
-<button type="button" onclick="descargarPlantillaExcel()">⬇️ Descargar plantilla Excel</button>
+<button type="button" onclick="descargarPlantillaExcel()"><span class="icono-3d-mini f-azulrey">⬇️</span> Descargar plantilla Excel</button>
 <h2 style="margin-top:18px">2 · Subir el archivo</h2>
 <p style="font-size:13px;color:#555">Acepta archivos .xlsx, .xls y .csv. Nada se guarda hasta que revises la vista previa y toques Importar.</p>
 <input id="archivoExcel" type="file" accept=".xlsx,.xls,.csv" style="position:absolute;opacity:0;width:1px;height:1px" onchange="leerArchivoExcel(event)">
-<button type="button" class="secundario" onclick="document.getElementById('archivoExcel').click()">📂 Elegir archivo Excel o CSV</button>
+<button type="button" class="secundario" onclick="document.getElementById('archivoExcel').click()"><span class="icono-3d-mini f-ambar">📂</span> Elegir archivo Excel o CSV</button>
 <span id="impNombreArchivo" style="font-size:13px;color:#555;margin-left:8px"></span>
 </div>
 <div id="impVacio" class="vacio-accion">📥<b>Aún no hay archivo cargado</b>Descarga la plantilla, llénala con tus productos y súbela aquí para ver la vista previa.</div>
@@ -1280,7 +1282,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
 <button type="button" id="btnImportarExcel" onclick="importarExcel()" disabled>📥 Importar 0 productos</button>
 <button type="button" class="secundario" onclick="limpiarImportar()">Limpiar</button>
-<button type="button" class="secundario" onclick="mostrarVista('productos')">📦 Ver Productos</button>
+<button type="button" class="secundario" onclick="mostrarVista('productos')"><span class="icono-3d-mini f-azul">📦</span> Ver Productos</button>
 </div>
 </div>
 </div>
@@ -1294,7 +1296,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" onclick="mostrarPanelEntradas('form')">📥 Registrar entrada</button>
 <button type="button" onclick="mostrarPanelEntradas('lista')">📋 Lista de entradas</button>
 <button type="button" onclick="verHistorialEntradaActual()">📜 Historial del producto</button>
-<button type="button" onclick="mostrarVista('productos')">📦 Ver Productos</button>
+<button type="button" onclick="mostrarVista('productos')"><span class="icono-3d-mini f-azul">📦</span> Ver Productos</button>
 </div>
 </div>
 </div>
@@ -2096,7 +2098,7 @@ function render(){
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
   const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" data-id="${p.id}" ${(p.stock<=0&&opcionesSistema.sinStock!==true)||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">'+ic3d("⏸","f-ambar")+' Pausado</span>':""}</h3><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="stock ${bajo||_bajoV?"bajo alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajoV?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_minV+")":bajo?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</div><button class="btn-agregar" data-id="${p.id}" ${(p.stock<=0&&opcionesSistema.sinStock!==true)||p.pausado?"disabled":""} onclick="agregar(${p.id})">+ Agregar</button>`;
   grid.appendChild(d);
  });
  renderTicket();renderTableroVentas();
@@ -2377,7 +2379,7 @@ function cambiarOpcionSistema(clave,valor){
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
  guardarFechaOpcionesNube(Date.now());
- if(typeof subirOpcionesNube==="function"){try{subirOpcionesNube();}catch(e){}}
+ if(typeof subirOpcionesNube==="function"){try{subirOpcionesNube().then(function(ok){if(!ok)toast("⚠ Se guardó en la tablet, pero no llegó a la nube (sin internet). Toca Sincronizar cuando tengas internet.");}).catch(function(){});}catch(e){}}
  aplicarOpcionesSistema();
  if(clave==="sinStock"){renderCortes();render();if(typeof aplicarPermisosMenu==="function")aplicarPermisosMenu();}
  if(clave==="sinStock"&&valor&&vistaActual==="entradas")mostrarVista("ventas");
@@ -3808,12 +3810,12 @@ function renderProductos(){
  const _mg=document.getElementById("resMargen");if(_mg)_mg.textContent=catalogo.length?Math.round(catalogo.reduce(function(a,p){return a+margenProducto(p)},0)/catalogo.length)+"%":"0%";
  const estFiltro=f==="disponibles"?"disponible":f==="agotados"?"agotado":f==="pausados"?"pausado":"todos";
  const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>estFiltro==="todos"||estadoDe(p)===estFiltro);
- if(!items.length){lista.innerHTML='<div class="ticket-vacio">📦<br><b>No hay productos con ese filtro</b><br>Agrega uno nuevo con el formulario de arriba.</div>';return}
+ if(!items.length){lista.innerHTML='<div class="ticket-vacio">'+ic3d("📦","f-gris")+'<br><b>No hay productos con ese filtro</b><br>Agrega uno nuevo con el formulario de arriba.</div>';return}
  items.forEach(p=>{
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";
   const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p>${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre} · Costo ${dinero(p.costo||0)} · Margen ${margenProducto(p)}%</p><p class="${_bajo||p.stock<=0?"alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></div><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">'+ic3d("⏸","f-ambar")+' Pausado</span>':""}</h3><p>${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre} · Costo ${dinero(p.costo||0)} · Margen ${margenProducto(p)}%</p><p class="${_bajo||p.stock<=0?"alerta-stock":""}"${opcionesSistema.sinStock===true?' style="display:none"':""}>${p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock)}</p><span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":ic3d("⏸","f-ambar")+" Pausado"}</span></div><div class="precio">${dinero(p.precio)} / ${UNIDADES_VENTA[unidadDe(p)].corta}</div><div class="acciones-prod"><button onclick="editarProducto(${p.id})">${ic3d("✏️","f-azul")} Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?ic3d("▶️","f-verde")+" Activar":ic3d("⏸","f-ambar")+" Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">${ic3d("🗑","f-coral")} Eliminar</button></div>`;
   lista.appendChild(d);
  });
 }
