@@ -4554,7 +4554,8 @@ function cortesHoy(){var h=hoyLocal();return cortes.filter(function(c){return c.
 function mostrarAvisoDiaCerrado(n){var b=document.getElementById("avisoDiaCerrado");if(!b)return;b.innerHTML=ic3d("🔒","f-oro")+" <b>Día cerrado</b><br>Se hicieron los "+n+" cortes de hoy. Inicia sesión para el día siguiente.";b.classList.remove("oculto");}
 function ocultarAvisoDiaCerrado(){var b=document.getElementById("avisoDiaCerrado");if(b)b.classList.add("oculto");}
 function guardarCortesParaCerrar(){if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia este ajuste.");var inp0=document.getElementById("cortesParaCerrarDia");if(inp0)inp0.value=cortesParaCerrar();return;}var inp=document.getElementById("cortesParaCerrarDia");var n=parseInt(inp&&inp.value,10);if(isNaN(n)||n<1)n=2;if(n>10)n=10;ticketConfig.cortesParaCerrar=n;if(inp)inp.value=n;guardar();toast("Cierre automático tras "+n+(n===1?" corte":" cortes")+" al día.");}
-function cerrarDiaAutomatico(){cierreAutoPendiente=true;salirSesion();}
+/* v184: al cerrarse el día el fondo de caja vuelve a 0 (Lalo 2026-11-24: al día siguiente seguía apareciendo la misma cantidad). El fondo se quedaba guardado para siempre y el efectivo esperado y el total en caja del día siguiente lo seguían sumando. El corte ya guardado conserva su fondo; en la mañana se escribe el fondo nuevo si hay cambio en caja. */
+function cerrarDiaAutomatico(){fondoCaja=0;try{guardar()}catch(e){}var _f=document.getElementById("fondoCaja");if(_f)_f.value="";cierreAutoPendiente=true;salirSesion();}
 function revisarCierreAutomatico(){if(cortesHoy()>=cortesParaCerrar())cerrarDiaAutomatico();}
 function realizarCorteDinero(ya){
  const r=resumenCorte();
