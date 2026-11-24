@@ -3811,7 +3811,6 @@ function toggleMensajesFlotante(){
   cargarMensajes();
   reenviarMensajesPendientes();
   marcarMensajesLeidos();
-  var inp=document.getElementById("chatTextoFlotante");if(inp)setTimeout(function(){inp.focus()},80);
  }
 }
 function toggleChatKupi(){
@@ -5130,7 +5129,6 @@ function abrirMensajes(){
  marcarMensajesLeidos();
  if(mensajesChatTimer)clearInterval(mensajesChatTimer);
  mensajesChatTimer=setInterval(function(){if(vistaActual==="mensajes")cargarMensajes();},20000);
- var inp=document.getElementById("chatTexto");if(inp)setTimeout(function(){inp.focus()},80);
 }
 function cambiarChatActivo(on){
  if(!esAdminChat()){renderMensajes();return;}
@@ -5343,6 +5341,7 @@ if ('serviceWorker' in navigator) {
      (display:none) cuando Kupi no está abierto, así que la ventana nunca se veía aunque se le
      quitara la clase "oculto". Se cierra aquí el panel de Kupi y Mensajes queda como hermano,
      fuera de él, para que sí se vea al abrirlo. -->
+<!-- v145: al abrir el chat ya no se pone el cursor solo en "Escribe un mensaje" -->
 <div id="panelMensajesFlotante" class="oculto">
 <div class="kupi-encabezado"><div><b>💬 Mensajes</b><span>● Chat del equipo</span></div><button type="button" onclick="toggleMensajesFlotante()" aria-label="Cerrar los mensajes">✕</button></div>
 <p class="chat-apagado oculto" id="chatApagadoFlotante">⛔ El chat interno está apagado para los cajeros. Préndelo en la vista de Mensajes.</p>

@@ -1995,6 +1995,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" class="chat-probar" onclick="probarConexionChat()">🔍 Probar conexión</button>
 <p class="chat-nota oculto" id="chatApagado" style="color:#a33">⛔ El chat interno está apagado para los cajeros. Préndelo con el interruptor para que vuelvan a ver Mensajes.</p>
 <div class="chat-lista" id="chatLista"></div>
+<!-- v145: al abrir Mensajes ya no se pone el cursor solo en "Escribe un mensaje" -->
 <div class="chat-entrada"><input id="chatTexto" maxlength="500" placeholder="Escribe un mensaje…" autocomplete="off" onkeydown="if(event.key==='Enter')enviarMensajeChat()"><button type="button" id="chatEnviar" onclick="enviarMensajeChat()" aria-label="Enviar mensaje">➤</button></div>
 </div>
 <div id="vistaAdminLic" class="oculto">
@@ -5487,7 +5488,6 @@ function abrirMensajes(){
  marcarMensajesLeidos();
  if(mensajesChatTimer)clearInterval(mensajesChatTimer);
  mensajesChatTimer=setInterval(function(){if(vistaActual==="mensajes")cargarMensajes();},20000);
- var inp=document.getElementById("chatTexto");if(inp)setTimeout(function(){inp.focus()},80);
 }
 function cambiarChatActivo(on){
  if(!esAdminChat()){renderMensajes();return;}
