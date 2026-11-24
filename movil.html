@@ -320,6 +320,13 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 .prod-row .acciones-prod{display:flex;flex-direction:column;gap:6px}
 .prod-row .acciones-prod button{border:1px solid #c9d4dc;background:#fff;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
 .prod-row .acciones-prod button.peligro{color:#b3261e;border-color:#e5b6b3}
+#barraSelProd{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fdecea;border:1px solid #f0c0c0;border-radius:12px;padding:10px 12px;margin:0 0 14px}
+#barraSelProd.oculto{display:none}
+#barraSelProd b{color:#b3261e}
+#barraSelProd .sep{flex:1}
+#barraSelProd button{border:1px solid #c9d4dc;background:#fff;border-radius:8px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer}
+#barraSelProd button.eliminar{color:#fff;background:#b3261e;border-color:#b3261e}
+.check-sel-prod{width:22px;height:22px;accent-color:var(--azul,#0b4a6e);flex:none;cursor:pointer}
 @media(max-width:760px){.resumen{grid-template-columns:repeat(2,1fr)}.prod-row{flex-wrap:wrap}.prod-row .acciones-prod{flex-direction:row;width:100%}}
 
 /* Productos a todo el ancho: sin panel de venta */
@@ -1664,6 +1671,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <input id="buscarProd" placeholder="🔍 Buscar producto..." oninput="renderProductos()">
 <select id="filtroProd" onchange="renderProductos()"><option value="todas">Todos</option></select>
 </div>
+<div id="barraSelProd" class="oculto"><b id="txtSelProd">0 seleccionados</b><button type="button" onclick="seleccionarTodosProd()">Seleccionar todos</button><span class="sep"></span><button type="button" class="eliminar" onclick="eliminarSeleccionadosProd()"><span class="icono-3d-mini f-coral">🗑</span> Eliminar</button><button type="button" onclick="limpiarSelProd()">✕ Cancelar</button></div>
 <div class="prod-lista" id="listaProductos"></div>
 </div>
 
@@ -2820,7 +2828,7 @@ function eliminarCotizacion(folio,ya){const c=cotizaciones.find(x=>x.folio===fol
 
 function agregarProducto(e){e.preventDefault();const nombre=document.getElementById("nuevoNombre").value.trim();const precio=parseFloat(document.getElementById("nuevoPrecio").value);const stock=(opcionesSistema.sinStock===true)?0:redondearCant(parseFloat(document.getElementById("nuevoStock").value));const unidad=document.getElementById("nuevoUnidad").value||"pieza";const emoji="";if(!nombre||isNaN(precio)||isNaN(stock))return;const nid=Date.now()+uid++;catalogo.push({id:nid,nombre,precio,stock,emoji,unidad,sku:"SKU-"+String(nid).slice(-3),costo:Math.round(precio*0.6*100)/100,stockMin:5,foto:""});stockAlmacen[nid]={};const pr0=almacenPrincipal();if(pr0)stockAlmacen[nid][pr0.id]=stock;sincronizarStock();e.target.reset();guardar();render();if(typeof encolarProductoNube==="function")encolarProductoNube(catalogo[catalogo.length-1]);toast("Producto agregado: "+nombre);}
 function editar(id){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede editar productos.");return}mostrarVista("productos");editarProducto(id);}
-function eliminar(id,ya){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}const p=catalogo.find(x=>x.id===id);if(p){if(!ya){pedirConfirmacion("¿Eliminar "+p.nombre+" del catálogo?","Eliminar",function(){eliminar(id,true)});return;}if(typeof encolarBorradoNube==="function")encolarBorradoNube("productos",p);catalogo=catalogo.filter(x=>x.id!==id);delete stockAlmacen[id];ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();}}
+function eliminar(id,ya){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}const p=catalogo.find(x=>x.id===id);if(p){if(!ya){pedirConfirmacion("¿Eliminar "+p.nombre+" del catálogo?","Eliminar",function(){eliminar(id,true)});return;}if(typeof encolarBorradoNube==="function")encolarBorradoNube("productos",p);catalogo=catalogo.filter(x=>x.id!==id);delete selProd[id];delete stockAlmacen[id];ticket=ticket.filter(x=>x.id!==id);guardar();render();renderProductos();if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();}}
 function restablecerEjemplo(ya){if(!ya){pedirConfirmacion("¿Restablecer los productos de ejemplo?","Restablecer",function(){restablecerEjemplo(true)});return;}catalogo=JSON.parse(JSON.stringify(EJEMPLO));stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0});sincronizarStock();guardar();render();renderProductos();if(typeof encolarTodosProductosNube==="function")encolarTodosProductosNube();}
 
 
@@ -4221,10 +4229,38 @@ function renderKiosco(){
 /* v162: al tocar un producto se abre su menú de opciones dentro de la tarjeta; al tocar otro, el anterior se cierra */
 var accionesProdAbierto=null;
 function toggleAccionesProd(id){var d=document.getElementById("acciones-prod-"+id);if(!d)return;if(accionesProdAbierto!==null&&accionesProdAbierto!==id){var a=document.getElementById("acciones-prod-"+accionesProdAbierto);if(a)a.style.display="none";}var abierto=d.style.display!=="none";d.style.display=abierto?"none":"flex";accionesProdAbierto=abierto?null:id;}
-function renderProductos(){
+/* v178: borrar varios productos a la vez (Lalo 2026-11-24). Casilla en cada fila + barra con el conteo; el borrado pide confirmación y avisa a la nube producto por producto, igual que borrar uno solo. */
+var selProd={};
+function listaFiltradaProd(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
- actualizarFiltroCatProd();
  const f=(document.getElementById("filtroProd")||{}).value||"todas";
+ return catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todas"||(p.categoria||"General")===f);
+}
+function toggleSelProd(id,on){if(on)selProd[id]=1;else delete selProd[id];actualizarBarraSelProd();}
+function actualizarBarraSelProd(){
+ const bar=document.getElementById("barraSelProd");if(!bar)return;
+ const n=Object.keys(selProd).length;
+ bar.classList.toggle("oculto",n===0);
+ const t=document.getElementById("txtSelProd");if(t)t.textContent=n+" seleccionado"+(n===1?"":"s");
+}
+function limpiarSelProd(){selProd={};actualizarBarraSelProd();renderProductos();}
+function seleccionarTodosProd(){listaFiltradaProd().forEach(function(p){selProd[p.id]=1});actualizarBarraSelProd();renderProductos();}
+function eliminarSeleccionadosProd(ya){
+ if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede eliminar productos.");return}
+ const ids=Object.keys(selProd);if(!ids.length)return;
+ if(!ya){pedirConfirmacion("¿Eliminar "+ids.length+" producto"+(ids.length===1?"":"s")+"? Ya no se podrán vender.","Eliminar",function(){eliminarSeleccionadosProd(true)});return;}
+ ids.forEach(function(id){
+  const p=catalogo.find(function(x){return String(x.id)===String(id)});
+  if(p){if(typeof encolarBorradoNube==="function")encolarBorradoNube("productos",p);delete stockAlmacen[p.id];ticket=ticket.filter(function(x){return x.id!==p.id});}
+ });
+ catalogo=catalogo.filter(function(x){return !selProd[x.id]});
+ selProd={};
+ guardar();render();renderProductos();
+ if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();
+ toast("Se eliminaron "+ids.length+" producto"+(ids.length===1?"":"s")+".");
+}
+function renderProductos(){
+ actualizarFiltroCatProd();
  const lista=document.getElementById("listaProductos");if(!lista)return;lista.innerHTML="";
  const disp=catalogo.filter(p=>estadoDe(p)==="disponible").length;
  const agot=catalogo.filter(p=>estadoDe(p)!=="disponible").length;
@@ -4234,15 +4270,16 @@ function renderProductos(){
  document.getElementById("resValor").textContent=dinero(catalogo.reduce((a,p)=>a+p.precio*p.stock,0));
  const _sb=document.getElementById("resStockBajo");if(_sb)_sb.textContent=catalogo.filter(function(p){return !p.pausado&&p.stock>0&&p.stock<=(p.stockMin==null?5:p.stockMin)}).length;
  const _mg=document.getElementById("resMargen");if(_mg)_mg.textContent=catalogo.length?Math.round(catalogo.reduce(function(a,p){return a+margenProducto(p)},0)/catalogo.length)+"%":"0%";
- const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todas"||(p.categoria||"General")===f);
+ const items=listaFiltradaProd();
  if(!items.length){lista.innerHTML='<div class="ticket-vacio">'+ic3d("📦","f-gris")+'<br><b>No hay productos con ese filtro</b></div>';return}
  items.forEach(p=>{
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";d.onclick=function(){toggleAccionesProd(p.id);};
   const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">'+ic3d("⏸","f-ambar")+' Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":ic3d("⏸","f-ambar")+" Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div><div class="acciones-prod" id="acciones-prod-${p.id}" style="display:none" onclick="event.stopPropagation()"><button onclick="editar(${p.id})">${ic3d("✏️","f-azul")} Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?ic3d("▶️","f-verde")+" Activar":ic3d("⏸","f-ambar")+" Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">${ic3d("🗑","f-coral")} Eliminar</button></div>`;
+  d.innerHTML=`<input type="checkbox" class="check-sel-prod" ${selProd[p.id]?"checked":""} onchange="toggleSelProd(${p.id},this.checked)" onclick="event.stopPropagation()"><div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">'+ic3d("⏸","f-ambar")+' Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":ic3d("⏸","f-ambar")+" Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div><div class="acciones-prod" id="acciones-prod-${p.id}" style="display:none" onclick="event.stopPropagation()"><button onclick="editar(${p.id})">${ic3d("✏️","f-azul")} Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?ic3d("▶️","f-verde")+" Activar":ic3d("⏸","f-ambar")+" Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">${ic3d("🗑","f-coral")} Eliminar</button></div>`;
   lista.appendChild(d);
  });
+ actualizarBarraSelProd();
 }
 /* v111: apartado Importar Excel (Lalo 2026-11-21): cargar inventario desde
    un archivo .xlsx/.xls/.csv con vista previa y validación. SheetJS va
