@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0b4a6e">
+<title>Kiosco KUPO</title>
+<script src="supabase.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#fff8ec;color:#1f2937;min-height:100vh}
+button{font-family:inherit;touch-action:manipulation;cursor:pointer}
+input{font-family:inherit}
+.pantalla{display:none;min-height:100vh}
+.pantalla.activa{display:flex;flex-direction:column}
+/* Encabezado */
+header{background:#0b4a6e;color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+header .negocio{font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.95}
+header .kiosco{font-size:30px;font-weight:900;letter-spacing:1px;margin-top:2px}
+header .kiosco span{color:#fbbf24}
+header .sub{font-size:13px;opacity:.8;margin-top:2px}
+</style>
+</head>
+<body>
+<style>
+/* Tipo: para llevar / para comer aquí */
+.tipo{display:flex;gap:12px;padding:16px 20px 6px}
+.tipo button{flex:1;padding:18px 8px;font-size:21px;font-weight:800;border-radius:16px;border:3px solid #e5e7eb;background:#fff;color:#374151}
+.tipo button.activo{background:#f59e0b;border-color:#d97706;color:#fff;box-shadow:0 4px 0 #b45309}
+.tipo button small{display:block;font-size:13px;font-weight:600;margin-top:2px;opacity:.85}
+/* Buscador y filtros */
+.busqueda{padding:10px 20px 4px}
+.busqueda input{width:100%;padding:15px 18px;font-size:19px;border:2px solid #e5e7eb;border-radius:14px;background:#fff;outline:none}
+.busqueda input:focus{border-color:#f59e0b}
+.filtros{display:flex;gap:8px;padding:12px 20px 4px;overflow-x:auto;scrollbar-width:none}
+.filtros::-webkit-scrollbar{display:none}
+.filtros button{flex:0 0 auto;padding:10px 18px;font-size:16px;font-weight:700;border-radius:999px;border:2px solid #e5e7eb;background:#fff;color:#374151}
+.filtros button.activo{background:#0b4a6e;border-color:#0b4a6e;color:#fff}
+/* Rejilla de productos */
+#grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 20px 150px}
+.tarjeta{background:#fff;border-radius:18px;padding:16px 14px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08);border:2px solid transparent}
+.tarjeta .emoji{font-size:52px;line-height:1.1}
+.tarjeta .foto{width:84px;height:84px;object-fit:cover;border-radius:14px}
+.tarjeta h3{font-size:18px;line-height:1.25;margin:8px 0 2px;min-height:44px}
+.tarjeta .precio{font-size:24px;font-weight:900;color:#ea580c}
+.tarjeta .cant-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px}
+.tarjeta .cant-row button{width:48px;height:48px;font-size:26px;font-weight:900;border-radius:50%;border:none;background:#0b4a6e;color:#fff}
+.tarjeta .cant-row button.mas{background:#f59e0b}
+.tarjeta .cant-row b{font-size:24px;min-width:28px;text-align:center}
+.tarjeta .agregar{margin-top:12px;width:100%;padding:13px;font-size:17px;font-weight:800;border-radius:12px;border:none;background:#f59e0b;color:#fff}
+.tarjeta.en-carrito{border-color:#f59e0b}
+#sinResultados{grid-column:1/-1;text-align:center;padding:40px 10px;font-size:18px;color:#6b7280}
+</style>
+<style>
+/* Barra inferior: nombre + total + mandar pedido */
+#barra{position:fixed;left:0;right:0;bottom:0;background:#0b4a6e;color:#fff;padding:14px 20px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.25);z-index:10}
+#barra .fila{display:flex;gap:10px;align-items:center}
+#nombreCliente{flex:1;min-width:0;padding:14px 16px;font-size:18px;border-radius:12px;border:2px solid transparent;outline:none}
+#nombreCliente.error{border-color:#ef4444;background:#fef2f2}
+#totalBarra{font-size:22px;font-weight:900;white-space:nowrap}
+#btnMandar{width:100%;margin-top:10px;padding:16px;font-size:21px;font-weight:900;border-radius:14px;border:none;background:#f59e0b;color:#fff;box-shadow:0 4px 0 #b45309}
+#btnMandar:disabled{background:#9ca3af;box-shadow:none;opacity:.7}
+#btnMandar.enviando{background:#9ca3af;box-shadow:none}
+#hintNombre{text-align:center;font-size:14px;color:#fca5a5;margin-top:8px;display:none}
+/* Ticket para foto */
+#ticketCard{background:#fff;border-radius:20px;margin:24px 20px;padding:28px 20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.12);flex:1}
+#ticketCard .tu-numero{font-size:20px;font-weight:800;color:#6b7280;letter-spacing:1px}
+#ticketNumero{font-size:130px;font-weight:900;line-height:1;color:#ea580c;margin:6px 0}
+#ticketCliente{font-size:24px;font-weight:800}
+#ticketTipo{font-size:16px;color:#6b7280;margin-top:2px}
+#ticketItems{text-align:left;margin:22px 4px 0;border-top:2px dashed #e5e7eb;padding-top:14px}
+#ticketItems .li{display:flex;justify-content:space-between;font-size:18px;padding:5px 0}
+#ticketItems .li b{white-space:nowrap;margin-left:10px}
+#ticketTotal{display:flex;justify-content:space-between;font-size:24px;font-weight:900;border-top:2px dashed #e5e7eb;margin-top:12px;padding-top:12px}
+#ticketFoto{font-size:19px;font-weight:800;color:#0b4a6e;margin-top:18px}
+#btnListo{margin:0 20px 24px;padding:18px;font-size:22px;font-weight:900;border-radius:16px;border:none;background:#16a34a;color:#fff;box-shadow:0 4px 0 #166534}
+/* Pantallas de setup / apagado / error */
+.centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center}
+.centro .icono{font-size:72px}
+.centro h1{font-size:28px;margin:14px 0 8px}
+.centro p{font-size:18px;color:#4b5563;line-height:1.5;max-width:480px}
+.centro input{width:100%;max-width:420px;padding:16px;font-size:20px;text-align:center;letter-spacing:2px;text-transform:uppercase;border:2px solid #d1d5db;border-radius:14px;margin-top:20px;outline:none}
+.centro input:focus{border-color:#f59e0b}
+.centro .btn-grande{margin-top:18px;padding:16px 34px;font-size:20px;font-weight:800;border-radius:14px;border:none;background:#f59e0b;color:#fff;box-shadow:0 4px 0 #b45309}
+.centro .btn-gris{margin-top:14px;padding:12px 22px;font-size:16px;font-weight:700;border-radius:12px;border:2px solid #d1d5db;background:#fff;color:#374151}
+.centro .error-msg{color:#dc2626;font-weight:700;margin-top:12px;display:none}
+.pie{font-size:12px;color:#9ca3af;text-align:center;padding:0 0 14px}
+</style>
+<body>
+<!-- Configuración inicial: clave de licencia -->
+<div id="pantallaSetup" class="pantalla">
+  <div class="centro">
+    <div class="icono">🏪</div>
+    <h1>Kiosco KUPO</h1>
+    <p>Escribe la clave de licencia del negocio para activar este kiosco. Se guarda solo en esta tablet.</p>
+    <input id="inputLicencia" placeholder="KUPO-XXXX-XXXX" maxlength="20" autocomplete="off">
+    <div id="errorSetup" class="error-msg"></div>
+    <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
+  </div>
+  <div class="pie">Kiosco KUPO · v164</div>
+</div>
+<!-- Kiosco apagado -->
+<div id="pantallaApagado" class="pantalla">
+  <div class="centro">
+    <div class="icono">🔒</div>
+    <h1>El kiosco está apagado</h1>
+    <p id="textoApagado">Este kiosco aún no está activado. Pídele al cajero que lo active desde el sistema.</p>
+    <button class="btn-grande" onclick="reintentar()">Reintentar</button>
+    <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
+  </div>
+  <div class="pie">Kiosco KUPO · v164</div>
+</div>
+<!-- Menú -->
+<div id="pantallaMenu" class="pantalla">
+  <header>
+    <div class="negocio" id="nombreNegocio">POLLOS RANCHEROS EL POLLÓN</div>
+    <div class="kiosco">KIOSCO <span>KUPO</span></div>
+    <div class="sub">Pide aquí, paga en caja 👇</div>
+  </header>
+  <div class="tipo">
+    <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')">🥡 Para llevar<small>Precio para llevar</small></button>
+    <button id="btnLocal" onclick="elegirTipo('local')">🍽️ Para comer aquí<small>Precio en el local</small></button>
+  </div>
+  <div class="busqueda"><input id="inputBuscar" placeholder="🔍 Buscar pollo, refresco..." oninput="renderMenu()"></div>
+  <div class="filtros" id="filtros"></div>
+  <div id="grid"></div>
+  <div id="barra">
+    <div class="fila">
+      <input id="nombreCliente" placeholder="Tu nombre" maxlength="30" autocomplete="off">
+      <span id="totalBarra">Total $0</span>
+    </div>
+    <button id="btnMandar" onclick="mandarPedido()" disabled>Mandar pedido</button>
+    <div id="hintNombre">Escribe tu nombre para mandar el pedido 🙂</div>
+  </div>
+</div>
+<!-- Ticket -->
+<div id="pantallaTicket" class="pantalla">
+  <header>
+    <div class="negocio" id="nombreNegocio2">POLLOS RANCHEROS EL POLLÓN</div>
+    <div class="kiosco">¡PEDIDO <span>LISTO!</span></div>
+  </header>
+  <div id="ticketCard">
+    <div class="tu-numero">TU NÚMERO ES</div>
+    <div id="ticketNumero">1</div>
+    <div id="ticketCliente"></div>
+    <div id="ticketTipo"></div>
+    <div id="ticketItems"></div>
+    <div id="ticketTotal"><span>Total</span><span id="ticketTotalValor">$0</span></div>
+    <div id="ticketFoto">📸 Tómale foto a tu ticket</div>
+    <p style="margin-top:8px;font-size:16px;color:#6b7280">El cajero te llamará por tu número.<br>Paga en caja cuando te llamen.</p>
+  </div>
+  <button id="btnListo" onclick="volverMenu()">✅ Listo</button>
+</div>
+<!-- Sin internet -->
+<div id="pantallaError" class="pantalla">
+  <div class="centro">
+    <div class="icono">📶</div>
+    <h1>Sin internet</h1>
+    <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
+    <button class="btn-grande" onclick="reintentar()">Reintentar</button>
+  </div>
+  <div class="pie">Kiosco KUPO · v164</div>
+</div>
+<script>
+/* Kiosco KUPO v164 — pide el cliente, cobra el cajero. Sin inventario, sin caja. */
+var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
+var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
+var sb=null;
+try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ sb=null; }
+var licencia="";
+var negocioNombre="POLLOS RANCHEROS EL POLLÓN";
+var productos=[];      /* crudos de la nube */
+var grupos=[];         /* agrupados por nombre base */
+var tipo="llevar";
+var categoria="Todos";
+var carrito={};        /* id del producto visible -> {p, cant} */
+var EMOJI_CAT={"Pollo":"🍗","Refrescos":"🥤","Complementos":"🍚","Salsas":"🌶️","Agua natural":"💧","Agua":"💧"};
+function $(id){ return document.getElementById(id); }
+function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function dinero(n){ return "$"+Math.round(Number(n)||0); }
+function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); }
+function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
+function emojiDe(p){ if(p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
+async function init(){
+  licencia=(localStorage.getItem("kupoPosKioscoLicencia")||"").trim().toUpperCase();
+  if(!licencia){ mostrar("pantallaSetup"); return; }
+  if(!sb||!navigator.onLine){ mostrar("pantallaError"); return; }
+  await cargarTodo();
+}
+async function cargarTodo(){
+  var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
+  if(r1.error||!r1.data){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Licencia no encontrada. Revisa la clave."; mostrar("pantallaSetup"); return; }
+  negocioNombre=(r1.data.negocio||"KUPO POS").toUpperCase();
+  $("nombreNegocio").textContent=negocioNombre;
+  $("nombreNegocio2").textContent=negocioNombre;
+  var r2=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
+  if(r2.error){ mostrar("pantallaError"); return; }
+  var opt=(r2.data&&r2.data.opciones)||{};
+  if(opt.kioscoActivo!==true){ mostrar("pantallaApagado"); return; }
+  var r3=await sb.from("productos").select("id,nombre,precio,categoria,foto,pausado").eq("licencia_clave",licencia).order("nombre");
+  if(r3.error){ mostrar("pantallaError"); return; }
+  productos=(r3.data||[]).filter(function(p){ return !p.pausado; });
+  agrupar();
+  renderFiltros();
+  renderMenu();
+  mostrar("pantallaMenu");
+  setInterval(revisarActivo,60000);
+}
+async function revisarActivo(){
+  if(!$("pantallaMenu").classList.contains("activa")) return;
+  var r=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
+  if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.kioscoActivo!==true){ mostrar("pantallaApagado"); }
+}
+function guardarLicencia(){
+  var v=$("inputLicencia").value.trim().toUpperCase();
+  if(!v){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Escribe la clave de licencia."; return; }
+  localStorage.setItem("kupoPosKioscoLicencia",v);
+  licencia=v;
+  $("errorSetup").style.display="none";
+  cargarTodo();
+}
+function cambiarLicencia(){ localStorage.removeItem("kupoPosKioscoLicencia"); licencia=""; $("inputLicencia").value=""; mostrar("pantallaSetup"); }
+function reintentar(){ init(); }
+</script>
+<script>
+/* Agrupa variantes Llevar/Local bajo el mismo nombre base. */
+function agrupar(){
+  var mapa={};
+  productos.forEach(function(p){
+    var base=baseNombre(p.nombre);
+    if(!mapa[base]) mapa[base]={base:base,llevar:null,local:null,solo:null};
+    var n=String(p.nombre).toLowerCase();
+    if(/llevar/.test(n)) mapa[base].llevar=p;
+    else if(/local/.test(n)) mapa[base].local=p;
+    else if(!mapa[base].solo) mapa[base].solo=p;
+    else mapa[base].solo=p;
+  });
+  grupos=Object.keys(mapa).map(function(k){ return mapa[k]; });
+}
+function visibleDe(g){
+  if(tipo==="llevar") return g.llevar||g.solo||g.local;
+  return g.local||g.solo||g.llevar;
+}
+function renderFiltros(){
+  var cats=[];
+  grupos.forEach(function(g){ var c=(visibleDe(g).categoria||"General").trim(); if(cats.indexOf(c)<0) cats.push(c); });
+  cats.sort();
+  $("filtros").innerHTML='<button class="'+(categoria==="Todos"?"activo":"")+'" onclick="elegirCat(\'Todos\')">Todos</button>'+cats.map(function(c){ return '<button class="'+(categoria===c?"activo":"")+'" onclick="elegirCat(\''+escHtml(c)+'\')">'+escHtml(c)+'</button>'; }).join("");
+}
+function elegirCat(c){ categoria=c; renderFiltros(); renderMenu(); }
+function elegirTipo(t){
+  tipo=t;
+  $("btnLlevar").classList.toggle("activo",t==="llevar");
+  $("btnLocal").classList.toggle("activo",t==="local");
+  renderFiltros(); renderMenu();
+}
+function renderMenu(){
+  var q=($("inputBuscar").value||"").toLowerCase().trim();
+  var lista=grupos.map(visibleDe).filter(function(p){
+    if(!p) return false;
+    if(categoria!=="Todos"&&(p.categoria||"General").trim()!==categoria) return false;
+    if(q&&baseNombre(p.nombre).toLowerCase().indexOf(q)<0&&String(p.nombre).toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  var g=$("grid");
+  if(!lista.length){ g.innerHTML='<div id="sinResultados">😕 No encontramos eso.<br>Prueba con otra palabra.</div>'; return; }
+  g.innerHTML=lista.map(function(p){
+    var cant=carrito[p.id]?carrito[p.id].cant:0;
+    var em=emojiDe(p);
+    var foto=em?'<div class="emoji">'+em+'</div>':'<img class="foto" src="'+escHtml(p.foto)+'" alt="">';
+    return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'">'+foto+
+      '<h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
+      '<div class="precio">'+dinero(p.precio)+'</div>'+
+      (cant>0?'<div class="cant-row"><button onclick="cambiarCant('+p.id+',-1)">−</button><b>'+cant+'</b><button class="mas" onclick="cambiarCant('+p.id+',1)">+</button></div>'
+             :'<button class="agregar" onclick="cambiarCant('+p.id+',1)">+ Agregar</button>')+
+      '</div>';
+  }).join("");
+}
+function cambiarCant(id,d){
+  var p=null;
+  grupos.forEach(function(g){ var v=visibleDe(g); if(v&&v.id===id) p=v; });
+  if(!p) return;
+  if(!carrito[id]) carrito[id]={p:p,cant:0};
+  carrito[id].cant+=d;
+  if(carrito[id].cant<=0) delete carrito[id];
+  renderMenu(); actualizarBarra();
+}
+function totalCarrito(){
+  var t=0; Object.keys(carrito).forEach(function(k){ t+=carrito[k].p.precio*carrito[k].cant; });
+  return t;
+}
+function actualizarBarra(){
+  var n=Object.keys(carrito).length;
+  $("totalBarra").textContent="Total "+dinero(totalCarrito());
+  $("btnMandar").disabled=n===0;
+}
+$("nombreCliente").addEventListener("input",function(){ $("nombreCliente").classList.remove("error"); $("hintNombre").style.display="none"; });
+</script>
+<script>
+async function mandarPedido(){
+  var nombre=$("nombreCliente").value.trim();
+  if(!nombre){ $("nombreCliente").classList.add("error"); $("hintNombre").style.display="block"; $("nombreCliente").focus(); return; }
+  if(!Object.keys(carrito).length) return;
+  if(!navigator.onLine){ mostrar("pantallaError"); return; }
+  var btn=$("btnMandar");
+  btn.disabled=true; btn.classList.add("enviando"); btn.textContent="Mandando...";
+  var items=Object.keys(carrito).map(function(k){ var c=carrito[k]; return {id:c.p.id,nombre:baseNombre(c.p.nombre),precio:c.p.precio,cant:c.cant}; });
+  var total=totalCarrito();
+  try{
+    var hoy=new Date(); hoy.setHours(0,0,0,0);
+    var r=await sb.from("pedidos_kiosco").select("numero").eq("licencia_clave",licencia).gte("creado_en",hoy.toISOString()).order("numero",{ascending:false}).limit(1);
+    if(r.error) throw r.error;
+    var numero=(r.data&&r.data.length?r.data[0].numero:0)+1;
+    var ins=await sb.from("pedidos_kiosco").insert([{licencia_clave:licencia,numero:numero,cliente:nombre,tipo:tipo,items:items,total:total,estado:"pendiente"}]).select("id");
+    if(ins.error) throw ins.error;
+    $("ticketNumero").textContent=numero;
+    $("ticketCliente").textContent=nombre;
+    $("ticketTipo").textContent=tipo==="llevar"?"🥡 Para llevar":"🍽️ Para comer aquí";
+    $("ticketItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
+    $("ticketTotalValor").textContent=dinero(total);
+    mostrar("pantallaTicket");
+  }catch(e){
+    mostrar("pantallaError");
+  }finally{
+    btn.disabled=false; btn.classList.remove("enviando"); btn.textContent="Mandar pedido";
+  }
+}
+function volverMenu(){
+  carrito={};
+  $("nombreCliente").value="";
+  $("inputBuscar").value="";
+  renderMenu(); actualizarBarra();
+  mostrar("pantallaMenu");
+}
+init();
+</script>
+</body>
+</html>
