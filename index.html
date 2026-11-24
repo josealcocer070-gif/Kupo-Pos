@@ -106,6 +106,15 @@ aside nav a .icono-3d{display:inline-flex!important;align-items:center!important
 #btnRecargar:hover,#btnReconectarBT:hover{background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.05) 45%),linear-gradient(135deg,#5ccfdd,#247a78)!important}
 #panelChatKupi{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
 #panelChatKupi.oculto{display:none!important}
+/* v139 (Lalo 2026-11-23): ventana flotante de Mensajes, igual que la de Kupi
+   (misma posición, tamaño y sombra), para contestar sin salir de Ventas. */
+#panelMensajesFlotante{position:fixed;right:18px;bottom:94px;width:380px;max-width:calc(100vw - 36px);height:520px;max-height:calc(100vh - 130px);background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);z-index:201;display:flex;flex-direction:column;overflow:hidden;border:1px solid #dfe5ea}
+#panelMensajesFlotante.oculto{display:none!important}
+#panelMensajesFlotante .chat-lista{flex:1;max-height:none;overflow-y:auto;margin:0;border-radius:0}
+#panelMensajesFlotante .chat-entrada{margin:0;border:0;border-top:1px solid #e5e5e5;border-radius:0;box-shadow:none}
+#panelMensajesFlotante .chat-apagado{padding:8px 12px;font-size:12px;color:#a33;background:#fdeceb}
+html[data-tema="noche"] #panelMensajesFlotante{background:var(--sup);border-color:var(--borde2)}
+html[data-tema="noche"] #panelMensajesFlotante .chat-lista{background:var(--fondo)}
 .kupi-encabezado{background:var(--azul);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 12px}
 .kupi-encabezado img{width:44px;height:44px;border-radius:50%;border:2px solid #f5b800;object-fit:cover;background:#fff;flex:none}
 .kupi-encabezado b{font-size:17px;display:block;line-height:1.1}
@@ -1012,7 +1021,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-tema" id="btnMenuAcciones" onclick="toggleMenuAcciones(event)" aria-label="Acciones rápidas" title="Acciones rápidas">☰</button>
-<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="mostrarVista('mensajes')" aria-label="Mensajes" title="Mensajes">💬 <span class="sync-texto">Mensajes</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
+<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="toggleMensajesFlotante()" aria-label="Mensajes" title="Mensajes">💬 <span class="sync-texto">Mensajes</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
 <button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar">🔄</button>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️ <span class="sync-texto">Sincronizar</span><span class="badge-sync" id="badgeSync">0</span></button>
@@ -1031,7 +1040,6 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button class="acc" onclick="ponerEnEspera()">⏱ Poner venta en espera</button>
 <button class="acc" onclick="recuperarVentaEnEspera()">⏯ Recuperar venta en espera</button>
 <button class="acc" onclick="reimprimir()">🖨 Reimprimir último ticket</button>
-<button class="acc" id="btnMensajesVentas" onclick="mostrarVista('mensajes')">💬 Mensajes <span class="badge-msg" id="badgeMsgVentas">0</span></button>
 <button class="acc" id="btnAbrirCajonVentas" onclick="abrirCajonBT()">💵 Abrir cajón</button>
 <button type="button" class="acc" id="btnPantallaCompleta" onclick="alternarPantallaCompleta()">⛶ Pantalla completa</button>
 <p id="btEstadoVentas" style="font-size:13px;font-weight:700;margin:0;width:100%">🖨 Impresora Bluetooth: no conectada.</p>
@@ -1049,7 +1057,6 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <a id="navReportes" onclick="mostrarVista('reportes')"><span class="icono-3d">📈</span> Reportes</a>
 <a id="navHistCortes" onclick="irHistorialCortes()"><span class="icono-3d">🕐</span> Historial de cortes</a>
 <a id="navImportar" onclick="mostrarVista('importar')"><span class="icono-3d">📥</span> Importar Excel <span class="insignia-nuevo">Nuevo</span></a>
-<a id="navMensajes" onclick="mostrarVista('mensajes')"><span class="icono-3d">💬</span> Mensajes <span class="badge-msg" id="badgeMsgMenu">0</span></a>
 </nav>
 <div class="sec">SISTEMA</div>
 <nav>
@@ -3010,9 +3017,9 @@ function guardarPermisosCajero(){const sel=document.getElementById("selPermCajer
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",tienePermiso("productos"));mostrar("navImportar",tienePermiso("importar"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
+ mostrar("navProductos",tienePermiso("productos"));mostrar("navImportar",tienePermiso("importar"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
  mostrar("btnMensajesHeader",verMensajesChat());
- mostrar("btnMensajesVentas",verMensajesChat()&&esAdmin);mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);
+ mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.style.display=tienePermiso(b.getAttribute("data-nav"))?"":"none"});
  document.querySelectorAll('#menuMovil button[data-nav="mensajes"]').forEach(function(b){b.style.display=verMensajesChat()?"":"none";});
  const _sec=document.querySelector("aside .sec");if(_sec)_sec.style.display=(tienePermiso("ticket")||tienePermiso("cajeros")||tienePermiso("multi")||esAdmin)?"":"none";
@@ -3384,6 +3391,7 @@ function mostrarVista(v){
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("accionesRapidas").classList.toggle("oculto",v!=="ventas");
  if(typeof cerrarMenuAcciones==="function")cerrarMenuAcciones();
+ var _pmf=document.getElementById("panelMensajesFlotante");if(_pmf)_pmf.classList.add("oculto");
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
@@ -3399,7 +3407,6 @@ function mostrarVista(v){
  document.getElementById("navMulti").classList.toggle("activo",v==="multi");
  document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
- var _nm=document.getElementById("navMensajes");if(_nm)_nm.classList.toggle("activo",v==="mensajes");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
  if(v==="productos")renderProductos(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
@@ -3770,6 +3777,26 @@ function actualizarBotonKupi(){
  var enc=document.getElementById("imgKupiEnc");if(enc&&!enc.getAttribute("src"))enc.src=MASCOTA_KUPI;
  b.style.display=esAdminKupi()?"":"none";
  if(!esAdminKupi()){var p=document.getElementById("panelChatKupi");if(p)p.classList.add("oculto")}
+}
+/* v139 (Lalo 2026-11-23): ventana flotante de Mensajes, igual que la de Kupi
+   (panel fijo encima de Ventas, con ✕ para cerrar). El botón de la barra
+   superior ya no cambia de vista: abre/cierra esta ventana para contestar
+   rápido sin interrumpir la venta. Reutiliza la lista, el envío y el
+   marcado de leídos del chat (renderMensajes pinta en las dos listas). */
+function mensajesFlotanteAbierto(){var p=document.getElementById("panelMensajesFlotante");return !!(p&&!p.classList.contains("oculto"));}
+function toggleMensajesFlotante(){
+ var p=document.getElementById("panelMensajesFlotante");if(!p)return;
+ var abrir=p.classList.contains("oculto");
+ p.classList.toggle("oculto");
+ if(abrir){
+  if(!chatActivo()&&!esAdminChat()){toast("💬 El chat interno está apagado. Pide al Administrador que lo prenda.");p.classList.add("oculto");return;}
+  suscribirChatMensajes();
+  renderMensajes();
+  cargarMensajes();
+  reenviarMensajesPendientes();
+  marcarMensajesLeidos();
+  var inp=document.getElementById("chatTextoFlotante");if(inp)setTimeout(function(){inp.focus()},80);
+ }
 }
 function toggleChatKupi(){
  if(!esAdminKupi()){toast("⛔ Kupi solo está para el Administrador.");return}
@@ -4268,7 +4295,6 @@ function realizarCorteDinero(){
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
- enviarMensajeCorteChat(c);
  revisarCierreAutomatico();
 }
 function realizarCorte(){realizarCorteDinero();}
@@ -4282,7 +4308,6 @@ function realizarCorteProductos(){
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
- enviarMensajeCorteChat(c);
  revisarCierreAutomatico();
 }
 function ic3d(e,c){return "<span class='icono-3d-mini "+(c||"f-gris")+"'>"+e+"</span>";}
@@ -4885,7 +4910,7 @@ function reintentarMensajeChat(idLocal){
 function actualizarBadgeMensajes(){
  var leido=ultimoLeidoChat(),yo=nombreRemitenteChat(),n=0;
  mensajesChat.forEach(function(m){if(!m.pendiente&&m.remitente!==yo&&m.creado_en&&new Date(m.creado_en).getTime()>leido)n++;});
- ["badgeMsgMenu","badgeMsgBar","badgeMsgVentas","badgeMsgVentasMovil","badgeMsgHeader"].forEach(function(id){var b=document.getElementById(id);if(!b)return;b.textContent=n;b.classList.toggle("con-nuevos",n>0);});
+ ["badgeMsgBar","badgeMsgVentasMovil","badgeMsgHeader"].forEach(function(id){var b=document.getElementById(id);if(!b)return;b.textContent=n;b.classList.toggle("con-nuevos",n>0);});
 }
 /* v132: botón "Probar conexión" — dice en claro si la nube responde, para no adivinar por qué no sale un mensaje. */
 async function probarConexionChat(){
@@ -4899,13 +4924,16 @@ async function probarConexionChat(){
  }catch(e){toast("🔍 Nube: no responde ("+((e&&(e.message||e.code))||"error")+").");}
 }
 function renderMensajes(){
- var lista=document.getElementById("chatLista");if(!lista)return;
+ var lista=document.getElementById("chatLista");var listaF=document.getElementById("chatListaFlotante");if(!lista&&!listaF)return;
  var activo=chatActivo();
  var tw=document.getElementById("chatToggleWrap");if(tw)tw.style.display=esAdminChat()?"":"none";
  var chk=document.getElementById("optChatActivo");if(chk)chk.checked=activo;
  var ap=document.getElementById("chatApagado");if(ap)ap.classList.toggle("oculto",activo);
  var inp=document.getElementById("chatTexto");if(inp)inp.disabled=!activo;
  var btn=document.getElementById("chatEnviar");if(btn)btn.disabled=!activo;
+ var inpF=document.getElementById("chatTextoFlotante");if(inpF)inpF.disabled=!activo;
+ var btnF=document.getElementById("chatEnviarFlotante");if(btnF)btnF.disabled=!activo;
+ var apF=document.getElementById("chatApagadoFlotante");if(apF)apF.classList.toggle("oculto",activo);
  var yo=nombreRemitenteChat();
  var todos=mensajesChat.slice().sort(function(a,b){return new Date(a.creado_en)-new Date(b.creado_en)});
  if(!todos.length){lista.innerHTML='<div class="chat-vacio"><span class="vacio-ic">💬</span><br>Aún no hay mensajes.<br>Escribe el primero abajo 👇</div>';}
@@ -4918,6 +4946,7 @@ function renderMensajes(){
   }).join("");
  }
  lista.scrollTop=lista.scrollHeight;
+ if(listaF){listaF.innerHTML=lista.innerHTML;listaF.scrollTop=listaF.scrollHeight;}
  actualizarBadgeMensajes();
 }
 /* v114 (Lalo 2026-11-21): conciliar la cola pendiente del chat con la nube.
@@ -4947,6 +4976,7 @@ function conciliarPendientesChat(nube){
  mensajesChat=mensajesChat.filter(function(x){return !x.pendiente||!x.idLocal||ids[x.idLocal];});
 }
 async function cargarMensajes(){
+ limpiarPendientesSistemaChat();
  asegurarSupabase();
  if(!kupoSupabase){renderMensajes();return;}
  try{
@@ -4964,45 +4994,46 @@ function encolarMensajeChat(texto,remitente,remitente_rol){
  mensajesChat.push(msg);renderMensajes();
  return msg;
 }
-async function enviarMensajeChat(){
- var inp=document.getElementById("chatTexto");if(!inp)return;
- var texto=inp.value.trim();if(!texto)return;
- if(!chatActivo()){toast("💬 El chat interno está apagado. Solo el Administrador puede prenderlo.");return;}
+/* v139 (Lalo 2026-11-23): enviarTextoChat comparte el envío entre la vista
+   completa de Mensajes y la ventana flotante (mismo encolado y reenvío). */
+async function enviarTextoChat(texto){
+ texto=String(texto||"").trim();if(!texto)return false;
+ if(!chatActivo()){toast("💬 El chat interno está apagado. Solo el Administrador puede prenderlo.");return false;}
  if(texto.length>500)texto=texto.slice(0,500);
  encolarMensajeChat(texto,nombreRemitenteChat(),rolRemitenteChat());
- inp.value="";
  await reenviarMensajesPendientes();
+ return true;
 }
-/* v137 (Lalo 2026-11-23): mensaje automático del corte en el chat interno,
-   en texto plano (primera prueba, sin tarjetas de colores ni formato
-   especial). Al guardar un corte (dinero o productos) el sistema publica
-   solo este resumen como un mensaje normal del chat, con remitente
-   "Sistema", usando la misma cola y el mismo reenvío del envío normal
-   (encolarMensajeChat + reenviarMensajesPendientes), para que se encole y
-   se reintente igual si no hay internet. Se envía ANTES del cierre
-   automático (v136): en realizarCorteDinero/Productos va después de
-   imprimir y antes de revisarCierreAutomatico, así el mensaje ya está en
-   la cola local aunque la sesión se cierre. */
-function diaCorteChat(f){try{var d=new Date(f+"T12:00:00");if(isNaN(d))return f;return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"short"}).replace(" de "," ");}catch(e){return f;}}
-function textoCorteChat(c){
- var dia=diaCorteChat(c.fecha);
- var quien=nombreRemitenteChat();
- if((c.tipo||"dinero")==="productos"){
-  return "📦 Corte de productos — "+dia+": Total "+dinero(c.ventasTotal||0)+", "+redondearCant(c.totalPiezas||0)+" piezas, Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
- }
- return "📋 Corte del día — "+dia+": Total "+dinero(c.ventasTotal||0)+", Efectivo "+dinero(c.efectivo||0)+", Tarjeta "+dinero(c.tarjeta||0)+", Diferencia "+dinero(c.diferencia||0)+", Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
+async function enviarMensajeChat(){
+ var inp=document.getElementById("chatTexto");if(!inp)return;
+ if(!(await enviarTextoChat(inp.value)))return;
+ inp.value="";
 }
-function enviarMensajeCorteChat(c){
- if(!c)return;
- var texto=textoCorteChat(c);
- if(texto.length>500)texto=texto.slice(0,500);
- encolarMensajeChat(texto,"Sistema","Sistema");
- reenviarMensajesPendientes();
+async function enviarMensajeChatFlotante(){
+ var inp=document.getElementById("chatTextoFlotante");if(!inp)return;
+ if(!(await enviarTextoChat(inp.value)))return;
+ inp.value="";
+}
+/* v139 (Lalo 2026-11-23): se quitó el mensaje automático del corte (v137) y el
+   chat queda solo para mensajes normales. Los mensajes del Sistema que hayan
+   quedado atorados en la cola local se eliminan sin intentar enviarlos, porque
+   la nube no acepta el rol "Sistema" y reintentarían para siempre. */
+function esMensajeSistemaChat(m){return !!(m&&(m.remitente==="Sistema"||String(m.texto||"").indexOf("📋 Corte del día")===0||String(m.texto||"").indexOf("📦 Corte de productos")===0));}
+function limpiarPendientesSistemaChat(){
+ var q=leerMensajesPendientes();
+ var quedan=q.filter(function(m){return !esMensajeSistemaChat(m);});
+ var cambio=false;
+ if(quedan.length!==q.length){guardarMensajesPendientes(quedan);cambio=true;}
+ var antes=mensajesChat.length;
+ mensajesChat=mensajesChat.filter(function(x){return !(x.pendiente&&esMensajeSistemaChat(x));});
+ if(mensajesChat.length!==antes)cambio=true;
+ if(cambio)renderMensajes();
 }
 var __kupoReenviando=false;
 async function reenviarMensajesPendientes(){
  if(__kupoReenviando)return;__kupoReenviando=true;
  try{
+ limpiarPendientesSistemaChat();
  var q=leerMensajesPendientes();if(!q.length)return;
  asegurarSupabase();
  if(!kupoSupabase){marcarFalloChat();toast("💬 No se pudo cargar la librería de la nube, revisa el internet y toca el mensaje para reintentar.");return;}
@@ -5032,7 +5063,7 @@ function recibirMensajeChat(m){
  conciliarPendientesChat([m]);
  mensajesChat.push(m);
  renderMensajes();
- if(vistaActual==="mensajes"){marcarMensajesLeidos();}
+ if(vistaActual==="mensajes"||mensajesFlotanteAbierto()){marcarMensajesLeidos();}
  else{actualizarBadgeMensajes();if(m.creado_en&&new Date(m.creado_en).getTime()>ultimoLeidoChat())toast("💬 Nuevo mensaje de "+m.remitente);}
 }
 function suscribirChatMensajes(){
@@ -5291,6 +5322,11 @@ if ('serviceWorker' in navigator) {
 <div id="kupiMensajes"></div>
 <div class="kupi-chips"><button type="button" onclick="kupiChip('¿Cuánto vendí hoy?')">¿Cuánto vendí hoy?</button><button type="button" onclick="kupiChip('¿Qué se está acabando?')">¿Qué se está acabando?</button><button type="button" onclick="kupiChip('¿Cómo viene la semana?')">¿Cómo viene la semana?</button></div>
 <div class="kupi-entrada"><input id="kupiEntrada" type="text" placeholder="Escribe tu pregunta..." autocomplete="off" onkeydown="if(event.key==='Enter')kupiEnviar()"><button type="button" onclick="kupiEnviar()" aria-label="Enviar">➤</button></div>
+<div id="panelMensajesFlotante" class="oculto">
+<div class="kupi-encabezado"><div><b>💬 Mensajes</b><span>● Chat del equipo</span></div><button type="button" onclick="toggleMensajesFlotante()" aria-label="Cerrar los mensajes">✕</button></div>
+<p class="chat-apagado oculto" id="chatApagadoFlotante">⛔ El chat interno está apagado para los cajeros. Préndelo en la vista de Mensajes.</p>
+<div class="chat-lista" id="chatListaFlotante"></div>
+<div class="chat-entrada"><input id="chatTextoFlotante" maxlength="500" placeholder="Escribe un mensaje…" autocomplete="off" onkeydown="if(event.key==='Enter')enviarMensajeChatFlotante()"><button type="button" id="chatEnviarFlotante" onclick="enviarMensajeChatFlotante()" aria-label="Enviar mensaje">➤</button></div>
 </div>
 </body>
 </html>

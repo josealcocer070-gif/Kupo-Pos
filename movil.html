@@ -4674,7 +4674,6 @@ function realizarCorteDinero(){
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
- enviarMensajeCorteChat(c);
  revisarCierreAutomatico();
 }
 function realizarCorte(){realizarCorteDinero();}
@@ -4688,7 +4687,6 @@ function realizarCorteProductos(){
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
- enviarMensajeCorteChat(c);
  revisarCierreAutomatico();
 }
 function ic3d(e,c){return "<span class='icono-3d-mini "+(c||"f-gris")+"'>"+e+"</span>";}
@@ -5267,6 +5265,22 @@ function nombreRemitenteChat(){return (sesionActual&&(sesionActual.nombre||sesio
 function rolRemitenteChat(){return (sesionActual&&sesionActual.rol)||"Cajero"}
 function leerMensajesPendientes(){try{return JSON.parse(localStorage.getItem(CHAT_PEND_KEY)||"[]")}catch(e){return[]}}
 function guardarMensajesPendientes(q){try{localStorage.setItem(CHAT_PEND_KEY,JSON.stringify(q))}catch(e){}}
+/* v140 (Lalo 2026-11-23): purga de mensajes del Sistema en la cola local.
+   Al quitar el mensaje automático del corte, los mensajes del Sistema que
+   quedaron pendientes nunca se enviarían (la nube solo acepta remitente_rol
+   Administrador o Cajero): se eliminan de la cola y de la lista del chat
+   sin intentar enviarlos. Se llama al cargar y al reenviar. */
+function esMensajeSistemaChat(m){return !!(m&&(m.remitente==="Sistema"||m.remitente_rol==="Sistema"));}
+function purgarMensajesSistemaPendientes(){
+ var q=leerMensajesPendientes();
+ var limpio=q.filter(function(m){return !esMensajeSistemaChat(m);});
+ if(limpio.length!==q.length){
+  guardarMensajesPendientes(limpio);
+  mensajesChat=mensajesChat.filter(function(x){return !(x&&x.pendiente&&esMensajeSistemaChat(x));});
+  renderMensajes();
+ }
+ return limpio;
+}
 function ultimoLeidoChat(){try{return Number(localStorage.getItem(CHAT_LEIDO_KEY)||0)||0}catch(e){return 0}}
 function marcarMensajesLeidos(){try{localStorage.setItem(CHAT_LEIDO_KEY,String(Date.now()))}catch(e){}actualizarBadgeMensajes()}
 function horaChat(fecha){try{var d=new Date(fecha);return isNaN(d)?"":d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}catch(e){return""}}
@@ -5359,6 +5373,7 @@ async function cargarMensajes(){
   var r=await kupoSupabase.from("mensajes").select("id,licencia_clave,remitente,remitente_rol,texto,creado_en").eq("licencia_clave",licenciaActual()).order("creado_en",{ascending:false}).limit(100);
   if(r.error)throw r.error;
   var nube=(r.data||[]).slice().reverse();
+  purgarMensajesSistemaPendientes();
   mensajesChat=nube.concat(leerMensajesPendientes());
   conciliarPendientesChat(nube);
   renderMensajes();
@@ -5379,36 +5394,16 @@ async function enviarMensajeChat(){
  inp.value="";
  await reenviarMensajesPendientes();
 }
-/* v137 (Lalo 2026-11-23): mensaje automático del corte en el chat interno,
-   en texto plano (primera prueba, sin tarjetas de colores ni formato
-   especial). Al guardar un corte (dinero o productos) el sistema publica
-   solo este resumen como un mensaje normal del chat, con remitente
-   "Sistema", usando la misma cola y el mismo reenvío del envío normal
-   (encolarMensajeChat + reenviarMensajesPendientes), para que se encole y
-   se reintente igual si no hay internet. Se envía ANTES del cierre
-   automático (v136): en realizarCorteDinero/Productos va después de
-   imprimir y antes de revisarCierreAutomatico, así el mensaje ya está en
-   la cola local aunque la sesión se cierre. */
-function diaCorteChat(f){try{var d=new Date(f+"T12:00:00");if(isNaN(d))return f;return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"short"}).replace(" de "," ");}catch(e){return f;}}
-function textoCorteChat(c){
- var dia=diaCorteChat(c.fecha);
- var quien=nombreRemitenteChat();
- if((c.tipo||"dinero")==="productos"){
-  return "📦 Corte de productos — "+dia+": Total "+dinero(c.ventasTotal||0)+", "+redondearCant(c.totalPiezas||0)+" piezas, Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
- }
- return "📋 Corte del día — "+dia+": Total "+dinero(c.ventasTotal||0)+", Efectivo "+dinero(c.efectivo||0)+", Tarjeta "+dinero(c.tarjeta||0)+", Diferencia "+dinero(c.diferencia||0)+", Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
-}
-function enviarMensajeCorteChat(c){
- if(!c)return;
- var texto=textoCorteChat(c);
- if(texto.length>500)texto=texto.slice(0,500);
- encolarMensajeChat(texto,"Sistema","Sistema");
- reenviarMensajesPendientes();
-}
+/* v140 (Lalo 2026-11-23): el mensaje automático del corte se quitó; el chat
+   vuelve a ser solo mensajes normales, como al comienzo. La base de datos
+   solo acepta remitente_rol Administrador o Cajero y el mensaje del sistema
+   usaba rol "Sistema", así que fallaba siempre. Se quitaron diaCorteChat,
+   textoCorteChat y enviarMensajeCorteChat y sus llamadas en los cortes. */
 var __kupoReenviando=false;
 async function reenviarMensajesPendientes(){
  if(__kupoReenviando)return;__kupoReenviando=true;
  try{
+ purgarMensajesSistemaPendientes();
  var q=leerMensajesPendientes();if(!q.length)return;
  asegurarSupabase();
  if(!kupoSupabase){marcarFalloChat();toast("💬 No se pudo cargar la librería de la nube, revisa el internet y toca el mensaje para reintentar.");return;}
