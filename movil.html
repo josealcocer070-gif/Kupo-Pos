@@ -4877,7 +4877,7 @@ let kupoSupabase=null;
 /* v131 (Lalo 2026-11-23): el cliente de la nube se repara solo. Antes se creaba una sola vez al cargar la página: si el CDN no cargaba en ese momento (tablet sin internet al abrir, wifi flojo), kupoSupabase quedaba en null para toda la sesión y TODO lo de la nube fallaba en silencio — los mensajes se quedaban en "enviando…" para siempre. Ahora asegurarSupabase() lo (re)crea cuando hace falta y, si la librería ni siquiera cargó, la vuelve a pedir al CDN. */
 function asegurarSupabase(){
  if(kupoSupabase)return kupoSupabase;
- try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}}catch(e){kupoSupabase=null;}
+ try{if(window.supabase&&window.supabase.createClient){kupoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{global:{fetch:function(url,opts){opts=opts||{};opts.cache="no-store";return fetch(url,opts);}}});}}catch(e){kupoSupabase=null;}
  if(!kupoSupabase&&typeof document!=="undefined"&&!window.__kupoSbCargando){
   window.__kupoSbCargando=true;
   var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
