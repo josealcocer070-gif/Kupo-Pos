@@ -5333,6 +5333,11 @@ if ('serviceWorker' in navigator) {
 <div id="kupiMensajes"></div>
 <div class="kupi-chips"><button type="button" onclick="kupiChip('¿Cuánto vendí hoy?')">¿Cuánto vendí hoy?</button><button type="button" onclick="kupiChip('¿Qué se está acabando?')">¿Qué se está acabando?</button><button type="button" onclick="kupiChip('¿Cómo viene la semana?')">¿Cómo viene la semana?</button></div>
 <div class="kupi-entrada"><input id="kupiEntrada" type="text" placeholder="Escribe tu pregunta..." autocomplete="off" onkeydown="if(event.key==='Enter')kupiEnviar()"><button type="button" onclick="kupiEnviar()" aria-label="Enviar">➤</button></div>
+</div>
+<!-- v142 (Lalo 2026-11-23): el panel de Mensajes estaba DENTRO del panel de Kupi, que está oculto
+     (display:none) cuando Kupi no está abierto, así que la ventana nunca se veía aunque se le
+     quitara la clase "oculto". Se cierra aquí el panel de Kupi y Mensajes queda como hermano,
+     fuera de él, para que sí se vea al abrirlo. -->
 <div id="panelMensajesFlotante" class="oculto">
 <div class="kupi-encabezado"><div><b>💬 Mensajes</b><span>● Chat del equipo</span></div><button type="button" onclick="toggleMensajesFlotante()" aria-label="Cerrar los mensajes">✕</button></div>
 <p class="chat-apagado oculto" id="chatApagadoFlotante">⛔ El chat interno está apagado para los cajeros. Préndelo en la vista de Mensajes.</p>
