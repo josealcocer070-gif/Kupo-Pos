@@ -331,28 +331,34 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 .inicio-tarjeta{background:#fff;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:480px;width:100%;padding:28px 24px;text-align:center}
 
 /* v151: inicio de sesión con perfiles: logos a la izquierda, tarjetas cuadradas a la derecha */
-.inicio-tarjeta-login{max-width:700px}
+/* v152: la tarjeta aprovecha la pantalla (700→1150 px, todo más grande) */
+.inicio-tarjeta-login{max-width:1150px}
+.inicio-tarjeta-login h2{font-size:26px}
+.inicio-tarjeta-login .inicio-negocio b{font-size:26px}
+.inicio-tarjeta-login .inicio-negocio span{font-size:14px}
 .login-dos-columnas{display:flex;gap:18px;align-items:stretch;margin-top:6px}
-.login-logos{flex:0 0 220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border-right:1px solid #e3e8ec;padding-right:18px}
-.login-logo-kupo{width:100%;max-width:200px;display:block}
+.login-logos{flex:0 0 300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;border-right:1px solid #e3e8ec;padding-right:24px}
+.login-logo-kupo{width:100%;max-width:280px;display:block}
 .login-logos-abajo{display:flex;gap:16px;align-items:center;justify-content:center}
-.login-logo-gb{width:64px;display:block}
-.login-logo-wa{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:#25d366;box-shadow:0 3px 10px rgba(37,211,102,.5);flex:0 0 auto}
-.login-logo-wa svg{width:28px;height:28px}
+.login-logo-gb{width:96px;display:block}
+.login-logo-wa{display:inline-flex;align-items:center;justify-content:center;width:76px;height:76px;border-radius:50%;background:#25d366;box-shadow:0 3px 10px rgba(37,211,102,.5);flex:0 0 auto}
+.login-logo-wa svg{width:40px;height:40px}
 .login-perfiles{flex:1;min-width:0}
-.perfiles-titulo{text-align:center;color:#555;font-size:14px;margin:0 0 10px}
-#listaPerfiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.perfiles-titulo{text-align:center;color:#555;font-size:18px;margin:0 0 14px}
+#listaPerfiles{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .login-otro-usuario{width:100%;margin-top:10px}
-.perfil-tarjeta{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#f4f8fa;border:1px solid #d7e0e6;border-radius:14px;padding:10px 6px;cursor:pointer}
-.perfil-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(180deg,#8ec9ff,#2b7cd3);color:#fff;font-weight:800;font-size:19px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.perfil-tarjeta{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#f4f8fa;border:1px solid #d7e0e6;border-radius:14px;padding:14px 8px;cursor:pointer}
+.perfil-avatar{width:84px;height:84px;border-radius:50%;background:linear-gradient(180deg,#8ec9ff,#2b7cd3);color:#fff;font-weight:800;font-size:30px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .perfil-avatar.admin{background:linear-gradient(180deg,#ffe082,#f5b800);color:#5d4037}
 .perfil-datos{display:flex;flex-direction:column;align-items:center;min-width:0}
-.perfil-datos b{font-size:14px;color:#12303f;text-align:center;line-height:1.25}
-.perfil-datos span{font-size:12px;color:#666}
-.perfil-quitar{position:absolute;top:2px;right:6px;color:#999;font-size:20px;line-height:1;padding:2px 6px;background:none;border:0;cursor:pointer}
-.perfil-elegido{display:flex;align-items:center;gap:12px;background:#eef6fb;border:1px solid #bcd8e8;border-radius:14px;padding:10px 12px;margin-bottom:12px;text-align:left}
+.perfil-datos b{font-size:20px;color:#12303f;text-align:center;line-height:1.25}
+.perfil-datos span{font-size:16px;color:#666}
+.perfil-quitar{position:absolute;top:4px;right:8px;color:#999;font-size:26px;line-height:1;padding:2px 6px;background:none;border:0;cursor:pointer}
+.perfil-elegido{display:flex;align-items:center;gap:16px;background:#eef6fb;border:1px solid #bcd8e8;border-radius:14px;padding:14px 16px;margin-bottom:12px;text-align:left}
 .perfil-elegido .perfil-datos{flex:1;align-items:flex-start}
 .perfil-elegido .perfil-datos b{text-align:left}
+/* v152: el botón Cambiar NO hereda el ancho 100% de .inicio .secundario (tapaba el nombre) */
+.inicio .perfil-elegido .secundario{width:auto;flex:0 0 auto;margin-top:0;white-space:nowrap}
 html[data-tema="noche"] .login-logo-kupo{background:#fff;border-radius:12px;padding:6px}
 @media(max-width:760px){.login-dos-columnas{flex-direction:column}.login-logos{flex:none;border-right:0;border-bottom:1px solid #e3e8ec;padding-right:0;padding-bottom:14px}.login-logo-kupo{max-width:220px}}@keyframes kupoCarga{0%{opacity:0;transform:scale(.85) rotate(-4deg)}55%{opacity:1;transform:scale(1.06) rotate(2deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}.inicio .inicio-logo{animation:kupoCarga 1s ease both}
 .inicio-logo{width:100%;max-width:340px;margin:14px auto 4px;display:block}
@@ -1475,6 +1481,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
   <div id="vistaLoginManual" class="oculto">
    <label for="usuarioLogin">Usuario</label>
    <input id="usuarioLogin" type="text" value="Administrador" autocomplete="off">
+   <!-- v152: botón Volver a los perfiles (faltaba: del login manual no se podía regresar) -->
+   <button type="button" class="secundario login-otro-usuario oculto" id="btnVolverPerfiles" onclick="cambiarPerfilLogin()">← Volver a los perfiles</button>
   </div>
   <!-- v151: PIN (compartido por el perfil elegido y el login manual) -->
   <div id="zonaPinLogin" class="oculto">
@@ -5663,7 +5671,7 @@ function renderPerfilesLogin(){
  var box=document.getElementById("listaPerfiles");if(!box)return;
  var p=leerPerfilesLogin().filter(function(x){return cajeros.some(function(c){return String(c.usuario).toLowerCase()===String(x.usuario).toLowerCase()&&c.estado==="Activo";});});
  var vista=document.getElementById("vistaPerfilesLogin"),manual=document.getElementById("vistaLoginManual"),pin=document.getElementById("vistaPinPerfil"),zona=document.getElementById("zonaPinLogin");
- if(!p.length){if(vista)vista.classList.add("oculto");if(manual)manual.classList.remove("oculto");if(pin)pin.classList.add("oculto");if(zona)zona.classList.remove("oculto");box.innerHTML="";return;}
+ if(!p.length){if(vista)vista.classList.add("oculto");if(manual)manual.classList.remove("oculto");if(pin)pin.classList.add("oculto");if(zona)zona.classList.remove("oculto");var vb2=document.getElementById("btnVolverPerfiles");if(vb2)vb2.classList.add("oculto");/* v152: sin perfiles no hay a dónde volver */box.innerHTML="";return;}
  if(vista)vista.classList.remove("oculto");if(manual)manual.classList.add("oculto");if(pin)pin.classList.add("oculto");if(zona)zona.classList.add("oculto");
  box.innerHTML=p.map(function(x){
   var c=cajeros.find(function(y){return String(y.usuario).toLowerCase()===String(x.usuario).toLowerCase();});
@@ -5689,6 +5697,7 @@ function mostrarLoginManual(){
  var pin=document.getElementById("vistaPinPerfil");if(pin)pin.classList.add("oculto");
  var manual=document.getElementById("vistaLoginManual");if(manual)manual.classList.remove("oculto");
  var zona=document.getElementById("zonaPinLogin");if(zona)zona.classList.remove("oculto");
+ var vb=document.getElementById("btnVolverPerfiles");if(vb)vb.classList.remove("oculto");/* v152: del manual sí se puede volver */
  limpiarPin();var m=document.getElementById("msgLogin");if(m)m.textContent="";
 }
 function quitarPerfilLogin(usuario){
