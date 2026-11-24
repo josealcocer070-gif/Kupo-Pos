@@ -4674,6 +4674,7 @@ function realizarCorteDinero(){
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
+ enviarMensajeCorteChat(c);
  revisarCierreAutomatico();
 }
 function realizarCorte(){realizarCorteDinero();}
@@ -4687,6 +4688,7 @@ function realizarCorteProductos(){
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
+ enviarMensajeCorteChat(c);
  revisarCierreAutomatico();
 }
 function ic3d(e,c){return "<span class='icono-3d-mini "+(c||"f-gris")+"'>"+e+"</span>";}
@@ -5362,15 +5364,46 @@ async function cargarMensajes(){
   renderMensajes();
  }catch(e){renderMensajes();}
 }
+function encolarMensajeChat(texto,remitente,remitente_rol){
+ var msg={idLocal:"local-"+Date.now()+"-"+Math.floor(Math.random()*1000),licencia_clave:licenciaActual(),remitente:remitente,remitente_rol:remitente_rol,texto:texto,creado_en:new Date().toISOString(),pendiente:true};
+ var q=leerMensajesPendientes();q.push(msg);guardarMensajesPendientes(q);
+ mensajesChat.push(msg);renderMensajes();
+ return msg;
+}
 async function enviarMensajeChat(){
  var inp=document.getElementById("chatTexto");if(!inp)return;
  var texto=inp.value.trim();if(!texto)return;
  if(!chatActivo()){toast("💬 El chat interno está apagado. Solo el Administrador puede prenderlo.");return;}
  if(texto.length>500)texto=texto.slice(0,500);
- var msg={idLocal:"local-"+Date.now()+"-"+Math.floor(Math.random()*1000),licencia_clave:licenciaActual(),remitente:nombreRemitenteChat(),remitente_rol:rolRemitenteChat(),texto:texto,creado_en:new Date().toISOString(),pendiente:true};
- var q=leerMensajesPendientes();q.push(msg);guardarMensajesPendientes(q);
- mensajesChat.push(msg);inp.value="";renderMensajes();
+ encolarMensajeChat(texto,nombreRemitenteChat(),rolRemitenteChat());
+ inp.value="";
  await reenviarMensajesPendientes();
+}
+/* v137 (Lalo 2026-11-23): mensaje automático del corte en el chat interno,
+   en texto plano (primera prueba, sin tarjetas de colores ni formato
+   especial). Al guardar un corte (dinero o productos) el sistema publica
+   solo este resumen como un mensaje normal del chat, con remitente
+   "Sistema", usando la misma cola y el mismo reenvío del envío normal
+   (encolarMensajeChat + reenviarMensajesPendientes), para que se encole y
+   se reintente igual si no hay internet. Se envía ANTES del cierre
+   automático (v136): en realizarCorteDinero/Productos va después de
+   imprimir y antes de revisarCierreAutomatico, así el mensaje ya está en
+   la cola local aunque la sesión se cierre. */
+function diaCorteChat(f){try{var d=new Date(f+"T12:00:00");if(isNaN(d))return f;return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"short"}).replace(" de "," ");}catch(e){return f;}}
+function textoCorteChat(c){
+ var dia=diaCorteChat(c.fecha);
+ var quien=nombreRemitenteChat();
+ if((c.tipo||"dinero")==="productos"){
+  return "📦 Corte de productos — "+dia+": Total "+dinero(c.ventasTotal||0)+", "+redondearCant(c.totalPiezas||0)+" piezas, Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
+ }
+ return "📋 Corte del día — "+dia+": Total "+dinero(c.ventasTotal||0)+", Efectivo "+dinero(c.efectivo||0)+", Tarjeta "+dinero(c.tarjeta||0)+", Diferencia "+dinero(c.diferencia||0)+", Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
+}
+function enviarMensajeCorteChat(c){
+ if(!c)return;
+ var texto=textoCorteChat(c);
+ if(texto.length>500)texto=texto.slice(0,500);
+ encolarMensajeChat(texto,"Sistema","Sistema");
+ reenviarMensajesPendientes();
 }
 var __kupoReenviando=false;
 async function reenviarMensajesPendientes(){
