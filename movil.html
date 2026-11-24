@@ -3580,7 +3580,8 @@ function probarImpresionBT(){return;/* v117: sin impresión física en el celula
 }
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones","kiosco"],Cajero:["ventas","cotizaciones","mensajes"]};
+/* v188 (Lalo 2026-11-24): cada responsable en caja saca su corte — Corte es permiso por defecto del Cajero (antes solo lo tenía quien lo prendiera a mano en Cajeros y permisos; María ya lo tenía así: cortes/gastos/productos). El Administrador puede quitarlo a un cajero en concreto desde ahí. */
+const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones","kiosco"],Cajero:["ventas","cotizaciones","mensajes","cortes"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
 let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
