@@ -56,7 +56,8 @@ header .user span{display:block;font-size:12px;color:#bcd7e6}
 .chat-toggle{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#0b2a5e}
 .chat-nota{color:#555;margin:6px 0 14px}
 /* v131 (Lalo 2026-11-23): chat más bonito — burbujas con sombra y brillo 3D, avatar con inicial y color por persona, barra de escribir en pastilla y botón de enviar dorado 3D. */
-.chat-lista{display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow-y:auto;padding:14px 10px;background:linear-gradient(180deg,#eef3f6,#e3ebf0);border-radius:18px}
+.chat-lista{display:flex;flex-direction:column;gap:10px;max-height:50vh;max-height:calc(100dvh - 430px);overflow-y:auto;padding:14px 10px;background:linear-gradient(180deg,#eef3f6,#e3ebf0);border-radius:18px}/* v163: la lista cabe en la pantalla visible; con el teclado abierto se achica sola */
+body.vista-mensajes main{padding-bottom:20px!important}/* v163: en Mensajes no hay barra de venta, no hace falta el hueco de abajo */
 .chat-dia{align-self:center;background:#dbe4ea;color:#5a6b7a;font-size:11px;font-weight:700;padding:4px 12px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .chat-msg{max-width:78%;padding:10px 12px;border-radius:18px;font-size:14px;line-height:1.35;word-break:break-word;box-shadow:0 2px 6px rgba(0,0,0,.14)}
 .chat-msg .quien{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;margin-bottom:4px}
@@ -3901,6 +3902,7 @@ function mostrarVista(v){
  if(v==="cajeros"&&typeof descargarCajerosNube==="function")descargarCajerosNube();
  document.body.classList.toggle("movil-ventas",v==="ventas");
  document.body.classList.toggle("vista-ventas",v==="ventas");
+ document.body.classList.toggle("vista-mensajes",v==="mensajes");/* v163: en Mensajes la página no necesita el hueco de la barra de venta */
  document.body.classList.remove("venta-movil-abierta");
  document.body.classList.remove("catalogo-abierto");var _fc=document.getElementById("fondoCatalogo");if(_fc)_fc.classList.remove("visible");
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.classList.toggle("activo",b.getAttribute("data-nav")===v||(v==="historial"&&b.getAttribute("data-nav")==="cortes"));});
@@ -3941,7 +3943,7 @@ function mostrarVista(v){
  document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");/* Apartados 2026-11-13: el menu lateral se cierra siempre al cambiar de apartado, tambien en modo escritorio del celular/tablet, para que no tape el apartado activo. */
  if(v==="productos")renderProductos(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
- window.scrollTo({top:0,behavior:"smooth"});
+ window.scrollTo(0,0);/* v163: al cambiar de apartado el salto es instantáneo (el suave se podía quedar a medias y dejaba el título de Mensajes escondido tras el encabezado) */
 }
 function toggleVentaMovil(){document.body.classList.toggle("venta-movil-abierta");}
 function actualizarBarraMovil(){var t=document.getElementById("total");var b=document.getElementById("barraTotal");if(t&&b)b.textContent=t.textContent;var a=document.getElementById("nArticulos");var ba=document.getElementById("barraArticulos");if(a&&ba)ba.textContent=a.textContent;}
@@ -5564,6 +5566,7 @@ function abrirMensajes(){
  marcarMensajesLeidos();
  if(mensajesChatTimer)clearInterval(mensajesChatTimer);
  mensajesChatTimer=setInterval(function(){if(vistaActual==="mensajes")cargarMensajes();},20000);
+ window.scrollTo(0,0);/* v163: al abrir Mensajes la página vuelve arriba al instante */
 }
 function cambiarChatActivo(on){
  if(!esAdminChat()){renderMensajes();return;}
