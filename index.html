@@ -5401,13 +5401,27 @@ function togglePanelKiosco(){
  var _pmf=document.getElementById("panelMensajesFlotante");if(_pmf)_pmf.classList.add("oculto");
  if(abrir){p.classList.remove("oculto");try{revisarPedidosKiosco();}catch(e){}}else{p.classList.add("oculto");}
 }
+/* v174: nombre base del kiosco (igual que baseNombre en kiosco.html): quita el
+   sufijo de variante " Llevar"/" Local"/" P/Llevar" para comparar productos. */
+function nombreBaseKiosco(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
 function cobrarPedidoKiosco(id){
  var p=pedidosKiosco.find(function(x){return x.id===id});
  if(!p){toast("Ese pedido ya no está en la lista.");return;}
  if(ticket.length){toast("Ya hay una venta en curso. Termínala o vacíala antes de cobrar el pedido del kiosco.");return;}
  var faltan=[];
  (p.items||[]).forEach(function(it){
-  var prod=(typeof catalogo!=="undefined"?catalogo:[]).find(function(x){return x.id===it.id});
+  var lista=(typeof catalogo!=="undefined"?catalogo:[]);
+  var prod=lista.find(function(x){return x.id===it.id});
+  if(!prod){
+   /* v174: el kiosco guarda el nombre base ("Pollo R. 1/2") y el id UUID de la
+      variante; el catálogo local usa ids numéricos y nombres de variante
+      ("Pollo R. 1/2 Llevar"). Por eso el Cobrar nunca encontraba nada y decía
+      que los productos ya no estaban. Se busca por nombre base + precio (el
+      precio distingue Llevar de Local) y, si no, por nombre base. */
+   var base=nombreBaseKiosco(it.nombre||"");
+   var cands=lista.filter(function(x){return nombreBaseKiosco(x.nombre||"")===base;});
+   prod=cands.find(function(x){return Number(x.precio)===Number(it.precio);})||cands[0];
+  }
   if(!prod){faltan.push(it.nombre||"Producto");return;}
   ticket.push({id:prod.id,cant:it.cant||1,precio:it.precio||prod.precio});
  });
