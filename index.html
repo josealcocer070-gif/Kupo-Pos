@@ -962,6 +962,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
   <p class="inicio-sub">Un producto de Grupo Benítez</p>
   <div class="inicio-negocio"><b id="inicioNegocio2">Mi negocio</b><span>SUCURSAL PRINCIPAL · V1.7.0</span></div>
   <h2 style="text-align:center">Iniciar sesión</h2>
+  <div id="avisoDiaCerrado" class="oculto" style="background:#fff8e1;border:1px solid #f5b800;border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:center;font-size:14px;line-height:1.5"></div>
   <label for="usuarioLogin">Usuario</label>
   <input id="usuarioLogin" type="text" value="Administrador" autocomplete="off">
   <label for="pinLogin">PIN de 6 dígitos</label>
@@ -1011,6 +1012,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-tema" id="btnMenuAcciones" onclick="toggleMenuAcciones(event)" aria-label="Acciones rápidas" title="Acciones rápidas">☰</button>
+<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="mostrarVista('mensajes')" aria-label="Mensajes" title="Mensajes">💬 <span class="sync-texto">Mensajes</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
 <button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar">🔄</button>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️ <span class="sync-texto">Sincronizar</span><span class="badge-sync" id="badgeSync">0</span></button>
@@ -1288,6 +1290,11 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <p style="font-size:15px">Total en caja hoy: <b id="resCorCaja">$0.00</b></p>
 <button type="button" onclick="realizarCorteDinero()">💾 Realizar corte de dinero</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
+<div id="secCierreAuto" style="margin-top:14px;border-top:1px solid #e3e8ec;padding-top:12px">
+<label for="cortesParaCerrarDia">🔒 Cortes para cerrar el día</label>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes al día</span></div>
+<p style="font-size:12px;color:#666">Al guardar este número de cortes en el día, el sistema cierra la sesión solo y queda en inicio de sesión para el día siguiente. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
+</div>
 </div>
 <div class="form-prod" id="secCorteProductos" style="margin-top:16px">
 <h2>📦 Corte de productos</h2>
@@ -2255,7 +2262,7 @@ function cambiarOpcionSistema(clave,valor){
 function cargarDatosLicencia(){
  const licRec=function(){try{const l=JSON.parse(localStorage.getItem("kupoLicenciasCompartidas")||"[]");return l.find(x=>x.clave===licenciaActual())||null}catch(e){return null}}();
  const negDef=(licRec&&licRec.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
- ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true});
+ ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true,cortesParaCerrar:2});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
  opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false});
@@ -2267,7 +2274,7 @@ function cargarDatosLicencia(){
  const boxEl=document.getElementById("negocioBox"); if(boxEl)boxEl.textContent=nb.toUpperCase();
  aplicarOpcionesSistema();
 }
-let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true});
+let ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:(localStorage.getItem("kupoPosV146Negocio")||"Mi negocio"),direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",papel:"80 mm",abrirCajon:true,cortesParaCerrar:2});
 let terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
 function escHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function cargarTicketConfig(){
@@ -2316,7 +2323,7 @@ function renderTicketPreview(){
 }
 function guardarTicketConfig(ev){
  if(ev)ev.preventDefault();
- ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",colorSistema:ticketConfig.colorSistema||"#0b4a6e",papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
+ ticketConfig={negocio:((document.getElementById("tNegocio").value||"").trim()||ticketConfig.negocio||"Mi negocio"),direccion:document.getElementById("tDireccion").value.trim(),telefono:document.getElementById("tTelefono").value.trim(),mensaje:document.getElementById("tMensaje").value.trim(),mostrarLogo:document.getElementById("tMostrarLogo").checked,mostrarIva:document.getElementById("tMostrarIva").checked,mostrarFolio:document.getElementById("tMostrarFolio").checked,impresionSilenciosa:((document.getElementById("tImpSilenciosa")||{}).checked===true),logo:ticketConfig.logo||"",logoEncabezado:ticketConfig.logoEncabezado||"",colorSistema:ticketConfig.colorSistema||"#0b4a6e",cortesParaCerrar:ticketConfig.cortesParaCerrar||2,papel:document.getElementById("tPapel").value||"80 mm",abrirCajon:ticketConfig.abrirCajon!==false};
  localStorage.setItem("kupoPosV146Negocio",ticketConfig.negocio);
  const nn=document.getElementById("nombreNegocio"); if(nn)nn.textContent=ticketConfig.negocio;
  guardar(); cargarTicketConfig(); prepararLogoTicket();
@@ -2324,7 +2331,7 @@ function guardarTicketConfig(ev){
 }
 function restablecerTicketConfig(ya){
  if(!ya){pedirConfirmacion("¿Restablecer los datos del ticket a los valores de ejemplo?","Restablecer",function(){restablecerTicketConfig(true)});return;}
- ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",logoEncabezado:"",colorSistema:"#0b4a6e",papel:"80 mm",abrirCajon:true};
+ ticketConfig={negocio:"Mi negocio",direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,impresionSilenciosa:false,logo:"",logoEncabezado:"",colorSistema:"#0b4a6e",cortesParaCerrar:2,papel:"80 mm",abrirCajon:true};
  guardar(); cargarTicketConfig(); toast("Ticket restablecido a los valores de ejemplo.");
 }
 
@@ -3004,6 +3011,7 @@ function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
  mostrar("navProductos",tienePermiso("productos"));mostrar("navImportar",tienePermiso("importar"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);mostrar("navMensajes",verMensajesChat());
+ mostrar("btnMensajesHeader",verMensajesChat());
  mostrar("btnMensajesVentas",verMensajesChat()&&esAdmin);mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);
  document.querySelectorAll("#menuMovil button[data-nav]").forEach(function(b){b.style.display=tienePermiso(b.getAttribute("data-nav"))?"":"none"});
  document.querySelectorAll('#menuMovil button[data-nav="mensajes"]').forEach(function(b){b.style.display=verMensajesChat()?"":"none";});
@@ -3600,8 +3608,34 @@ function limpiarGasto(){
  const f=document.querySelector("#vistaGastos form"); if(f)f.reset();
  const gf=document.getElementById("gFecha"); if(gf)gf.value=hoyLocal();
 }
+/* v138 (Lalo 2026-11-23): un gasto solo se puede eliminar HASTA que se haga
+   el corte de dinero; después del corte queda bloqueado para el cajero (solo
+   el Administrador puede eliminarlo), para que el corte salga todo bien
+   desglosado. Se compara con los cortes de dinero: bloqueado si hay un corte
+   de dinero de fecha posterior al gasto, o del mismo día creado después que
+   el gasto (el id es la marca de tiempo de creación). */
+function gastoBloqueadoPorCorte(g){
+ if(!g)return false;
+ var idG=Number(g.id);
+ return cortes.some(function(c){
+  if((c.tipo||"dinero")!=="dinero")return false;
+  if((c.fecha||"")>(g.fecha||""))return true;
+  if(c.fecha===g.fecha){
+   var idC=Number(c.id);
+   if(!isNaN(idG)&&!isNaN(idC))return idC>idG;
+   return true;
+  }
+  return false;
+ });
+}
+function puedeEliminarGasto(g){
+ if(!g)return false;
+ if((sesionActual&&sesionActual.rol)==="Administrador")return true;
+ return !gastoBloqueadoPorCorte(g);
+}
 function eliminarGasto(id,ya){
  const g=gastos.find(x=>x.id===id); if(!g)return;
+ if(!puedeEliminarGasto(g)){toast("🔒 Este gasto ya está en un corte. Solo el Administrador puede eliminarlo.");return;}
  if(!ya){pedirConfirmacion("¿Eliminar el gasto \""+g.concepto+"\" de "+dinero(g.monto)+"?","Eliminar",function(){eliminarGasto(id,true)});return;}
  gastos=gastos.filter(x=>x.id!==id);
  guardar(); renderGastos();
@@ -3623,7 +3657,7 @@ function renderGastos(){
  const lista=document.getElementById("listaGastos"); if(!lista)return;
  const items=gastos.filter(g=>(g.concepto+" "+(g.nota||"")).toLowerCase().includes(q)).filter(g=>fc==="todos"||g.categoria===fc).filter(g=>!ff||g.fecha===ff);
  if(!items.length){lista.innerHTML='<tr><td colspan="5" style="text-align:center;color:#555">💲<br><b>Aún no hay gastos</b><br>Registra tu primer gasto arriba.</td></tr>';return}
- lista.innerHTML=items.map(g=>`<tr><td>${fechaBonita(g.fecha)}${g.nota?`<br><span style="color:#666;font-size:12px">${g.nota}</span>`:""}</td><td>${g.concepto}</td><td>${g.categoria}</td><td class="num"><b>${dinero(g.monto)}</b></td><td><button onclick="eliminarGasto(${g.id})">Eliminar</button></td></tr>`).join("");
+ lista.innerHTML=items.map(g=>`<tr><td>${fechaBonita(g.fecha)}${g.nota?`<br><span style="color:#666;font-size:12px">${g.nota}</span>`:""}</td><td>${g.concepto}</td><td>${g.categoria}</td><td class="num"><b>${dinero(g.monto)}</b></td><td>${puedeEliminarGasto(g)?'<button onclick="eliminarGasto('+g.id+')">Eliminar</button>':'<span style="color:#999;font-size:12px">🔒 En corte</span>'}</td></tr>`).join("");
 }
 function estadoDe(p){if(opcionesSistema.sinStock===true)return p.pausado?"pausado":"disponible";if(p.stock<=0)return "agotado";if(p.pausado)return "pausado";return "disponible"}
 
@@ -4187,6 +4221,9 @@ function renderCortes(){
  document.getElementById("resEfectivoEsperado").value=dinero(r.efectivoEsperado);
  actualizarCuadre();
  renderCorteProductos();
+ var esAdminCierre=(sesionActual&&sesionActual.rol)==="Administrador";
+ var secCA=document.getElementById("secCierreAuto");if(secCA)secCA.style.display=esAdminCierre?"":"none";
+ var inpCA=document.getElementById("cortesParaCerrarDia");if(inpCA)inpCA.value=cortesParaCerrar();
 }
 function renderHistorial(){
  const q=((document.getElementById("buscarHist")||{}).value||"").toLowerCase();
@@ -4204,6 +4241,22 @@ function renderHistorial(){
  if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">🕐<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">📊 Ir a Corte diario</button></div></td></tr>';return}
  lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?"📦 Productos":"💰 Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">👁 Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">🖨 Reimprimir</button></div></td></tr>'}).join("");
 }
+/* v136 (Lalo 2026-11-23): cierre automático del día — al guardar el corte
+   número N del día (N configurable en Corte diario, por defecto 2), el
+   sistema cierra la sesión solo y queda en inicio de sesión para el día
+   siguiente. Nada se borra. El Administrador puede reabrir con su PIN en
+   cualquier momento: el bloqueo solo se dispara al guardar el corte N,
+   no al iniciar sesión. Se cuentan todos los cortes del día (dinero y
+   productos), como dice el aviso de Corte: "se hacen 2 cortes: uno de
+   dinero y uno de productos". */
+var cierreAutoPendiente=false;
+function cortesParaCerrar(){var n=parseInt(ticketConfig&&ticketConfig.cortesParaCerrar,10);return (isNaN(n)||n<1)?2:n;}
+function cortesHoy(){var h=hoyLocal();return cortes.filter(function(c){return c.fecha===h;}).length;}
+function mostrarAvisoDiaCerrado(n){var b=document.getElementById("avisoDiaCerrado");if(!b)return;b.innerHTML=ic3d("🔒","f-oro")+" <b>Día cerrado</b><br>Se hicieron los "+n+" cortes de hoy. Inicia sesión para el día siguiente.";b.classList.remove("oculto");}
+function ocultarAvisoDiaCerrado(){var b=document.getElementById("avisoDiaCerrado");if(b)b.classList.add("oculto");}
+function guardarCortesParaCerrar(){if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia este ajuste.");var inp0=document.getElementById("cortesParaCerrarDia");if(inp0)inp0.value=cortesParaCerrar();return;}var inp=document.getElementById("cortesParaCerrarDia");var n=parseInt(inp&&inp.value,10);if(isNaN(n)||n<1)n=2;if(n>10)n=10;ticketConfig.cortesParaCerrar=n;if(inp)inp.value=n;guardar();toast("Cierre automático tras "+n+(n===1?" corte":" cortes")+" al día.");}
+function cerrarDiaAutomatico(){cierreAutoPendiente=true;salirSesion();}
+function revisarCierreAutomatico(){if(cortesHoy()>=cortesParaCerrar())cerrarDiaAutomatico();}
 function realizarCorteDinero(){
  const r=resumenCorte();
  if(!r.ventasNum&&r.gastosHoy===0&&r.piezasEntradas===0){toast("Aún no hay movimientos hoy para cortar.");return}
@@ -4215,6 +4268,8 @@ function realizarCorteDinero(){
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
+ enviarMensajeCorteChat(c);
+ revisarCierreAutomatico();
 }
 function realizarCorte(){realizarCorteDinero();}
 function realizarCorteProductos(){
@@ -4227,6 +4282,8 @@ function realizarCorteProductos(){
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
+ enviarMensajeCorteChat(c);
+ revisarCierreAutomatico();
 }
 function ic3d(e,c){return "<span class='icono-3d-mini "+(c||"f-gris")+"'>"+e+"</span>";}
 var detalleCorteId=null;
@@ -4828,7 +4885,7 @@ function reintentarMensajeChat(idLocal){
 function actualizarBadgeMensajes(){
  var leido=ultimoLeidoChat(),yo=nombreRemitenteChat(),n=0;
  mensajesChat.forEach(function(m){if(!m.pendiente&&m.remitente!==yo&&m.creado_en&&new Date(m.creado_en).getTime()>leido)n++;});
- ["badgeMsgMenu","badgeMsgBar","badgeMsgVentas","badgeMsgVentasMovil"].forEach(function(id){var b=document.getElementById(id);if(!b)return;b.textContent=n;b.classList.toggle("con-nuevos",n>0);});
+ ["badgeMsgMenu","badgeMsgBar","badgeMsgVentas","badgeMsgVentasMovil","badgeMsgHeader"].forEach(function(id){var b=document.getElementById(id);if(!b)return;b.textContent=n;b.classList.toggle("con-nuevos",n>0);});
 }
 /* v132: botón "Probar conexión" — dice en claro si la nube responde, para no adivinar por qué no sale un mensaje. */
 async function probarConexionChat(){
@@ -4901,15 +4958,46 @@ async function cargarMensajes(){
   renderMensajes();
  }catch(e){renderMensajes();}
 }
+function encolarMensajeChat(texto,remitente,remitente_rol){
+ var msg={idLocal:"local-"+Date.now()+"-"+Math.floor(Math.random()*1000),licencia_clave:licenciaActual(),remitente:remitente,remitente_rol:remitente_rol,texto:texto,creado_en:new Date().toISOString(),pendiente:true};
+ var q=leerMensajesPendientes();q.push(msg);guardarMensajesPendientes(q);
+ mensajesChat.push(msg);renderMensajes();
+ return msg;
+}
 async function enviarMensajeChat(){
  var inp=document.getElementById("chatTexto");if(!inp)return;
  var texto=inp.value.trim();if(!texto)return;
  if(!chatActivo()){toast("💬 El chat interno está apagado. Solo el Administrador puede prenderlo.");return;}
  if(texto.length>500)texto=texto.slice(0,500);
- var msg={idLocal:"local-"+Date.now()+"-"+Math.floor(Math.random()*1000),licencia_clave:licenciaActual(),remitente:nombreRemitenteChat(),remitente_rol:rolRemitenteChat(),texto:texto,creado_en:new Date().toISOString(),pendiente:true};
- var q=leerMensajesPendientes();q.push(msg);guardarMensajesPendientes(q);
- mensajesChat.push(msg);inp.value="";renderMensajes();
+ encolarMensajeChat(texto,nombreRemitenteChat(),rolRemitenteChat());
+ inp.value="";
  await reenviarMensajesPendientes();
+}
+/* v137 (Lalo 2026-11-23): mensaje automático del corte en el chat interno,
+   en texto plano (primera prueba, sin tarjetas de colores ni formato
+   especial). Al guardar un corte (dinero o productos) el sistema publica
+   solo este resumen como un mensaje normal del chat, con remitente
+   "Sistema", usando la misma cola y el mismo reenvío del envío normal
+   (encolarMensajeChat + reenviarMensajesPendientes), para que se encole y
+   se reintente igual si no hay internet. Se envía ANTES del cierre
+   automático (v136): en realizarCorteDinero/Productos va después de
+   imprimir y antes de revisarCierreAutomatico, así el mensaje ya está en
+   la cola local aunque la sesión se cierre. */
+function diaCorteChat(f){try{var d=new Date(f+"T12:00:00");if(isNaN(d))return f;return d.toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"short"}).replace(" de "," ");}catch(e){return f;}}
+function textoCorteChat(c){
+ var dia=diaCorteChat(c.fecha);
+ var quien=nombreRemitenteChat();
+ if((c.tipo||"dinero")==="productos"){
+  return "📦 Corte de productos — "+dia+": Total "+dinero(c.ventasTotal||0)+", "+redondearCant(c.totalPiezas||0)+" piezas, Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
+ }
+ return "📋 Corte del día — "+dia+": Total "+dinero(c.ventasTotal||0)+", Efectivo "+dinero(c.efectivo||0)+", Tarjeta "+dinero(c.tarjeta||0)+", Diferencia "+dinero(c.diferencia||0)+", Hecho por "+quien+", "+(c.ventasNum||0)+" ventas";
+}
+function enviarMensajeCorteChat(c){
+ if(!c)return;
+ var texto=textoCorteChat(c);
+ if(texto.length>500)texto=texto.slice(0,500);
+ encolarMensajeChat(texto,"Sistema","Sistema");
+ reenviarMensajesPendientes();
 }
 var __kupoReenviando=false;
 async function reenviarMensajesPendientes(){
@@ -5116,7 +5204,7 @@ async function entrar(){
  var _pc=document.getElementById("pantallaCarga");if(_pc)_pc.style.display="flex";
  setTimeout(function(){var _p2=document.getElementById("pantallaCarga");if(_p2)_p2.style.display="none";document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);},1300);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();toast("Turno cerrado. Inicia sesión para volver a entrar.");}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();if(cierreAutoPendiente){cierreAutoPendiente=false;mostrarAvisoDiaCerrado(cortesHoy());toast("Día cerrado: ya se hicieron los cortes de hoy. Inicia sesión para el día siguiente.");}else{ocultarAvisoDiaCerrado();toast("Turno cerrado. Inicia sesión para volver a entrar.");}}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
