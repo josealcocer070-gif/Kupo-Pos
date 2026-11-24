@@ -2838,9 +2838,9 @@ function cargarDatoLicencia(base,defecto){
  }
  return defecto;
 }
-let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false});
-if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false};
-opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true};
+let opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"});
+if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"};
+opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true,colorSistema:(typeof opcionesSistema.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(opcionesSistema.colorSistema))?opcionesSistema.colorSistema:"#0b4a6e"};
 function guardarOpcionesSistema(){guardarPorLicencia("kupoPosV146Opciones",opcionesSistema);}
 /* Migración v82: el interruptor del chat vivía en localStorage kupoPosV146ChatActivo; ahora vive en opcionesSistema.chatInterno (por licencia). */
 try{var _chatViejo=localStorage.getItem("kupoPosV146ChatActivo");if(_chatViejo!==null){opcionesSistema.chatInterno=_chatViejo==="true";localStorage.removeItem("kupoPosV146ChatActivo");guardarOpcionesSistema();}}catch(e){}
@@ -2897,9 +2897,9 @@ function cargarDatosLicencia(){
  ticketConfig=cargarDatoLicencia("kupoPosV146TicketConfig",{negocio:negDef,direccion:"Palizada, Campeche",telefono:"951 943 3938",mensaje:"¡Gracias por su compra!",mostrarLogo:true,mostrarIva:true,mostrarFolio:true,logo:"",papel:"80 mm",abrirCajon:true,impresionSilenciosa:false,cortesParaCerrar:2});
  terminales=cargarDatoLicencia("kupoPosV146Terminales",[{id:1,nombre:"Impresora mostrador",marca:"Qian",modelo:"QTP-BTWF-01",conexion:"Bluetooth + USB",papel:"80 mm",estado:"Activa"},{id:2,nombre:"Impresora respaldo",marca:"Epson",modelo:"TM-T20III",conexion:"USB",papel:"80 mm",estado:"Activa"}]);
  cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
- opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false});
- if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false};
- opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true};
+ opcionesSistema=leerPorLicencia("kupoPosV146Opciones",{corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"});
+ if(!opcionesSistema||typeof opcionesSistema!=="object")opcionesSistema={corteProductos:false,multiAlmacen:false,chatInterno:true,descuentos:false,sinStock:false,colorSistema:"#0b4a6e"};
+ opcionesSistema={corteProductos:opcionesSistema.corteProductos===true,multiAlmacen:opcionesSistema.multiAlmacen===true,chatInterno:opcionesSistema.chatInterno!==false,descuentos:opcionesSistema.descuentos===true,sinStock:opcionesSistema.sinStock===true,colorSistema:(typeof opcionesSistema.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(opcionesSistema.colorSistema))?opcionesSistema.colorSistema:"#0b4a6e"};
  const nb=(ticketConfig&&ticketConfig.negocio)||negDef;
  localStorage.setItem("kupoPosV146Negocio",nb);
  const nbEl=document.getElementById("nombreNegocio"); if(nbEl)nbEl.textContent=nb;
@@ -3002,6 +3002,7 @@ function aplicarColorSistema(){
 function elegirColorSistema(hex){
  if(!hex)return;
  ticketConfig.colorSistema=hex; guardar(); aplicarColorSistema();
+ if(typeof opcionesSistema!=="undefined"&&opcionesSistema){opcionesSistema.colorSistema=hex;if(typeof guardarOpcionesSistema==="function")guardarOpcionesSistema();if(typeof guardarFechaOpcionesNube==="function")guardarFechaOpcionesNube(Date.now());if(typeof subirOpcionesNube==="function"){try{subirOpcionesNube().then(function(ok){if(!ok)toast("⚠ Color guardado en la tablet, pero no llegó a la nube. Toca Sincronizar cuando tengas internet.");}).catch(function(){});}catch(e){}}}
  var inp=document.getElementById("tColorSistema"); if(inp)inp.value=hex;
  toast("Color del sistema cambiado.");
 }
@@ -5137,16 +5138,24 @@ async function sincronizarOpcionesNube(){
   var r=await kupoSupabase.from("opciones_licencia").select("opciones,updated_at").eq("licencia_clave",clave).limit(1);
   if(r.error||!r.data)return false;
   var fechaLocal=leerFechaOpcionesNube();
-  if(!r.data.length){if(fechaLocal>0){try{await subirOpcionesNube()}catch(e){}}return false;}
+  var colorLocal=(typeof ticketConfig!=="undefined"&&ticketConfig&&ticketConfig.colorSistema)||"";
+  var migroColor=false;
+  if(/^#[0-9a-fA-F]{6}$/.test(colorLocal)&&opcionesSistema.colorSistema==="#0b4a6e"&&colorLocal.toLowerCase()!=="#0b4a6e"){opcionesSistema.colorSistema=colorLocal;guardarOpcionesSistema();migroColor=true;}
+  if(!r.data.length){if(fechaLocal>0||migroColor){try{await subirOpcionesNube()}catch(e){}}return false;}
   var fila=r.data[0];
   var fechaNube=0;try{fechaNube=new Date(fila.updated_at).getTime()||0}catch(e){fechaNube=0;}
   if(fechaLocal>fechaNube){try{await subirOpcionesNube()}catch(e){}return false;}
   if(fechaNube>fechaLocal&&fila.opciones&&typeof fila.opciones==="object"){
    var claves=["corteProductos","multiAlmacen","chatInterno","descuentos","sinStock"];
    var cambio=false;
+   var subirColor=false;
    claves.forEach(function(k){if(typeof fila.opciones[k]==="boolean"&&opcionesSistema[k]!==fila.opciones[k]){opcionesSistema[k]=fila.opciones[k];cambio=true;}});
-   if(cambio){guardarOpcionesSistema();aplicarOpcionesSistema();if(typeof render==="function")render();}
+   var nubeColor=(typeof fila.opciones.colorSistema==="string"&&/^#[0-9a-fA-F]{6}$/.test(fila.opciones.colorSistema))?fila.opciones.colorSistema:null;
+   if(nubeColor){if(opcionesSistema.colorSistema!==nubeColor){opcionesSistema.colorSistema=nubeColor;if(typeof ticketConfig!=="undefined"&&ticketConfig)ticketConfig.colorSistema=nubeColor;cambio=true;}}
+   else if(/^#[0-9a-fA-F]{6}$/.test(colorLocal)&&opcionesSistema.colorSistema===colorLocal){subirColor=true;}
+   if(cambio){guardarOpcionesSistema();aplicarOpcionesSistema();if(typeof aplicarColorSistema==="function")aplicarColorSistema();if(typeof render==="function")render();if(typeof guardar==="function")guardar();}
    guardarFechaOpcionesNube(fechaNube);
+   if(subirColor){try{await subirOpcionesNube()}catch(e){}}
    return cambio;
   }
   return false;

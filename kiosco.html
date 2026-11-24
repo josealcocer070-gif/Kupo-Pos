@@ -8,13 +8,25 @@
 <script src="supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--azul:#0b4a6e}
+/* Iconos 3D del sistema (v171: mismo sistema que la app) */
+.icono-3d-mini{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c);box-shadow:0 2px 4px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5);font-size:15px;vertical-align:-6px;margin-right:3px;flex:none}
+.icono-3d-grande{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c);box-shadow:0 3px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.5);font-size:32px;flex:none}
+.f-oro{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)}
+.f-verde{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#9be89b,#2e9e4f)}
+.f-azul{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8ec9ff,#2b7cd3)}
+.f-teal{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#7de3d0,#0f8a7a)}
+.f-coral{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffb199,#e6714c)}
+.f-morado{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#c5a3ff,#7b4fd0)}
+.f-azulrey{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8fb8ff,#3d5afe)}
+.f-gris{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#cfd8dc,#78909c)}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#fff8ec;color:#1f2937;min-height:100vh}
 button{font-family:inherit;touch-action:manipulation;cursor:pointer}
 input{font-family:inherit}
 .pantalla{display:none;min-height:100vh}
 .pantalla.activa{display:flex;flex-direction:column}
 /* Encabezado */
-header{background:#0b4a6e;color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 header .negocio{font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.95}
 header .kiosco{font-size:30px;font-weight:900;letter-spacing:1px;margin-top:2px}
 header .kiosco span{color:#fbbf24}
@@ -23,67 +35,81 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 </head>
 <body>
 <style>
+/* Saludo de bienvenida centrado (v171) */
+.bienvenida{text-align:center;padding:22px 20px 4px}
+.bienvenida .saludo-menu{font-size:40px;font-weight:900;color:var(--azul,#0b4a6e);line-height:1.15;margin-top:10px}
+.bienvenida .saludo-negocio-menu{font-size:18px;font-weight:800;color:#374151;margin-top:6px}
+.bienvenida .saludo-pregunta{font-size:17px;color:#6b7280;margin-top:4px}
 /* Tipo: para llevar / para comer aquí */
 .tipo{display:flex;gap:12px;padding:16px 20px 6px}
 .tipo button{flex:1;padding:18px 8px;font-size:21px;font-weight:800;border-radius:16px;border:3px solid #e5e7eb;background:#fff;color:#374151}
-.tipo button.activo{background:#f59e0b;border-color:#d97706;color:#fff;box-shadow:0 4px 0 #b45309}
+.tipo button.activo{background:var(--azul,#0b4a6e);border-color:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 .tipo button small{display:block;font-size:13px;font-weight:600;margin-top:2px;opacity:.85}
 /* Buscador y filtros */
-.busqueda{padding:10px 20px 4px}
-.busqueda input{width:100%;padding:15px 18px;font-size:19px;border:2px solid #e5e7eb;border-radius:14px;background:#fff;outline:none}
-.busqueda input:focus{border-color:#f59e0b}
+.busqueda{display:flex;align-items:center;gap:10px;padding:10px 20px 4px}
+.busqueda input{flex:1;min-width:0;padding:15px 18px;font-size:19px;border:2px solid #e5e7eb;border-radius:14px;background:#fff;outline:none}
+.busqueda input:focus{border-color:var(--azul,#0b4a6e)}
 .filtros{display:flex;gap:8px;padding:12px 20px 4px;overflow-x:auto;scrollbar-width:none}
 .filtros::-webkit-scrollbar{display:none}
-.filtros button{flex:0 0 auto;padding:10px 18px;font-size:16px;font-weight:700;border-radius:999px;border:2px solid #e5e7eb;background:#fff;color:#374151}
-.filtros button.activo{background:#0b4a6e;border-color:#0b4a6e;color:#fff}
-/* Rejilla de productos */
+.filtros button{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-size:16px;font-weight:700;border-radius:999px;border:2px solid #e5e7eb;background:#fff;color:#374151}
+.filtros button.activo{background:var(--azul,#0b4a6e);border-color:var(--azul,#0b4a6e);color:#fff}
+/* Rejilla de productos: tarjetas modernas de foto completa (v171) */
 #grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 20px 150px}
-.tarjeta{background:#fff;border-radius:18px;padding:16px 14px 14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08);border:2px solid transparent}
-.tarjeta .emoji{font-size:52px;line-height:1.1}
-.tarjeta .foto{width:84px;height:84px;object-fit:cover;border-radius:14px}
-.tarjeta h3{font-size:18px;line-height:1.25;margin:8px 0 2px;min-height:44px}
-.tarjeta .precio{font-size:24px;font-weight:900;color:#ea580c}
-.tarjeta .cant-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px}
-.tarjeta .cant-row button{width:48px;height:48px;font-size:26px;font-weight:900;border-radius:50%;border:none;background:#0b4a6e;color:#fff}
-.tarjeta .cant-row button.mas{background:#f59e0b}
-.tarjeta .cant-row b{font-size:24px;min-width:28px;text-align:center}
-.tarjeta .agregar{margin-top:12px;width:100%;padding:13px;font-size:17px;font-weight:800;border-radius:12px;border:none;background:#f59e0b;color:#fff}
-.tarjeta.en-carrito{border-color:#f59e0b}
+.tarjeta{position:relative;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.12);border:2px solid transparent;transition:transform .15s ease,box-shadow .15s ease;cursor:pointer;aspect-ratio:1}
+.tarjeta:active{transform:scale(.96);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.tarjeta .foto-grande{width:100%;height:100%;object-fit:cover;display:block}
+.tarjeta .sombra-abajo{position:absolute;left:0;right:0;bottom:0;height:38%;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.35));pointer-events:none}
+.tarjeta .pastilla-precio{position:absolute;left:12px;bottom:12px;background:#fff;color:var(--azul,#0b4a6e);font-size:26px;font-weight:900;padding:8px 16px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.tarjeta .btn-mas{position:absolute;right:12px;bottom:12px;width:56px;height:56px;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff;font-size:34px;font-weight:900;box-shadow:0 3px 8px rgba(0,0,0,.35);transition:transform .12s ease}
+.tarjeta .btn-mas:active{transform:scale(.88)}
+.tarjeta .pastilla-cant{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:6px;background:var(--azul,#0b4a6e);color:#fff;border-radius:999px;padding:6px 8px;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.tarjeta .pastilla-cant button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:26px;font-weight:900}
+.tarjeta .pastilla-cant button:active{transform:scale(.88)}
+.tarjeta .pastilla-cant b{font-size:26px;min-width:30px;text-align:center}
+.tarjeta.en-carrito{border-color:var(--azul,#0b4a6e)}
+/* Sin foto: tarjeta con icono 3D grande, nombre y precio */
+.tarjeta.sin-foto{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 14px;gap:8px}
+.tarjeta.sin-foto h3{font-size:18px;line-height:1.25;margin:4px 0 0;text-align:center}
+.tarjeta.sin-foto .precio{font-size:26px;font-weight:900;color:var(--azul,#0b4a6e)}
+.tarjeta.sin-foto .cant-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px}
+.tarjeta.sin-foto .cant-row button{width:48px;height:48px;font-size:26px;font-weight:900;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff}
+.tarjeta.sin-foto .cant-row b{font-size:24px;min-width:28px;text-align:center}
+.tarjeta.sin-foto .agregar{margin-top:8px;width:100%;padding:13px;font-size:17px;font-weight:800;border-radius:12px;border:none;background:var(--azul,#0b4a6e);color:#fff}
 #sinResultados{grid-column:1/-1;text-align:center;padding:40px 10px;font-size:18px;color:#6b7280}
 </style>
 <style>
 /* Barra inferior: nombre + total + mandar pedido */
-#barra{position:fixed;left:0;right:0;bottom:0;background:#0b4a6e;color:#fff;padding:14px 20px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.25);z-index:10}
+#barra{position:fixed;left:0;right:0;bottom:0;background:var(--azul,#0b4a6e);color:#fff;padding:14px 20px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.25);z-index:10}
 #barra .fila{display:flex;gap:10px;align-items:center}
 #nombreCliente{flex:1;min-width:0;padding:14px 16px;font-size:18px;border-radius:12px;border:2px solid transparent;outline:none}
 #nombreCliente.error{border-color:#ef4444;background:#fef2f2}
 #totalBarra{font-size:22px;font-weight:900;white-space:nowrap}
-#btnMandar{width:100%;margin-top:10px;padding:16px;font-size:21px;font-weight:900;border-radius:14px;border:none;background:#f59e0b;color:#fff;box-shadow:0 4px 0 #b45309}
+#btnMandar{width:100%;margin-top:10px;padding:16px;font-size:21px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 #btnMandar:disabled{background:#9ca3af;box-shadow:none;opacity:.7}
 #btnMandar.enviando{background:#9ca3af;box-shadow:none}
 #hintNombre{text-align:center;font-size:14px;color:#fca5a5;margin-top:8px;display:none}
 /* Ticket para foto */
 #ticketCard{background:#fff;border-radius:20px;margin:24px 20px;padding:28px 20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.12);flex:1}
 #ticketCard .tu-numero{font-size:20px;font-weight:800;color:#6b7280;letter-spacing:1px}
-#ticketNumero{font-size:130px;font-weight:900;line-height:1;color:#ea580c;margin:6px 0}
+#ticketNumero{font-size:130px;font-weight:900;line-height:1;color:var(--azul,#0b4a6e);margin:6px 0}
 #ticketCliente{font-size:24px;font-weight:800}
 #ticketTipo{font-size:16px;color:#6b7280;margin-top:2px}
 #ticketItems{text-align:left;margin:22px 4px 0;border-top:2px dashed #e5e7eb;padding-top:14px}
 #ticketItems .li{display:flex;justify-content:space-between;font-size:18px;padding:5px 0}
 #ticketItems .li b{white-space:nowrap;margin-left:10px}
 #ticketTotal{display:flex;justify-content:space-between;font-size:24px;font-weight:900;border-top:2px dashed #e5e7eb;margin-top:12px;padding-top:12px}
-#ticketFoto{font-size:19px;font-weight:800;color:#0b4a6e;margin-top:18px}
+#ticketFoto{font-size:19px;font-weight:800;color:var(--azul,#0b4a6e);margin-top:18px}
 #btnListo{margin:0 20px 24px;padding:18px;font-size:22px;font-weight:900;border-radius:16px;border:none;background:#16a34a;color:#fff;box-shadow:0 4px 0 #166534}
 /* Pantallas de setup / apagado / error */
 .centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center}
 .centro .icono{font-size:72px}
-.centro .saludo{font-size:34px;font-weight:900;color:#0b4a6e;line-height:1.15}
+.centro .saludo{font-size:34px;font-weight:900;color:var(--azul,#0b4a6e);line-height:1.15}
 .centro .saludo-negocio{font-size:15px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#6b7280;margin-top:6px}
 .centro h1{font-size:28px;margin:14px 0 8px}
 .centro p{font-size:18px;color:#4b5563;line-height:1.5;max-width:480px}
 .centro input{width:100%;max-width:420px;padding:16px;font-size:20px;text-align:center;letter-spacing:2px;text-transform:uppercase;border:2px solid #d1d5db;border-radius:14px;margin-top:20px;outline:none}
-.centro input:focus{border-color:#f59e0b}
-.centro .btn-grande{margin-top:18px;padding:16px 34px;font-size:20px;font-weight:800;border-radius:14px;border:none;background:#f59e0b;color:#fff;box-shadow:0 4px 0 #b45309}
+.centro input:focus{border-color:var(--azul,#0b4a6e)}
+.centro .btn-grande{margin-top:18px;padding:16px 34px;font-size:20px;font-weight:800;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 .centro .btn-gris{margin-top:14px;padding:12px 22px;font-size:16px;font-weight:700;border-radius:12px;border:2px solid #d1d5db;background:#fff;color:#374151}
 .centro .error-msg{color:#dc2626;font-weight:700;margin-top:12px;display:none}
 .pie{font-size:12px;color:#9ca3af;text-align:center;padding:0 0 14px}
@@ -100,7 +126,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v170</div>
+  <div class="pie">Kiosco KUPO · v171</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -113,7 +139,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v170</div>
+  <div class="pie">Kiosco KUPO · v171</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -122,11 +148,17 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <div class="kiosco">KIOSCO <span>KUPO</span></div>
     <div class="sub">Pide aquí, paga en caja 👇</div>
   </header>
-  <div class="tipo">
-    <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')">🥡 Para llevar<small>Precio para llevar</small></button>
-    <button id="btnLocal" onclick="elegirTipo('local')">🍽️ Para comer aquí<small>Precio en el local</small></button>
+  <div class="bienvenida">
+    <span class="icono-3d-grande f-oro" id="iconoSaludo">☀️</span>
+    <div class="saludo-menu" id="saludoMenu">¡Buenos días!</div>
+    <div class="saludo-negocio-menu" id="bienvenidaNegocio">Bienvenido a Pollos Rancheros El Pollón</div>
+    <div class="saludo-pregunta">¿Qué se te antoja hoy?</div>
   </div>
-  <div class="busqueda"><input id="inputBuscar" placeholder="🔍 Buscar pollo, refresco..." oninput="renderMenu()"></div>
+  <div class="tipo">
+    <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')"><span class="icono-3d-mini f-coral">🥡</span> Para llevar<small>Precio para llevar</small></button>
+    <button id="btnLocal" onclick="elegirTipo('local')"><span class="icono-3d-mini f-teal">🍽️</span> Para comer aquí<small>Precio en el local</small></button>
+  </div>
+  <div class="busqueda"><span class="icono-3d-mini f-gris">🔍</span><input id="inputBuscar" placeholder="Buscar pollo, refresco..." oninput="renderMenu()"></div>
   <div class="filtros" id="filtros"></div>
   <div id="grid"></div>
   <div id="barra">
@@ -165,10 +197,10 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · v170</div>
+  <div class="pie">Kiosco KUPO · v171</div>
 </div>
 <script>
-/* Kiosco KUPO v170 — la foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. El botón + Agregar llevaba el id del producto sin comillas y el navegador lo leía como una cuenta (el id es un código con guiones), así el clic no hacía nada. Ahora el id va entre comillas. Lee siempre como anónimo; saludo según la hora; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
+/* Kiosco KUPO v171 — menú moderno: saludo de bienvenida centrado según la hora con icono 3D (sol en la mañana, sol con nube en la tarde, luna en la noche), tarjetas de foto completa con pastilla de precio y botón + redondo, animación al toque (la tarjeta se hunde), iconos 3D del sistema en filtros, toggle y buscador, y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -181,11 +213,17 @@ var tipo="llevar";
 var categoria="Todos";
 var carrito={};        /* id del producto visible -> {p, cant} */
 var EMOJI_CAT={"Pollo":"🍗","Refrescos":"🥤","Complementos":"🍚","Salsas":"🌶️","Agua natural":"💧","Agua":"💧"};
+var CLASE_CAT={"Pollo":"f-coral","Refrescos":"f-azul","Complementos":"f-verde","Salsas":"f-morado","Agua natural":"f-teal","Agua":"f-teal"};
+var negocioCrudo="";
+function ic3d(e,c){ return '<span class="icono-3d-mini '+c+'">'+e+'</span>'; }
+function claseDe(p){ return CLASE_CAT[(p.categoria||"").trim()]||"f-gris"; }
+function iconoSaludo(){ var h=new Date().getHours(); if(h>=5&&h<12)return["☀️","f-oro"]; if(h>=12&&h<19)return["🌤️","f-azul"]; return["🌙","f-morado"]; }
+function aplicarColorKiosco(hex){ if(typeof hex!=="string"||!/^#[0-9a-fA-F]{6}$/.test(hex))hex="#0b4a6e"; var r=document.documentElement; if(r&&r.style&&r.style.setProperty)r.style.setProperty("--azul",hex); var m=document.querySelector('meta[name="theme-color"]'); if(m)m.content=hex; }
 function $(id){ return document.getElementById(id); }
 function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function dinero(n){ return "$"+Math.round(Number(n)||0); }
 function saludoKiosco(){ var h=new Date().getHours(); return h>=5&&h<12?"¡Buenos días!":h>=12&&h<19?"¡Buenas tardes!":"¡Buenas noches!"; }
-function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); }
+function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); var sm=$("saludoMenu"); if(sm)sm.textContent=s; var bn=$("bienvenidaNegocio"); if(bn)bn.textContent="Bienvenido a "+(negocioCrudo||"nuestro negocio"); var ic=$("iconoSaludo"); if(ic){ var is=iconoSaludo(); ic.textContent=is[0]; ic.className="icono-3d-grande "+is[1]; } }
 function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); pintarSaludo(); }
 function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
 function emojiDe(p){ if(p.foto_kiosco||p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
@@ -198,7 +236,8 @@ async function init(){
 async function cargarTodo(){
   var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
   if(r1.error||!r1.data){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Licencia no encontrada. Revisa la clave."; mostrar("pantallaSetup"); return; }
-  negocioNombre=(r1.data.negocio||"KUPO POS").toUpperCase();
+  negocioCrudo=(r1.data.negocio||"KUPO POS");
+  negocioNombre=negocioCrudo.toUpperCase();
   $("nombreNegocio").textContent=negocioNombre;
   $("nombreNegocio2").textContent=negocioNombre;
   $("negocioApagado").textContent=negocioNombre;
@@ -206,6 +245,7 @@ async function cargarTodo(){
   if(r2.error){ mostrar("pantallaError"); return; }
   var opt=(r2.data&&r2.data.opciones)||{};
   if(opt.kioscoActivo!==true){ mostrar("pantallaApagado"); return; }
+  aplicarColorKiosco(opt.colorSistema);
   var r3=await sb.from("productos").select("id,nombre,precio,categoria,foto,foto_kiosco,pausado").eq("licencia_clave",licencia).order("nombre");
   if(r3.error){ mostrar("pantallaError"); return; }
   productos=(r3.data||[]).filter(function(p){ return !p.pausado; });
@@ -219,6 +259,7 @@ async function revisarActivo(){
   if(!$("pantallaMenu").classList.contains("activa")) return;
   var r=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
   if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.kioscoActivo!==true){ mostrar("pantallaApagado"); }
+  if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.colorSistema)aplicarColorKiosco(r.data.opciones.colorSistema);
 }
 function guardarLicencia(){
   var v=$("inputLicencia").value.trim().toUpperCase();
@@ -254,7 +295,7 @@ function renderFiltros(){
   var cats=[];
   grupos.forEach(function(g){ var c=(visibleDe(g).categoria||"General").trim(); if(cats.indexOf(c)<0) cats.push(c); });
   cats.sort();
-  $("filtros").innerHTML='<button class="'+(categoria==="Todos"?"activo":"")+'" onclick="elegirCat(\'Todos\')">Todos</button>'+cats.map(function(c){ return '<button class="'+(categoria===c?"activo":"")+'" onclick="elegirCat(\''+escHtml(c)+'\')">'+escHtml(c)+'</button>'; }).join("");
+  $("filtros").innerHTML='<button class="'+(categoria==="Todos"?"activo":"")+'" onclick="elegirCat(\'Todos\')">'+ic3d("⭐","f-oro")+'Todos</button>'+cats.map(function(c){ return '<button class="'+(categoria===c?"activo":"")+'" onclick="elegirCat(\''+escHtml(c)+'\')">'+ic3d(EMOJI_CAT[c]||"📦",CLASE_CAT[c]||"f-gris")+escHtml(c)+'</button>'; }).join("");
 }
 function elegirCat(c){ categoria=c; renderFiltros(); renderMenu(); }
 function elegirTipo(t){
@@ -276,12 +317,21 @@ function renderMenu(){
   g.innerHTML=lista.map(function(p){
     var cant=carrito[p.id]?carrito[p.id].cant:0;
     var em=emojiDe(p);
-    var foto=em?'<div class="emoji">'+em+'</div>':'<img class="foto" src="'+escHtml(p.foto_kiosco||p.foto)+'" alt="">';
-    return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'">'+foto+
-      '<h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
-      '<div class="precio">'+dinero(p.precio)+'</div>'+
-      (cant>0?'<div class="cant-row"><button onclick="cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button class="mas" onclick="cambiarCant(\''+p.id+'\',1)">+</button></div>'
-             :'<button class="agregar" onclick="cambiarCant(\''+p.id+'\',1)">+ Agregar</button>')+
+    if(em){
+      return '<div class="tarjeta sin-foto'+(cant>0?" en-carrito":"")+'" onclick="cambiarCant(\''+p.id+'\',1)">'+
+        '<span class="icono-3d-grande '+claseDe(p)+'">'+em+'</span>'+
+        '<h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
+        '<div class="precio">'+dinero(p.precio)+'</div>'+
+        (cant>0?'<div class="cant-row"><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+</button></div>'
+               :'<button class="agregar" onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+ Agregar</button>')+
+        '</div>';
+    }
+    return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'" onclick="cambiarCant(\''+p.id+'\',1)">'+
+      '<img class="foto-grande" src="'+escHtml(p.foto_kiosco||p.foto)+'" alt="">'+
+      '<div class="sombra-abajo"></div>'+
+      '<div class="pastilla-precio">'+dinero(p.precio)+'</div>'+
+      (cant>0?'<div class="pastilla-cant"><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+</button></div>'
+             :'<button class="btn-mas" onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+</button>')+
       '</div>';
   }).join("");
 }
