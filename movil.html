@@ -985,7 +985,7 @@ h1,h2{font-weight:800!important}
  body.movil-ventas main{padding:0 14px 0!important}
  body.movil-ventas #panelVenta{margin-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}
  /* SCAN grande en el ticket + botón para abrir el catálogo */
- .ticket-scan{display:flex!important;gap:10px!important;margin:10px 0 14px!important}
+ .ticket-scan{display:flex!important;gap:10px!important;margin:10px 0 14px!important;justify-content:center!important}/* v161: Catálogo y Mensajes centrados */
  .ticket-scan .btn-ver-catalogo{flex:0 0 auto!important;background:#0b2a5e!important;color:#fff!important;border:0!important;border-radius:14px!important;padding:16px 18px!important;font-size:16px!important;font-weight:800!important;cursor:pointer!important;min-height:56px!important}
  /* Botón 🗑️ para quitar una línea del ticket */
  .linea-ticket .linea-quitar{flex:0 0 auto!important;width:44px!important;min-width:44px!important;height:44px!important;background:#fde8e8!important;color:#b3261e!important;border:0!important;border-radius:10px!important;font-size:18px!important;font-weight:800!important;cursor:pointer!important;align-self:center!important}
@@ -1083,6 +1083,8 @@ h1,h2{font-weight:800!important}
 #vistaProductos .prod-row{flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:10px!important;padding:8px 10px!important;border-radius:12px!important}
 #vistaProductos .prod-row .foto{width:56px!important;height:56px!important;flex:none!important;border-radius:10px!important;font-size:28px!important}
 #vistaProductos .prod-row .info{flex:1!important;min-width:0!important}
+/* v161: la fila de Productos baja a dos líneas para que quepan Editar/Pausar/Eliminar. */
+#vistaProductos .prod-row{flex-wrap:wrap!important}
 #vistaProductos .prod-row .info h3{font-size:15px!important;font-weight:800!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important}
 #vistaProductos .prod-row .info .meta{font-size:12px!important;color:#555!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:2px 0 0!important}
 #vistaProductos .prod-row .info .stock-line{font-size:13px!important;font-weight:700!important;color:#0f6a4d!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:2px 0 0!important}
@@ -1621,7 +1623,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 
 <div id="vistaProductos" class="oculto">
 <h1>Productos</h1>
-<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. En el celular no se crean ni se cambian productos; eso se hace en la versión de PC.</p>
+<p id="descProductos" style="color:#555;margin-bottom:14px">Consulta el inventario del negocio: busca un producto para ver su precio y su stock. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.</p>
 <div class="resumen">
 <div class="tarjeta"><small>TOTAL PRODUCTOS</small><b id="resTotal">0</b></div>
 <div class="tarjeta"><small>DISPONIBLES</small><b id="resDisp">0</b></div>
@@ -1631,6 +1633,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="tarjeta"><small>MARGEN PROMEDIO</small><b id="resMargen">0%</b></div>
 </div>
 <!-- v133: en la móvil Productos es solo consulta; el formulario de alta/edición queda oculto (sigue en el DOM para no romper las funciones que lo referencian). -->
+<!-- v161: el Administrador ya puede editar/eliminar desde el celular; el formulario se muestra solo al tocar Editar. -->
 <div class="form-prod" style="display:none">
 <h2 id="tituloFormProd">+ Nuevo producto</h2>
 <form onsubmit="guardarProducto(event)">
@@ -2847,7 +2850,7 @@ function aplicarOpcionesSistema(){
  var ta=document.getElementById("tarjAgot"); if(ta)ta.style.display=opcionesSistema.sinStock===true?"none":"";
  var tv=document.getElementById("tarjValor"); if(tv)tv.style.display=opcionesSistema.sinStock===true?"none":"";
  var tsb=document.getElementById("tarjStockBajo"); if(tsb)tsb.style.display=opcionesSistema.sinStock===true?"none":"";
- var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. En el celular no se crean ni se cambian productos; eso se hace en la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. En el celular no se crean ni se cambian productos; eso se hace en la versión de PC.";
+ var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.";
  var fp=document.getElementById("filtroProd"); if(fp){var oa=fp.querySelector('option[value="agotados"]'); if(oa)oa.style.display=opcionesSistema.sinStock===true?"none":""; if(opcionesSistema.sinStock===true&&fp.value==="agotados"){fp.value="todos";if(typeof renderProductos==="function")renderProductos();}}
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
@@ -4187,7 +4190,7 @@ function renderProductos(){
   const est=estadoDe(p);
   const d=document.createElement("div");d.className="prod-row";
   const _min=(p.stockMin==null?5:p.stockMin);const _bajo=!p.pausado&&p.stock>0&&p.stock<=_min;
-  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div>`;
+  d.innerHTML=`<div class="foto">${fotoHtml(p)}</div><div class="info"><h3>${p.nombre}${p.pausado?' <span class="etiqueta-pausado">⏸ Pausado</span>':""}</h3><p class="meta">${p.sku||""} · ${p.categoria||"General"} · ${UNIDADES_VENTA[unidadDe(p)].nombre}</p><p class="stock-line${opcionesSistema.sinStock===true?"":(_bajo||p.stock<=0?" alerta-stock":"")}">${opcionesSistema.sinStock===true?"":(p.stock<=0?"Quedan 0 "+etiquetaUnidad(p,0):_bajo?"⚠ Quedan "+textoCantidad(p,p.stock)+" (mín. "+_min+")":p.stock<=5?"Quedan "+textoCantidad(p,p.stock):"Stock: "+textoCantidad(p,p.stock))+" "}<span class="estado ${est}">${est==="disponible"?"● Disponible":est==="agotado"?"● Agotado":"⏸ Pausado"}</span></p></div><div class="lado"><div class="precio">${dinero(p.precio)} <small>/ ${UNIDADES_VENTA[unidadDe(p)].corta}</small></div></div><div class="acciones-prod"><button onclick="editar(${p.id})">✏️ Editar</button><button onclick="togglePausa(${p.id})">${p.pausado?"▶️ Activar":"⏸ Pausar"}</button><button class="peligro" onclick="eliminar(${p.id})">🗑 Eliminar</button></div>`;
   lista.appendChild(d);
  });
 }
@@ -4403,17 +4406,21 @@ function guardarProducto(e){e.preventDefault();
  else{const nid2=Date.now()+uid++;catalogo.push({id:nid2,nombre,precio,stock,emoji,categoria,pausado,unidad,sku:sku||("SKU-"+String(nid2).slice(-3)),costo:isNaN(costo)?Math.round(precio*0.6*100)/100:costo,stockMin:isNaN(stockMin)?5:stockMin,foto:foto});stockAlmacen[nid2]={};const pr2=almacenPrincipal();if(pr2)stockAlmacen[nid2][pr2.id]=stock;sincronizarStock();toast("Producto agregado: "+nombre);}
  if(typeof encolarProductoNube==="function"){const _pid=document.getElementById("pId").value;const _pr=_pid?catalogo.find(function(x){return x.id==_pid}):catalogo[catalogo.length-1];if(_pr)encolarProductoNube(_pr);}
  e.target.reset();fotoProductoActual="";const _pv=document.getElementById("pFotoPreview");if(_pv){_pv.src="";_pv.style.display="none"}document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";
+ formProdVisible(false);
  guardar();render();renderProductos();
 }
+/* v161: el formulario de producto vive oculto en el móvil; solo se muestra al tocar Editar. */
+function formProdVisible(v){var f=document.querySelector("#vistaProductos .form-prod");if(f)f.style.display=v?"":"none";}
 function editarProducto(id){const p=catalogo.find(x=>x.id===id);if(!p)return;
  document.getElementById("pId").value=p.id;document.getElementById("pNombre").value=p.nombre;
  document.getElementById("pPrecio").value=p.precio;document.getElementById("pStock").value=p.stock;document.getElementById("pUnidad").value=unidadDe(p);
  document.getElementById("pCategoria").value=p.categoria||"General";document.getElementById("pSku").value=p.sku||"";document.getElementById("pCosto").value=(p.costo==null?"":p.costo);document.getElementById("pStockMin").value=(p.stockMin==null?5:p.stockMin);fotoProductoActual=p.foto||"";const _pv2=document.getElementById("pFotoPreview");if(_pv2){if(p.foto){_pv2.src=p.foto;_pv2.style.display=""}else{_pv2.src="";_pv2.style.display="none"}}
  document.getElementById("pEstado").value=p.pausado?"pausado":"disponible";
  document.getElementById("tituloFormProd").textContent="✏️ Editando: "+p.nombre;
+ formProdVisible(true);
  document.getElementById("vistaProductos").scrollIntoView({behavior:"smooth"});
 }
-function cancelarEdicion(){document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();quitarFotoProducto();}
+function cancelarEdicion(){document.getElementById("pId").value="";document.getElementById("tituloFormProd").textContent="+ Nuevo producto";document.querySelector("#vistaProductos form").reset();quitarFotoProducto();formProdVisible(false);}
 function togglePausa(id){const p=catalogo.find(x=>x.id===id);if(!p)return;p.pausado=!p.pausado;guardar();render();renderProductos();if(typeof encolarProductoNube==="function")encolarProductoNube(p);toast(p.nombre+(p.pausado?" pausado. Ya no se puede agregar a la venta.":" activado."));}
 function toggleGestion(){if(sesionActual&&sesionActual.rol==="Cajero"){toast("⛔ Sin permiso: solo el Administrador puede gestionar productos.");return}document.getElementById("gestion").classList.toggle("oculto");document.getElementById("gestion").scrollIntoView({behavior:"smooth",block:"start"});}
 function ponerEnEspera(){if(!ticket.length){toast("No hay venta en curso para poner en espera.");return}localStorage.setItem("kupoPosV146Espera",JSON.stringify(ticket));ticket=[];guardar();render();toast("Venta puesta en espera. Se guardó en este dispositivo y se sincroniza con la nube cuando hay internet.");}
