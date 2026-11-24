@@ -1679,7 +1679,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaPedidosKiosco" class="oculto">
 <h1>🔔 Pedidos del kiosco</h1>
 <p style="color:#555;margin-bottom:14px">El cliente pide en el kiosco, tú cobras aquí. Cuando cobres un pedido, se quita de la lista.</p>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button type="button" onclick="mostrarVista('ventas')">← Volver a Ventas</button><button type="button" onclick="revisarPedidosKiosco()">🔄 Actualizar</button></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button type="button" onclick="mostrarVista('ventas')"><span class="icono-3d-mini f-azul">↩️</span> Volver a Ventas</button><button type="button" onclick="revisarPedidosKiosco()"><span class="icono-3d-mini f-teal">🔄</span> Actualizar</button></div>
 <div id="listaPedidosKioscoVista" style="max-width:640px"></div>
 </div>
 <div id="vistaAdminLic" class="oculto">
@@ -5379,8 +5379,8 @@ function renderPedidosKiosco(){
    '<div class="pk-cliente">'+escHtml(p.cliente||"Cliente")+(espera?' <span style="color:#b45309;font-size:13px">· En espera</span>':"")+'</div>'+
    '<div class="pk-tipo">'+(p.tipo==="llevar"?"🥡 Para llevar":"🍽️ Para comer aquí")+'</div>'+
    '<div class="pk-items">'+items+'</div>'+
-   '<div class="pk-botones"><button type="button" class="pk-cobrar" onclick="cobrarPedidoKiosco(\''+p.id+'\')">💰 Cobrar</button>'+
-   (espera?'<button type="button" class="pk-volver" onclick="volverPendientePedidoKiosco(\''+p.id+'\')">↩️ Volver</button>':'<button type="button" class="pk-espera" onclick="ponerEnEsperaPedidoKiosco(\''+p.id+'\')">⏸️ En espera</button>')+
+   '<div class="pk-botones"><button type="button" class="pk-cobrar" onclick="cobrarPedidoKiosco(\''+p.id+'\')"><span class="icono-3d-mini f-oro">💰</span> Cobrar</button>'+
+   (espera?'<button type="button" class="pk-volver" onclick="volverPendientePedidoKiosco(\''+p.id+'\')"><span class="icono-3d-mini f-azul">↩️</span> Volver</button>':'<button type="button" class="pk-espera" onclick="ponerEnEsperaPedidoKiosco(\''+p.id+'\')"><span class="icono-3d-mini f-gris">⏸️</span> En espera</button>')+
    '</div></div>';
  }).join("");}
  var box=document.getElementById("listaPedidosKiosco");if(box)box.innerHTML=html;
