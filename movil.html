@@ -5617,9 +5617,15 @@ function recibirMensajeChat(m){
  conciliarPendientesChat([m]);
  mensajesChat.push(m);
  renderMensajes();
+ if(m.remitente&&m.remitente!==yo&&typeof sonarChat==="function")sonarChat();
  if(vistaActual==="mensajes"){marcarMensajesLeidos();}
  else{actualizarBadgeMensajes();if(m.creado_en&&new Date(m.creado_en).getTime()>ultimoLeidoChat())toast("💬 Nuevo mensaje de "+m.remitente);}
 }
+/* v180: sonido del chat interno (Lalo 2026-11-24). Único y reconocible, distinto a la campana de hotel del kiosco: arpegio ascendente de 3 notas (sol-do-mi), 0.5 s. Suena solo cuando llega un mensaje de la OTRA persona, nunca con los míos. */
+function sonarChat(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var ctx=sonarChat._ctx||(sonarChat._ctx=new C());if(ctx.state==="suspended")ctx.resume();var t0=ctx.currentTime;[[784,0.20],[1047,0.20],[1319,0.20]].forEach(function(p,i){var o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=p[0];var t=t0+i*0.12;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(p[1],t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+0.15);});}catch(e){}}
+/* v180: desbloqueo de audio (Lalo 2026-11-24). El navegador bloquea el sonido hasta el primer toque en la pantalla; al tocarla, se reanudan los contextos de la campanita y del chat para que los avisos suenen después. */
+function desbloquearSonido(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var c1=(typeof sonarCampanita==="function")?sonarCampanita._ctx:null;if(c1&&c1.state==="suspended")c1.resume();var c2=(typeof sonarChat==="function")?sonarChat._ctx:null;if(c2&&c2.state==="suspended")c2.resume();}catch(e){}}
+if(typeof window!=="undefined"&&window.addEventListener){window.addEventListener("pointerdown",desbloquearSonido);window.addEventListener("touchstart",desbloquearSonido);}
 function suscribirChatMensajes(){
  var lic=licenciaActual();
  asegurarSupabase();if(!kupoSupabase||!lic||lic==="SIN-LICENCIA")return;

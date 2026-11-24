@@ -1687,7 +1687,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div id="vistaPedidosKiosco" class="oculto">
 <h1>🔔 Pedidos del kiosco</h1>
 <p style="color:#555;margin-bottom:14px">El cliente pide en el kiosco, tú cobras aquí. Cuando cobres un pedido, se quita de la lista.</p>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button type="button" onclick="mostrarVista('ventas')"><span class="icono-3d-mini f-azul">↩️</span> Volver a Ventas</button><button type="button" onclick="revisarPedidosKiosco()"><span class="icono-3d-mini f-teal">🔄</span> Actualizar</button></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button type="button" onclick="mostrarVista('ventas')"><span class="icono-3d-mini f-azul">↩️</span> Volver a Ventas</button><button type="button" onclick="revisarPedidosKiosco()"><span class="icono-3d-mini f-teal">🔄</span> Actualizar</button><button type="button" onclick="sonarCampanita()"><span class="icono-3d-mini f-oro">🔔</span> Probar sonido</button></div>
 <div id="listaPedidosKioscoVista" style="max-width:640px"></div>
 </div>
 <div id="vistaAdminLic" class="oculto">
@@ -2295,7 +2295,7 @@ function confirmarCobro(){
  ventas.push({folio,total,totalBase:baseTotal,descuento:desc.monto,descuentoTipo:desc.tipo,descuentoValor:desc.valor,pago,fecha:new Date().toISOString(),items:ticket,almacenId:av.id,almacen:av.nombre,cliente:clienteVentaActual,whatsapp:whatsappVentaActual,cambio:pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0),mixtoEfectivo:pago==="Mixto"?ef:0,mixtoTarjeta:pago==="Mixto"?tj:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||""});
  const ventaNueva=ventas[ventas.length-1];
  /* v164: si esta venta vino del kiosco, marcar el pedido como cobrado. */
- if(ventaKiosco){var _vk=ventaKiosco;ventaKiosco=null;if(typeof marcarPedidoKioscoCobrado==="function")marcarPedidoKioscoCobrado(_vk);}
+ if(ventaKiosco){var _vk=ventaKiosco;ventaKiosco=null;/* v180: el nombre del cliente del kiosco no se queda pegado para la siguiente venta. */clienteVentaActual="Cliente general";try{localStorage.setItem("kupoPosV146ClienteVenta",clienteVentaActual)}catch(e){}var _ci=document.getElementById("clienteVenta");if(_ci)_ci.value=clienteVentaActual;if(typeof marcarPedidoKioscoCobrado==="function")marcarPedidoKioscoCobrado(_vk);}
  const cambio=pago==="Mixto"?Math.max(0,cubierto-total):(pago==="Efectivo"&&rec>0?rec-total:0);
  ticket=[];document.getElementById("recibido").value="";var _me2=document.getElementById("mixtoEfectivo");if(_me2)_me2.value="";var _mt2=document.getElementById("mixtoTarjeta");if(_mt2)_mt2.value="";var _dv2=document.getElementById("descValor");if(_dv2)_dv2.value="";var _dt2=document.getElementById("descTipo");if(_dt2)_dt2.value="%";guardar();render();
  if(typeof sincronizarVentaNube==="function")sincronizarVentaNube(ventaNueva);
@@ -5338,6 +5338,7 @@ function recibirMensajeChat(m){
  conciliarPendientesChat([m]);
  mensajesChat.push(m);
  renderMensajes();
+ if(m.remitente&&m.remitente!==yo&&typeof sonarChat==="function")sonarChat();
  if(vistaActual==="mensajes"||mensajesFlotanteAbierto()){marcarMensajesLeidos();}
  else{actualizarBadgeMensajes();if(m.creado_en&&new Date(m.creado_en).getTime()>ultimoLeidoChat())toast("💬 Nuevo mensaje de "+m.remitente);}
 }
@@ -5389,6 +5390,11 @@ let kioscoCobrosPendientes=[];
 try{kioscoCobrosPendientes=JSON.parse(localStorage.getItem("kupoPosV146KioscoCobrosPendientes")||"[]")||[]}catch(e){kioscoCobrosPendientes=[];}
 function guardarCobrosPendientesKiosco(){try{localStorage.setItem("kupoPosV146KioscoCobrosPendientes",JSON.stringify(kioscoCobrosPendientes))}catch(e){}}
 function sonarCampanita(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var ctx=sonarCampanita._ctx||(sonarCampanita._ctx=new C());if(ctx.state==="suspended")ctx.resume();var t0=ctx.currentTime;[[1568,0.15],[2489,0.30],[3723,0.20],[5233,0.12]].forEach(function(p){var o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=p[0];g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(p[1],t0+0.003);g.gain.exponentialRampToValueAtTime(0.0001,t0+0.9);o.connect(g);g.connect(ctx.destination);o.start(t0);o.stop(t0+0.9);});}catch(e){}}
+/* v180: sonido del chat interno (Lalo 2026-11-24). Único y reconocible, distinto a la campana de hotel del kiosco: arpegio ascendente de 3 notas (sol-do-mi), 0.5 s. Suena solo cuando llega un mensaje de la OTRA persona, nunca con los míos. */
+function sonarChat(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var ctx=sonarChat._ctx||(sonarChat._ctx=new C());if(ctx.state==="suspended")ctx.resume();var t0=ctx.currentTime;[[784,0.20],[1047,0.20],[1319,0.20]].forEach(function(p,i){var o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=p[0];var t=t0+i*0.12;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(p[1],t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+0.15);});}catch(e){}}
+/* v180: desbloqueo de audio (Lalo 2026-11-24). El navegador bloquea el sonido hasta el primer toque en la pantalla; al tocarla, se reanudan los contextos de la campanita y del chat para que los avisos suenen después. */
+function desbloquearSonido(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var c1=(typeof sonarCampanita==="function")?sonarCampanita._ctx:null;if(c1&&c1.state==="suspended")c1.resume();var c2=(typeof sonarChat==="function")?sonarChat._ctx:null;if(c2&&c2.state==="suspended")c2.resume();}catch(e){}}
+if(typeof window!=="undefined"&&window.addEventListener){window.addEventListener("pointerdown",desbloquearSonido);window.addEventListener("touchstart",desbloquearSonido);}
 async function revisarPedidosKiosco(){
  asegurarSupabase();
  if(!kupoSupabase)return;
