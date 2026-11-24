@@ -1021,10 +1021,12 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-tema" id="btnMenuAcciones" onclick="toggleMenuAcciones(event)" aria-label="Acciones rápidas" title="Acciones rápidas">☰</button>
-<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="abrirMensajesSeguro()" aria-label="Mensajes" title="Mensajes">💬 <span class="sync-texto">Mensajes</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
+<!-- v143 (Lalo 2026-11-23): el botón de Mensajes queda solo con el ícono, sin el nombre (igual que Sincronizar). -->
+<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="abrirMensajesSeguro()" aria-label="Mensajes" title="Mensajes">💬<span class="badge-msg" id="badgeMsgHeader">0</span></button>
 <button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar">🔄</button>
-<button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️ <span class="sync-texto">Sincronizar</span><span class="badge-sync" id="badgeSync">0</span></button>
+<!-- v143 (Lalo 2026-11-23): el botón de Sincronizar queda solo con la nube, sin el nombre. -->
+<button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube" title="Sincronizar">☁️<span class="badge-sync" id="badgeSync">0</span></button>
 <button type="button" class="btn-tema" id="btnReconectarBT" onclick="reconectarImpresoraBT()" aria-label="Reconectar impresora Bluetooth" title="Reconectar impresora">🔄</button>
 <button type="button" class="btn-tema" id="btnTema" onclick="cambiarTema()" aria-label="Cambiar a modo noche">🌙</button>
 <div class="user"><b id="usuarioActual">Eduardo Benitez</b><span id="rolActual">Administrador</span></div>
