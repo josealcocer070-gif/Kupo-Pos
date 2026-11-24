@@ -1856,8 +1856,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <button type="button" onclick="realizarCorteDinero()"><span class="icono-3d-mini f-azul">💾</span> Realizar corte de dinero</button>
 <button type="button" class="secundario" onclick="renderCortes()">Actualizar datos</button>
 <div id="secCierreAuto" style="margin-top:14px;border-top:1px solid #e3e8ec;padding-top:12px">
-<label for="cortesParaCerrarDia"><span class="icono-3d-mini f-gris">🔒</span> Cortes para cerrar el día</label>
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes al día</span></div>
+<label for="cortesParaCerrarDia"><span class="icono-3d-mini f-gris">🔒</span> Cortes para cerrar el turno</label>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="cortesParaCerrarDia" type="number" min="1" max="10" step="1" value="2" onchange="guardarCortesParaCerrar()" style="width:80px"><span style="font-size:13px;color:#555">cortes por turno</span></div>
 <p style="font-size:12px;color:#666">Con el corte de productos activado, la sesión se cierra solo al guardar el corte de productos que complete este número. Sin corte de productos, se cierra con el corte de dinero. Solo el Administrador lo cambia; él puede reabrir con su PIN si hace falta otro corte.</p>
 </div>
 </div>
@@ -2463,6 +2463,11 @@ let gastos=JSON.parse(localStorage.getItem("kupoPosV146Gastos")||"[]");
 let cortes=JSON.parse(localStorage.getItem("kupoPosV146Cortes")||"[]");
 let fondoCaja=Number(localStorage.getItem("kupoPosV146Fondo")||"0")||0;
 let fondoFecha=localStorage.getItem("kupoPosV146FondoFecha")||"";
+/* v187 (Lalo 2026-11-24): turnos por cajero, como SICAR — cada cajero abre su caja con su perfil, corta solo sus ventas y al cerrar el turno el dinero vuelve a 0 para el siguiente; el folio de ventas sigue de largo. fronteraFolio = folio máximo de venta incluido en el último turno cerrado; fronteraTiempo = instante del último corte del turno cerrado (para gastos/entradas, que no tienen folio); turnoId = turno actual (cada corte anota el suyo). */
+let fronteraFolio=Number(localStorage.getItem("kupoPosV146FronteraFolio")||"0")||0;
+let fronteraTiempo=Number(localStorage.getItem("kupoPosV146FronteraTiempo")||"0")||0;
+let turnoId=Number(localStorage.getItem("kupoPosV146Turno")||"1")||1;
+var ultimoCierreCortes=0;
 let corteFolio=(JSON.parse(localStorage.getItem("kupoPosV146CorteFolio")||"0"))||0;
 /* Cotizaciones: se guardan en localStorage, no descuentan stock al crearlas. */
 let cotizaciones=JSON.parse(localStorage.getItem("kupoPosV146Cotizaciones")||"[]");
@@ -2489,7 +2494,7 @@ function almacenVenta(){let a=almacenActivo(ventaAlmacen);if(a)return a;a=almace
 if(!stockAlmacen){stockAlmacen={};const pr=almacenPrincipal();catalogo.forEach(p=>{stockAlmacen[p.id]={};if(pr)stockAlmacen[p.id][pr.id]=p.stock||0})}
 catalogo.forEach(p=>{if(!stockAlmacen[p.id]){stockAlmacen[p.id]={};const pr=almacenPrincipal();if(pr)stockAlmacen[p.id][pr.id]=p.stock||0}});
 sincronizarStock();
-function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146HistorialProducto",JSON.stringify(historialProducto));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146FondoFecha",fondoFecha);localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146Cotizaciones",JSON.stringify(cotizaciones));localStorage.setItem("kupoPosV146CotFolio",JSON.stringify(cotFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
+function guardar(){localStorage.setItem("kupoPosV146Catalogo",JSON.stringify(catalogo));localStorage.setItem("kupoPosV146Ticket",JSON.stringify(ticket));localStorage.setItem("kupoPosV146Ventas",JSON.stringify(ventas));localStorage.setItem("kupoPosV146Folio",JSON.stringify(folio));localStorage.setItem("kupoPosV146Entradas",JSON.stringify(entradas));localStorage.setItem("kupoPosV146HistorialProducto",JSON.stringify(historialProducto));localStorage.setItem("kupoPosV146Gastos",JSON.stringify(gastos));localStorage.setItem("kupoPosV146Cortes",JSON.stringify(cortes));localStorage.setItem("kupoPosV146Fondo",String(fondoCaja));localStorage.setItem("kupoPosV146FondoFecha",fondoFecha);localStorage.setItem("kupoPosV146FronteraFolio",String(fronteraFolio));localStorage.setItem("kupoPosV146FronteraTiempo",String(fronteraTiempo));localStorage.setItem("kupoPosV146Turno",String(turnoId));localStorage.setItem("kupoPosV146CorteFolio",JSON.stringify(corteFolio));localStorage.setItem("kupoPosV146Cotizaciones",JSON.stringify(cotizaciones));localStorage.setItem("kupoPosV146CotFolio",JSON.stringify(cotFolio));guardarPorLicencia("kupoPosV146TicketConfig",ticketConfig);guardarPorLicencia("kupoPosV146Terminales",terminales);guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));localStorage.setItem("kupoPosV146Almacenes",JSON.stringify(almacenes));localStorage.setItem("kupoPosV146StockAlmacen",JSON.stringify(stockAlmacen));localStorage.setItem("kupoPosV146Traspasos",JSON.stringify(traspasos));localStorage.setItem("kupoPosV146VentaAlmacen",String(ventaAlmacen));}
 function hoyLocal(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function fechaBonita(f){if(!f)return "";const p=f.split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:f}
 function dinero(n){return "$"+Number(n).toFixed(2)}
@@ -3308,6 +3313,7 @@ function corteESCPosBytes(c){
  out+="\x1Ba\x01\x1BE\x01"+btCentrar(ticketConfig.negocio||"Mi negocio",ancho)+"\x1BE\x00";
  out+="\x1Ba\x01"+btCentrar(ticketConfig.direccion||"",ancho)+btCentrar(ticketConfig.telefono||"",ancho);
  out+=btCentrar((c.fecha||"")+" "+(c.hora||""),ancho);
+ if(c.cajeroNombre)out+=btCentrar("CAJERO: "+btSinAcentos(c.cajeroNombre),ancho);
  out+=btCentrar((esProd?"CORTE DE PRODUCTOS #":"CORTE DE DINERO #")+String(c.folio).padStart(4,"0"),ancho);
  out+="\x1Ba\x00";
  out+=new Array(ancho+1).join("-")+"\n";
@@ -3359,7 +3365,7 @@ function corteImpresoHTML(c){
   +'<div class="t-line"><span>Efectivo contado</span><span>'+dinero(c.efectivoContado||0)+'</span></div>'
   +'<div class="t-line"><span>Diferencia</span><span>'+dinero(c.diferencia||0)+'</span></div>';
  }
- return '<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div><div>'+escHtml((c.fecha||"")+" "+(c.hora||""))+'</div><div class="t-titulo">'+(esProd?"CORTE DE PRODUCTOS":"CORTE DE DINERO")+' #'+String(c.folio).padStart(4,"0")+'</div><hr>'+filas+'<hr><div class="t-line t-total"><span>TOTAL</span><span>'+dinero(esProd?(c.ventasTotal||0):(c.totalCaja||0))+'</span></div><div>Un producto de Grupo Benitez - V1.7.0</div>';
+ return '<div class="t-titulo">'+escHtml(ticketConfig.negocio||"Mi negocio")+'</div><div>'+escHtml((c.fecha||"")+" "+(c.hora||""))+'</div>'+(c.cajeroNombre?'<div>CAJERO: '+escHtml(c.cajeroNombre)+'</div>':'')+'<div class="t-titulo">'+(esProd?"CORTE DE PRODUCTOS":"CORTE DE DINERO")+' #'+String(c.folio).padStart(4,"0")+'</div><hr>'+filas+'<hr><div class="t-line t-total"><span>TOTAL</span><span>'+dinero(esProd?(c.ventasTotal||0):(c.totalCaja||0))+'</span></div><div>Un producto de Grupo Benitez - V1.7.0</div>';
 }
 function imprimirCorteVentana(c){
  if(!c)return false;
@@ -4746,9 +4752,9 @@ function esHoyVenta(v){return new Date(v.fecha).toDateString()===new Date().toDa
 function fondoEfectivo(){return opcionesSistema.usaFondo===true?fondoCaja:0;}
 function resumenCorte(){
  const hoy=hoyLocal();
- const vHoy=ventas.filter(esHoyVenta);
- const gHoy=gastos.filter(g=>g.fecha===hoy);
- const eHoy=entradas.filter(e=>e.fecha===hoy);
+ const vHoy=ventasTurno();
+ const gHoy=gastos.filter(g=>g.fecha===hoy&&Number(g.id||0)>fronteraTiempo);
+ const eHoy=entradas.filter(e=>e.fecha===hoy&&Number(e.id||0)>fronteraTiempo);
  const ventasTotal=vHoy.reduce((a,v)=>a+v.total,0);
  const porPago={Efectivo:0,Tarjeta:0,"Transf.":0,Mixto:0};
  vHoy.forEach(v=>{if(porPago[v.pago]===undefined)porPago[v.pago]=0;porPago[v.pago]+=v.total});
@@ -4763,8 +4769,8 @@ function resumenCorte(){
 }
 function resumenCorteProductos(){
  const hoy=hoyLocal();
- const vHoy=ventas.filter(esHoyVenta);
- const eHoy=entradas.filter(e=>e.fecha===hoy);
+ const vHoy=ventasTurno();
+ const eHoy=entradas.filter(e=>e.fecha===hoy&&Number(e.id||0)>fronteraTiempo);
  const porProd={};
  vHoy.forEach(v=>{(v.items||[]).forEach(l=>{const p=catalogo.find(x=>x.id===l.id);const key=l.id;if(!porProd[key])porProd[key]={productoId:l.id,nombre:p?p.nombre:"Producto",emoji:p?p.emoji:"📦",precio:l.precio||(p?p.precio:0),cantidad:0,monto:0,unidad:unidadDe(p)};porProd[key].cantidad+=l.cant;porProd[key].monto+=l.cant*(l.precio||0)})});
  const filas=Object.values(porProd).map(r=>{const p=catalogo.find(x=>x.id===r.productoId);const entHoy=eHoy.filter(e=>String(e.productoId)===String(r.productoId)).reduce((a,e)=>a+(e.cantidad||0),0);const restante=p?p.stock:0;const inicial=redondearCant(restante+r.cantidad-entHoy);return {productoId:r.productoId,nombre:r.nombre,emoji:r.emoji,precio:r.precio,cantidad:r.cantidad,monto:r.monto,unidad:r.unidad||"pieza",entradasHoy:entHoy,stockInicial:inicial,stockVendido:r.cantidad,stockRestante:restante}});
@@ -4835,7 +4841,7 @@ function renderHistorial(){
  const elD=document.getElementById("resHistDif"); if(elD)elD.textContent=dinero(soloDinero.reduce((s,c)=>s+(c.diferencia||0),0));
  const lista=document.getElementById("listaHistCortes"); if(!lista)return;
  if(!items.length){lista.innerHTML='<tr><td colspan="10"><div class="vacio-accion">'+ic3d("🕐","f-morado")+'<b>Aún no hay cortes</b>Realiza tu primer corte de dinero o de productos en Corte diario.<br><button type="button" onclick="mostrarVista(\'cortes\')">'+ic3d("📊","f-azulrey")+' Ir a Corte diario</button></div></td></tr>';return}
- lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?ic3d("📦","f-azul")+" Productos":ic3d("💰","f-oro")+" Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">'+ic3d("👁","f-azul")+' Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">'+ic3d("🖨","f-azul")+' Reimprimir</button></div></td></tr>'}).join("");
+ lista.innerHTML=items.map(c=>{const esProd=tipoDe(c)==="productos";return '<tr><td>'+c.fecha+' '+c.hora+(c.cajeroNombre?' · '+escHtml(c.cajeroNombre):'')+'</td><td>#'+String(c.folio).padStart(4,"0")+'</td><td>'+(esProd?ic3d("📦","f-azul")+" Productos":ic3d("💰","f-oro")+" Dinero")+'</td><td class="num">'+dinero(c.ventasTotal)+'</td><td class="num">'+(esProd?"—":dinero(c.gastos))+'</td><td class="num">'+(esProd?redondearCant(c.totalPiezas||0):dinero(c.entradasCosto||0)+' ('+redondearCant(c.entradasPiezas||0)+')')+'</td><td class="num">'+(esProd?"—":"<b>"+dinero(c.totalCaja)+"</b>")+'</td><td class="num">'+(esProd?"—":dinero(c.diferencia))+'</td><td><span class="badge">✅ Cerrado</span></td><td><div class="hist-botones"><button type="button" onclick="verDetalleCorte('+c.id+')">'+ic3d("👁","f-azul")+' Ver detalle</button><button type="button" onclick="reimprimirCorte('+c.id+')">'+ic3d("🖨","f-azul")+' Reimprimir</button></div></td></tr>'}).join("");
 }
 /* v136 (Lalo 2026-11-23): cierre automático del día — al guardar el corte
    número N del día (N configurable en Corte diario, por defecto 2), el
@@ -4853,11 +4859,15 @@ function renderHistorial(){
 var cierreAutoPendiente=false;
 function cortesParaCerrar(){var n=parseInt(ticketConfig&&ticketConfig.cortesParaCerrar,10);return (isNaN(n)||n<1)?2:n;}
 function cortesHoy(){var h=hoyLocal();return cortes.filter(function(c){return c.fecha===h;}).length;}
-function mostrarAvisoDiaCerrado(n){var b=document.getElementById("avisoDiaCerrado");if(!b)return;b.innerHTML=ic3d("🔒","f-oro")+" <b>Día cerrado</b><br>Se hicieron los "+n+" cortes de hoy. Inicia sesión para el día siguiente.";b.classList.remove("oculto");}
+/* v187: ventas del turno actual — solo las de hoy, con folio mayor que la frontera del último turno cerrado, y del cajero de la sesión (las ventas sin cajero se cuentan una vez, en el primer corte que las tome). El corte de productos cuenta lo mismo que el de dinero del turno, más lo que se venda entre un corte y otro, para que ninguna venta quede fuera de los cortes. */
+function ventasTurno(){var yo=(sesionActual&&sesionActual.usuario)||"";return ventas.filter(function(v){if(!esHoyVenta(v))return false;var f=Number(v.folio||0);if(f<=fronteraFolio)return false;return !v.cajero||v.cajero===yo;});}
+function cortesTurno(){return cortes.filter(function(c){return c.turno===turnoId;}).length;}
+function mostrarAvisoDiaCerrado(n){var b=document.getElementById("avisoDiaCerrado");if(!b)return;b.innerHTML=ic3d("🔒","f-oro")+" <b>Turno cerrado</b><br>Se hicieron los "+n+" cortes del turno. Inicia sesión para el siguiente turno.";b.classList.remove("oculto");}
 function ocultarAvisoDiaCerrado(){var b=document.getElementById("avisoDiaCerrado");if(b)b.classList.add("oculto");}
-function guardarCortesParaCerrar(){if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia este ajuste.");var inp0=document.getElementById("cortesParaCerrarDia");if(inp0)inp0.value=cortesParaCerrar();return;}var inp=document.getElementById("cortesParaCerrarDia");var n=parseInt(inp&&inp.value,10);if(isNaN(n)||n<1)n=2;if(n>10)n=10;ticketConfig.cortesParaCerrar=n;if(inp)inp.value=n;guardar();toast("Cierre automático tras "+n+(n===1?" corte":" cortes")+" al día.");}
+function guardarCortesParaCerrar(){if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia este ajuste.");var inp0=document.getElementById("cortesParaCerrarDia");if(inp0)inp0.value=cortesParaCerrar();return;}var inp=document.getElementById("cortesParaCerrarDia");var n=parseInt(inp&&inp.value,10);if(isNaN(n)||n<1)n=2;if(n>10)n=10;ticketConfig.cortesParaCerrar=n;if(inp)inp.value=n;guardar();toast("Cierre automático tras "+n+(n===1?" corte":" cortes")+" por turno.");}
 /* v184: al cerrarse el día el fondo de caja vuelve a 0 (Lalo 2026-11-24: al día siguiente seguía apareciendo la misma cantidad). El fondo se quedaba guardado para siempre y el efectivo esperado y el total en caja del día siguiente lo seguían sumando. El corte ya guardado conserva su fondo; en la mañana se escribe el fondo nuevo si hay cambio en caja. */
-function cerrarDiaAutomatico(){fondoCaja=0;fondoFecha="";try{guardar()}catch(e){}var _f=document.getElementById("fondoCaja");if(_f)_f.value="";cierreAutoPendiente=true;salirSesion();}
+/* v187 (Lalo 2026-11-24): turnos por cajero, como SICAR — al cerrar el turno, el dinero del turno queda en sus dos cortes y el turno nuevo empieza en 0: la frontera se mueve al último corte (sus ventas ya se contaron) y el turno avanza. El folio de ventas sigue de largo, no se resetea. El fondo vuelve a 0 como en v184. */
+function cerrarDiaAutomatico(){var uc=cortes[0];if(uc){if(typeof uc.hastaFolio==="number")fronteraFolio=uc.hastaFolio;if(uc.hastaTiempo)fronteraTiempo=uc.hastaTiempo;}ultimoCierreCortes=cortesTurno();turnoId=(turnoId||0)+1;fondoCaja=0;fondoFecha="";try{guardar()}catch(e){}var _f=document.getElementById("fondoCaja");if(_f)_f.value="";cierreAutoPendiente=true;salirSesion();}
 /* v185: el cierre de hoy ya pasó con una versión vieja (sin reseteo) y mañana el fondo seguiría mostrando lo de ayer. Al abrir la app o la vista de Cortes, si el fondo es de un día anterior y ese día se cerró con los cortes completos, el fondo vuelve a 0. El fondo se anota con su fecha al escribirlo (fondoFecha); si el fondo es viejo y no trae fecha, se usa el día del último corte. Si el día no se cerró (faltó un corte), el fondo se queda: el dinero sigue en caja. */
 function resetFondoSiDiaCerrado(){
  if(!fondoCaja)return false;
@@ -4874,7 +4884,7 @@ function resetFondoSiDiaCerrado(){
  var _f=document.getElementById("fondoCaja");if(_f)_f.value="";
  return true;
 }
-function revisarCierreAutomatico(){if(cortesHoy()>=cortesParaCerrar())cerrarDiaAutomatico();}
+function revisarCierreAutomatico(){if(cortesTurno()>=cortesParaCerrar())cerrarDiaAutomatico();}
 function realizarCorteDinero(ya){
  const r=resumenCorte();
  if(!r.ventasNum&&r.gastosHoy===0&&r.piezasEntradas===0){toast("Aún no hay movimientos hoy para cortar.");return}
@@ -4882,7 +4892,8 @@ function realizarCorteDinero(ya){
  if(!ya){pedirConfirmacion("¿Sacar el corte de dinero?","Sacar corte",function(){realizarCorteDinero(true)});return;}
  corteFolio++;
  const ahora=new Date();
- const c={id:Date.now()+uid++,tipo:"dinero",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoEfectivo(),efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja};
+ const hastaFolio=ventasTurno().reduce(function(m,v){return Math.max(m,Number(v.folio||0));},fronteraFolio);
+ const c={id:Date.now()+uid++,tipo:"dinero",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.ventasTotal,efectivo:r.porPago.Efectivo||0,tarjeta:r.porPago.Tarjeta||0,transf:r.porPago["Transf."]||0,mixto:r.porPago.Mixto||0,gastos:r.gastosHoy,entradasCosto:r.costoEntradas,entradasPiezas:r.piezasEntradas,ganancia:r.ganancia,fondo:fondoEfectivo(),efectivoEsperado:r.efectivoEsperado,efectivoContado:contado,diferencia:contado-r.efectivoEsperado,totalCaja:r.totalCaja,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||"",turno:turnoId,desdeFolio:fronteraFolio,hastaFolio:hastaFolio,hastaTiempo:Date.now()};
  cortes.unshift(c);
  ticket=[];document.getElementById("efectivoContado").value="";
  guardar();render();renderCortes();renderHistorial();
@@ -4897,7 +4908,8 @@ function realizarCorteProductos(ya){
  if(!ya){pedirConfirmacion("¿Sacar el corte de productos?","Sacar corte",function(){realizarCorteProductos(true)});return;}
  corteFolio++;
  const ahora=new Date();
- const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoEfectivo(),efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0};
+ const hastaFolio=ventasTurno().reduce(function(m,v){return Math.max(m,Number(v.folio||0));},fronteraFolio);
+ const c={id:Date.now()+uid++,tipo:"productos",folio:corteFolio,fecha:hoyLocal(),hora:String(ahora.getHours()).padStart(2,"0")+":"+String(ahora.getMinutes()).padStart(2,"0"),ventasNum:r.ventasNum,ventasTotal:r.totalMonto,totalPiezas:r.totalPiezas,productos:r.filas,efectivo:0,tarjeta:0,transf:0,mixto:0,gastos:0,entradasCosto:0,entradasPiezas:0,ganancia:0,fondo:fondoEfectivo(),efectivoEsperado:0,efectivoContado:0,diferencia:0,totalCaja:0,cajero:(sesionActual&&sesionActual.usuario)||"",cajeroNombre:(sesionActual&&sesionActual.nombre)||"",turno:turnoId,desdeFolio:fronteraFolio,hastaFolio:hastaFolio,hastaTiempo:Date.now()};
  cortes.unshift(c);
  guardar();render();renderCortes();renderHistorial();
  imprimirCorteSilenciosa(c);
@@ -4909,11 +4921,11 @@ function verDetalleCorte(id){const c=cortes.find(x=>x.id===id);if(!c)return;
  detalleCorteId=id;
  var det=document.getElementById("cuerpoDetalleCorte"); if(!det)return;
  if((c.tipo||"dinero")==="productos"){
-  det.innerHTML="<b>"+ic3d("📦","f-azul")+" Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+  det.innerHTML="<b>"+ic3d("📦","f-azul")+" Corte de productos #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+(c.cajeroNombre?" · por "+escHtml(c.cajeroNombre):"")+(c.desdeFolio!==undefined&&c.hastaFolio>c.desdeFolio?" · folios #"+String(c.desdeFolio+1).padStart(4,"0")+"–#"+String(c.hastaFolio).padStart(4,"0"):"")+"</b><br>"+
   (c.productos||[]).map(p=>ic3d(p.emoji||"📦","f-azul")+" "+escHtml(p.nombre)+": "+textoCantidadU(p.cantidad,p.unidad||"pieza")+" · "+dinero(p.monto)+(opcionesSistema.sinStock===true?"":" · "+ic3d("📥","f-verde")+" Stock inicial "+textoCantidadU(p.stockInicial,p.unidad||"pieza")+" · "+ic3d("✅","f-verde")+" Vendido "+textoCantidadU(p.stockVendido,p.unidad||"pieza")+" · "+ic3d("📦","f-gris")+" Restante "+textoCantidadU(p.stockRestante,p.unidad||"pieza"))).join("<br>")+
   "<br><b>"+ic3d("📊","f-azulrey")+" Total: "+redondearCant(c.totalPiezas||0)+" · "+dinero(c.ventasTotal)+"</b>";
  } else {
-  det.innerHTML="<b>"+ic3d("💰","f-oro")+" Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+"</b><br>"+
+  det.innerHTML="<b>"+ic3d("💰","f-oro")+" Corte de dinero #"+String(c.folio).padStart(4,"0")+" · "+c.fecha+" "+c.hora+(c.cajeroNombre?" · por "+escHtml(c.cajeroNombre):"")+(c.desdeFolio!==undefined&&c.hastaFolio>c.desdeFolio?" · folios #"+String(c.desdeFolio+1).padStart(4,"0")+"–#"+String(c.hastaFolio).padStart(4,"0"):"")+"</b><br>"+
   ic3d("🛒","f-oro")+" Ventas: "+c.ventasNum+" · "+dinero(c.ventasTotal)+" ("+ic3d("💵","f-verde")+" Efectivo "+dinero(c.efectivo)+" · "+ic3d("💳","f-azul")+" Tarjeta "+dinero(c.tarjeta)+" · "+ic3d("🏦","f-azulrey")+" Transf. "+dinero(c.transf)+" · "+ic3d("🔀","f-ambar")+" Mixto "+dinero(c.mixto)+")<br>"+
   ic3d("🧾","f-coral")+" Gastos: "+dinero(c.gastos)+" · "+ic3d("📥","f-verde")+" Costo de entradas: "+dinero(c.entradasCosto)+" ("+redondearCant(c.entradasPiezas||0)+")<br>"+
   ic3d("📈","f-azulrey")+" Ganancia: "+dinero(c.ganancia)+" · "+ic3d("💼","f-gris")+" Fondo: "+dinero(c.fondo)+" · "+ic3d("🧮","f-gris")+" Efectivo esperado: "+dinero(c.efectivoEsperado)+" · "+ic3d("✋","f-oro")+" Contado: "+dinero(c.efectivoContado)+" · "+ic3d("⚖️","f-morado")+" Diferencia: "+dinero(c.diferencia)+"<br>"+
@@ -5894,7 +5906,7 @@ async function entrar(){
  var _pc=document.getElementById("pantallaCarga");if(_pc)_pc.style.display="flex";
  setTimeout(function(){var _p2=document.getElementById("pantallaCarga");if(_p2)_p2.style.display="none";document.getElementById("pantallaLogin").classList.add("oculto");document.getElementById("app").classList.remove("oculto");aplicarPermisosMenu();mostrarVista("ventas");if(typeof suscribirChatMensajes==="function")suscribirChatMensajes();actualizarAvisoGracia(true);},1300);
 }
-function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");renderPerfilesLogin();document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();if(cierreAutoPendiente){cierreAutoPendiente=false;mostrarAvisoDiaCerrado(cortesHoy());toast("Día cerrado: ya se hicieron los cortes de hoy. Inicia sesión para el día siguiente.");}else{ocultarAvisoDiaCerrado();toast("Turno cerrado. Inicia sesión para volver a entrar.");}}
+function salirSesion(){if(mensajesChatCanal&&typeof kupoSupabase!=="undefined"&&kupoSupabase){try{kupoSupabase.removeChannel(mensajesChatCanal)}catch(e){}mensajesChatCanal=null;mensajesChatLicencia="";}if(mensajesChatTimer){clearInterval(mensajesChatTimer);mensajesChatTimer=null;}sesionActual=null;try{localStorage.removeItem("kupoPosV146Sesion")}catch(e){}try{localStorage.removeItem("kupoPosV146Vivo")}catch(e){}document.body.classList.remove("movil-ventas");document.body.classList.remove("vista-ventas");guardarCajeros();aplicarPermisosMenu();limpiarPin();document.getElementById("msgLogin").textContent="";actualizarBotonOlvido();document.getElementById("app").classList.add("oculto");document.getElementById("pantallaLogin").classList.remove("oculto");renderPerfilesLogin();document.getElementById("pantallaLicencia").classList.add("oculto");var _s=document.getElementById("pantallaSetup");if(_s)_s.classList.add("oculto");window.scrollTo({top:0});if(typeof actualizarBotonKupi==="function")actualizarBotonKupi();if(cierreAutoPendiente){cierreAutoPendiente=false;mostrarAvisoDiaCerrado(ultimoCierreCortes||cortesHoy());toast("Turno cerrado: se hicieron los cortes del turno. Inicia sesión para el siguiente turno.");}else{ocultarAvisoDiaCerrado();toast("Turno cerrado. Inicia sesión para volver a entrar.");}}
 /* Lalo 2026-11-12: el nombre del negocio en el encabezado NO es editable: es solo texto.
    Antes era un <input> y al hacer clic se podía borrar el nombre (y ese borrado se guardaba).
    Ahora el nombre solo se cambia en Personalizar ticket (tNegocio) y nunca se guarda vacío. */
