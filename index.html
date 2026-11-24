@@ -1165,6 +1165,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <nav>
 <a class="activo" id="navVentas" onclick="mostrarVista('ventas')"><span class="icono-3d">🧾</span> Ventas</a>
 <a id="navProductos" onclick="mostrarVista('productos')"><span class="icono-3d">📦</span> Productos</a>
+<a id="navKiosco" onclick="mostrarVista('kiosco')"><span class="icono-3d">🖥️</span> Kiosco</a>
 <a id="navCotizaciones" onclick="mostrarVista('cotizaciones')"><span class="icono-3d">📋</span> Cotizaciones</a>
 <a id="navEntradas" onclick="mostrarVista('entradas')"><span class="icono-3d">➕</span> Entradas</a>
 <a id="navGastos" onclick="mostrarVista('gastos')"><span class="icono-3d">💲</span> Gastos</a>
@@ -1249,6 +1250,17 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <select id="filtroProd" onchange="renderProductos()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option><option value="pausados">Pausados</option></select>
 </div>
 <div class="prod-lista" id="listaProductos"></div>
+</div>
+
+
+<div id="vistaKiosco" class="oculto">
+<h1>🖥️ Kiosco</h1>
+<p style="color:#555;margin-bottom:14px">La foto del kiosco es solo para el menú del kiosco. Sube o cambia la foto de cada producto aquí; el menú original y el ticket no cambian.</p>
+<div class="buscar">
+<input id="buscarKiosco" placeholder="🔍 Buscar producto..." oninput="renderKiosco()">
+</div>
+<div class="prod-lista" id="listaKiosco"></div>
+<input id="kioscoFotoArchivo" type="file" accept="image/*" style="display:none" onchange="subirFotoKiosco(event)">
 </div>
 
 
@@ -3128,7 +3140,7 @@ function probarImpresionBT(){
 }
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones"],Cajero:["ventas","cotizaciones","mensajes"]};
+const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones","kiosco"],Cajero:["ventas","cotizaciones","mensajes"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
 let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
@@ -3139,7 +3151,7 @@ function guardarPermisosCajero(){const sel=document.getElementById("selPermCajer
 function aplicarPermisosMenu(){
  const esAdmin=(sesionActual&&sesionActual.rol)==="Administrador";
  const mostrar=function(id,ver){const el=document.getElementById(id);if(el)el.style.display=ver?"":"none"};
- mostrar("navProductos",tienePermiso("productos"));mostrar("navImportar",tienePermiso("importar"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
+ mostrar("navProductos",tienePermiso("productos"));mostrar("navKiosco",tienePermiso("kiosco"));mostrar("navImportar",tienePermiso("importar"));mostrar("navEntradas",tienePermiso("entradas")&&opcionesSistema.sinStock!==true);mostrar("navGastos",tienePermiso("gastos"));mostrar("navCorte",tienePermiso("cortes"));mostrar("navReportes",tienePermiso("reportes"));mostrar("navHistCortes",tienePermiso("historial"));mostrar("navTicket",tienePermiso("ticket"));mostrar("navCajeros",tienePermiso("cajeros"));mostrar("navAdminLic",esAdmin);mostrar("navMulti",tienePermiso("multi")&&opcionesSistema.multiAlmacen);mostrar("navCotizaciones",true);
  mostrar("btnMensajesHeader",verMensajesChat());
  mostrar("btnKioscoHeader",opcionesSistema.kioscoActivo===true);
  mostrar("btnMensajesVentasMovil",verMensajesChat()&&esAdmin);
@@ -3499,6 +3511,7 @@ function mostrarVista(v){
  document.getElementById("fondoMenu").classList.remove("visible");
  document.getElementById("vistaVentas").classList.toggle("oculto",v!=="ventas");
  document.getElementById("vistaProductos").classList.toggle("oculto",v!=="productos");
+ document.getElementById("vistaKiosco").classList.toggle("oculto",v!=="kiosco");
  document.getElementById("vistaImportar").classList.toggle("oculto",v!=="importar");
  document.getElementById("vistaEntradas").classList.toggle("oculto",v!=="entradas");
  document.getElementById("vistaGastos").classList.toggle("oculto",v!=="gastos");
@@ -3519,6 +3532,7 @@ function mostrarVista(v){
  document.getElementById("layout").classList.toggle("sin-panel",v!=="ventas");
  document.getElementById("navVentas").classList.toggle("activo",v==="ventas");
  document.getElementById("navProductos").classList.toggle("activo",v==="productos");
+ document.getElementById("navKiosco").classList.toggle("activo",v==="kiosco");
  document.getElementById("navImportar").classList.toggle("activo",v==="importar");
  if(v==="importar")marcarImportarVisto();
  document.getElementById("navEntradas").classList.toggle("activo",v==="entradas");
@@ -3532,7 +3546,7 @@ function mostrarVista(v){
  document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
- if(v==="productos")renderProductos(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
+ if(v==="productos")renderProductos(); else if(v==="kiosco")renderKiosco(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -3796,6 +3810,30 @@ function fotoHtml(p){return p.foto?'<img src="'+p.foto+'" alt="'+escHtml(p.nombr
 function margenProducto(p){const c=Number(p.costo)||0;const pr=Number(p.precio)||0;if(pr<=0)return 0;return Math.round((pr-c)/pr*100)}
 function subirFotoProducto(ev){const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=function(){const img=new Image();img.onload=function(){const max=400;let w=img.width,h=img.height;if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s)}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);fotoProductoActual=cv.toDataURL("image/jpeg",0.82);const pv=document.getElementById("pFotoPreview");if(pv){pv.src=fotoProductoActual;pv.style.display=""}};img.src=rd.result};rd.readAsDataURL(f)}
 function quitarFotoProducto(){fotoProductoActual="__SIN_FOTO__";const pv=document.getElementById("pFotoPreview");if(pv){pv.src="";pv.style.display="none"}const inp=document.getElementById("pFotoArchivo");if(inp)inp.value=""}
+/* v170: apartado Kiosco (Lalo 2026-11-24): la foto del kiosco es SEPARADA de la
+   foto del menú original. Cada producto tiene fotoKiosco; el kiosco muestra
+   fotoKiosco y si está vacía usa foto. Subir/cambiar/quitar solo toca
+   fotoKiosco y se sincroniza a la nube como foto_kiosco. */
+var kioscoFotoId=null;
+function fotoKioscoDe(p){return (p&&(p.fotoKiosco||p.foto))||"";}
+function fotoHtmlKiosco(p){var f=fotoKioscoDe(p);return f?'<img src="'+f+'" alt="'+escHtml(p.nombre)+'">':fotoHtml(p);}
+function elegirFotoKiosco(id){kioscoFotoId=id;var inp=document.getElementById("kioscoFotoArchivo");if(inp)inp.click();}
+function subirFotoKiosco(ev){const f=ev&&ev.target&&ev.target.files&&ev.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=function(){const img=new Image();img.onload=function(){const max=400;let w=img.width,h=img.height;if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s)}const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);asignarFotoKiosco(kioscoFotoId,cv.toDataURL("image/jpeg",0.82));const inp=document.getElementById("kioscoFotoArchivo");if(inp)inp.value=""};img.src=rd.result};rd.readAsDataURL(f)}
+function asignarFotoKiosco(id,dataUrl){var p=catalogo.find(function(x){return String(x.id)===String(id)});if(!p||!dataUrl)return;p.fotoKiosco=dataUrl;guardar();if(typeof encolarProductoNube==="function")encolarProductoNube(p);renderKiosco();toast("Foto del kiosco actualizada: "+p.nombre)}
+function quitarFotoKiosco(id){var p=catalogo.find(function(x){return String(x.id)===String(id)});if(!p||!p.fotoKiosco)return;p.fotoKiosco="";guardar();if(typeof encolarProductoNube==="function")encolarProductoNube(p);renderKiosco();toast("Foto del kiosco quitada: "+p.nombre+" (ahora usa la foto del menú)")}
+function renderKiosco(){
+ var q=((document.getElementById("buscarKiosco")||{}).value||"").toLowerCase();
+ var lista=document.getElementById("listaKiosco");if(!lista)return;lista.innerHTML="";
+ var items=catalogo.filter(function(p){return p.nombre.toLowerCase().indexOf(q)>=0});
+ if(!items.length){lista.innerHTML='<div class="ticket-vacio">'+ic3d("🖥️","f-gris")+'<br><b>No hay productos con ese nombre</b><br>Agrega productos en Productos.</div>';return}
+ items.forEach(function(p){
+  var d=document.createElement("div");d.className="prod-row";
+  var fk=p.fotoKiosco||"";
+  var etiqueta=fk?"Foto del kiosco":(p.foto?"Foto del menú":"Sin foto");
+  d.innerHTML='<div class="foto">'+fotoHtmlKiosco(p)+'</div><div class="info"><h3>'+escHtml(p.nombre)+'</h3><p>'+dinero(p.precio)+' · '+escHtml(p.categoria||"General")+' · '+etiqueta+'</p></div><div class="acciones-prod"><button onclick="elegirFotoKiosco(\''+String(p.id).replace(/'/g,"")+'\')">'+ic3d("🖼️","f-azul")+' Subir foto</button>'+(fk?'<button class="secundario" onclick="quitarFotoKiosco(\''+String(p.id).replace(/'/g,"")+'\')">Quitar foto del kiosco</button>':"")+'</div>';
+  lista.appendChild(d);
+ });
+}
 function renderProductos(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
  const f=(document.getElementById("filtroProd")||{}).value||"todos";
@@ -4703,7 +4741,7 @@ async function descargarProductosNube(){
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevos:0,actualizados:0};
  var clave=licenciaActual();if(!clave||clave==="SIN-LICENCIA")return{nuevos:0,actualizados:0};
  try{
-  var r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado,foto").eq("licencia_clave",clave).limit(500);
+  var r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado,foto,foto_kiosco").eq("licencia_clave",clave).limit(500);
   if(r.error&&/foto/i.test((r.error&&r.error.message)||"")){r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado").eq("licencia_clave",clave).limit(500);}
   if(r.error||!r.data)return{nuevos:0,actualizados:0};
   var nuevos=0,actualizados=0,tocoStock=false;
@@ -4715,7 +4753,7 @@ async function descargarProductosNube(){
    var stock=Number(x.stock)||0;
    var loc=catalogo.find(function(p){return String(p.id)===String(id)});
    if(!loc){
-    catalogo.push({id:id,nombre:x.nombre||"Producto",precio:Number(x.precio)||0,stock:stock,emoji:x.emoji||"📦",categoria:x.categoria||"General",unidad:x.unidad||"pieza",sku:"SKU-"+String(id).slice(-6),costo:Math.round((Number(x.precio)||0)*0.6*100)/100,stockMin:5,foto:(x.foto||""),pausado:!!x.pausado,nubeId:x.nube_id||null});
+    catalogo.push({id:id,nombre:x.nombre||"Producto",precio:Number(x.precio)||0,stock:stock,emoji:x.emoji||"📦",categoria:x.categoria||"General",unidad:x.unidad||"pieza",sku:"SKU-"+String(id).slice(-6),costo:Math.round((Number(x.precio)||0)*0.6*100)/100,stockMin:5,foto:(x.foto||""),fotoKiosco:(x.foto_kiosco||""),pausado:!!x.pausado,nubeId:x.nube_id||null});
     nuevos++;
    }else{
     var ch=false;
@@ -4726,6 +4764,8 @@ async function descargarProductosNube(){
     if((loc.emoji||"")!==(x.emoji||"")){loc.emoji=x.emoji||"";ch=true;}
     if(!!loc.pausado!==!!x.pausado){loc.pausado=!!x.pausado;ch=true;}
     if(x.foto&&loc.foto!==x.foto){loc.foto=x.foto;ch=true;}
+    if(x.foto_kiosco&&loc.fotoKiosco!==x.foto_kiosco){loc.fotoKiosco=x.foto_kiosco;ch=true;}
+    if(!x.foto_kiosco&&loc.fotoKiosco){loc.fotoKiosco="";ch=true;}
     if(x.nube_id&&!loc.nubeId){loc.nubeId=x.nube_id;ch=true;}
     if(Number(loc.stock)!==stock){loc.stock=stock;ch=true;}
     if(ch)actualizados++;
@@ -4919,7 +4959,7 @@ function comprimirFotoNube(dataUrl,cb){
   img.src=dataUrl;
  }catch(e){if(cb)cb(null);}
 }
-function encolarProductoNube(pr){if(!pr)return;if(!pr.nubeId)pr.nubeId=nubeId();var _foto=(pr.foto||"");var _carga={nubeId:pr.nubeId,licencia_clave:licenciaActual(),producto_id:String(pr.id),nombre:pr.nombre,precio:Number(pr.precio)||0,stock:redondearCant(pr.stock||0),unidad:unidadDe(pr),categoria:pr.categoria||"General",emoji:pr.emoji||"📦",pausado:!!pr.pausado};if(_foto)_carga.foto=_foto;encolarNube("productos",_carga);if(_foto&&_foto.length>120000&&typeof comprimirFotoNube==="function"){try{comprimirFotoNube(_foto,function(chica){if(!chica||chica===_foto||chica.length>=_foto.length)return;pr.foto=chica;encolarProductoNube(pr);});}catch(e){}}if(typeof guardar==="function"){try{guardar()}catch(e){}}}
+function encolarProductoNube(pr){if(!pr)return;if(!pr.nubeId)pr.nubeId=nubeId();var _foto=(pr.foto||"");var _carga={nubeId:pr.nubeId,licencia_clave:licenciaActual(),producto_id:String(pr.id),nombre:pr.nombre,precio:Number(pr.precio)||0,stock:redondearCant(pr.stock||0),unidad:unidadDe(pr),categoria:pr.categoria||"General",emoji:pr.emoji||"📦",pausado:!!pr.pausado};if(_foto)_carga.foto=_foto;if(pr.fotoKiosco)_carga.foto_kiosco=pr.fotoKiosco;else if(pr.fotoKiosco==="")_carga.foto_kiosco=null;encolarNube("productos",_carga);if(_foto&&_foto.length>120000&&typeof comprimirFotoNube==="function"){try{comprimirFotoNube(_foto,function(chica){if(!chica||chica===_foto||chica.length>=_foto.length)return;pr.foto=chica;encolarProductoNube(pr);});}catch(e){}}if(typeof guardar==="function"){try{guardar()}catch(e){}}}
 function encolarMovimientoNube(m){if(!m)return;if(!m.nubeId)m.nubeId=nubeId();encolarNube("movimientos",{nubeId:m.nubeId,licencia_clave:licenciaActual(),producto_id:String(m.productoId),producto_nombre:m.nombre||"",fecha:m.fecha||new Date().toISOString(),tipo:m.tipo||"",cambio:Number(m.cambio)||0,stock:Number(m.stock)||0,cajero:(typeof sesionActual!=="undefined"&&sesionActual&&sesionActual.usuario)||"",cajero_nombre:m.cajero||"",rol:m.rol||"",almacen:m.almacen||"",proveedor:m.proveedor||"",nota:m.nota||""});}
 function marcarMovimientoSubido(nubeId){if(!nubeId)return false;var h=null;try{h=historialProducto.find(function(x){return x.nubeId===nubeId})}catch(e){}if(h&&!h.subidoNube){h.subidoNube=true;return true}return false}
 function encolarHistorialLocalNube(){if(typeof historialProducto==="undefined"||!historialProducto.length)return 0;var n=0;historialProducto.forEach(function(h){if(!h.subidoNube){if(!h.nubeId)h.nubeId=nubeId();encolarMovimientoNube(h);n++}});return n}
@@ -4946,7 +4986,7 @@ async function intentarSincronizarNube(){
   }
   for(const v of q.ventas.slice()){const r=await kupoSupabase.from("ventas").upsert({nube_id:v.nubeId,licencia_clave:v.licencia_clave,folio:v.folio,total:v.total,forma_pago:v.forma_pago,fecha:v.fecha,cajero:v.cajero,almacen:v.almacen,items:v.items},{onConflict:"nube_id"});if(!r.error)q.ventas=q.ventas.filter(function(x){return x.nubeId!==v.nubeId});}
   for(const c of q.cajeros.slice()){let r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo,permisos:c.permisos||{}},{onConflict:"licencia_clave,usuario"});if(r.error&&/permisos/i.test(r.error.message||"")){r=await kupoSupabase.from("cajeros").upsert({nube_id:c.nubeId,licencia_clave:c.licencia_clave,nombre:c.nombre,usuario:c.usuario,rol:c.rol,activo:c.activo},{onConflict:"licencia_clave,usuario"});}if(!r.error)q.cajeros=q.cajeros.filter(function(x){return x.nubeId!==c.nubeId});}
-  for(const pr of q.productos.slice()){var _up={nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado};if(pr.foto)_up.foto=pr.foto;var r=await kupoSupabase.from("productos").upsert(_up,{onConflict:"licencia_clave,producto_id"});if(r.error&&/foto/i.test((r.error&&r.error.message)||"")){delete _up.foto;r=await kupoSupabase.from("productos").upsert(_up,{onConflict:"licencia_clave,producto_id"});}if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
+  for(const pr of q.productos.slice()){var _up={nube_id:pr.nubeId,licencia_clave:pr.licencia_clave,producto_id:pr.producto_id,nombre:pr.nombre,precio:pr.precio,stock:pr.stock,unidad:pr.unidad,categoria:pr.categoria,emoji:pr.emoji,pausado:pr.pausado};if(pr.foto)_up.foto=pr.foto;if(pr.foto_kiosco!==undefined)_up.foto_kiosco=pr.foto_kiosco;var r=await kupoSupabase.from("productos").upsert(_up,{onConflict:"licencia_clave,producto_id"});if(r.error&&/foto/i.test((r.error&&r.error.message)||"")){delete _up.foto;delete _up.foto_kiosco;r=await kupoSupabase.from("productos").upsert(_up,{onConflict:"licencia_clave,producto_id"});}if(!r.error)q.productos=q.productos.filter(function(x){return x.nubeId!==pr.nubeId});}
   for(const m of q.movimientos.slice()){const r=await kupoSupabase.from("movimientos_inventario").upsert({nube_id:m.nubeId,licencia_clave:m.licencia_clave,producto_id:m.producto_id,producto_nombre:m.producto_nombre,fecha:m.fecha,tipo:m.tipo,cambio:m.cambio,stock:m.stock,cajero:m.cajero,cajero_nombre:m.cajero_nombre,rol:m.rol,almacen:m.almacen,proveedor:m.proveedor,nota:m.nota},{onConflict:"nube_id"});if(!r.error){q.movimientos=q.movimientos.filter(function(x){return x.nubeId!==m.nubeId});if(typeof marcarMovimientoSubido==="function")marcarMovimientoSubido(m.nubeId);}}
   guardarPendientesNube(q);
   if(typeof reintentarPinsNube==="function"){try{await reintentarPinsNube()}catch(e){}}

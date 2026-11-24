@@ -100,7 +100,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v168</div>
+  <div class="pie">Kiosco KUPO · v170</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -113,7 +113,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v168</div>
+  <div class="pie">Kiosco KUPO · v170</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -165,10 +165,10 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · v168</div>
+  <div class="pie">Kiosco KUPO · v170</div>
 </div>
 <script>
-/* Kiosco KUPO v168 — el kiosco lee SIEMPRE como anónimo (sin sesión guardada): en la tablet y el celular hay sesión de KUPO POS y el kiosco la heredaba, así la nube le respondía como usuario y no le dejaba ver el interruptor. Lecturas sin caché (no-store). Saludo según la hora; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
+/* Kiosco KUPO v170 — la foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. El botón + Agregar llevaba el id del producto sin comillas y el navegador lo leía como una cuenta (el id es un código con guiones), así el clic no hacía nada. Ahora el id va entre comillas. Lee siempre como anónimo; saludo según la hora; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -188,7 +188,7 @@ function saludoKiosco(){ var h=new Date().getHours(); return h>=5&&h<12?"¡Bueno
 function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); }
 function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); pintarSaludo(); }
 function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
-function emojiDe(p){ if(p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
+function emojiDe(p){ if(p.foto_kiosco||p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
 async function init(){
   licencia=(localStorage.getItem("kupoPosKioscoLicencia")||"").trim().toUpperCase();
   if(!licencia){ mostrar("pantallaSetup"); return; }
@@ -206,7 +206,7 @@ async function cargarTodo(){
   if(r2.error){ mostrar("pantallaError"); return; }
   var opt=(r2.data&&r2.data.opciones)||{};
   if(opt.kioscoActivo!==true){ mostrar("pantallaApagado"); return; }
-  var r3=await sb.from("productos").select("id,nombre,precio,categoria,foto,pausado").eq("licencia_clave",licencia).order("nombre");
+  var r3=await sb.from("productos").select("id,nombre,precio,categoria,foto,foto_kiosco,pausado").eq("licencia_clave",licencia).order("nombre");
   if(r3.error){ mostrar("pantallaError"); return; }
   productos=(r3.data||[]).filter(function(p){ return !p.pausado; });
   agrupar();
@@ -276,12 +276,12 @@ function renderMenu(){
   g.innerHTML=lista.map(function(p){
     var cant=carrito[p.id]?carrito[p.id].cant:0;
     var em=emojiDe(p);
-    var foto=em?'<div class="emoji">'+em+'</div>':'<img class="foto" src="'+escHtml(p.foto)+'" alt="">';
+    var foto=em?'<div class="emoji">'+em+'</div>':'<img class="foto" src="'+escHtml(p.foto_kiosco||p.foto)+'" alt="">';
     return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'">'+foto+
       '<h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
       '<div class="precio">'+dinero(p.precio)+'</div>'+
-      (cant>0?'<div class="cant-row"><button onclick="cambiarCant('+p.id+',-1)">−</button><b>'+cant+'</b><button class="mas" onclick="cambiarCant('+p.id+',1)">+</button></div>'
-             :'<button class="agregar" onclick="cambiarCant('+p.id+',1)">+ Agregar</button>')+
+      (cant>0?'<div class="cant-row"><button onclick="cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button class="mas" onclick="cambiarCant(\''+p.id+'\',1)">+</button></div>'
+             :'<button class="agregar" onclick="cambiarCant(\''+p.id+'\',1)">+ Agregar</button>')+
       '</div>';
   }).join("");
 }
