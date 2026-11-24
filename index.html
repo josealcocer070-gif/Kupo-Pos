@@ -4805,13 +4805,14 @@ async function reintentarPinsNube(){
    como descargarCajerosNube): en el celular, donde se entra con PIN,
    también funciona. */
 function idProductoNube(pid){var s=String(pid==null?"":pid);return /^\d+$/.test(s)?Number(s):s}
+/* v183: los borrados en la nube ahora borran en el aparato (Lalo 2026-11-24: el APK no actualizaba los productos). La descarga solo agregaba/actualizaba; solo quitaba los de ejemplo. Ahora también quita los que tienen nubeId y ya no están en la nube; los creados en el aparato y aún sin subir (sin nubeId) no se tocan. */
 async function descargarProductosNube(){
- if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevos:0,actualizados:0};
- var clave=licenciaActual();if(!clave||clave==="SIN-LICENCIA")return{nuevos:0,actualizados:0};
+ if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevos:0,actualizados:0,quitados:0};
+ var clave=licenciaActual();if(!clave||clave==="SIN-LICENCIA")return{nuevos:0,actualizados:0,quitados:0};
  try{
   var r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado,foto,foto_kiosco").eq("licencia_clave",clave).limit(500);
   if(r.error&&/foto/i.test((r.error&&r.error.message)||"")){r=await kupoSupabase.from("productos").select("nube_id,licencia_clave,producto_id,nombre,precio,stock,unidad,categoria,emoji,pausado").eq("licencia_clave",clave).limit(500);}
-  if(r.error||!r.data)return{nuevos:0,actualizados:0};
+  if(r.error||!r.data)return{nuevos:0,actualizados:0,quitados:0};
   var nuevos=0,actualizados=0,tocoStock=false;
   var nubeIds={};
   r.data.forEach(function(x){nubeIds[String(x.producto_id)]=true;});
@@ -4845,13 +4846,14 @@ async function descargarProductosNube(){
    var quitados=[];
    catalogo=catalogo.filter(function(p){
     if(idsEjemplo[p.id]&&!nubeIds[String(p.id)]){quitados.push(p.id);return false;}
+    if(p.nubeId&&!nubeIds[String(p.id)]){quitados.push(p.id);return false;}
     return true;
    });
    quitados.forEach(function(pid){try{delete stockAlmacen[pid];}catch(e){}try{ticket=ticket.filter(function(l){return String(l.id)!==String(pid);});}catch(e){}});
   }
   if(tocoStock){try{if(typeof sincronizarStock==="function")sincronizarStock();}catch(e){}}
-  return{nuevos:nuevos,actualizados:actualizados};
- }catch(e){return{nuevos:0,actualizados:0};}
+  return{nuevos:nuevos,actualizados:actualizados,quitados:(quitados||[]).length};
+ }catch(e){return{nuevos:0,actualizados:0,quitados:0};}
 }
 async function descargarVentasNube(){
  if(!kupoSupabase||typeof navigator==="undefined"||!navigator.onLine)return{nuevas:0,actualizadas:0};
@@ -4941,13 +4943,14 @@ async function descargarNube(opciones){
  try{nv=await descargarVentasNube();}catch(e){nv={nuevas:0,actualizadas:0};}
  try{if(typeof descargarCajerosNube==="function")nc=await descargarCajerosNube();}catch(e){nc=false;}
  try{if(typeof sincronizarOpcionesNube==="function")no=await sincronizarOpcionesNube();}catch(e){no=false;}
- var res={productos:np.nuevos||0,ventas:nv.nuevas||0,productosActualizados:np.actualizados||0,ventasActualizadas:nv.actualizadas||0,cajeros:nc?1:0,opciones:no?1:0};
- if(res.productos>0||res.ventas>0||res.cajeros>0||res.opciones>0){
+ var res={productos:np.nuevos||0,ventas:nv.nuevas||0,productosActualizados:np.actualizados||0,ventasActualizadas:nv.actualizadas||0,productosQuitados:np.quitados||0,cajeros:nc?1:0,opciones:no?1:0};
+ if(res.productos>0||res.ventas>0||res.productosQuitados>0||res.cajeros>0||res.opciones>0){
   try{if(typeof guardar==="function")guardar();}catch(e){}
   try{if(typeof render==="function")render();}catch(e){}
   if(!silencioso&&typeof toast==="function"){
    var partes=[];
    if(res.productos>0)partes.push(res.productos+" producto"+(res.productos===1?"":"s"));
+   if(res.productosQuitados>0)partes.push(res.productosQuitados+" producto"+(res.productosQuitados===1?"":"s")+" quitado"+(res.productosQuitados===1?"":"s"));
    if(res.ventas>0)partes.push(res.ventas+" venta"+(res.ventas===1?"":"s"));
    if(res.cajeros>0)partes.push("cajeros actualizados");
    if(res.opciones>0)partes.push("opciones actualizadas");
