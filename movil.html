@@ -185,6 +185,8 @@ main h1{font-size:34px;margin-bottom:14px}
 .buscar{display:flex;gap:12px;margin-bottom:18px}
 .buscar input{flex:1;border:1px solid #c9d4dc;border-radius:24px;padding:12px 18px;font-size:16px}
 .buscar select{border:1px solid #c9d4dc;border-radius:24px;padding:10px 14px;font-size:15px;background:#fff}
+.buscar .filtros-prod{display:flex;gap:12px;flex:1;min-width:0}
+.buscar .filtros-prod select{flex:1;min-width:0}
 .btn-scan{flex:0 0 auto;border:2px solid var(--azul);background:var(--azul);color:#fff;border-radius:24px;padding:10px 16px;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;display:none}
 /* SCAN solo smartphone/tablet (<=1020px), regla de Lalo: en PC no va el botón
    SCAN de cámara, va el lector de códigos de barras USB/Bluetooth, que escribe
@@ -1631,6 +1633,8 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <!-- Barra de búsqueda de Ventas quitada por Lalo (2026-11-21, v104): solo quedan las pastillas de categorías; el SCAN de cámara del ticket sigue funcionando. -->
 <div class="categorias" id="categoriasTabs" role="tablist" aria-label="Categorías de productos"></div>
+<!-- v182: filtro Llevar/Local en Ventas (Lalo 2026-11-24: "ya me hice bolas"): segunda fila de pastillas; los productos sin variante (Arroz, Tortilla...) se ven en los dos filtros. -->
+<div class="categorias" id="filtrosVariante" role="tablist" aria-label="Para llevar o local"></div>
 <div class="grid" id="grid"></div>
 </div>
 
@@ -1672,7 +1676,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <div class="buscar">
 <input id="buscarProd" placeholder="🔍 Buscar producto..." oninput="renderProductos()">
-<select id="filtroProd" onchange="renderProductos()"><option value="todas">Todos</option></select>
+<div class="filtros-prod"><select id="filtroProd" onchange="renderProductos()"><option value="todas">Todos</option></select><select id="filtroVarianteProd" onchange="renderProductos()" title="Para llevar o local"><option value="todas">Llevar y local</option><option value="llevar">🥡 Llevar</option><option value="local">🍽️ Local</option></select></div>
 </div>
 <div id="barraSelProd" class="oculto"><b id="txtSelProd">0 seleccionados</b><button type="button" onclick="seleccionarTodosProd()">Seleccionar todos</button><span class="sep"></span><button type="button" class="eliminar" onclick="eliminarSeleccionadosProd()"><span class="icono-3d-mini f-coral">🗑</span> Eliminar</button><button type="button" onclick="limpiarSelProd()">✕ Cancelar</button></div>
 <div class="prod-lista" id="listaProductos"></div>
@@ -2558,6 +2562,11 @@ function cerrarTurnoDesdePanel(){cerrarSesionPanel();cerrarTurno()}
 let categoriaActual="todas";
 function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c=p.categoria||"General";if(seen.indexOf(c)===-1)seen.push(c)});return seen}
 function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
+/* v182: filtro Llevar/Local en Ventas (Lalo 2026-11-24: "ya me hice bolas"). La variante se detecta por el nombre: termina en Llevar o P/Llevar → llevar; en Local → local; sin sufijo → comun (se vende igual para llevar y local, se ve en los dos filtros). */
+let varianteActual="todas";
+function varianteDe(p){var n=String((p&&p.nombre)||"");if(/\s+(llevar|p\/llevar)\s*$/i.test(n))return "llevar";if(/\s+local\s*$/i.test(n))return "local";return "comun"}
+function renderVariante(){var box=document.getElementById("filtrosVariante");if(!box)return;box.innerHTML='<button type="button" class="'+(varianteActual==="todas"?"activo":"")+'" onclick="elegirVariante(\'todas\')">Todos</button><button type="button" class="'+(varianteActual==="llevar"?"activo":"")+'" onclick="elegirVariante(\'llevar\')">'+ic3d("🥡","f-coral")+' Para llevar</button><button type="button" class="'+(varianteActual==="local"?"activo":"")+'" onclick="elegirVariante(\'local\')">'+ic3d("🍽️","f-teal")+' Local</button>'}
+function elegirVariante(v){varianteActual=v;render()}
 function actualizarDatalistCategorias(){var dl=document.getElementById("listaCategorias");if(!dl)return;var cats=categoriasCatalogo();if(cats.indexOf("General")===-1)cats.push("General");dl.innerHTML=cats.map(function(c){return '<option value="'+c.replace(/"/g,"&quot;")+'"></option>'}).join("")}
 /* v177: el desplegable "Todos" de Productos ahora filtra por categoría (Lalo 2026-11-24: "Mételo ahí donde dice todo"). Las opciones se arman solas con las categorías del catálogo; el valor es la categoría tal cual (con espacios) y lo que se ve es recortado. */
 function actualizarFiltroCatProd(){var fp=document.getElementById("filtroProd");if(!fp)return;var actual=fp.value||"todas";var cats=categoriasCatalogo();if(cats.indexOf("General")===-1)cats.push("General");fp.innerHTML='<option value="todas">Todos</option>'+cats.map(function(c){return '<option value="'+c.replace(/"/g,"&quot;")+'">'+c.trim()+'</option>'}).join("");if(cats.indexOf(actual)!==-1)fp.value=actual;else fp.value="todas"}
@@ -2594,11 +2603,11 @@ function aplicarIvaPantalla(){
  var fi=document.getElementById("filaIva");if(fi)fi.style.display=off?"none":"";
 }
 function render(){
- llenarSelectVentaAlmacen();renderCategorias();actualizarDatalistCategorias();
+ llenarSelectVentaAlmacen();renderCategorias();renderVariante();actualizarDatalistCategorias();
  const _b=document.getElementById("buscar");const q=_b?(_b.value||"").toLowerCase():"";
  const _f=document.getElementById("filtro");const f=_f?_f.value:"todos";
  const grid=document.getElementById("grid");grid.innerHTML="";
- catalogo.filter(p=>p.nombre.toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q)).filter(p=>categoriaActual==="todas"||(p.categoria||"General")===categoriaActual).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).forEach(p=>{
+ catalogo.filter(p=>p.nombre.toLowerCase().includes(q)||(p.sku||"").toLowerCase().includes(q)).filter(p=>categoriaActual==="todas"||(p.categoria||"General")===categoriaActual).filter(p=>f==="todos"||(f==="disponibles"&&p.stock>0&&!p.pausado)||(f==="agotados"&&p.stock<=0)).filter(p=>varianteActual==="todas"||varianteDe(p)==="comun"||varianteDe(p)===varianteActual).forEach(p=>{
   const d=document.createElement("div");d.className="card";
   const bajo=p.stock<=5&&p.stock>0;
   const _minV=(p.stockMin==null?5:p.stockMin);const _bajoV=!p.pausado&&p.stock>0&&p.stock<=_minV;
@@ -4249,7 +4258,8 @@ var selProd={};
 function listaFiltradaProd(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
  const f=(document.getElementById("filtroProd")||{}).value||"todas";
- return catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todas"||(p.categoria||"General")===f);
+ const v=(document.getElementById("filtroVarianteProd")||{}).value||"todas";
+ return catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todas"||(p.categoria||"General")===f).filter(p=>v==="todas"||varianteDe(p)==="comun"||varianteDe(p)===v);
 }
 function toggleSelProd(id,on){if(on)selProd[id]=1;else delete selProd[id];actualizarBarraSelProd();}
 function actualizarBarraSelProd(){
