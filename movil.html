@@ -1580,6 +1580,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <span class="titulo"><span class="icono-3d-mini f-ambar">⚡</span> Acciones rápidas</span>
 <button class="acc" onclick="ponerEnEspera()"><span class="icono-3d-mini f-gris">⏱</span> Poner venta en espera</button>
 <button class="acc" id="btnMensajesVentas" onclick="mostrarVista('mensajes')"><span class="icono-3d-mini f-azul">💬</span> Mensajes <span class="badge-msg" id="badgeMsgVentas">0</span></button>
+<button class="acc" onclick="abrirBuscarTicket()"><span class="icono-3d-mini f-morado">🔍</span> Buscar ticket</button>
 </div>
 
 <div class="layout" id="layout">
@@ -2420,6 +2421,22 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
    <button type="button" class="btn-inicio" onclick="confirmarRestablecerPin()">Guardar PIN nuevo</button>
   </div>
   <button type="button" class="secundario" style="margin-top:10px" onclick="cerrarRestablecerPin()">Cancelar</button>
+ </div>
+</div>
+<div id="modalBuscarTicket" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="buscarTicketTitulo" onclick="if(event.target===this)cerrarBuscarTicket()">
+ <div class="conf-tarjeta">
+  <h2 id="buscarTicketTitulo">🔍 Buscar ticket por folio</h2>
+  <p class="conf-sub">Escribe el folio del ticket para ver qué se vendió, a quién y cómo pagó.</p>
+  <label for="buscarTicketFolio" style="display:block;font-weight:700;margin:12px 0 4px">Folio del ticket</label>
+  <input id="buscarTicketFolio" type="number" inputmode="numeric" placeholder="Ej. 66" autocomplete="off">
+  <div class="conf-botones" style="margin-top:14px">
+   <button type="button" class="conf-confirmar" style="width:100%" onclick="buscarTicketFolio()">Buscar ticket</button>
+  </div>
+  <div id="resultadoTicket" style="margin-top:12px"></div>
+  <p style="color:#555;font-size:13px;margin-top:12px">En el celular el ticket solo se consulta. Para imprimirlo, búscalo en la tablet.</p>
+  <div class="conf-botones" style="margin-top:10px">
+   <button type="button" class="conf-regresar" style="width:100%" onclick="cerrarBuscarTicket()">Cerrar</button>
+  </div>
  </div>
 </div>
 <div id="modalHistorialProducto" class="modal-confirmar" role="dialog" aria-modal="true" aria-labelledby="histProdTitulo" onclick="if(event.target===this)cerrarHistorialProducto()">
@@ -4552,6 +4569,60 @@ function reimprimir(){return;/* v117: sin impresión física en el celular. */co
 /* Enviar ticket por WhatsApp (Lalo 2026-11-17): versión simple y gratis con
    enlace wa.me. El texto es el MISMO contenido del ticket impreso por
    Bluetooth/ESC-POS, en texto plano y sin códigos de control. */
+/* v189 (Lalo 2026-11-24): buscar ticket de venta por folio — cuando un cliente reclama un error al cobrar, se busca su ticket y se ve qué se le vendió. El buscador del Historial es de cortes, no de ventas; Reimprimir solo saca el último ticket. Las ventas ya se bajan de la nube con sus productos (descargarVentasNube, hasta 500), así que el folio se puede buscar aunque la venta se haya hecho en otro aparato. En el celular el ticket solo se consulta (sin impresión física, v117); para imprimirlo se busca en la tablet. */
+var ticketBuscado=null;
+function buscarTicketPorFolio(folio){var n=Number(folio);if(!n)return null;return ventas.find(function(v){return Number(v.folio)===n;})||null;}
+function detalleTicketHtml(v){
+ var lineas=[];
+ lineas.push('<div style="text-align:center"><b style="font-size:19px">Folio #'+String(v.folio).padStart(4,"0")+'</b><br><span style="color:#555">'+escHtml(fechaHoraTicket(v))+'</span></div>');
+ var at=nombreCajeroVenta(v); if(at)lineas.push('<div style="margin-top:8px">ATENDIÓ: <b>'+escHtml(at)+'</b></div>');
+ if(v.cliente)lineas.push('<div>Cliente: <b>'+escHtml(v.cliente)+'</b></div>');
+ if(v.almacen)lineas.push('<div>Almacén: '+escHtml(v.almacen)+'</div>');
+ lineas.push('<hr style="border:0;border-top:1px dashed #c9d4dc;margin:10px 0">');
+ (v.items||[]).forEach(function(l){
+  var p=catalogo.find(function(x){return String(x.id)===String(l.id);});
+  var nombre=p?p.nombre:"Producto";
+  var cant=p?textoCantidad(p,l.cant):String(l.cant);
+  lineas.push('<div style="display:flex;justify-content:space-between;gap:8px"><span>'+escHtml(cant+' x '+nombre)+'</span><b>'+escHtml(lineaPrecioTicket(l,"  ·  "))+'</b></div>');
+ });
+ lineas.push('<hr style="border:0;border-top:1px dashed #c9d4dc;margin:10px 0">');
+ lineas.push('<div style="display:flex;justify-content:space-between"><span>Total</span><b>'+dinero(v.total)+'</b></div>');
+ if(v.pago)lineas.push('<div style="display:flex;justify-content:space-between"><span>Pago</span><b>'+escHtml(v.pago)+'</b></div>');
+ if(Number(v.cambio)>0)lineas.push('<div style="display:flex;justify-content:space-between"><span>Cambio</span><b>'+dinero(v.cambio)+'</b></div>');
+ return lineas.join("");
+}
+function abrirBuscarTicket(){
+ ticketBuscado=null;
+ var inp=document.getElementById("buscarTicketFolio"); if(inp)inp.value="";
+ var res=document.getElementById("resultadoTicket"); if(res)res.innerHTML='<p style="color:#555">Escribe el folio del ticket y toca Buscar.</p>';
+ var btn=document.getElementById("btnReimprimirTicketBuscado"); if(btn)btn.classList.add("oculto");
+ var m=document.getElementById("modalBuscarTicket"); if(m)m.classList.add("abierto");
+}
+function cerrarBuscarTicket(){
+ var m=document.getElementById("modalBuscarTicket"); if(m)m.classList.remove("abierto");
+ ticketBuscado=null;
+}
+async function buscarTicketFolio(){
+ var inp=document.getElementById("buscarTicketFolio");
+ var res=document.getElementById("resultadoTicket");
+ var btn=document.getElementById("btnReimprimirTicketBuscado");
+ var f=(inp&&inp.value||"").trim();
+ var v=buscarTicketPorFolio(f);
+ if(!v&&typeof navigator!=="undefined"&&navigator.onLine&&typeof descargarVentasNube==="function"){
+  try{await descargarVentasNube(); v=buscarTicketPorFolio(f);}catch(e){}
+ }
+ ticketBuscado=v||null;
+ if(!v){
+  if(res)res.innerHTML='<p style="color:#b3261e">No se encontró el folio #'+escHtml(f)+' en este dispositivo. Si la venta se hizo en otro aparato, toca Sincronizar y vuelve a buscar.</p>';
+  if(btn)btn.classList.add("oculto");
+  return;
+ }
+ if(res)res.innerHTML=detalleTicketHtml(v);
+ if(btn)btn.classList.remove("oculto");
+}
+function reimprimirTicketBuscado(){
+ toast("En el celular el ticket solo se consulta. Para imprimirlo, búscalo en la tablet.");
+}
 function textoTicketPlano(v){
  if(!v)return"";
  var total=v.total||0,base=(v.totalBase!=null&&v.totalBase>0)?v.totalBase:total,descMonto=Math.min(Number(v.descuento)||0,base),iva=base-(base/1.16);
