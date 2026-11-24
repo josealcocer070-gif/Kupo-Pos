@@ -371,6 +371,11 @@ html[data-tema="noche"] .aviso-actualizacion .aviso-ahora{background:#12233a;col
 #listaPerfiles{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
 .login-otro-usuario{width:100%;margin-top:10px}
 .perfil-tarjeta{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#f4f8fa;border:1px solid #d7e0e6;border-radius:14px;padding:12px 8px;cursor:pointer}
+/* v155: las tarjetas del login brincan al tocarlas, como las de venta (v149), y el sistema vibra */
+.perfil-tarjeta{transition:transform.12s ease,filter.12s ease;touch-action:manipulation}
+.perfil-tarjeta:active{transform:scale(.95);filter:brightness(1.06)}
+@keyframes perfilPop{0%{transform:scale(1)}35%{transform:scale(.93)}70%{transform:scale(1.05)}100%{transform:scale(1)}}
+.perfil-tarjeta.perfil-tocado{animation:perfilPop.35s ease}
 .perfil-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,#8ec9ff,#2b7cd3);color:#fff;font-weight:800;font-size:23px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .perfil-avatar.admin{background:linear-gradient(180deg,#ffe082,#f5b800);color:#5d4037}
 .perfil-datos{display:flex;flex-direction:column;align-items:center;min-width:0}
@@ -400,6 +405,9 @@ html[data-tema="noche"] .login-logo-kupo{background:#fff;border-radius:12px;padd
 #pantallaCarga .carga-puntos{color:#555;font-size:15px;font-weight:700;margin:6px 0 0}
 #pantallaCarga .carga-puntos span{color:#f5b800}
 .inicio-sub{color:#555;font-size:14px}
+/* v156: saludo según la hora en el inicio (Lalo eligió "¡Buenos días! ¡A vender!") */
+.inicio-saludo{color:var(--azul);text-align:center;margin:0 0 6px;font-size:22px;line-height:1.3}
+.inicio-saludo b{font-size:30px}
 .inicio-negocio{margin:14px 0 4px}
 .inicio-negocio b{display:block;font-size:22px;color:var(--azul)}
 .inicio-negocio span{font-size:12px;letter-spacing:1px;color:#666;font-weight:700}
@@ -820,7 +828,7 @@ html[data-tema="noche"] .form-prod label,html[data-tema="noche"] .inicio label,h
 html[data-tema="noche"] .cot-prod-info span,html[data-tema="noche"] .conf-cambio small,html[data-tema="noche"] .inicio .msg,
 html[data-tema="noche"] #vistaProductos .prod-row .info .meta,html[data-tema="noche"] #vistaProductos .prod-row .precio small,
 html[data-tema="noche"] .aviso-vacio,html[data-tema="noche"] .sesion-fila span,html[data-tema="noche"] .aviso-fila span{color:var(--texto2)}
-html[data-tema="noche"] .resumen .tarjeta b,html[data-tema="noche"] .inicio-negocio b,html[data-tema="noche"] .inicio h2,
+html[data-tema="noche"] .resumen .tarjeta b,html[data-tema="noche"] .inicio-negocio b,html[data-tema="noche"] .inicio h2,html[data-tema="noche"] .inicio-saludo,
 html[data-tema="noche"] .contratar h3,html[data-tema="noche"] .contratar .plan b,html[data-tema="noche"] .contratar .plan .precio,
 html[data-tema="noche"] .pin-puntos,html[data-tema="noche"] .ticket-preview h2,html[data-tema="noche"] .conf-tarjeta h2,
 html[data-tema="noche"] .scan-tarjeta h2,html[data-tema="noche"] .conf-fila.total,html[data-tema="noche"] .conf-mixto h3,
@@ -1011,7 +1019,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <div id="pantallaLogin" class="inicio oculto">
  <div class="inicio-tarjeta inicio-tarjeta-login">
-  <p class="inicio-sub">Un producto de Grupo Benítez</p>
+  <p class="inicio-saludo"><b id="saludoHora">¡Buenos días!</b><br>¡A vender!</p>
   <div class="inicio-negocio"><b id="inicioNegocio2">Mi negocio</b><span>SUCURSAL PRINCIPAL · V1.7.0</span></div>
   <h2 style="text-align:center">Iniciar sesión</h2>
   <div id="avisoDiaCerrado" class="oculto" style="background:#fff8e1;border:1px solid #f5b800;border-radius:12px;padding:10px 12px;margin-bottom:10px;text-align:center;font-size:14px;line-height:1.5"></div>
@@ -2112,7 +2120,7 @@ function renderTicket(){
  if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();
 }
 function animarBotonAgregar(id){const b=document.querySelector('.btn-agregar[data-id="'+id+'"]');if(!b||!b.classList)return;b.classList.add('btn-agregado');setTimeout(function(){b.classList.remove('btn-agregado');},350);}
-function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(opcionesSistema.sinStock!==true&&disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(opcionesSistema.sinStock!==true&&nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();animarBotonAgregar(id);}
+function agregar(id){const p=catalogo.find(x=>x.id===id);const av=almacenVenta();if(!p||!av||p.pausado)return;const disp=stockEn(p.id,av.id);if(opcionesSistema.sinStock!==true&&disp<=0){toast("No hay stock de "+p.nombre+" en "+av.nombre+".");return}const paso=pasoUnidad(p);const l=ticket.find(x=>x.id===id);const enTicket=l?l.cant:0;const nuevo=redondearCant(enTicket+paso);if(opcionesSistema.sinStock!==true&&nuevo>disp+0.000001){toast("No hay más stock de "+p.nombre+" en "+av.nombre+".");return}if(l)l.cant=nuevo;else ticket.push({id,cant:paso,precio:p.precio});guardar();render();animarBotonAgregar(id);vibrar(15);/* v155: el botón + también vibra */}
 function cambiarCant(id,d){const l=ticket.find(x=>x.id===id);if(!l)return;if(d>0){const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&redondearCant(l.cant+d)>stockEn(id,av.id)+0.000001){toast("No hay más stock de ese producto en "+av.nombre+".");return}}l.cant=redondearCant(l.cant+d);if(l.cant<=0)ticket=ticket.filter(x=>x.id!==id);guardar();render();}
 function fijarCant(id,valor){const l=ticket.find(x=>x.id===id);if(!l)return;const p=catalogo.find(x=>x.id===id)||{unidad:"pieza"};let cant=normalizarCant(p,Number(valor));if(cant<=0){ticket=ticket.filter(x=>x.id!==id);guardar();render();return}const av=almacenVenta();if(opcionesSistema.sinStock!==true&&av&&cant>stockEn(id,av.id)+0.000001){cant=stockEn(id,av.id);toast("Solo hay "+textoCantidad(p,cant)+" en "+av.nombre+".");}l.cant=cant;guardar();render();}
 function elegirPago(b){pago=b.dataset.pago;document.querySelectorAll("#confPagos button").forEach(x=>x.classList.remove("activo"));b.classList.add("activo");renderTicket();if(typeof actualizarConfirmacionCobro==="function")actualizarConfirmacionCobro();}
@@ -5313,6 +5321,10 @@ function actualizarPuntosPin(){const v=document.getElementById("pinLogin").value
 /* Ver el PIN en el login (Lalo, 2026-11-14): el ojito muestra/oculta los dígitos. */
 function alternarVerPin(){var i=document.getElementById("pinLogin");var b=document.getElementById("btnVerPin");if(!i)return;if(i.type==="password"){i.type="text";if(b)b.textContent="🙈";}else{i.type="password";if(b)b.textContent="👁️";}}
 function vibrarPin(){try{if(navigator.vibrate)navigator.vibrate(20)}catch(e){}}
+function vibrar(ms){try{if(navigator.vibrate)navigator.vibrate(ms||20);}catch(e){}}
+/* v156: el saludo cambia solo según la hora del aparato (sin internet) */
+function saludoSegunHora(){var h=new Date().getHours();if(h>=5&&h<12)return "¡Buenos días!";if(h>=12&&h<19)return "¡Buenas tardes!";return "¡Buenas noches!";}
+function pintarSaludoLogin(){var e=document.getElementById("saludoHora");if(e)e.textContent=saludoSegunHora();}/* v155: vibración del sistema al tocar (en Android; en PC no hace nada) */
 function ajustarTecladoPin(){
  var i=document.getElementById("pinLogin");
  var t=document.querySelector(".teclado");
@@ -5347,6 +5359,7 @@ function guardarPerfilesLogin(p){try{localStorage.setItem("kupoPosV146Perfiles",
 function registrarPerfilLogin(c){if(!c||!c.usuario)return;var p=leerPerfilesLogin().filter(function(x){return String(x.usuario||"").toLowerCase()!==String(c.usuario).toLowerCase()});p.unshift({usuario:c.usuario,nombre:c.nombre,rol:c.rol,ultimo:Date.now()});guardarPerfilesLogin(p);}
 function inicialesPerfil(nombre){var t=String(nombre||"?").trim().split(/\s+/);return ((t[0]||"?").charAt(0)+(t.length>1?(t[t.length-1]||"").charAt(0):"")).toUpperCase();}
 function renderPerfilesLogin(){
+ pintarSaludoLogin();/* v156: saludo según la hora */
  var box=document.getElementById("listaPerfiles");if(!box)return;
  var p=leerPerfilesLogin().filter(function(x){return cajeros.some(function(c){return String(c.usuario).toLowerCase()===String(x.usuario).toLowerCase()&&c.estado==="Activo";});});
  var vista=document.getElementById("vistaPerfilesLogin"),manual=document.getElementById("vistaLoginManual"),pin=document.getElementById("vistaPinPerfil"),zona=document.getElementById("zonaPinLogin");
@@ -5355,10 +5368,16 @@ function renderPerfilesLogin(){
  box.innerHTML=p.map(function(x){
   var c=cajeros.find(function(y){return String(y.usuario).toLowerCase()===String(x.usuario).toLowerCase();});
   var rol=c?c.rol:x.rol;
-  return '<button type="button" class="perfil-tarjeta" onclick="elegirPerfilLogin(\''+String(x.usuario).replace(/'/g,"\\'")+'\')"><span class="perfil-avatar'+(rol==="Administrador"?" admin":"")+'">'+inicialesPerfil(x.nombre)+'</span><span class="perfil-datos"><b>'+escHtml(x.nombre)+'</b><span>'+escHtml(rol)+'</span></span><span class="perfil-quitar" onclick="event.stopPropagation();quitarPerfilLogin(\''+String(x.usuario).replace(/'/g,"\\'")+'\')">×</span></button>';
+  return '<button type="button" class="perfil-tarjeta" data-usuario="'+String(x.usuario).replace(/'/g,"\\'")+'" onclick="elegirPerfilLogin(\''+String(x.usuario).replace(/'/g,"\\'")+'\',this)"><span class="perfil-avatar'+(rol==="Administrador"?" admin":"")+'">'+inicialesPerfil(x.nombre)+'</span><span class="perfil-datos"><b>'+escHtml(x.nombre)+'</b><span>'+escHtml(rol)+'</span></span><span class="perfil-quitar" onclick="event.stopPropagation();quitarPerfilLogin(\''+String(x.usuario).replace(/'/g,"\\'")+'\')">×</span></button>';
  }).join("");
 }
-function elegirPerfilLogin(usuario){
+function elegirPerfilLogin(usuario,el){
+ if(el&&el.classList)el.classList.add("perfil-tocado");/* v155: la tarjeta brinca como las de venta */
+ vibrar(20);
+ setTimeout(function(){elegirPerfilLoginAplicar(usuario);},160);
+ setTimeout(function(){if(el&&el.classList)el.classList.remove("perfil-tocado");},400);
+}
+function elegirPerfilLoginAplicar(usuario){
  var c=cajeros.find(function(x){return String(x.usuario).toLowerCase()===String(usuario).toLowerCase();});if(!c)return;
  var u=document.getElementById("usuarioLogin");if(u)u.value=c.usuario;
  var vista=document.getElementById("vistaPerfilesLogin");if(vista)vista.classList.add("oculto");
