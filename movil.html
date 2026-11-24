@@ -1662,7 +1662,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 </div>
 <div class="buscar">
 <input id="buscarProd" placeholder="🔍 Buscar producto..." oninput="renderProductos()">
-<select id="filtroProd" onchange="renderProductos()"><option value="todos">Todos</option><option value="disponibles">Disponibles</option><option value="agotados">Agotados</option><option value="pausados">Pausados</option></select>
+<select id="filtroProd" onchange="renderProductos()"><option value="todas">Todos</option></select>
 </div>
 <div class="prod-lista" id="listaProductos"></div>
 </div>
@@ -2548,6 +2548,8 @@ let categoriaActual="todas";
 function categoriasCatalogo(){const seen=[];catalogo.forEach(function(p){const c=p.categoria||"General";if(seen.indexOf(c)===-1)seen.push(c)});return seen}
 function renderCategorias(){const box=document.getElementById("categoriasTabs");if(!box)return;const cats=categoriasCatalogo();if(categoriaActual!=="todas"&&cats.indexOf(categoriaActual)===-1)categoriaActual="todas";const contar=function(c){return catalogo.filter(function(p){return (p.categoria||"General")===c}).length};box.innerHTML='<button type="button" class="'+(categoriaActual==="todas"?"activo":"")+'" onclick="elegirCategoria(\'todas\')">Todos <small>('+catalogo.length+')</small></button>'+cats.map(function(c){return '<button type="button" class="'+(categoriaActual===c?"activo":"")+'" onclick="elegirCategoria(\''+c.replace(/'/g,"\\'")+'\')">'+c+' <small>('+contar(c)+')</small></button>'}).join("")}
 function actualizarDatalistCategorias(){var dl=document.getElementById("listaCategorias");if(!dl)return;var cats=categoriasCatalogo();if(cats.indexOf("General")===-1)cats.push("General");dl.innerHTML=cats.map(function(c){return '<option value="'+c.replace(/"/g,"&quot;")+'"></option>'}).join("")}
+/* v177: el desplegable "Todos" de Productos ahora filtra por categoría (Lalo 2026-11-24: "Mételo ahí donde dice todo"). Las opciones se arman solas con las categorías del catálogo; el valor es la categoría tal cual (con espacios) y lo que se ve es recortado. */
+function actualizarFiltroCatProd(){var fp=document.getElementById("filtroProd");if(!fp)return;var actual=fp.value||"todas";var cats=categoriasCatalogo();if(cats.indexOf("General")===-1)cats.push("General");fp.innerHTML='<option value="todas">Todos</option>'+cats.map(function(c){return '<option value="'+c.replace(/"/g,"&quot;")+'">'+c.trim()+'</option>'}).join("");if(cats.indexOf(actual)!==-1)fp.value=actual;else fp.value="todas"}
 function elegirCategoria(c){categoriaActual=c;render()}
 /* Cámara para escanear códigos de barras (Lalo, 2026-11-12, solo movil.html):
    al tocar SCAN se pide permiso de cámara y se abre la cámara trasera en vivo.
@@ -2868,7 +2870,6 @@ function aplicarOpcionesSistema(){
  var tv=document.getElementById("tarjValor"); if(tv)tv.style.display=opcionesSistema.sinStock===true?"none":"";
  var tsb=document.getElementById("tarjStockBajo"); if(tsb)tsb.style.display=opcionesSistema.sinStock===true?"none":"";
  var dp=document.getElementById("descProductos"); if(dp)dp.textContent=opcionesSistema.sinStock===true?"Catálogo del negocio. Consulta el precio y la disponibilidad de cada producto. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.":"Consulta el inventario del negocio: busca un producto para ver su precio y su stock. Toca un producto para ver sus opciones. El Administrador puede editar o eliminar productos desde aquí; para crear uno nuevo, usa la versión de PC.";
- var fp=document.getElementById("filtroProd"); if(fp){var oa=fp.querySelector('option[value="agotados"]'); if(oa)oa.style.display=opcionesSistema.sinStock===true?"none":""; if(opcionesSistema.sinStock===true&&fp.value==="agotados"){fp.value="todos";if(typeof renderProductos==="function")renderProductos();}}
  var oc=document.getElementById("optChatActivo"); if(oc)oc.checked=opcionesSistema.chatInterno;
  const txtC=document.getElementById("textoCorteDiario"); if(txtC)txtC.textContent=opcionesSistema.corteProductos?"La pollería y negocios así hacen 2 cortes por separado: uno de dinero y uno de productos. Cada corte tiene su propio botón, su folio y su lugar en el historial.":"Hoy solo está activo el corte de dinero. El corte de productos está desactivado para esta licencia; se activa en Administrador de licencia.";
  const txtA=document.getElementById("textoAyudaOpciones"); if(txtA)txtA.textContent=(opcionesSistema.corteProductos?"Corte por productos activado: en Corte diario se ven los dos cortes, dinero y productos. ":"Corte por productos desactivado: en Corte diario solo se ve el corte de dinero. ")+(opcionesSistema.multiAlmacen?"Multi-almacén activado: aparece en el menú. ":"Multi-almacén desactivado: no aparece en el menú. ")+(opcionesSistema.chatInterno?"Chat interno activado: el patrón y los cajeros se escriben en Mensajes. ":"Chat interno desactivado: los cajeros no ven Mensajes en el menú. ")+(opcionesSistema.descuentos?"Descuentos activados: al cobrar se puede aplicar un descuento en % o en pesos (solo el Administrador). ":"Descuentos desactivados: al cobrar no se puede rebajar el total. ")+(opcionesSistema.sinStock===true?"Sin stock activado: esta licencia no maneja inventario; las ventas no se bloquean por stock y el corte de productos no muestra columnas de stock. ":"")+"Los datos de ticket, cajeros y terminales de este negocio también son por licencia.";
@@ -4222,7 +4223,8 @@ var accionesProdAbierto=null;
 function toggleAccionesProd(id){var d=document.getElementById("acciones-prod-"+id);if(!d)return;if(accionesProdAbierto!==null&&accionesProdAbierto!==id){var a=document.getElementById("acciones-prod-"+accionesProdAbierto);if(a)a.style.display="none";}var abierto=d.style.display!=="none";d.style.display=abierto?"none":"flex";accionesProdAbierto=abierto?null:id;}
 function renderProductos(){
  const q=((document.getElementById("buscarProd")||{}).value||"").toLowerCase();
- const f=(document.getElementById("filtroProd")||{}).value||"todos";
+ actualizarFiltroCatProd();
+ const f=(document.getElementById("filtroProd")||{}).value||"todas";
  const lista=document.getElementById("listaProductos");if(!lista)return;lista.innerHTML="";
  const disp=catalogo.filter(p=>estadoDe(p)==="disponible").length;
  const agot=catalogo.filter(p=>estadoDe(p)!=="disponible").length;
@@ -4232,8 +4234,7 @@ function renderProductos(){
  document.getElementById("resValor").textContent=dinero(catalogo.reduce((a,p)=>a+p.precio*p.stock,0));
  const _sb=document.getElementById("resStockBajo");if(_sb)_sb.textContent=catalogo.filter(function(p){return !p.pausado&&p.stock>0&&p.stock<=(p.stockMin==null?5:p.stockMin)}).length;
  const _mg=document.getElementById("resMargen");if(_mg)_mg.textContent=catalogo.length?Math.round(catalogo.reduce(function(a,p){return a+margenProducto(p)},0)/catalogo.length)+"%":"0%";
- const estFiltro=f==="disponibles"?"disponible":f==="agotados"?"agotado":f==="pausados"?"pausado":"todos";
- const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>estFiltro==="todos"||estadoDe(p)===estFiltro);
+ const items=catalogo.filter(p=>p.nombre.toLowerCase().includes(q)).filter(p=>f==="todas"||(p.categoria||"General")===f);
  if(!items.length){lista.innerHTML='<div class="ticket-vacio">'+ic3d("📦","f-gris")+'<br><b>No hay productos con ese filtro</b></div>';return}
  items.forEach(p=>{
   const est=estadoDe(p);
