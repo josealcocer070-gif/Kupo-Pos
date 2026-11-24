@@ -1676,6 +1676,12 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="chat-lista" id="chatLista"></div>
 <div class="chat-entrada"><input id="chatTexto" maxlength="500" placeholder="Escribe un mensaje…" autocomplete="off" onkeydown="if(event.key==='Enter')enviarMensajeChat()"><button type="button" id="chatEnviar" onclick="enviarMensajeChat()" aria-label="Enviar mensaje">➤</button></div>
 </div>
+<div id="vistaPedidosKiosco" class="oculto">
+<h1>🔔 Pedidos del kiosco</h1>
+<p style="color:#555;margin-bottom:14px">El cliente pide en el kiosco, tú cobras aquí. Cuando cobres un pedido, se quita de la lista.</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><button type="button" onclick="mostrarVista('ventas')">← Volver a Ventas</button><button type="button" onclick="revisarPedidosKiosco()">🔄 Actualizar</button></div>
+<div id="listaPedidosKioscoVista" style="max-width:640px"></div>
+</div>
 <div id="vistaAdminLic" class="oculto">
 <h1>⚙️ Administrador de licencia</h1>
 <p style="color:#555;margin-bottom:14px">Opciones de esta licencia, solo para el Administrador de este negocio. Al entrar con otra licencia, se aplican las opciones de esa licencia.</p>
@@ -3141,12 +3147,12 @@ function probarImpresionBT(){
 }
 
 /* Interfaz 3.2 · Cajeros y permisos */
-const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones","kiosco"],Cajero:["ventas","cotizaciones","mensajes"]};
+const PERMISOS={Administrador:["ventas","productos","importar","entradas","gastos","cortes","reportes","historial","ticket","cajeros","multi","adminlic","cotizaciones","kiosco","pedidosKiosco"],Cajero:["ventas","cotizaciones","mensajes","pedidosKiosco"]};
 let cajeros=cargarDatoLicencia("kupoPosV146Cajeros",[]);
 let sesionActual=(function(){try{const s=JSON.parse(localStorage.getItem("kupoPosV146Sesion")||"null");return (s&&s.activa===true&&s.usuario&&s.rol)?s:null}catch(e){return null}})();
 function guardarCajeros(){guardarPorLicencia("kupoPosV146Cajeros",cajeros);localStorage.setItem("kupoPosV146Sesion",JSON.stringify(sesionActual));}
 function tienePermiso(vista){const rol=(sesionActual&&sesionActual.rol)||"Administrador";if(rol==="Administrador")return true;const yo=cajeros.find(function(c){return c.usuario===(sesionActual&&sesionActual.usuario)});if(yo&&yo.permisos&&Object.prototype.hasOwnProperty.call(yo.permisos,vista))return !!yo.permisos[vista];const lista=PERMISOS[rol]||[];return lista.indexOf(vista)!==-1}
-const VISTAS_PERMISO=[["productos","📦 Productos"],["importar","📥 Importar Excel"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"]];
+const VISTAS_PERMISO=[["productos","📦 Productos"],["importar","📥 Importar Excel"],["entradas","➕ Entradas"],["gastos","💲 Gastos"],["cortes","📊 Corte diario"],["reportes","📈 Reportes"],["historial","🕐 Historial de cortes"],["ticket","🎟 Personalizar ticket"],["cajeros","🛡 Cajeros y permisos"],["multi","🏬 Multi-almacén"],["pedidosKiosco","🔔 Pedidos del kiosco"]];
 function renderPermisosCajero(){const sel=document.getElementById("selPermCajero");const box=document.getElementById("listaPermisosCajero");if(!sel||!box)return;const lista=cajeros.filter(function(c){return c.rol==="Cajero"});sel.innerHTML=lista.length?lista.map(function(c){return '<option value="'+c.id+'">'+escHtml(c.nombre)+" ("+escHtml(c.usuario)+")</option>"}).join(""):'<option value="">Sin cajeros</option>';const c=lista.find(function(x){return String(x.id)===String(sel.value)})||lista[0];if(!c){box.innerHTML='<p style="color:#555">Crea primero un cajero con rol Cajero.</p>';return}sel.value=c.id;const per=c.permisos||{};const esAdminP=(sesionActual&&sesionActual.rol)==="Administrador";box.innerHTML=VISTAS_PERMISO.map(function(v){const base=(PERMISOS.Cajero||[]).indexOf(v[0])!==-1;const val=Object.prototype.hasOwnProperty.call(per,v[0])?!!per[v[0]]:base;return '<label class="perm-fila"><span>'+v[1]+'</span><span class="interruptor"><input type="checkbox" data-vista="'+v[0]+'" '+(val?"checked":"")+(esAdminP?"":" disabled")+' onchange="guardarPermisosCajero()"><span class="deslizador"></span></span></label>'}).join("")+'<p style="font-size:12px;color:#666">Ventas y Cotizaciones siempre están activas para el cajero. Administrador de licencia siempre es solo del Administrador. Los permisos se sincronizan a la nube para todas las sucursales (con internet y sesión del Administrador en este navegador).</p>';if(!esAdminP){box.insertAdjacentHTML("beforeend",'<p style="font-size:12px;color:#666">Solo el Administrador cambia permisos.</p>');}}
 function guardarPermisosCajero(){const sel=document.getElementById("selPermCajero");if(!sel||!sel.value)return;const c=cajeros.find(function(x){return String(x.id)===String(sel.value)});if(!c)return;if((sesionActual&&sesionActual.rol)!=="Administrador"){toast("⛔ Solo el Administrador cambia permisos.");return}c.permisos=c.permisos||{};document.querySelectorAll("#listaPermisosCajero input[data-vista]").forEach(function(inp){c.permisos[inp.getAttribute("data-vista")]=inp.checked});guardarCajeros();if(typeof encolarCajeroNube==="function")encolarCajeroNube(c);if(typeof intentarSincronizarNube==="function")intentarSincronizarNube();aplicarPermisosMenu();toast("Permisos actualizados para "+c.nombre)}
 function aplicarPermisosMenu(){
@@ -3525,6 +3531,7 @@ function mostrarVista(v){
  document.getElementById("vistaAdminLic").classList.toggle("oculto",v!=="adminlic");
  document.getElementById("vistaCotizaciones").classList.toggle("oculto",v!=="cotizaciones");
  document.getElementById("vistaMensajes").classList.toggle("oculto",v!=="mensajes");
+ document.getElementById("vistaPedidosKiosco").classList.toggle("oculto",v!=="pedidosKiosco");
  document.getElementById("panelVenta").classList.toggle("oculto",v!=="ventas");
  document.getElementById("accionesRapidas").classList.toggle("oculto",v!=="ventas");
  if(typeof cerrarMenuAcciones==="function")cerrarMenuAcciones();
@@ -3547,7 +3554,7 @@ function mostrarVista(v){
  document.getElementById("navAdminLic").classList.toggle("activo",v==="adminlic");
  document.getElementById("navCotizaciones").classList.toggle("activo",v==="cotizaciones");
  if(window.innerWidth<=760){document.querySelector("aside").classList.remove("abierto");document.body.classList.remove("menu-abierto");}
- if(v==="productos")renderProductos(); else if(v==="kiosco")renderKiosco(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else render();
+ if(v==="productos")renderProductos(); else if(v==="kiosco")renderKiosco(); else if(v==="importar")renderImportar(); else if(v==="entradas")renderEntradas(); else if(v==="gastos")renderGastos(); else if(v==="cortes")renderCortes(); else if(v==="reportes")renderReportes(); else if(v==="historial")renderHistorial(); else if(v==="ticket")cargarTicketConfig(); else if(v==="cajeros")renderCajeros(); else if(v==="multi")renderMulti(); else if(v==="adminlic")aplicarOpcionesSistema(); else if(v==="cotizaciones")renderCotizaciones(); else if(v==="mensajes")abrirMensajes(); else if(v==="pedidosKiosco"){renderPedidosKiosco();revisarPedidosKiosco();} else render();
  if(v==="ventas"&&window.innerWidth>1020){var _b=document.getElementById("buscar");if(_b)setTimeout(function(){_b.focus()},50);}
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -5362,9 +5369,9 @@ function actualizarBadgeKiosco(){
  b.classList.toggle("con-nuevos",n>0);
 }
 function renderPedidosKiosco(){
- var box=document.getElementById("listaPedidosKiosco");if(!box)return;
- if(!pedidosKiosco.length){box.innerHTML='<p style="text-align:center;color:#6b7280;padding:30px 10px;font-size:16px">🔔 Sin pedidos del kiosco.<br>Cuando un cliente pida, aparecerá aquí.</p>';return;}
- box.innerHTML=pedidosKiosco.map(function(p){
+ var html;
+ if(!pedidosKiosco.length){html='<p style="text-align:center;color:#6b7280;padding:30px 10px;font-size:16px">🔔 Sin pedidos del kiosco.<br>Cuando un cliente pida, aparecerá aquí.</p>';}
+ else{html=pedidosKiosco.map(function(p){
   var items=(p.items||[]).map(function(it){return (it.cant||1)+" × "+escHtml(it.nombre||"Producto")}).join("<br>");
   var espera=p.estado==="en_espera";
   return '<div class="pedido-kiosco'+(espera?" en-espera":"")+'">'+
@@ -5375,24 +5382,18 @@ function renderPedidosKiosco(){
    '<div class="pk-botones"><button type="button" class="pk-cobrar" onclick="cobrarPedidoKiosco(\''+p.id+'\')">💰 Cobrar</button>'+
    (espera?'<button type="button" class="pk-volver" onclick="volverPendientePedidoKiosco(\''+p.id+'\')">↩️ Volver</button>':'<button type="button" class="pk-espera" onclick="ponerEnEsperaPedidoKiosco(\''+p.id+'\')">⏸️ En espera</button>')+
    '</div></div>';
- }).join("");
+ }).join("");}
+ var box=document.getElementById("listaPedidosKiosco");if(box)box.innerHTML=html;
+ var boxV=document.getElementById("listaPedidosKioscoVista");if(boxV)boxV.innerHTML=html;
 }
-/* v172: campana del kiosco a prueba de fallos (mismo patrón que v141 con Mensajes:
-   en la tablet el toque no abría nada aunque el distintivo marcaba 1 pedido).
-   1) Avisa al tocar, así se ve al instante si el toque llegó. 2) Si la ventana
-   flotante no existe en la página cargada (caché viejo), avisa que hay que
-   recargar. 3) Verifica que el panel quedó abierto y reintenta una vez. */
+/* v173: la campana abre los pedidos en VISTA COMPLETA (no ventana flotante):
+   en la tablet la ventana flotante no se pinta aunque el código está bien
+   (verificado por 3 vías: arnés, navegador real y la lógica del botón); la
+   vista completa sí se ve, como Ventas y Mensajes. La ventana flotante queda
+   como está por si se abre desde otro lado. */
 function abrirKioscoSeguro(){
- var p=document.getElementById("panelKioscoFlotante");
- if(!p){toast("🔔 La pantalla está desactualizada: toca Recargar 🔄 arriba y vuelve a intentar.");return;}
- if(p.classList.contains("oculto")){
-  toast("🔔 Abriendo pedidos del kiosco…");
-  togglePanelKiosco();
-  if(p.classList.contains("oculto")){togglePanelKiosco();}
-  if(p.classList.contains("oculto")){toast("🔔 No se pudo abrir: toca Recargar 🔄 arriba y vuelve a intentar.");}
- }else{
-  togglePanelKiosco();
- }
+ toast("🔔 Abriendo pedidos del kiosco…");
+ mostrarVista("pedidosKiosco");
 }
 function togglePanelKiosco(){
  var p=document.getElementById("panelKioscoFlotante");if(!p)return;
