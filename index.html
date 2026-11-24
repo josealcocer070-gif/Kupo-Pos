@@ -131,6 +131,11 @@ html[data-tema="noche"] #panelMensajesFlotante .chat-lista{background:var(--fond
 .kupi-entrada{display:flex;gap:8px;padding:10px;border-top:1px solid #e5e5e5;background:#fff}
 .kupi-entrada input{flex:1;border:1px solid #c9d4dc;border-radius:20px;padding:9px 12px;font-size:14px;min-width:0}
 .kupi-entrada>button{background:#f5b800;border:none;border-radius:50%;width:40px;height:40px;font-size:17px;cursor:pointer;color:var(--azul);flex:none}
+.kupi-escribiendo{display:flex;gap:5px;align-items:center;padding:12px 14px}
+.kupi-escribiendo i{width:8px;height:8px;border-radius:50%;background:#8a9ba8;animation:kupiPunto 1s infinite}
+.kupi-escribiendo i:nth-child(2){animation-delay:.15s}
+.kupi-escribiendo i:nth-child(3){animation-delay:.3s}
+@keyframes kupiPunto{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
 html[data-tema="noche"] #panelChatKupi{background:var(--sup);border-color:var(--borde2)}
 html[data-tema="noche"] #kupiMensajes{background:var(--fondo)}
 html[data-tema="noche"] .kupi-msg.bot{background:var(--sup2);border-color:var(--borde2);color:var(--texto)}
@@ -3820,7 +3825,6 @@ function toggleChatKupi(){
  p.classList.toggle("oculto");
  if(abrir){
   if(!kupiSaludado){kupiSaludado=true;kupiAgregarMsg("bot",KUPI_SALUDO)}
-  var inp=document.getElementById("kupiEntrada");if(inp)inp.focus();
  }
 }
 function kupiAgregarMsg(quien,texto){
@@ -3836,16 +3840,29 @@ function kupiAgregarMsg(quien,texto){
  }
  caja.scrollTop=caja.scrollHeight;
 }
+function kupiMostrarEscribiendo(){
+ var caja=document.getElementById("kupiMensajes");if(!caja)return null;
+ var fila=document.createElement("div");fila.className="kupi-fila-bot";
+ var av=document.createElement("img");av.className="kupi-mini";av.src=MASCOTA_KUPI;av.alt="Kupi";
+ var bur=document.createElement("div");bur.className="kupi-msg bot kupi-escribiendo";bur.innerHTML="<i></i><i></i><i></i>";
+ fila.appendChild(av);fila.appendChild(bur);caja.appendChild(fila);
+ caja.scrollTop=caja.scrollHeight;
+ return fila;
+}
 function kupiPreguntar(texto){
  if(!texto||!String(texto).trim())return;
  kupiAgregarMsg("yo",String(texto).trim());
  var inp=document.getElementById("kupiEntrada");if(inp)inp.value="";
- setTimeout(function(){kupiAgregarMsg("bot",responderKupi(texto))},350);
+ var escribiendo=kupiMostrarEscribiendo();
+ setTimeout(function(){
+  if(escribiendo&&escribiendo.parentNode)escribiendo.parentNode.removeChild(escribiendo);
+  kupiAgregarMsg("bot",responderKupi(texto));
+ },900);
 }
 function kupiEnviar(){var i=document.getElementById("kupiEntrada");if(i)kupiPreguntar(i.value)}
 function kupiChip(t){kupiPreguntar(t)}
 function kupiAyuda(){
- return "Puedo ayudarte con:<br>• ¿Cuánto vendí hoy?<br>• ¿Cómo va la semana?<br>• ¿Cuál es mi producto más vendido?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?";
+ return "Puedo ayudarte con:<br>• ¿Cuánto vendí hoy?<br>• ¿Cuánto gané hoy?<br>• ¿Cuánto vendí ayer?<br>• ¿Cómo va la semana?<br>• ¿Cuál es mi producto más vendido?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?";
 }
 function kupiRespHoy(){
  var r=resumenReportes();
@@ -3895,6 +3912,19 @@ function kupiRespPronostico(){
  if(pr.aprendiendo)t+="<br><i>Estoy aprendiendo: llevas "+pr.diasConVenta+(pr.diasConVenta===1?" día":" días")+" con ventas, el pronóstico se afina con cada venta.</i>";
  return t;
 }
+function kupiRespGanancia(){
+ var r=resumenCorte();
+ if(!r.ventasNum)return "Hoy aún no hay ventas, así que todavía no hay ganancia. ¡Vende algo y me preguntas de nuevo! 😊";
+ var t="Hoy llevas de ganancia <b>"+dineroMiles(r.ganancia)+"</b> en "+r.ventasNum+(r.ventasNum===1?" venta":" ventas")+" por "+dineroMiles(r.ventasTotal)+".";
+ if(r.gastosHoy)t+="<br>Gastos de hoy: "+dineroMiles(r.gastosHoy)+".";
+ return t;
+}
+function kupiRespAyer(){
+ var r=resumenReportes();
+ var d=(r.dias&&r.dias.length>=6)?r.dias[5]:null;
+ if(!d||!d.num)return "Ayer no hubo ventas registradas.";
+ return "Ayer ("+escHtml(d.fechaCorta)+") vendiste <b>"+dineroMiles(d.total)+"</b> en "+d.num+(d.num===1?" venta":" ventas")+".";
+}
 function responderKupi(pregunta){
  var q=kupiNormTxt(pregunta);
  var tiene=function(){for(var i=0;i<arguments.length;i++){if(q.indexOf(arguments[i])!==-1)return true}return false};
@@ -3902,11 +3932,13 @@ function responderKupi(pregunta){
  if(tiene("pronostico","como viene la semana","que viene","preparar","proxima semana","siguiente semana"))return kupiRespPronostico();
  if(tiene("acabando","se acaba","stock bajo","que falta","por acabarse","se esta acabando","quedan","agotado","faltante"))return kupiRespStock();
  if(tiene("mas vendido","mejor producto","que se vende mas","lo que mas se vende","mas se vende"))return kupiRespMasVendido();
+ if(tiene("gane","ganancia","ganancias"))return kupiRespGanancia();
+ if(tiene("ayer"))return kupiRespAyer();
  if(tiene("hoy","cuanto vendi","cuanto se vendio","ventas de hoy","cuanto llevo","cuanto he vendido"))return kupiRespHoy();
  if(tiene("semana","ultimos 7 dias","esta semana","ultima semana","como va la semana"))return kupiRespSemana();
- if(tiene("hola","buenos dias","buenas tardes","buenas noches","que tal","que onda","saludos"))return KUPI_SALUDO+" Pregúntame cuánto vendiste hoy, qué se está acabando o cómo viene la semana. 😊";
+ if(tiene("hola","buenos dias","buenas tardes","buenas noches","que tal","que onda","saludos"))return KUPI_SALUDO+" Pregúntame cuánto vendiste hoy, cuánto ganaste, qué se está acabando o cómo viene la semana. 😊";
  if(tiene("ayuda","que puedes","que sabes","que haces","como funcionas","para que sirves"))return kupiAyuda();
- return "No te entendí 🤔 pero te puedo ayudar con esto:<br>• ¿Cuánto vendí hoy?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?<br>• ¿Cuál es mi producto más vendido?";
+ return "No te entendí 🤔 pero te puedo ayudar con esto:<br>• ¿Cuánto vendí hoy?<br>• ¿Cuánto gané hoy?<br>• ¿Cuánto vendí ayer?<br>• ¿Qué se está acabando?<br>• ¿Cómo viene la semana?<br>• ¿Cuál es mi producto más vendido?";
 }
 /* v113 (Lalo 2026-11-21): 1) insignia "Nuevo" de Importar Excel se oculta
    al abrir el apartado (se guarda por aparato); 2) botón de Kupi arrastrable
@@ -5331,10 +5363,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<!-- v146: Kupi con 3 preguntas nuevas + animación de escritura + ya no abre el teclado solo -->
 <div id="panelChatKupi" class="oculto">
 <div class="kupi-encabezado"><img id="imgKupiEnc" alt="Kupi"><div><b>Kupi</b><span>● En línea</span></div><button type="button" onclick="toggleChatKupi()" aria-label="Cerrar el chat">✕</button></div>
 <div id="kupiMensajes"></div>
-<div class="kupi-chips"><button type="button" onclick="kupiChip('¿Cuánto vendí hoy?')">¿Cuánto vendí hoy?</button><button type="button" onclick="kupiChip('¿Qué se está acabando?')">¿Qué se está acabando?</button><button type="button" onclick="kupiChip('¿Cómo viene la semana?')">¿Cómo viene la semana?</button></div>
+<div class="kupi-chips"><button type="button" onclick="kupiChip('¿Cuánto vendí hoy?')">¿Cuánto vendí hoy?</button><button type="button" onclick="kupiChip('¿Qué se está acabando?')">¿Qué se está acabando?</button><button type="button" onclick="kupiChip('¿Cómo viene la semana?')">¿Cómo viene la semana?</button><button type="button" onclick="kupiChip('¿Cuánto gané hoy?')">¿Cuánto gané hoy?</button><button type="button" onclick="kupiChip('¿Cuál es mi producto más vendido?')">¿Cuál es mi producto más vendido?</button><button type="button" onclick="kupiChip('¿Cuánto vendí ayer?')">¿Cuánto vendí ayer?</button></div>
 <div class="kupi-entrada"><input id="kupiEntrada" type="text" placeholder="Escribe tu pregunta..." autocomplete="off" onkeydown="if(event.key==='Enter')kupiEnviar()"><button type="button" onclick="kupiEnviar()" aria-label="Enviar">➤</button></div>
 </div>
 <!-- v142 (Lalo 2026-11-23): el panel de Mensajes estaba DENTRO del panel de Kupi, que está oculto
