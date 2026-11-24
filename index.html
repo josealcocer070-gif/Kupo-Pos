@@ -5338,7 +5338,7 @@ let kioscoUltimosPendientes=0;
 let kioscoCobrosPendientes=[];
 try{kioscoCobrosPendientes=JSON.parse(localStorage.getItem("kupoPosV146KioscoCobrosPendientes")||"[]")||[]}catch(e){kioscoCobrosPendientes=[];}
 function guardarCobrosPendientesKiosco(){try{localStorage.setItem("kupoPosV146KioscoCobrosPendientes",JSON.stringify(kioscoCobrosPendientes))}catch(e){}}
-function sonarCampanita(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var ctx=sonarCampanita._ctx||(sonarCampanita._ctx=new C());if(ctx.state==="suspended")ctx.resume();[0,180].forEach(function(d){var o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=880;g.gain.setValueAtTime(0.0001,ctx.currentTime+d/1000);g.gain.exponentialRampToValueAtTime(0.25,ctx.currentTime+d/1000+0.02);g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+d/1000+0.16);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+d/1000);o.stop(ctx.currentTime+d/1000+0.18);});}catch(e){}}
+function sonarCampanita(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var ctx=sonarCampanita._ctx||(sonarCampanita._ctx=new C());if(ctx.state==="suspended")ctx.resume();var t0=ctx.currentTime;[[1568,0.15],[2489,0.30],[3723,0.20],[5233,0.12]].forEach(function(p){var o=ctx.createOscillator(),g=ctx.createGain();o.type="sine";o.frequency.value=p[0];g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(p[1],t0+0.003);g.gain.exponentialRampToValueAtTime(0.0001,t0+0.9);o.connect(g);g.connect(ctx.destination);o.start(t0);o.stop(t0+0.9);});}catch(e){}}
 async function revisarPedidosKiosco(){
  asegurarSupabase();
  if(!kupoSupabase)return;
