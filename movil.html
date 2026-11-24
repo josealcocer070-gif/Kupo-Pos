@@ -2886,13 +2886,25 @@ function aplicarOpcionesSistema(){
  const ol=document.getElementById("optLicencia"); if(ol)ol.textContent=licenciaActual();
  const on=document.getElementById("optNegocio"); if(on)on.textContent=(typeof ticketConfig!=="undefined"&&ticketConfig.negocio)||localStorage.getItem("kupoPosV146Negocio")||"Mi negocio";
 }
+/* v179: reintento automático de las opciones (Lalo 2026-11-24). Si un interruptor (Sin stock, etc.) no llega a la nube, se reintenta solo cada 30 s hasta que llegue; al lograrlo avisa con toast y se detiene. */
+var timerReintentoOpciones=null;
+function programarReintentoOpciones(){
+ if(timerReintentoOpciones)return;
+ timerReintentoOpciones=setInterval(async function(){
+  try{
+   if(typeof subirOpcionesNube!=="function"){clearInterval(timerReintentoOpciones);timerReintentoOpciones=null;return;}
+   var ok=await subirOpcionesNube();
+   if(ok){clearInterval(timerReintentoOpciones);timerReintentoOpciones=null;toast("✅ Las opciones llegaron a la nube.");}
+  }catch(e){}
+ },30000);
+}
 function cambiarOpcionSistema(clave,valor){
  if(!((sesionActual&&sesionActual.rol)==="Administrador")){toast("⛔ Sin permiso: solo el Administrador puede cambiar las opciones de esta licencia.");aplicarOpcionesSistema();return}
  if(clave!=="corteProductos"&&clave!=="multiAlmacen"&&clave!=="chatInterno"&&clave!=="descuentos"&&clave!=="sinStock")return;
  opcionesSistema[clave]=!!valor;
  guardarOpcionesSistema();
  guardarFechaOpcionesNube(Date.now());
- if(typeof subirOpcionesNube==="function"){try{subirOpcionesNube();}catch(e){}}
+ if(typeof subirOpcionesNube==="function"){try{subirOpcionesNube().then(function(ok){if(!ok){toast("⚠ Se guardó en el celular, pero no llegó a la nube. Lo reintento solo.");if(typeof programarReintentoOpciones==="function")programarReintentoOpciones();}}).catch(function(){if(typeof programarReintentoOpciones==="function")programarReintentoOpciones();});}catch(e){}}
  aplicarOpcionesSistema();
  if(clave==="sinStock"){renderCortes();render();if(typeof aplicarPermisosMenu==="function")aplicarPermisosMenu();}
  if(clave==="sinStock"&&valor&&vistaActual==="entradas")mostrarVista("ventas");
