@@ -1021,7 +1021,7 @@ document.addEventListener("DOMContentLoaded",aplicarTema);
 <div class="negocio-wrap"><div class="negocio"><b id="nombreNegocio" title="Nombre del negocio">Mi negocio</b></div><div class="sucursal">SUCURSAL PRINCIPAL · V1.7.0</div></div>
 <div class="sp"></div>
 <button type="button" class="btn-tema" id="btnMenuAcciones" onclick="toggleMenuAcciones(event)" aria-label="Acciones rápidas" title="Acciones rápidas">☰</button>
-<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="toggleMensajesFlotante()" aria-label="Mensajes" title="Mensajes">💬 <span class="sync-texto">Mensajes</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
+<button type="button" class="btn-sync" id="btnMensajesHeader" onclick="abrirMensajesSeguro()" aria-label="Mensajes" title="Mensajes">💬 <span class="sync-texto">Mensajes</span><span class="badge-msg" id="badgeMsgHeader">0</span></button>
 <button type="button" class="btn-tema" id="btnChatKupi" onclick="toggleChatKupi()" style="display:none" aria-label="Abrir el chat con Kupi" title="Kupi"><img id="imgBtnKupi" alt="Kupi"></button>
 <button type="button" class="btn-tema" id="btnRecargar" onclick="recargarPantalla()" aria-label="Recargar pantalla" title="Recargar">🔄</button>
 <button type="button" class="btn-sync" id="btnSync" onclick="sincronizarAhora()" aria-label="Sincronizar con la nube">☁️ <span class="sync-texto">Sincronizar</span><span class="badge-sync" id="badgeSync">0</span></button>
@@ -3784,6 +3784,17 @@ function actualizarBotonKupi(){
    rápido sin interrumpir la venta. Reutiliza la lista, el envío y el
    marcado de leídos del chat (renderMensajes pinta en las dos listas). */
 function mensajesFlotanteAbierto(){var p=document.getElementById("panelMensajesFlotante");return !!(p&&!p.classList.contains("oculto"));}
+/* v141: abrir Mensajes a prueba de fallos (en la tablet el boton no abria nada tras la v139).
+   1) Avisa al tocar, asi se ve al instante si el toque llego. 2) Si la ventana flotante no
+   existe en la pagina cargada (cache viejo), abre la vista completa de Mensajes. */
+function abrirMensajesSeguro(){
+ var p=document.getElementById("panelMensajesFlotante");
+ if(!p){mostrarVista("mensajes");return;}
+ if(!p.classList.contains("oculto")){toggleMensajesFlotante();return;}
+ if(!chatActivo()&&!esAdminChat()){toast("\uD83D\uDCAC El chat interno est\u00E1 apagado. Pide al Administrador que lo prenda.");return;}
+ toast("\uD83D\uDCAC Abriendo mensajes\u2026");
+ toggleMensajesFlotante();
+}
 function toggleMensajesFlotante(){
  var p=document.getElementById("panelMensajesFlotante");if(!p)return;
  var abrir=p.classList.contains("oculto");
