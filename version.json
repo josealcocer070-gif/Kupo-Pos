@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Registro de actividad del POS: inicio de sesión, cierre de turno, cortes, productos y cajeros quedan anotados en la nube y se ven en la vista Registro de KUPO Admin.",
+  "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.3"
+  "version": "V1.20.4"
  },
  "pc": {
-  "notas": "Registro de actividad del POS: inicio de sesión, cierre de turno, cortes, productos y cajeros quedan anotados en la nube y se ven en la vista Registro de KUPO Admin.",
+  "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.4"
+  "version": "V1.19.5"
  },
- "version": "V1.20.3"
+ "version": "V1.20.4"
 }
