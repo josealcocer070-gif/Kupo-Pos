@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Inicio de sesión: textos de arriba centrados, tarjetas de usuario con brillo dorado que respira, sin el texto de soporte (el logo de WhatsApp ya enlaza al soporte).",
+  "notas": "Ventas: el botón ☰ del menú de funciones ahora va a la izquierda del encabezado y se quitó el nombre del negocio repetido dentro de la tarjeta del ticket.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.7"
+  "version": "V1.20.8"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.7"
+ "version": "V1.20.8"
 }
