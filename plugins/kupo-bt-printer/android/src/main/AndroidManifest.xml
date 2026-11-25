@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Bluetooth clásico (SPP) para la impresora térmica. En Android 12+
+         (API 31) hace falta BLUETOOTH_CONNECT en tiempo de ejecución; el
+         plugin lo pide solo. En API 30 o menos bastan los permisos viejos. -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
+</manifest>

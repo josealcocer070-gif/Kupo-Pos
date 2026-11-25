@@ -1,0 +1,1 @@
+{"capacitor":{"android":{"src":"android"}},"description":"Bluetooth clásico (SPP) para imprimir tickets ESC/POS en KUPO POS. El socket vive en la capa nativa y sobrevive a la recarga del WebView.","keywords":["capacitor","plugin","bluetooth","escpos","kupo"],"license":"MIT","main":"dist/plugin.js","name":"kupo-bt-printer","types":"dist/definitions.d.ts","version":"1.0.0"}
