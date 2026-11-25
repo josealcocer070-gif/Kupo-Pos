@@ -12,9 +12,19 @@
          se pide en tiempo de ejecución, se concede una sola vez desde los
          ajustes del sistema (el plugin abre esa pantalla con
          ACTION_MANAGE_OVERLAY_PERMISSION, solo cuando el usuario toca el
-         botón en Administrador de licencia). El receptor NO se toca. -->
+         botón en Administrador de licencia). El receptor NO se toca.
+         v200: arranque por notificación tipo alarma (Lalo 2026-11-25). La
+         tablet AUMI tiene deshabilitada de fábrica la función "mostrar
+         sobre otras apps", así que ese camino está muerto en este aparato.
+         El receptor ya NO abre la actividad directo (Android 10+ lo
+         bloquea, BAL): publica un aviso de alta prioridad con full-screen
+         intent y la app se abre sola como una alarma. Para eso hacen falta
+         POST_NOTIFICATIONS (permiso de notificaciones, Android 13+) y
+         USE_FULL_SCREEN_INTENT (permiso normal, se concede al instalar). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <application>
         <receiver
             android:name="com.grupobenitez.kupoautostart.BootReceiver"

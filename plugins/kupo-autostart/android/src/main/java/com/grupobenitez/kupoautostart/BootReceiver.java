@@ -6,16 +6,21 @@ import android.content.Intent;
 import android.util.Log;
 
 /**
- * BootReceiver — abre KUPO POS al prender la tablet (v196, Lalo 2026-11-24).
+ * BootReceiver — abre KUPO POS al prender la tablet (v196, Lalo 2026-11-24;
+ * método tipo alarma desde v200, Lalo 2026-11-25).
  *
  * Escucha BOOT_COMPLETED (y QUICKBOOT_POWERON, que mandan algunas tablets
- * en vez del primero) y arranca la actividad principal de la app con el
- * intent de lanzamiento del propio paquete, sin inventar la clase: así
- * abre la MainActivity de Capacitor tal como la abriría el ícono.
+ * en vez del primero) y publica el aviso de arranque del plugin: una
+ * notificación de alta prioridad con full-screen intent hacia la actividad
+ * principal, así Android abre la app sola como una alarma.
  *
- * El PIN se sigue pidiendo al entrar (la app abre en el inicio de sesión).
- * Si Android no deja arrancar la actividad, se registra y no se rompe
- * nada: el receptor nunca tumba el arranque del sistema.
+ * Antes (v196-v199) arrancaba la actividad directo con startActivity, pero
+ * Android 10+ lo bloquea (BAL) sin el permiso "mostrar sobre otras apps",
+ * y la tablet AUMI lo tiene deshabilitado de fábrica: por eso ya no se
+ * abre directo, se publica el aviso. El PIN se sigue pidiendo al entrar
+ * (la app abre en el inicio de sesión). Si el aviso no se puede publicar,
+ * se registra y no se rompe nada: el receptor nunca tumba el arranque
+ * del sistema.
  */
 public class BootReceiver extends BroadcastReceiver {
 
@@ -28,17 +33,10 @@ public class BootReceiver extends BroadcastReceiver {
         if (!Intent.ACTION_BOOT_COMPLETED.equals(action)
                 && !"android.intent.action.QUICKBOOT_POWERON".equals(action)) return;
         try {
-            Intent launch = context.getPackageManager()
-                    .getLaunchIntentForPackage(context.getPackageName());
-            if (launch == null) {
-                Log.w(TAG, "Sin intent de lanzamiento para " + context.getPackageName());
-                return;
-            }
-            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(launch);
-            Log.i(TAG, "KUPO POS abierto al prender la tablet.");
+            KupoAutostartPlugin.publicarAvisoArranque(context);
+            Log.i(TAG, "Aviso de arranque publicado al prender la tablet.");
         } catch (Exception e) {
-            Log.w(TAG, "No se pudo abrir KUPO POS al prender: " + e.getMessage());
+            Log.w(TAG, "No se pudo publicar el aviso de arranque: " + e.getMessage());
         }
     }
 }
