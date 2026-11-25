@@ -5,14 +5,14 @@
     "version": "V1.19.4"
   },
   "movil": {
-    "notas": "Ventas móvil: encabezado plano estilo Manus y el botón COBRAR vuelve a verse dentro del ticket (totales, forma de pago y efectivo recibido).",
+    "notas": "Ventas: botón dorado del encabezado ahora abre el menú de productos; interruptor Pago mixto en el ticket; pie fijo con COBRAR siempre visible y solo las líneas con scroll.",
     "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-    "version": "V1.20.10"
+    "version": "V1.20.11"
   },
   "pc": {
     "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
     "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
     "version": "V1.19.5"
   },
-  "version": "V1.20.10"
+  "version": "V1.20.11"
 }
