@@ -168,7 +168,10 @@ public class KupoBtPrinterPlugin extends Plugin {
                 call.resolve(ret);
             } catch (Exception e) {
                 closeQuietly();
-                call.reject("no se pudo conectar a la impresora");
+                // v192: el motivo real (p. ej. "read failed, socket might closed")
+                // llega al toast de la app en vez de un mensaje genérico.
+                String detalle = e.getMessage() != null ? e.getMessage() : "";
+                call.reject("no se pudo conectar a la impresora" + (detalle.isEmpty() ? "" : " (" + detalle + ")"));
             }
         });
     }
