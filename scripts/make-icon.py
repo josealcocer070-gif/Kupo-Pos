@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Genera assets/icon.png (1024x1024) para @capacitor/assets.
 
+Consciente del sabor: si capacitor.config.json trae el appId de KUPO Admin
+(com.grupobenitez.kupopos.admin) usa icon-admin-512.png (el icono de Admin);
+en cualquier otro caso (o sin config) usa el icono KUPO de siempre.
+
 Fuente (en orden): el icono más grande incrustado en manifest.json (data URI
 PNG); si no hay, el archivo icon-512.png del repo (el icono oficial de KUPO
 POS, subido como archivo). No se sube ningún binario al repo: este script
@@ -13,6 +17,17 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+ADMIN_APP_ID = "com.grupobenitez.kupopos.admin"
+
+
+def _app_id() -> str:
+    """appId de capacitor.config.json, o "" si no existe o no se lee."""
+    try:
+        cfg = json.loads((ROOT / "capacitor.config.json").read_text(encoding="utf-8"))
+        return str(cfg.get("appId", ""))
+    except (OSError, ValueError):
+        return ""
 
 
 def main() -> None:
@@ -33,6 +48,20 @@ def main() -> None:
             best = src
 
     from PIL import Image
+
+    if _app_id() == ADMIN_APP_ID:
+        admin_png = ROOT / "icon-admin-512.png"
+        if not admin_png.exists():
+            print("Falta icon-admin-512.png (icono de KUPO Admin) para el sabor Admin",
+                  file=sys.stderr)
+            sys.exit(1)
+        img = Image.open(admin_png).convert("RGBA")
+        img = img.resize((1024, 1024), Image.LANCZOS)
+        out = ROOT / "assets" / "icon.png"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        img.save(out, "PNG")
+        print(f"Icono generado: {out} (1024x1024, desde icon-admin-512.png, KUPO Admin)")
+        return
 
     if best is not None:
         raw = base64.b64decode(best.split(",", 1)[1])
