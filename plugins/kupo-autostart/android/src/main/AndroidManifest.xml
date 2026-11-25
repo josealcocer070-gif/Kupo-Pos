@@ -4,8 +4,17 @@
          2026-11-24: "al prender la tablet que KUPO se abra en automático,
          estilo Windows"). RECEIVE_BOOT_COMPLETED es permiso normal: se
          concede solo al instalar, sin ventana. El receptor arranca la
-         actividad principal de la app; el PIN se sigue pidiendo al entrar. -->
+         actividad principal de la app; el PIN se sigue pidiendo al entrar.
+         v199: SYSTEM_ALERT_WINDOW ("mostrar sobre otras apps"). En
+         Android 10+ el sistema no deja arrancar una actividad desde
+         segundo plano sin este permiso, por eso la tablet no abría sola
+         aunque el receptor sí estaba en el APK. Es permiso especial: no
+         se pide en tiempo de ejecución, se concede una sola vez desde los
+         ajustes del sistema (el plugin abre esa pantalla con
+         ACTION_MANAGE_OVERLAY_PERMISSION, solo cuando el usuario toca el
+         botón en Administrador de licencia). El receptor NO se toca. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application>
         <receiver
             android:name="com.grupobenitez.kupoautostart.BootReceiver"
