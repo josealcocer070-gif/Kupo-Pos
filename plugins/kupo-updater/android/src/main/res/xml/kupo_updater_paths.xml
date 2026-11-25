@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- El APK descargado vive en la caché interna de la app (kupo-updater/):
+         solo KUPO POS lo puede leer y el instalador lo recibe con permiso
+         temporal (FLAG_GRANT_READ_URI_PERMISSION). -->
+    <cache-path name="updates" path="kupo-updater/" />
+</paths>
