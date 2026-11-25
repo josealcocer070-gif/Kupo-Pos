@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Login móvil reestructurado: tarjetas de usuario arriba, logos de WhatsApp y Grupo Benítez abajo junto al soporte, textos acortados y pantalla más corta.",
+  "notas": "Inicio de sesión: textos de arriba centrados, tarjetas de usuario con brillo dorado que respira, sin el texto de soporte (el logo de WhatsApp ya enlaza al soporte).",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.6"
+  "version": "V1.20.7"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.6"
+ "version": "V1.20.7"
 }
