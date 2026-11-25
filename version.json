@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Buscar producto: el botón + ya no tapa el precio (vuelve al flujo flex); tarjetas del catálogo en verde oscuro con precio dorado y botón + dorado.",
+  "notas": "Buscar producto: el botón + ya es uno solo (sin el ::after duplicado) y el catálogo ya no se cierra al agregar — se cierra solo con la X.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.13"
+  "version": "V1.20.14"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.13"
+ "version": "V1.20.14"
 }
