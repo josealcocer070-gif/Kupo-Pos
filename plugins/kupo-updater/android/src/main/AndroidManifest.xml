@@ -5,19 +5,19 @@
          de Android con su propio APK descargado. La primera vez el sistema
          pide permitir "instalar apps desconocidas" para KUPO POS (una sola
          vez); después cada actualización solo muestra la confirmación
-         "Instalar" del sistema. El FileProvider sirve el APK descargado
-         (vive en la caché interna) al instalador con permiso temporal. -->
+         "Instalar" del sistema.
+         OJO (arreglo 2026-11-25, con cuidado: no se toca ningún código):
+         este plugin NO declara su propio FileProvider. La plantilla de
+         Capacitor YA trae uno con la misma autoridad
+         (${applicationId}.fileprovider) y sirve todo el caché
+         (file_paths.xml: cache-path "."), que es donde baja el APK
+         (caché/kupo-updater/). Declararlo aquí duplicado — mismo nombre,
+         misma autoridad y el mismo meta-data FILE_PROVIDER_PATHS con otro
+         recurso — rompía la fusión del manifiesto y los 3 builds de la
+         v198 fallaban en processReleaseMainManifest. El código Java usa
+         esa misma autoridad, así que del lado de la app no cambia nada.
+         El archivo res/xml/kupo_updater_paths.xml queda sin uso (no se
+         borra para no tocar más archivos de los necesarios). -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <application>
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/kupo_updater_paths" />
-        </provider>
-    </application>
 </manifest>
