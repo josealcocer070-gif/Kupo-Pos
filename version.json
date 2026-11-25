@@ -1,18 +1,18 @@
 {
-  "admin": {
-    "notas": "Protección de datos: registro de actividad, candado PIN para abrir la Admin y sesión segura (bloqueo a los 15 min sin uso + aviso de última sesión).",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
-    "version": "V1.19.4"
-  },
-  "movil": {
-    "notas": "Ventas: botón dorado del encabezado ahora abre el menú de productos; interruptor Pago mixto en el ticket; pie fijo con COBRAR siempre visible y solo las líneas con scroll.",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-    "version": "V1.20.11"
-  },
-  "pc": {
-    "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-    "version": "V1.19.5"
-  },
-  "version": "V1.20.11"
+ "admin": {
+  "notas": "Protección de datos: registro de actividad, candado PIN para abrir la Admin y sesión segura (bloqueo a los 15 min sin uso + aviso de última sesión).",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
+  "version": "V1.19.4"
+ },
+ "movil": {
+  "notas": "Ventas: sin botón MENÚ en el ticket (el menú vive en el botón dorado del encabezado); tipos de pago y efectivo recibido pasaron a la pantalla aparte de confirmar el cobro (flujo PC); pie fijo con COBRAR siempre visible.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
+  "version": "V1.20.12"
+ },
+ "pc": {
+  "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
+  "version": "V1.19.5"
+ },
+ "version": "V1.20.12"
 }
