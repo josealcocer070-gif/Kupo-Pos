@@ -1,0 +1,1 @@
+{"capacitor":{"android":{"src":"android"}},"description":"Abrir KUPO POS solo al prender la tablet (BOOT_COMPLETED). Sin métodos JS: el receptor vive en el manifiesto y arranca la app.","keywords":["capacitor","plugin","autostart","boot","kupo"],"license":"MIT","main":"dist/plugin.js","name":"kupo-autostart","types":"dist/definitions.d.ts","version":"1.0.0"}

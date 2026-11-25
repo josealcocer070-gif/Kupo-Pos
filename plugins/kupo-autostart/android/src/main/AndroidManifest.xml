@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Arranque automático de KUPO POS al prender la tablet (v196, Lalo
+         2026-11-24: "al prender la tablet que KUPO se abra en automático,
+         estilo Windows"). RECEIVE_BOOT_COMPLETED es permiso normal: se
+         concede solo al instalar, sin ventana. El receptor arranca la
+         actividad principal de la app; el PIN se sigue pidiendo al entrar. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <application>
+        <receiver
+            android:name="com.grupobenitez.kupoautostart.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
