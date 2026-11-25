@@ -16,5 +16,6 @@ cp "$ROOT/admin.html" "$ROOT/www/admin.html"
 cp "$ROOT/manifest.json" "$ROOT/www/manifest.json"
 cp "$ROOT/manifest-movil.json" "$ROOT/www/manifest-movil.json"
 cp "$ROOT/sw.js" "$ROOT/www/sw.js"
+cp "$ROOT/publicidad.html" "$ROOT/www/publicidad.html"
 
 echo "www/ listo: $(ls "$ROOT/www")"

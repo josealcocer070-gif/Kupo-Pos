@@ -18,6 +18,7 @@ cp "$ROOT/index.html" "$ROOT/www/escritorio.html"
 cp "$ROOT/manifest.json" "$ROOT/www/manifest.json"
 cp "$ROOT/manifest-movil.json" "$ROOT/www/manifest-movil.json"
 cp "$ROOT/sw.js" "$ROOT/www/sw.js"
+cp "$ROOT/publicidad.html" "$ROOT/www/publicidad.html"
 
 # "Ver versión PC" debe abrir la copia de escritorio, no volver a la entrada móvil.
 python3 - "$ROOT/www/index.html" <<'PY'
