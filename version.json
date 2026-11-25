@@ -5,14 +5,14 @@
     "version": "V1.19.4"
   },
   "movil": {
-    "notas": "Actualizador estilo Cristal oscuro: ventana centrada, tarjeta oscura con borde dorado y anillo de progreso con el porcentaje real de descarga.",
+    "notas": "Ventas móvil: encabezado plano estilo Manus y el botón COBRAR vuelve a verse dentro del ticket (totales, forma de pago y efectivo recibido).",
     "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-    "version": "V1.20.9"
+    "version": "V1.20.10"
   },
   "pc": {
     "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
     "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
     "version": "V1.19.5"
   },
-  "version": "V1.20.9"
+  "version": "V1.20.10"
 }
