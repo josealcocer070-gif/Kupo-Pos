@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Rediseño móvil estilo Manus: ticket primero, búsqueda de producto, confirmar cobro, venta registrada, activación, login y menú lateral con Acciones rápidas.",
+  "notas": "Registro de actividad del POS: inicio de sesión, cierre de turno, cortes, productos y cajeros quedan anotados en la nube y se ven en la vista Registro de KUPO Admin.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.2"
+  "version": "V1.20.3"
  },
  "pc": {
-  "notas": "Avisos de actualización separados por versión: cada lado sube solo cuando le toca.",
+  "notas": "Registro de actividad del POS: inicio de sesión, cierre de turno, cortes, productos y cajeros quedan anotados en la nube y se ven en la vista Registro de KUPO Admin.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.3"
+  "version": "V1.19.4"
  },
- "version": "V1.20.2"
+ "version": "V1.20.3"
 }
