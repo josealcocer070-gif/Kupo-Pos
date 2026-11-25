@@ -1,1 +1,18 @@
-{"admin": {"notas": "Avisos de actualización separados por versión: cada lado sube solo cuando le toca.", "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk", "version": "V1.19.2"}, "movil": {"notas": "Rediseño móvil estilo Manus: ticket primero, búsqueda de producto, confirmar cobro, venta registrada, activación, login y menú lateral con Acciones rápidas.", "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk", "version": "V1.20.0"}, "pc": {"notas": "Avisos de actualización separados por versión: cada lado sube solo cuando le toca.", "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk", "version": "V1.19.1"}, "version": "V1.20.0"}
+{
+ "admin": {
+  "notas": "Avisos de actualizaci\u00f3n separados por versi\u00f3n: cada lado sube solo cuando le toca.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
+  "version": "V1.19.3"
+ },
+ "movil": {
+  "notas": "Redise\u00f1o m\u00f3vil estilo Manus: ticket primero, b\u00fasqueda de producto, confirmar cobro, venta registrada, activaci\u00f3n, login y men\u00fa lateral con Acciones r\u00e1pidas.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
+  "version": "V1.20.0"
+ },
+ "pc": {
+  "notas": "Avisos de actualizaci\u00f3n separados por versi\u00f3n: cada lado sube solo cuando le toca.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
+  "version": "V1.19.1"
+ },
+ "version": "V1.20.0"
+}
