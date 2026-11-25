@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Activación pulida: textos de arriba centrados, sin 'Un producto de Grupo Benítez' repetido ni el párrafo de $300, pies como 'KUPO POS V1.20.5', botón de activar con brillo dorado que respira.",
+  "notas": "Login móvil reestructurado: tarjetas de usuario arriba, logos de WhatsApp y Grupo Benítez abajo junto al soporte, textos acortados y pantalla más corta.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.5"
+  "version": "V1.20.6"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.5"
+ "version": "V1.20.6"
 }
