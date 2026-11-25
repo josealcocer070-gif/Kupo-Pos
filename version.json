@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Ventas: sin botón MENÚ en el ticket (el menú vive en el botón dorado del encabezado); tipos de pago y efectivo recibido pasaron a la pantalla aparte de confirmar el cobro (flujo PC); pie fijo con COBRAR siempre visible.",
+  "notas": "Buscar producto: el botón + ya no tapa el precio (vuelve al flujo flex); tarjetas del catálogo en verde oscuro con precio dorado y botón + dorado.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.12"
+  "version": "V1.20.13"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.12"
+ "version": "V1.20.13"
 }
