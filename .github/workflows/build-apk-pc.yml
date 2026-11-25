@@ -3,6 +3,9 @@
 # "apk-pc-latest" para instalarlo directo en la tablet. Arranca directo
 # en la versión PC (index.html), sin pasar por la versión móvil.
 # La PWA de GitHub Pages no se toca: el workflow solo lee la web del repo.
+# Desde v197 (Lalo 2026-11-25): este APK solo se reconstruye cuando cambia
+# index.html o un archivo compartido (admin, manifests, sw.js, package,
+# plugins, scripts). Los cambios solo de móvil (movil.html) ya no lo disparan.
 name: Build APK PC (KUPO POS)
 
 on:
@@ -10,7 +13,6 @@ on:
     branches: [main]
     paths:
       - "index.html"
-      - "movil.html"
       - "admin.html"
       - "manifest.json"
       - "manifest-movil.json"

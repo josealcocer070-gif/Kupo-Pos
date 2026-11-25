@@ -2,13 +2,15 @@
 # Arma el APK con Capacitor en GitHub Actions y lo publica en el release
 # "apk-latest" para instalarlo directo en el celular de un cliente.
 # La PWA de GitHub Pages no se toca: el workflow solo lee la web del repo.
+# Desde v197 (Lalo 2026-11-25): este APK solo se reconstruye cuando cambia
+# movil.html o un archivo compartido (admin, manifests, sw.js, package,
+# plugins, scripts). Los cambios solo de PC (index.html) ya no lo disparan.
 name: Build APK (KUPO POS)
 
 on:
   push:
     branches: [main]
     paths:
-      - "index.html"
       - "movil.html"
       - "admin.html"
       - "manifest.json"
@@ -17,6 +19,7 @@ on:
       - "capacitor.config.json"
       - "package.json"
       - "package-lock.json"
+      - "plugins/**"
       - "scripts/**"
       - ".github/workflows/build-apk.yml"
   workflow_dispatch:
