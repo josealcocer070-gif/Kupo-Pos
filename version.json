@@ -1,8 +1,8 @@
 {
  "admin": {
-  "notas": "Avisos de actualización separados por versión: cada lado sube solo cuando le toca.",
+  "notas": "Protección de datos: registro de actividad, candado PIN para abrir la Admin y sesión segura (bloqueo a los 15 min sin uso + aviso de última sesión).",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
-  "version": "V1.19.3"
+  "version": "V1.19.4"
  },
  "movil": {
   "notas": "Rediseño móvil estilo Manus: ticket primero, búsqueda de producto, confirmar cobro, venta registrada, activación, login y menú lateral con Acciones rápidas.",
