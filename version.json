@@ -1,18 +1,18 @@
 {
- "admin": {
-  "notas": "Protección de datos: registro de actividad, candado PIN para abrir la Admin y sesión segura (bloqueo a los 15 min sin uso + aviso de última sesión).",
-  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
-  "version": "V1.19.4"
- },
- "movil": {
-  "notas": "Ventas: el botón ☰ del menú de funciones ahora va a la izquierda del encabezado y se quitó el nombre del negocio repetido dentro de la tarjeta del ticket.",
-  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.8"
- },
- "pc": {
-  "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
-  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.5"
- },
- "version": "V1.20.8"
+  "admin": {
+    "notas": "Protección de datos: registro de actividad, candado PIN para abrir la Admin y sesión segura (bloqueo a los 15 min sin uso + aviso de última sesión).",
+    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
+    "version": "V1.19.4"
+  },
+  "movil": {
+    "notas": "Actualizador estilo Cristal oscuro: ventana centrada, tarjeta oscura con borde dorado y anillo de progreso con el porcentaje real de descarga.",
+    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
+    "version": "V1.20.9"
+  },
+  "pc": {
+    "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
+    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
+    "version": "V1.19.5"
+  },
+  "version": "V1.20.9"
 }
