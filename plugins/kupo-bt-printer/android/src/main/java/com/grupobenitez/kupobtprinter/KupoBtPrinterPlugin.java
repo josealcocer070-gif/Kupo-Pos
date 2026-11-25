@@ -142,7 +142,17 @@ public class KupoBtPrinterPlugin extends Plugin {
             }
             try {
                 closeQuietly();
-                adapter.cancelDiscovery();
+                // v194: cancelDiscovery() exige BLUETOOTH_SCAN en Android 12+
+                // y la app solo pide BLUETOOTH_CONNECT. La app no hace
+                // descubrimiento, así que si falta el permiso se salta
+                // sin romper la conexión (antes tronaba aquí y el toast
+                // decía "Need BLUETOOTH_SCAN permission").
+                try {
+                    adapter.cancelDiscovery();
+                } catch (Exception ignored) {
+                    // Sin BLUETOOTH_SCAN no se puede cancelar el
+                    // descubrimiento; la conexión SPP funciona igual.
+                }
                 BluetoothDevice device = adapter.getRemoteDevice(address);
                 BluetoothSocket s = device.createRfcommSocketToServiceRecord(SPP_UUID);
                 try {
