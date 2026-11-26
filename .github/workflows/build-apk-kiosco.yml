@@ -3,8 +3,10 @@
 # "apk-kiosco-latest" para instalarlo directo en la tablet del cliente.
 # Es el Kiosco (kiosco.html) como app propia, con su propio appId para que
 # conviva con el POS en la misma tablet: el cliente pide solo desde el
-# menú y el cajero cobra en el POS. Sin versión visible ni actualizador
-# propio: se actualiza instalando el APK nuevo encima.
+# menú y el cajero cobra en el POS. Con actualizador propio desde V1.0.0:
+# el Kiosco lee version.json (entrada "kiosco") y avisa solo en la tablet
+# con una pastillita dorada en el menú; la versión vive en kiosco.html
+# (VERSION_KIOSCO) y en version.json, y se sube a mano como en el POS.
 # La PWA de GitHub Pages no se toca: el workflow solo lee la web del repo.
 # Desde su creación (Lalo 2026-11-26): este APK solo se reconstruye cuando
 # cambia kiosco.html o un archivo compartido (manifests, sw.js, package,
@@ -142,6 +144,7 @@ jobs:
             Kiosco KUPO para instalar directo en Android, sin Play Store.
             Descargar kupo-pos-kiosco.apk e instalar permitiendo "instalar apps desconocidas".
             La app abre directo el Kiosco (el cliente pide solo desde el menú; cobra el cajero en el POS).
+            El Kiosco se actualiza solo: cuando hay versión nueva muestra una pastillita dorada en el menú de la tablet.
             Sin secretos de firma este APK es debug: para actualizar hay que desinstalar antes (ver APK-README.md).
           files: kupo-pos-kiosco.apk
           fail_on_unmatched_files: true
