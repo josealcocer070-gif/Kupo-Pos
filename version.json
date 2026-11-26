@@ -1,8 +1,8 @@
 {
  "admin": {
-  "notas": "Licencias Estándar y Pro: cada licencia tiene su plan — Estándar $249/mes (2 aparatos, sin Kiosco ni Kupi) o Pro $299/mes (4 aparatos, con Kiosco y Kupi); la lista muestra la insignia del plan y los aparatos en uso (n de 2/4), y el cambio de plan se hace desde la lista (al bajar se eligen los 2 aparatos que se quedan).",
+  "notas": "La Admin descarga las licencias de la nube al entrar (y con el botón 'Actualizar desde la nube'): la lista muestra todas las licencias con su insignia de plan y los aparatos en uso (n de 2/4); la subida sigue sin pisar el plan de la nube.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
-  "version": "V1.19.5"
+  "version": "V1.19.6"
  },
  "movil": {
   "notas": "Licencias Estándar y Pro: el plan de la licencia manda — Estándar $249/mes (2 aparatos, sin Kiosco ni Kupi) o Pro $299/mes (4 aparatos, con Kiosco y Kupi); cada aparato se registra solo al entrar con la licencia y si el límite está lleno avisa que liberes uno en KUPO Admin; el botón de Kupi vuelve al encabezado (en Estándar se muestra bloqueado) y el interruptor del Kiosco se bloquea en Estándar.",
