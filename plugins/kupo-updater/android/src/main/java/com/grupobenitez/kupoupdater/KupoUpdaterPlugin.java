@@ -356,6 +356,13 @@ public class KupoUpdaterPlugin extends Plugin {
             int banderas = PendingIntent.FLAG_UPDATE_CURRENT;
             if (Build.VERSION.SDK_INT >= 31) banderas |= PendingIntent.FLAG_MUTABLE;
             Intent intentEstado = new Intent(accion);
+            // Android 14+ (targetSdk 34+): un PendingIntent MUTABLE con
+            // Intent implícito está prohibido y truena al crearlo
+            // ("Targeting U+ disallows ... FLAG_MUTABLE ... implicit Intent").
+            // setPackage() lo vuelve explícito sin cambiar el receptor
+            // (registrado dinámico para esta acción en este paquete).
+            // MUTABLE se conserva: el sistema rellena EXTRA_STATUS al entregar.
+            intentEstado.setPackage(getContext().getPackageName());
             PendingIntent pi = PendingIntent.getBroadcast(getContext(), sessionId, intentEstado, banderas);
             IntentSender remitente = pi.getIntentSender();
             PackageInstaller.Session sesion = installer.openSession(sessionId);
