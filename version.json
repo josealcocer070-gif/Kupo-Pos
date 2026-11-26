@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Ambos menús con los colores de la app: el cajón derecho y el menú izquierdo ahora traen el fondo verde oscuro de la app con botones en un verde más claro e iconos 3D de colores; Cerrar turno en rojo y la vista activa en dorado.",
+  "notas": "Menú sin 'Ventas en espera' (la recuperación vive ahora en la barra del ticket como 'Recuperar venta en espera') y 'Buscar ticket' en el menú para buscar por folio desde cualquier vista; en Administrador de licencia: interruptor 'Mostrar IVA (16%)' (apagado por defecto, se sincroniza a la nube) y 'Color del sistema' con los 6 colores de la PC + color propio.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.20"
+  "version": "V1.20.21"
  },
  "pc": {
   "notas": "Entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia: el letrero 'Admin · sesión de sincronización' ya no se muestra; tocando el logo de Supabase se pide el PIN y se abre la Admin (solo Lalo lo sabe). El sello se ve igual que antes.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.6"
  },
- "version": "V1.20.20"
+ "version": "V1.20.21"
 }
