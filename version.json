@@ -5,14 +5,14 @@
   "version": "V1.19.8"
  },
  "movil": {
-  "notas": "Actualizador reparado: instala con el instalador del sistema (ninguna app de terceros puede agarrar la instalación), verifica que el APK baje completo antes de instalar y si llega roto lo vuelve a descargar solo hasta 3 veces, con mensaje claro. La pastillita del plan (PRO dorada / Estándar gris) ya aparece en el encabezado junto a la versión. Tras la revalidación en segundo plano el botón de Kupi, la línea del plan y el Kiosco se repintan solos (sin reescribir la licencia); el teclado ya no se abre al tocar Kupi, solo al tocar el cuadro de texto; cada aparato se registra solo al entrar con la licencia y si el límite está lleno avisa que liberes uno en KUPO Admin.",
+  "notas": "Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.25"
+  "version": "V1.20.26"
  },
  "pc": {
   "notas": "Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.11"
  },
- "version": "V1.20.25"
+ "version": "V1.20.26"
 }
