@@ -84,13 +84,6 @@ public class KupoUpdaterPlugin extends Plugin {
        commit solo tumba el intento de su propia generación, nunca uno nuevo. */
     private volatile int generacionInstalacion = 0;
 
-    /* PackageInstaller.EXTRA_INTENT es una API oculta (@hide): no está en
-       el SDK público y el compilador no la encuentra (ese fue el único
-       error del build). El valor real es "android.content.pm.extra.INTENT":
-       el Intent que se abre cuando la instalación pide la confirmación
-       del usuario. */
-    private static final String EXTRA_INTENT_SESION = "android.content.pm.extra.INTENT";
-
     private boolean puedeInstalarApps() {
         if (Build.VERSION.SDK_INT < 26) return true;
         return getContext().getPackageManager().canRequestPackageInstalls();
@@ -360,7 +353,11 @@ public class KupoUpdaterPlugin extends Plugin {
             public void onReceive(Context ctx, Intent intent) {
                 int estado = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
                 if (estado == PackageInstaller.STATUS_PENDING_USER_ACTION) {
-                    Intent confirmar = intent.getParcelableExtra(EXTRA_INTENT_SESION);
+                    /* V1.20.33: Android entrega la confirmación bajo Intent.EXTRA_INTENT
+                       ("android.intent.extra.INTENT"). La llave anterior, con el
+                       prefijo content.pm, no existe en el intent y siempre
+                       devolvía null: la ventana nunca aparecía. */
+                    Intent confirmar = intent.getParcelableExtra(Intent.EXTRA_INTENT);
                     if (confirmar == null) {
                         /* V1.20.31: nunca retornar en silencio. Si Android no
                            entregó la ventana de confirmación, la llamada
