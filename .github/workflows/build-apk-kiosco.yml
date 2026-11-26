@@ -1,0 +1,147 @@
+# Kiosco KUPO — APK para Android (sin Play Store)
+# Arma el APK con Capacitor en GitHub Actions y lo publica en el release
+# "apk-kiosco-latest" para instalarlo directo en la tablet del cliente.
+# Es el Kiosco (kiosco.html) como app propia, con su propio appId para que
+# conviva con el POS en la misma tablet: el cliente pide solo desde el
+# menú y el cajero cobra en el POS. Sin versión visible ni actualizador
+# propio: se actualiza instalando el APK nuevo encima.
+# La PWA de GitHub Pages no se toca: el workflow solo lee la web del repo.
+# Desde su creación (Lalo 2026-11-26): este APK solo se reconstruye cuando
+# cambia kiosco.html o un archivo compartido (manifests, sw.js, package,
+# plugins, scripts). Los cambios solo de POS (index.html, movil.html) o de
+# Admin (admin.html) no lo disparan.
+name: Build APK Kiosco (Kiosco KUPO)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "kiosco.html"
+      - "capacitor.config.kiosco.json"
+      - "icon-kiosco-512.png"
+      - "manifest.json"
+      - "manifest-movil.json"
+      - "sw.js"
+      - "package.json"
+      - "package-lock.json"
+      - "plugins/**"
+      - "scripts/**"
+      - ".github/workflows/build-apk-kiosco.yml"
+  workflow_dispatch:
+
+jobs:
+  build-apk-kiosco:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # para publicar el release apk-kiosco-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web Kiosco (www, entrada = kiosco.html)
+        run: bash scripts/build-www-kiosco.sh
+
+      - name: Usar config de Kiosco (appId y nombre propios)
+        run: cp capacitor.config.kiosco.json capacitor.config.json
+
+      - name: Generate app icon (1024x1024, desde manifest.json)
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 scripts/make-icon.py
+
+      - name: Add Android platform + icons
+        run: |
+          npx cap add android
+          npx @capacitor/assets generate --android
+          npx cap sync android
+
+      - name: Set versionCode from run number
+        run: |
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+          p = Path("android/app/build.gradle")
+          s = p.read_text(encoding="utf-8")
+          run = "${{ github.run_number }}"
+          s2, n = re.subn(r"versionCode \d+", f"versionCode {run}", s, count=1)
+          print("versionCode actualizado" if n else "AVISO: no se encontró versionCode")
+          p.write_text(s2, encoding="utf-8")
+          PY
+
+      - name: Prepare release keystore (solo si hay secretos de firma)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "Sin secretos de firma: se compilara APK debug."
+            exit 0
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > android/kupo-release.keystore
+          cat > android/keystore.properties <<EOF
+          storeFile=kupo-release.keystore
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          python3 scripts/patch-signing.py
+          echo "SIGNED_RELEASE=true" >> "$GITHUB_ENV"
+
+      - name: Build debug APK
+        if: ${{ env.SIGNED_RELEASE != 'true' }}
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          echo "APK_PATH=android/app/build/outputs/apk/debug/app-debug.apk" >> "$GITHUB_ENV"
+
+      - name: Build signed release APK
+        if: ${{ env.SIGNED_RELEASE == 'true' }}
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          echo "APK_PATH=android/app/build/outputs/apk/release/app-release.apk" >> "$GITHUB_ENV"
+
+      - name: Prepare APK file
+        run: |
+          cp "$APK_PATH" kupo-pos-kiosco.apk
+          ls -lh kupo-pos-kiosco.apk
+          file kupo-pos-kiosco.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kupo-pos-kiosco-apk
+          path: kupo-pos-kiosco.apk
+          if-no-files-found: error
+
+      - name: Publish rolling release (apk-kiosco-latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-kiosco-latest
+          name: "Kiosco KUPO APK (última versión)"
+          body: |
+            Kiosco KUPO para instalar directo en Android, sin Play Store.
+            Descargar kupo-pos-kiosco.apk e instalar permitiendo "instalar apps desconocidas".
+            La app abre directo el Kiosco (el cliente pide solo desde el menú; cobra el cajero en el POS).
+            Sin secretos de firma este APK es debug: para actualizar hay que desinstalar antes (ver APK-README.md).
+          files: kupo-pos-kiosco.apk
+          fail_on_unmatched_files: true
