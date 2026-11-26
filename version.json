@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Menú derecho con ACCIONES: Sincronizar, Recargar pantalla, Tema noche/día, Mi sesión, Pantalla completa y Cerrar turno ahora viven en el cajón derecho; Ventas en espera pasa a OPERACIONES y Cambiar licencia a SISTEMA; Mensajes sale del menú (ya está en Ventas). Animación visible al abrir y cerrar ambos menús.",
+  "notas": "Ambos menús con los colores de la app: el cajón derecho y el menú izquierdo ahora traen el fondo verde oscuro de la app con botones en un verde más claro e iconos 3D de colores; Cerrar turno en rojo y la vista activa en dorado.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.19"
+  "version": "V1.20.20"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.19"
+ "version": "V1.20.20"
 }
