@@ -5,14 +5,14 @@
   "version": "V1.19.8"
  },
  "movil": {
-  "notas": "V1.20.28: el menú izquierdo ahora tiene su fila de encabezado (logo KU + KUPO POS + ✕ para cerrar). V1.20.27: entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia (sin letrero visible). Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
+  "notas": "V1.20.29: Kupi saluda con los datos del día y entiende preguntas de producto con tus palabras (precio y stock por nombre); con Sin stock no inventa faltantes. V1.20.28: el menú izquierdo ahora tiene su fila de encabezado (logo KU + KUPO POS + ✕ para cerrar). V1.20.27: entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia (sin letrero visible). Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.28"
+  "version": "V1.20.29"
  },
  "pc": {
-  "notas": "Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
+  "notas": "V1.19.12: Kupi saluda con los datos del día y entiende preguntas de producto con tus palabras (precio y stock por nombre); con Sin stock no inventa faltantes. Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.11"
+  "version": "V1.19.12"
  },
- "version": "V1.20.28"
+ "version": "V1.20.29"
 }
