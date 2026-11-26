@@ -10,9 +10,9 @@
   "version": "V1.20.20"
  },
  "pc": {
-  "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
+  "notas": "Entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia: el letrero 'Admin · sesión de sincronización' ya no se muestra; tocando el logo de Supabase se pide el PIN y se abre la Admin (solo Lalo lo sabe). El sello se ve igual que antes.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.5"
+  "version": "V1.19.6"
  },
  "version": "V1.20.20"
 }
