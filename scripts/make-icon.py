@@ -3,7 +3,10 @@
 
 Consciente del sabor: si capacitor.config.json trae el appId de KUPO Admin
 (com.grupobenitez.kupopos.admin) usa icon-admin-512.png (el icono de Admin);
-en cualquier otro caso (o sin config) usa el icono KUPO de siempre.
+si trae el appId de Kiosco KUPO (com.grupobenitez.kupopos.kiosco) usa
+icon-kiosco-512.png (el icono del Kiosco, elegido por Lalo 2026-11-26:
+kiosco con campanita dorada, opción C); en cualquier otro caso (o sin
+config) usa el icono KUPO de siempre.
 
 Fuente (en orden): el icono más grande incrustado en manifest.json (data URI
 PNG); si no hay, el archivo icon-512.png del repo (el icono oficial de KUPO
@@ -19,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 ADMIN_APP_ID = "com.grupobenitez.kupopos.admin"
+KIOSCO_APP_ID = "com.grupobenitez.kupopos.kiosco"
 
 
 def _app_id() -> str:
@@ -61,6 +65,20 @@ def main() -> None:
         out.parent.mkdir(parents=True, exist_ok=True)
         img.save(out, "PNG")
         print(f"Icono generado: {out} (1024x1024, desde icon-admin-512.png, KUPO Admin)")
+        return
+
+    if _app_id() == KIOSCO_APP_ID:
+        kiosco_png = ROOT / "icon-kiosco-512.png"
+        if not kiosco_png.exists():
+            print("Falta icon-kiosco-512.png (icono de Kiosco KUPO) para el sabor Kiosco",
+                  file=sys.stderr)
+            sys.exit(1)
+        img = Image.open(kiosco_png).convert("RGBA")
+        img = img.resize((1024, 1024), Image.LANCZOS)
+        out = ROOT / "assets" / "icon.png"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        img.save(out, "PNG")
+        print(f"Icono generado: {out} (1024x1024, desde icon-kiosco-512.png, Kiosco KUPO)")
         return
 
     if best is not None:
