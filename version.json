@@ -10,9 +10,9 @@
   "version": "V1.20.24"
  },
  "pc": {
-  "notas": "La PC ya revalida la licencia en segundo plano al cargar y al volver internet: si el plan cambia, el botón de Kupi, la línea del plan y el Kiosco se repintan solos; cada aparato se registra solo al entrar con la licencia y si el límite está lleno avisa que liberes uno en KUPO Admin.",
+  "notas": "Actualizador reparado: instala con el instalador del sistema (ninguna app de terceros puede agarrar la instalación), verifica que el APK baje completo antes de instalar y si llega roto lo vuelve a descargar solo hasta 3 veces, con mensaje claro. La pastillita del plan (PRO dorada / Estándar gris) ya aparece en el encabezado junto a la versión. La PC ya revalida la licencia en segundo plano al cargar y al volver internet: si el plan cambia, el botón de Kupi, la línea del plan y el Kiosco se repintan solos; cada aparato se registra solo al entrar con la licencia y si el límite está lleno avisa que liberes uno en KUPO Admin.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.9"
+  "version": "V1.19.10"
  },
  "version": "V1.20.24"
 }
