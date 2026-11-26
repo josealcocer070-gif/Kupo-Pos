@@ -10,6 +10,8 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 
 import com.getcapacitor.JSObject;
@@ -78,6 +80,9 @@ public class KupoUpdaterPlugin extends Plugin {
        sesión; mientras tanto queda pendiente. */
     private volatile PluginCall llamadaInstalacion = null;
     private volatile BroadcastReceiver receptorInstalacion = null;
+    /* V1.20.31: generación de la instalación en curso. El vigilante tras el
+       commit solo tumba el intento de su propia generación, nunca uno nuevo. */
+    private volatile int generacionInstalacion = 0;
 
     /* PackageInstaller.EXTRA_INTENT es una API oculta (@hide): no está en
        el SDK público y el compilador no la encuentra (ese fue el único
@@ -121,6 +126,28 @@ public class KupoUpdaterPlugin extends Plugin {
         call.resolve(ret);
     }
 
+    /* V1.20.31: cancela un intento de actualización atorado (descarga al 100%
+       sin que llegue el estado de la sesión). Quita el receptor, rechaza la
+       llamada vieja para que el JS se desbloquee y deja el camino libre para
+       reintentar sin cerrar la app. */
+    @PluginMethod
+    public void cancelarActualizacion(PluginCall call) {
+        BroadcastReceiver receptor = receptorInstalacion;
+        receptorInstalacion = null;
+        if (receptor != null) {
+            try {
+                getContext().unregisterReceiver(receptor);
+            } catch (Exception ignored) {
+            }
+        }
+        PluginCall pendiente = llamadaInstalacion;
+        llamadaInstalacion = null;
+        if (pendiente != null) pendiente.reject("actualización cancelada");
+        JSObject ret = new JSObject();
+        ret.put("ok", true);
+        call.resolve(ret);
+    }
+
     @PluginMethod
     public void descargarEInstalar(PluginCall call) {
         String url = call.getString("url");
@@ -136,8 +163,20 @@ public class KupoUpdaterPlugin extends Plugin {
             return;
         }
         if (llamadaInstalacion != null) {
-            call.reject("ya hay una actualización en curso");
-            return;
+            /* V1.20.31: un intento atorado no debe bloquear el reintento para
+               siempre. Se limpia el intento anterior (se quita su receptor y
+               se rechaza su llamada) y se sigue con la descarga normal. */
+            BroadcastReceiver receptorViejo = receptorInstalacion;
+            receptorInstalacion = null;
+            if (receptorViejo != null) {
+                try {
+                    getContext().unregisterReceiver(receptorViejo);
+                } catch (Exception ignored) {
+                }
+            }
+            PluginCall llamadaVieja = llamadaInstalacion;
+            llamadaInstalacion = null;
+            if (llamadaVieja != null) llamadaVieja.reject("se canceló la actualización anterior");
         }
         executor.execute(() -> {
             try {
@@ -322,13 +361,19 @@ public class KupoUpdaterPlugin extends Plugin {
                 int estado = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
                 if (estado == PackageInstaller.STATUS_PENDING_USER_ACTION) {
                     Intent confirmar = intent.getParcelableExtra(EXTRA_INTENT_SESION);
-                    if (confirmar != null) {
-                        confirmar.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        try {
-                            ctx.startActivity(confirmar);
-                        } catch (Exception e) {
-                            terminarInstalacion(false, "no se pudo abrir la confirmación de instalación");
-                        }
+                    if (confirmar == null) {
+                        /* V1.20.31: nunca retornar en silencio. Si Android no
+                           entregó la ventana de confirmación, la llamada
+                           quedaba colgada para siempre (descarga al 100% sin
+                           avanzar). Ahora se rechaza con un mensaje claro. */
+                        terminarInstalacion(false, "Android no entregó la ventana de confirmación de instalación. Vuelve a tocar 'Actualizar ahora'.");
+                        return;
+                    }
+                    confirmar.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        ctx.startActivity(confirmar);
+                    } catch (Exception e) {
+                        terminarInstalacion(false, "no se pudo abrir la confirmación de instalación");
                     }
                     return;
                 }
@@ -375,6 +420,23 @@ public class KupoUpdaterPlugin extends Plugin {
                     sesion.fsync(out);
                 }
                 sesion.commit(remitente);
+                /* V1.20.31: vigilante. Si Android no responde a la instalación
+                   en 60 s (ni confirmación ni estado final), la llamada se
+                   rechaza para no colgarse en "Descargando…" para siempre.
+                   La generación evita que el vigilante de un intento viejo
+                   tumbe un intento nuevo; terminarInstalacion pone
+                   llamadaInstalacion en null, así que no dispara dos veces. */
+                generacionInstalacion++;
+                final int miGeneracion = generacionInstalacion;
+                final PluginCall llamadaVigilada = call;
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (llamadaInstalacion == llamadaVigilada && generacionInstalacion == miGeneracion) {
+                            terminarInstalacion(false, "Android no respondió a la instalación. Vuelve a tocar 'Actualizar ahora'.");
+                        }
+                    }
+                }, 60000);
             } finally {
                 sesion.close();
             }
