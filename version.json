@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Buscar producto: el botón + ya es uno solo (sin el ::after duplicado) y el catálogo ya no se cierra al agregar — se cierra solo con la X.",
+  "notas": "Actualizador: la descarga se reanuda donde se quedó si se corta, espera 120 s en vez de 30 s con internet lento, avisa si va muy lenta y el botón 'Actualizar ahora' ya se vuelve a habilitar tras abrir el instalador.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.14"
+  "version": "V1.20.15"
  },
  "pc": {
   "notas": "Sello del login y de la licencia simplificado: solo logos y nombres de KUPO Admin y Supabase, sin descripciones.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.5"
  },
- "version": "V1.20.14"
+ "version": "V1.20.15"
 }

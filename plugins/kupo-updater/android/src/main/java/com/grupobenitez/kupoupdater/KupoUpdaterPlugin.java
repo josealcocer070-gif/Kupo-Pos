@@ -35,6 +35,10 @@ import java.util.concurrent.Executors;
  * (abrirAjustesInstalacion) y el usuario lo activa una sola vez. Después
  * cada actualización solo muestra la confirmación "Instalar" del sistema.
  *
+ * V1.20.15: si la descarga se corta, se reanuda donde se quedó (header
+ * Range: el parcial queda en la caché interna) y el tiempo de lectura sube
+ * a 120 s para que el internet lento de Palizada no la corte a la mitad.
+ *
  * El APK baja por HTTPS desde el release oficial de GitHub (las URLs de
  * github.com redirigen; HttpURLConnection las sigue). Se guarda en la
  * caché interna (kupo-updater/) y se sirve al instalador con FileProvider
@@ -104,24 +108,61 @@ public class KupoUpdaterPlugin extends Plugin {
                 progresoEstado = "descargando";
                 progresoDescargado = 0;
                 progresoTotal = -1;
+                /* V1.20.15: el parcial de una descarga cortada queda en la
+                   caché interna y se reanuda donde se quedó (header Range)
+                   en vez de empezar de cero. */
+                File dir = new File(getContext().getCacheDir(), "kupo-updater");
+                if (!dir.exists()) dir.mkdirs();
+                File apk = new File(dir, "kupo-pos-update.apk");
+                long yaDescargado = apk.exists() ? apk.length() : 0;
                 URL u = new URL(url);
                 conn = (HttpURLConnection) u.openConnection();
                 conn.setInstanceFollowRedirects(true);
                 conn.setConnectTimeout(15000);
-                conn.setReadTimeout(30000);
+                conn.setReadTimeout(120000);
                 conn.setRequestProperty("User-Agent", "KUPO-POS-Updater");
+                if (yaDescargado > 0) conn.setRequestProperty("Range", "bytes=" + yaDescargado + "-");
                 conn.connect();
                 int code = conn.getResponseCode();
-                if (code < 200 || code >= 300) {
+                boolean reanudar = false;
+                if (code == 206 && yaDescargado > 0) {
+                    /* El servidor aceptó el Range: seguimos donde se quedó. */
+                    reanudar = true;
+                } else if (code == 200) {
+                    /* El servidor ignoró el Range (o no había parcial): de cero. */
+                    if (yaDescargado > 0) apk.delete();
+                    yaDescargado = 0;
+                } else if (code == 416) {
+                    /* El parcial ya no coincide con el archivo del servidor: de cero. */
+                    conn.disconnect();
+                    apk.delete();
+                    yaDescargado = 0;
+                    conn = (HttpURLConnection) u.openConnection();
+                    conn.setInstanceFollowRedirects(true);
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(120000);
+                    conn.setRequestProperty("User-Agent", "KUPO-POS-Updater");
+                    conn.connect();
+                    code = conn.getResponseCode();
+                    if (code < 200 || code >= 300) {
+                        call.reject("la descarga falló (HTTP " + code + ")");
+                        return;
+                    }
+                } else if (code < 200 || code >= 300) {
                     call.reject("la descarga falló (HTTP " + code + ")");
                     return;
                 }
-                progresoTotal = conn.getContentLengthLong();
-                File dir = new File(getContext().getCacheDir(), "kupo-updater");
-                if (!dir.exists()) dir.mkdirs();
-                File apk = new File(dir, "kupo-pos-update.apk");
+                long restante = conn.getContentLengthLong();
+                if (restante < 0) {
+                    progresoTotal = -1;
+                } else {
+                    /* Con 206 el Content-Length es solo lo que falta: el total
+                       real es lo ya descargado + lo que falta. */
+                    progresoTotal = reanudar ? yaDescargado + restante : restante;
+                }
+                progresoDescargado = reanudar ? yaDescargado : 0;
                 try (InputStream in = conn.getInputStream();
-                     FileOutputStream out = new FileOutputStream(apk)) {
+                     FileOutputStream out = new FileOutputStream(apk, reanudar)) {
                     byte[] buf = new byte[8192];
                     int n;
                     long ultimoAviso = 0;
