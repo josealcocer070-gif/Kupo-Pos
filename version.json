@@ -5,14 +5,14 @@
   "version": "V1.19.4"
  },
  "movil": {
-  "notas": "Menú sin 'Ventas en espera' (la recuperación vive ahora en la barra del ticket como 'Recuperar venta en espera') y 'Buscar ticket' en el menú para buscar por folio desde cualquier vista; en Administrador de licencia: interruptor 'Mostrar IVA (16%)' (apagado por defecto, se sincroniza a la nube) y 'Color del sistema' con los 6 colores de la PC + color propio.",
+  "notas": "Cortes en la nube: el historial de cortes se guarda en la tabla 'cortes' de Supabase y se ve igual en la tablet y en los celulares con la licencia; la frontera por cajero la marca el último corte en la nube. El Administrador puede sacar el corte de cualquier cajero desde la vista Corte diario (selector nuevo, solo Admin); cada corte anota quién lo hizo y de quién son las ventas. Sin internet los cortes se encolan y suben solos al volver la conexión; si un corte más nuevo ya cubre esos folios, el pendiente se salta sin duplicar. Gastos y entradas en la nube: lo que se anota en la tablet se guarda en las tablas 'gastos' y 'entradas' y se lee en todos los aparatos, así un corte hecho desde un celular incluye los gastos y entradas de la tablet con los totales exactos; borrar un gasto o entrada lo marca eliminado en la nube y deja de contar en los cortes.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-  "version": "V1.20.21"
+  "version": "V1.20.22"
  },
  "pc": {
-  "notas": "Entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia: el letrero 'Admin · sesión de sincronización' ya no se muestra; tocando el logo de Supabase se pide el PIN y se abre la Admin (solo Lalo lo sabe). El sello se ve igual que antes.",
+  "notas": "Cortes en la nube: el historial de cortes se guarda en la tabla 'cortes' de Supabase y se ve igual en la tablet y en los celulares con la licencia; la frontera por cajero la marca el último corte en la nube. El Administrador puede sacar el corte de cualquier cajero desde la vista Corte diario (selector nuevo, solo Admin); cada corte anota quién lo hizo y de quién son las ventas. Sin internet los cortes se encolan y suben solos al volver la conexión; si un corte más nuevo ya cubre esos folios, el pendiente se salta sin duplicar. Gastos y entradas en la nube: lo que se anota en la tablet se guarda en las tablas 'gastos' y 'entradas' y se lee en todos los aparatos, así un corte hecho desde un celular incluye los gastos y entradas de la tablet con los totales exactos; borrar un gasto o entrada lo marca eliminado en la nube y deja de contar en los cortes.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.6"
+  "version": "V1.19.7"
  },
- "version": "V1.20.21"
+ "version": "V1.20.22"
 }
