@@ -1,8 +1,8 @@
 {
  "admin": {
-  "notas": "Actualizador reparado: instala con el instalador del sistema (ninguna app de terceros puede agarrar la instalación), verifica que el APK baje completo antes de instalar y si llega roto lo vuelve a descargar solo hasta 3 veces, con mensaje claro. La Admin descarga las licencias de la nube al entrar (y con el botón 'Actualizar desde la nube'): la lista muestra todas las licencias con su insignia de plan y los aparatos en uso (n de 2/4); la subida sigue sin pisar el plan de la nube.",
+  "notas": "Licencias de prueba: Duración \"Prueba — 14 días\" con plan Gratuito $0 y sistema completo; la lista muestra la pastilla PRUEBA con los días que quedan y el filtro \"Pruebas\". Nuevo apartado Avisos: manda un aviso a todas las licencias activas o a una sola, con historial.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
-  "version": "V1.19.7"
+  "version": "V1.19.8"
  },
  "movil": {
   "notas": "Actualizador reparado: instala con el instalador del sistema (ninguna app de terceros puede agarrar la instalación), verifica que el APK baje completo antes de instalar y si llega roto lo vuelve a descargar solo hasta 3 veces, con mensaje claro. La pastillita del plan (PRO dorada / Estándar gris) ya aparece en el encabezado junto a la versión. Tras la revalidación en segundo plano el botón de Kupi, la línea del plan y el Kiosco se repintan solos (sin reescribir la licencia); el teclado ya no se abre al tocar Kupi, solo al tocar el cuadro de texto; cada aparato se registra solo al entrar con la licencia y si el límite está lleno avisa que liberes uno en KUPO Admin.",
