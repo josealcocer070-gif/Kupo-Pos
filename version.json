@@ -10,9 +10,9 @@
   "version": "V1.20.22"
  },
  "pc": {
-  "notas": "Cortes en la nube: el historial de cortes se guarda en la tabla 'cortes' de Supabase y se ve igual en la tablet y en los celulares con la licencia; la frontera por cajero la marca el último corte en la nube. El Administrador puede sacar el corte de cualquier cajero desde la vista Corte diario (selector nuevo, solo Admin); cada corte anota quién lo hizo y de quién son las ventas. Sin internet los cortes se encolan y suben solos al volver la conexión; si un corte más nuevo ya cubre esos folios, el pendiente se salta sin duplicar. Gastos y entradas en la nube: lo que se anota en la tablet se guarda en las tablas 'gastos' y 'entradas' y se lee en todos los aparatos, así un corte hecho desde un celular incluye los gastos y entradas de la tablet con los totales exactos; borrar un gasto o entrada lo marca eliminado en la nube y deja de contar en los cortes.",
+  "notas": "Licencias Estándar y Pro: el plan de la licencia manda — Estándar $249/mes (2 aparatos, sin Kiosco ni Kupi) o Pro $299/mes (4 aparatos, con Kiosco y Kupi); cada aparato se registra solo al entrar con la licencia y si el límite está lleno avisa que liberes uno en KUPO Admin; el interruptor del Kiosco y el botón de Kupi se bloquean en Estándar.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-  "version": "V1.19.7"
+  "version": "V1.19.8"
  },
  "version": "V1.20.22"
 }
