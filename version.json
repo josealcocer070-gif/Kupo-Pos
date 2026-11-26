@@ -14,5 +14,10 @@
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
   "version": "V1.19.13"
  },
+ "kiosco": {
+  "notas": "V1.0.0: primera versión del Kiosco con actualizador propio: si hay versión nueva, el Kiosco muestra una pastillita dorada en el encabezado del menú y la ventana de actualización; se instala encima sin desinstalar.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-kiosco-latest/kupo-pos-kiosco.apk",
+  "version": "V1.0.0"
+ },
  "version": "V1.20.34"
 }

@@ -26,11 +26,21 @@ input{font-family:inherit}
 .pantalla{display:none;min-height:100vh}
 .pantalla.activa{display:flex;flex-direction:column}
 /* Encabezado */
-header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2);position:relative}
 header .negocio{font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.95}
 header .kiosco{font-size:30px;font-weight:900;letter-spacing:1px;margin-top:2px}
 header .kiosco span{color:#fbbf24}
 header .sub{font-size:13px;opacity:.8;margin-top:2px}
+/* Actualizador del Kiosco (V1.0.0): pastilla discreta en el encabezado + ventana oscura con borde dorado, como el POS */
+#btnActKiosco{position:absolute;right:12px;top:12px;background:#f5b301;color:#12233a;border:0;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+#modalActKiosco{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
+#modalActKiosco .card{background:#12233a;color:#e8f0f2;border:2px solid #f5b301;border-radius:16px;padding:20px;max-width:480px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#modalActKiosco h2{font-size:22px;margin-bottom:8px}
+#modalActKiosco p{font-size:15px;line-height:1.45;color:#e8f0f2}
+#modalActKiosco .btn-amarillo{display:block;width:100%;background:#f5b301;color:#12233a;border:0;border-radius:12px;padding:12px;font-size:17px;font-weight:bold;margin-bottom:10px}
+#modalActKiosco .btn-amarillo:disabled{opacity:.6}
+#modalActKiosco .btn-borde{display:block;width:100%;background:transparent;color:#f5b301;border:2px solid #f5b301;border-radius:12px;padding:10px;font-size:15px;font-weight:bold;margin-bottom:10px}
+#modalActKiosco .btn-gris2{display:block;width:100%;background:transparent;color:#e8f0f2;border:1px solid rgba(255,255,255,.45);border-radius:12px;padding:10px;font-size:15px}
 </style>
 </head>
 <body>
@@ -126,7 +136,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v171</div>
+  <div class="pie">Kiosco KUPO · V1.0.0</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -139,11 +149,12 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · v171</div>
+  <div class="pie">Kiosco KUPO · V1.0.0</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
   <header>
+    <button id="btnActKiosco" type="button" onclick="mostrarAvisoActualizadorKiosco()" style="display:none">⬇️ Actualización</button>
     <div class="negocio" id="nombreNegocio">POLLOS RANCHEROS EL POLLÓN</div>
     <div class="kiosco">KIOSCO <span>KUPO</span></div>
     <div class="sub">Pide aquí, paga en caja 👇</div>
@@ -197,10 +208,26 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · v171</div>
+  <div class="pie">Kiosco KUPO · V1.0.0</div>
+</div>
+<!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
+<div id="modalActKiosco">
+  <div class="card">
+    <h2 id="actKVersion">Kiosco KUPO</h2>
+    <p id="actKNotas">Mejoras y correcciones.</p>
+    <div id="actKProgresoWrap" style="display:none;margin:14px 0">
+      <div style="height:10px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden"><div id="actKProgreso" style="height:100%;width:0%;background:#f5b301"></div></div>
+      <p id="actKPorcentaje" style="margin:8px 0 0;font-size:14px">Descargando… 0%</p>
+    </div>
+    <p id="actKLento" style="display:none;color:#f5b301;font-size:14px;margin:0 0 12px">La descarga va muy lenta, pero sigue intentándolo…</p>
+    <p id="actKError" style="display:none;color:#ff9a9a;font-size:14px;margin:0 0 12px"></p>
+    <button id="btnActKActualizar" class="btn-amarillo" type="button" onclick="iniciarDescargaActualizacionKiosco()">Actualizar ahora</button>
+    <button id="btnActKAjustes" class="btn-borde" type="button" onclick="abrirAjustesActualizacionKiosco()" style="display:none">Abrir ajustes de instalación</button>
+    <button id="btnActKMasTarde" class="btn-gris2" type="button" onclick="cerrarAvisoActualizadorKiosco(true)">Más tarde</button>
+  </div>
 </div>
 <script>
-/* Kiosco KUPO v171 — menú moderno: saludo de bienvenida centrado según la hora con icono 3D (sol en la mañana, sol con nube en la tarde, luna en la noche), tarjetas de foto completa con pastilla de precio y botón + redondo, animación al toque (la tarjeta se hunde), iconos 3D del sistema en filtros, toggle y buscador, y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. */
+/* Kiosco KUPO v172 — menú moderno: saludo de bienvenida centrado según la hora con icono 3D (sol en la mañana, sol con nube en la tarde, luna en la noche), tarjetas de foto completa con pastilla de precio y botón + redondo, animación al toque (la tarjeta se hunde), iconos 3D del sistema en filtros, toggle y buscador, y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -229,9 +256,10 @@ function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar
 function emojiDe(p){ if(p.foto_kiosco||p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
 async function init(){
   licencia=(localStorage.getItem("kupoPosKioscoLicencia")||"").trim().toUpperCase();
-  if(!licencia){ mostrar("pantallaSetup"); return; }
+  if(!licencia){ mostrar("pantallaSetup"); revisarActualizacionKiosco(); return; }
   if(!sb||!navigator.onLine){ mostrar("pantallaError"); return; }
   await cargarTodo();
+  revisarActualizacionKiosco();
 }
 async function cargarTodo(){
   var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
@@ -257,6 +285,8 @@ async function cargarTodo(){
 }
 async function revisarActivo(){
   if(!$("pantallaMenu").classList.contains("activa")) return;
+  _actKioscoContador++;
+  if(_actKioscoContador%60===0) revisarActualizacionKiosco(); /* cada hora, mientras el menú está abierto */
   var r=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
   if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.kioscoActivo!==true){ mostrar("pantallaApagado"); }
   if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.colorSistema)aplicarColorKiosco(r.data.opciones.colorSistema);
@@ -271,6 +301,148 @@ function guardarLicencia(){
 }
 function cambiarLicencia(){ localStorage.removeItem("kupoPosKioscoLicencia"); licencia=""; $("inputLicencia").value=""; mostrar("pantallaSetup"); }
 function reintentar(){ init(); }
+/* Actualizador del Kiosco (V1.0.0, Lalo 2026-11-26): el Kiosco avisa solo cuando hay versión nueva.
+   Lee version.json de GitHub Pages al entrar (y cada hora mientras el menú está abierto); si hay
+   versión nueva del Kiosco muestra una pastillita dorada en el encabezado del menú (discreta, para
+   no estorbar a los clientes) y, si el kiosco está en la pantalla de configuración (el cajero),
+   abre la ventana sola. La descarga y la instalación las hace el mismo plugin nativo KupoUpdater
+   del POS: descarga el APK y abre el instalador de Android para instalar encima, con la misma
+   firma. Sin internet no hace nada y no estorba. En el navegador (sin plugin) "Actualizar ahora"
+   abre el APK en una pestaña para descargarlo a mano.
+   Al subir versión: cambiar VERSION_KIOSCO y los tres pies "Kiosco KUPO · V…" (la versión del
+   Kiosco vive en version.json, entrada "kiosco"). */
+var VERSION_KIOSCO="V1.0.0";
+var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
+var _actKioscoInfo=null;
+var _actKioscoDescartada=false;
+var _actKioscoConsultando=false;
+var _actKioscoContador=0;
+var _actKioscoUltimoDescargado=0;
+var _actKioscoUltimoAvanceMs=0;
+var _actKioscoProgresoEscuchando=false;
+function updKioscoEsNativo(){return (typeof window!=="undefined"&&!!window.Capacitor&&typeof window.Capacitor.isNativePlatform==="function"&&window.Capacitor.isNativePlatform()&&!!(window.Capacitor.Plugins&&window.Capacitor.Plugins.KupoUpdater));}
+function updKioscoPlugin(){return window.Capacitor.Plugins.KupoUpdater;}
+function compararVersionesKiosco(a,b){
+  function partes(v){return String(v||"").replace(/^V/i,"").split(".").map(function(x){var n=parseInt(x,10);return isNaN(n)?0:n;});}
+  var pa=partes(a),pb=partes(b);
+  for(var i=0;i<3;i++){var x=pa[i]||0,y=pb[i]||0;if(x!==y)return x<y?-1:1;}
+  return 0;
+}
+function esVersionNuevaKiosco(disp,act){return compararVersionesKiosco(disp,act)>0;}
+function revisarActualizacionKiosco(){
+  if(_actKioscoConsultando) return;
+  if(typeof fetch!=="function") return;
+  _actKioscoConsultando=true;
+  var hecho=false;
+  var espera=new Promise(function(res){setTimeout(function(){if(!hecho)res(null);},5000);});
+  var pedido=fetch(URL_VERSION_JSON,{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("HTTP "+(r&&r.status));return r.json();}).catch(function(){return null;});
+  Promise.race([pedido,espera]).then(function(info){
+    _actKioscoConsultando=false;
+    if(hecho) return;
+    hecho=true;
+    if(!info||!info.kiosco||!info.kiosco.version||!info.kiosco.url) return;
+    if(!esVersionNuevaKiosco(info.kiosco.version,VERSION_KIOSCO)) return;
+    _actKioscoInfo={version:info.kiosco.version,url:info.kiosco.url,notas:info.kiosco.notas||""};
+    var pill=$("btnActKiosco"); if(pill) pill.style.display="";
+    if($("pantallaSetup").classList.contains("activa")&&!_actKioscoDescartada) mostrarAvisoActualizadorKiosco();
+  });
+}
+function mostrarAvisoActualizadorKiosco(){
+  var m=$("modalActKiosco"); if(!m||!_actKioscoInfo) return;
+  var v=$("actKVersion"); if(v) v.textContent="Kiosco KUPO "+_actKioscoInfo.version;
+  var n=$("actKNotas"); if(n) n.textContent=_actKioscoInfo.notas||"Mejoras y correcciones.";
+  var w=$("actKProgresoWrap"); if(w) w.style.display="none";
+  var p=$("actKPorcentaje"); if(p) p.textContent="Descargando… 0%";
+  var bar=$("actKProgreso"); if(bar) bar.style.width="0%";
+  var e=$("actKError"); if(e) e.style.display="none";
+  var le=$("actKLento"); if(le) le.style.display="none";
+  var b=$("btnActKActualizar"); if(b){b.disabled=false;b.textContent="Actualizar ahora";}
+  var a=$("btnActKAjustes"); if(a) a.style.display="none";
+  m.style.display="flex";
+}
+function cerrarAvisoActualizadorKiosco(masTarde){
+  var m=$("modalActKiosco"); if(m) m.style.display="none";
+  if(masTarde) _actKioscoDescartada=true;
+  try{ if(updKioscoEsNativo()){ var pl=updKioscoPlugin(); if(pl&&typeof pl.cancelarActualizacion==="function") pl.cancelarActualizacion().catch(function(){}); } }catch(e){}
+}
+function mostrarErrorActualizacionKiosco(msg){ var e=$("actKError"); if(e){e.textContent=msg;e.style.display="block";} }
+function mostrarBotonAjustesKiosco(){ var a=$("btnActKAjustes"); if(a) a.style.display="block"; }
+function formatoMBKiosco(b){var mb=b/1048576;return (mb<10?mb.toFixed(1):Math.round(mb))+" MB";}
+function actualizarProgresoKiosco(ev){
+  var p=0,total=0,desc=0;
+  if(ev){p=Number(ev.porcentaje||0);total=Number(ev.total||0);desc=Number(ev.descargado||0);}
+  if(p<0)p=0; if(p>100)p=100;
+  if(desc>_actKioscoUltimoDescargado){_actKioscoUltimoDescargado=desc;_actKioscoUltimoAvanceMs=Date.now();var le=$("actKLento");if(le)le.style.display="none";}
+  var bar=$("actKProgreso"); if(bar) bar.style.width=p+"%";
+  var t=$("actKPorcentaje");
+  if(ev&&ev.estado==="instalando"){
+    if(t) t.textContent="Instalando… esperando la confirmación de Android";
+    var leI=$("actKLento"); if(leI) leI.style.display="none";
+    var bI=$("btnActKActualizar"); if(bI){bI.disabled=true;bI.textContent="Instalando…";}
+  }else if(t){t.textContent="Descargando… "+p+"%"+(total>0?" ("+formatoMBKiosco(desc)+" / "+formatoMBKiosco(total)+")":"");}
+}
+async function abrirAjustesActualizacionKiosco(){
+  if(!updKioscoEsNativo()) return;
+  try{await updKioscoPlugin().abrirAjustesInstalacion();}catch(e){}
+}
+async function iniciarDescargaActualizacionKiosco(){
+  var info=_actKioscoInfo; if(!info) return;
+  var b=$("btnActKActualizar"); if(b){b.disabled=true;b.textContent="Descargando…";}
+  var w=$("actKProgresoWrap"); if(w) w.style.display="block";
+  var e=$("actKError"); if(e) e.style.display="none";
+  actualizarProgresoKiosco({porcentaje:0,descargado:0,total:0});
+  _actKioscoUltimoDescargado=0; _actKioscoUltimoAvanceMs=Date.now();
+  var le0=$("actKLento"); if(le0) le0.style.display="none";
+  if(!updKioscoEsNativo()){
+    try{window.open(info.url,"_blank");}catch(err){}
+    mostrarErrorActualizacionKiosco("El APK se está descargando en el navegador. Instálalo desde Descargas.");
+    if(b){b.disabled=false;b.textContent="Actualizar ahora";}
+    return;
+  }
+  var plug=updKioscoPlugin();
+  var sondeo=null; var usarEventos=false;
+  try{
+    if(plug&&typeof plug.addListener==="function"){
+      if(!_actKioscoProgresoEscuchando){ plug.addListener("progreso",function(ev){actualizarProgresoKiosco(ev);}); _actKioscoProgresoEscuchando=true; }
+      usarEventos=true;
+    }
+  }catch(err){usarEventos=false;}
+  if(!usarEventos&&plug&&typeof plug.obtenerProgreso==="function"){
+    sondeo=setInterval(function(){try{plug.obtenerProgreso().then(function(p){actualizarProgresoKiosco(p);}).catch(function(){});}catch(err){}},500);
+  }
+  var lento=setInterval(function(){
+    if(_actKioscoUltimoAvanceMs&&Date.now()-_actKioscoUltimoAvanceMs>20000){
+      var le=$("actKLento"); if(le) le.style.display="block";
+    }
+  },5000);
+  try{
+    var r=await plug.puedeInstalar();
+    if(r&&r.puede===false){
+      if(sondeo)clearInterval(sondeo); if(lento)clearInterval(lento);
+      mostrarErrorActualizacionKiosco("Primero permite que Kiosco KUPO instale apps. Toca 'Abrir ajustes', actívalo y vuelve a tocar Actualizar ahora.");
+      mostrarBotonAjustesKiosco();
+      if(b){b.disabled=false;b.textContent="Actualizar ahora";}
+      return;
+    }
+    var res=await plug.descargarEInstalar({url:info.url});
+    if(sondeo)clearInterval(sondeo); if(lento)clearInterval(lento);
+    if(res&&res.necesitaPermiso){
+      mostrarErrorActualizacionKiosco("Primero permite que Kiosco KUPO instale apps. Toca 'Abrir ajustes', actívalo y vuelve a tocar Actualizar ahora.");
+      mostrarBotonAjustesKiosco();
+      if(b){b.disabled=false;b.textContent="Actualizar ahora";}
+      return;
+    }
+    actualizarProgresoKiosco({porcentaje:100,descargado:0,total:0});
+    var le1=$("actKLento"); if(le1) le1.style.display="none";
+    if(b){b.disabled=false;b.textContent="Actualizar ahora";}
+    var t=$("actKPorcentaje"); if(t) t.textContent="Toca Instalar en la ventana de Android para terminar.";
+  }catch(err){
+    if(sondeo)clearInterval(sondeo); if(lento)clearInterval(lento);
+    var msgErr=(err&&err.message)?String(err.message):"";
+    mostrarErrorActualizacionKiosco(msgErr?msgErr:"Se cortó la descarga. Vuelve a tocar 'Actualizar ahora': se reanuda donde se quedó.");
+    if(b){b.disabled=false;b.textContent="Actualizar ahora";}
+  }
+}
 </script>
 <script>
 /* Agrupa variantes Llevar/Local bajo el mismo nombre base. */
