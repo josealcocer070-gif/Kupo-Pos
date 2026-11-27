@@ -22,6 +22,10 @@ cp "$ROOT/publicidad.html" "$ROOT/www/publicidad.html"
 # respaldo por CDN): sin este archivo en www/ el Kiosco no leería productos
 # ni mandaría pedidos. En CI el archivo está en la raíz del checkout.
 cp "$ROOT/supabase.min.js" "$ROOT/www/supabase.min.js"
+# QR del ticket virtual (v186, Lalo 2026-11-27): kiosco.html carga la librería
+# con <script src="qrcode.min.js"> (relativo, sin CDN): sin este archivo en
+# www/ el QR no se generaría en la tablet aunque hubiera internet.
+cp "$ROOT/qrcode.min.js" "$ROOT/www/qrcode.min.js"
 # Iconos sólidos+flat del Kiosco (v176, Lalo 2026-11-26): 9 PNG en iconos/,
 # referenciados como iconos/icono-*.png desde kiosco.html; van dentro del
 # APK para que el menú se vea bien aunque el internet falle.

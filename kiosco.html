@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0b4a6e">
 <title>Kupo Kiosko</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="supabase.min.js"></script>
+<script src="qrcode.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--azul:#0b4a6e}
@@ -58,18 +57,12 @@ input{font-family:inherit}
 
 /* Encabezado */
 header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2);position:relative}
-header .negocio{font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.95}
 header .kiosco{font-size:30px;font-weight:900;letter-spacing:1px;margin-top:2px}
 header .kiosco span{color:#fbbf24}
-header .fila-marca{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-header .kiosco-logo{font-family:'Fredoka','Arial Rounded MT Bold',system-ui,sans-serif;font-weight:700;color:#fbbf24;letter-spacing:1px;line-height:1}
-header .kiosco-logo .kiosco-chico{display:block;font-size:22px;font-weight:600;color:#fff;letter-spacing:6px}
-header .kiosco-logo .kiosco-grande{display:block;font-size:48px;font-weight:700}
-header .fila-marca .kiosco-logo{text-align:left}
-.kiosco-logo-img{height:56px;width:auto;display:block}
-.kiosco-logo.con-pollon{display:flex;align-items:center;gap:12px}
-.logo-pollon-mini{width:56px;height:56px;display:block}
-header .negocio-menu{font-size:18px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#fff;text-align:right;max-width:46%;line-height:1.35;padding-top:6px}
+/* v184 (Lalo 2026-11-27): encabezado discreto — el logo de KUPO KIOSCO chico a la izquierda y el de la pollería a la derecha, sin el nombre del negocio en texto (el logo de la pollería lo representa). Se quitan el logo grande de 56px, el nombre y la fuente Fredoka (solo se usaba para el logo en texto). */
+header .fila-marca{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.marca-kiosco{height:40px;width:auto;display:block}
+.marca-pollon{width:40px;height:40px;display:block}
 header .bienvenido{font-size:24px;font-weight:700;color:#fff;margin-top:10px}
 header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:2px}
 header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
@@ -153,8 +146,8 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 #btnListo{margin:0 20px 24px;padding:18px;font-size:22px;font-weight:900;border-radius:16px;border:none;background:#16a34a;color:#fff;box-shadow:0 4px 0 #166534}
 /* Ticket de confirmación antes de enviar (v174) */
 #ticketConfirmar{background:#fff;border-radius:20px;margin:24px 20px;padding:28px 20px;box-shadow:0 4px 20px rgba(0,0,0,.12);flex:1}
-#ticketConfirmar h2{font-size:28px;font-weight:900;color:#12233a;margin-bottom:14px}
-#confirmarItems .li{display:flex;justify-content:space-between;font-size:18px;padding:7px 0}
+#ticketConfirmar h2{font-size:28px;font-weight:900;color:#12233a;margin:0}
+#confirmarItems .li{display:flex;justify-content:space-between;font-size:18px;padding:7px 0;border-bottom:1px solid #f3f4f6}
 #confirmarItems .li b{white-space:nowrap;margin-left:10px}
 #confirmarTotal{display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:800;border-top:2px dashed #e5e7eb;margin-top:12px;padding-top:14px}
 #confirmarTotalValor{font-size:34px;font-weight:900;color:var(--azul,#0b4a6e)}
@@ -163,6 +156,17 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 #btnConfirmar{width:100%;margin-top:20px;padding:18px;font-size:20px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 #btnConfirmar:active{transform:scale(.98)}
 #btnEditar{width:100%;margin-top:12px;padding:16px;font-size:19px;font-weight:800;border-radius:14px;border:2px solid #d1d5db;background:#fff;color:#374151}
+/* v185 (Lalo 2026-11-27): ticket de confirmación más moderno — sin el logo grande de KUPO KIOSCO en el encabezado (solo la pastilla), tarjeta con acento naranja arriba, el modo (Para llevar/Local) como pastilla junto al título y líneas divisorias entre productos. */
+.header-ticket{padding:14px 20px 10px}
+#ticketConfirmar{border-top:6px solid var(--azul,#0b4a6e)}
+.confirmar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.chip-modo{display:inline-flex;align-items:center;gap:6px;background:#fff8e1;border:1px solid #f5b800;color:var(--azul,#0b4a6e);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:800;white-space:nowrap}
+.chip-modo img{width:22px;height:22px}
+/* v186 (Lalo 2026-11-27): pantalla de Pedido Recibido moderna + ticket virtual con QR — el encabezado lleva el logo de la pollería (sin el nombre en texto) y el ticket muestra el QR que abre el ticket en el celular; si el QR no se puede generar, queda la foto como respaldo. */
+.header-recibido{display:flex;align-items:center;justify-content:center;gap:14px}
+#ticketQRWrap{display:none;margin-top:20px;padding-top:18px;border-top:2px dashed #e5e7eb}
+#ticketQR{width:200px;height:200px;display:block;margin:0 auto}
+.ticket-qr-txt{font-size:16px;font-weight:800;color:var(--azul,#0b4a6e);margin-top:10px}
 /* Pantallas de setup / apagado / error */
 .centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center}
 .centro .icono{font-size:72px}
@@ -194,7 +198,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.7</div>
+  <div class="pie">Kupo Kiosko · V1.0.8</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -207,14 +211,14 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.7</div>
+  <div class="pie">Kupo Kiosko · V1.0.8</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
   <header>
     <div class="fila-marca">
-      <div class="kiosco-logo"><img class="kiosco-logo-img" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
-      <div class="negocio-menu" id="nombreNegocioBienvenida">POLLOS RANCHEROS EL POLLÓN</div>
+      <img class="marca-kiosco" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO">
+      <img class="marca-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón">
     </div>
     <div class="bienvenido">¡Bienvenido!</div>
     <div class="saludo-menu" id="saludoBienvenida">¡Buenas noches!</div>
@@ -234,7 +238,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.7</div>
+  <div class="pie">Kupo Kiosko · V1.0.8</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -242,8 +246,8 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
   <header>
     <button id="btnActKiosco" type="button" onclick="mostrarAvisoActualizadorKiosco()" style="display:none">⬇️ Actualización</button>
     <div class="fila-marca">
-      <div class="kiosco-logo con-pollon"><img class="logo-pollon-mini" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón"><img class="kiosco-logo-img" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
-      <div class="negocio-menu" id="nombreNegocio">POLLOS RANCHEROS EL POLLÓN</div>
+      <img class="marca-kiosco" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO">
+      <img class="marca-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón">
     </div>
     <div class="bienvenido">¡Bienvenido!</div>
     <div class="saludo-menu" id="saludoMenu">¡Buenas tardes!</div>
@@ -265,8 +269,8 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 </div>
 <!-- Ticket -->
 <div id="pantallaTicket" class="pantalla">
-  <header>
-    <div class="negocio" id="nombreNegocio2">POLLOS RANCHEROS EL POLLÓN</div>
+  <header class="header-recibido">
+    <img class="marca-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón">
     <div class="kiosco">¡PEDIDO <span>RECIBIDO!</span></div>
   </header>
   <div id="ticketCard">
@@ -276,6 +280,10 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="ticketTipo"></div>
     <div id="ticketItems"></div>
     <div id="ticketTotal"><span>Total</span><span id="ticketTotalValor">$0</span></div>
+    <div id="ticketQRWrap">
+      <img id="ticketQR" alt="QR de tu ticket">
+      <div class="ticket-qr-txt">Escanea el QR para ver tu ticket en tu celular</div>
+    </div>
     <div id="ticketFoto">📸 Tómale foto a tu ticket</div>
     <p style="margin-top:8px;font-size:16px;color:#6b7280"><img class="icono-img" src="iconos/icono-caja.png" alt=""> Paga en caja. Te llamaremos por tu número cuando esté listo.</p>
   </div>
@@ -283,12 +291,11 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 </div>
 <!-- Ticket de confirmación antes de enviar -->
 <div id="pantallaConfirmar" class="pantalla">
-  <header>
-    <div class="kiosco-logo"><img class="kiosco-logo-img" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
+  <header class="header-ticket">
     <div class="sub">Pide aquí, paga en caja 👇</div>
   </header>
   <div id="ticketConfirmar">
-    <h2><img class="icono-img icono-h2" src="iconos/icono-ticket.png" alt=""> Tu Pedido</h2>
+    <div class="confirmar-top"><h2><img class="icono-img icono-h2" src="iconos/icono-ticket.png" alt=""> Tu Pedido</h2><span class="chip-modo" id="confirmarModo"></span></div>
     <div id="confirmarItems"></div>
     <div id="confirmarTotal"><span>Total</span><span id="confirmarTotalValor">$0</span></div>
     <div class="confirmar-nombre"><span>Tu nombre</span><b id="confirmarNombre"></b></div>
@@ -305,7 +312,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.7</div>
+  <div class="pie">Kupo Kiosko · V1.0.8</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -382,7 +389,7 @@ async function cargarTodo(){
   negocioCrudo=(r1.data.negocio||"KUPO POS");
   negocioNombre=negocioCrudo.toUpperCase();
   var nn=$("nombreNegocio"); if(nn) nn.textContent=negocioNombre; /* v175: el nombre vuelve al menú, arriba a la derecha */
-  $("nombreNegocio2").textContent=negocioNombre;
+  var n2=$("nombreNegocio2"); if(n2) n2.textContent=negocioNombre; /* v186: el nombre ya no va en el encabezado del ticket (lo representa el logo de la pollería) */
   var nb=$("nombreNegocioBienvenida"); if(nb) nb.textContent=negocioNombre;
   $("negocioApagado").textContent=negocioNombre;
   var r2=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
@@ -446,7 +453,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.7";
+var VERSION_KIOSCO="V1.0.8";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -760,7 +767,19 @@ function mostrarConfirmacion(){
   $("confirmarItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
   $("confirmarTotalValor").textContent=dinero(totalCarrito());
   $("confirmarNombre").textContent=nombre;
+  $("confirmarModo").innerHTML=tipo==="llevar"?'<img src="iconos/icono-para-llevar.png" alt=""> Para llevar':'<img src="iconos/icono-para-comer-aqui.png" alt=""> Para comer aquí'; /* v185: el modo se ve en el ticket */
   mostrar("pantallaConfirmar");
+}
+/* v186: ticket virtual con QR — el QR abre ticket.html con la licencia y el id del pedido en la nube; el cliente ve su ticket en el celular sin instalar nada. */
+function urlTicketPedido(pedidoId){ return "https://josealcocer070-gif.github.io/Kupo-Pos/ticket.html?licencia="+encodeURIComponent(licencia)+"&pedido="+encodeURIComponent(pedidoId); }
+function pintarQRTicket(pedidoId){
+  var w=$("ticketQRWrap"); if(!w) return;
+  try{
+    if(typeof qrcode!=="function"||!pedidoId) throw new Error("sin QR");
+    var qr=qrcode(0,"M"); qr.addData(urlTicketPedido(pedidoId)); qr.make();
+    var img=$("ticketQR"); img.src=qr.createDataURL(6,8); img.alt="QR de tu ticket";
+    w.style.display="block";
+  }catch(e){ w.style.display="none"; } /* sin QR (sin librería o sin id) queda la foto como respaldo */
 }
 async function confirmarPedido(){
   var nombre=$("nombreCliente").value.trim();
@@ -777,11 +796,13 @@ async function confirmarPedido(){
     var numero=(r.data&&r.data.length?r.data[0].numero:0)+1;
     var ins=await sb.from("pedidos_kiosco").insert([{licencia_clave:licencia,numero:numero,cliente:nombre,tipo:tipo,items:items,total:total,estado:"pendiente"}]).select("id");
     if(ins.error) throw ins.error;
+    var pedidoId=(ins.data&&ins.data[0]&&ins.data[0].id)||null; /* v186: el id del pedido alimenta el QR del ticket virtual */
     $("ticketNumero").textContent=numero;
     $("ticketCliente").textContent=nombre;
     $("ticketTipo").innerHTML=tipo==="llevar"?'<img class="icono-img" src="iconos/icono-para-llevar.png" alt=""> Para llevar':'<img class="icono-img" src="iconos/icono-para-comer-aqui.png" alt=""> Para comer aquí';
     $("ticketItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
     $("ticketTotalValor").textContent=dinero(total);
+    pintarQRTicket(pedidoId);
     mostrar("pantallaTicket");
     if(_kioscoTicketTimer) clearTimeout(_kioscoTicketTimer);
     _kioscoTicketTimer=setTimeout(function(){ if($("pantallaTicket").classList.contains("activa")) volverInicio(); },60000); /* el ticket vuelve solo al inicio al minuto si nadie toca Listo (V1.0.1, v177: ahora a la pantalla inicial) */
@@ -793,6 +814,7 @@ async function confirmarPedido(){
 }
 function volverInicio(){ /* v177: fin de sesión (Listo, ticket al minuto, 90 s sin tocar, vuelta de segundo plano): carrito vacío y vuelta a la pantalla inicial, lista para el siguiente cliente */
   if(_kioscoTicketTimer){ clearTimeout(_kioscoTicketTimer); _kioscoTicketTimer=null; }
+  var _qrw=$("ticketQRWrap"); if(_qrw) _qrw.style.display="none"; var _qri=$("ticketQR"); if(_qri) _qri.removeAttribute("src"); /* v186: el QR del cliente anterior no se queda para el siguiente */
   if($("modalSalsa")) $("modalSalsa").style.display="none"; _salsaPendiente=null; /* la ventana de salsa no se queda abierta para el siguiente cliente (v183) */
   carrito={};
   $("nombreCliente").value="";
