@@ -30,7 +30,12 @@ header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-ali
 header .negocio{font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.95}
 header .kiosco{font-size:30px;font-weight:900;letter-spacing:1px;margin-top:2px}
 header .kiosco span{color:#fbbf24}
-header .sub{font-size:13px;opacity:.8;margin-top:2px}
+header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
+/* Aviso sin internet + parte superior fija (V1.0.1) */
+#bannerSinInternet{background:#f59e0b;color:#451a03;text-align:center;font-size:15px;font-weight:800;padding:10px 16px}
+.fija-superior{position:sticky;top:0;z-index:30;background:#fff8ec}
+.fija-superior.compacta .bienvenida{display:none}
+.fija-superior.compacta{box-shadow:0 2px 10px rgba(0,0,0,.12)}
 /* Actualizador del Kiosco (V1.0.0): pastilla discreta en el encabezado + ventana oscura con borde dorado, como el POS */
 #btnActKiosco{position:absolute;right:12px;top:12px;background:#f5b301;color:#12233a;border:0;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 #modalActKiosco{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
@@ -41,6 +46,19 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 #modalActKiosco .btn-amarillo:disabled{opacity:.6}
 #modalActKiosco .btn-borde{display:block;width:100%;background:transparent;color:#f5b301;border:2px solid #f5b301;border-radius:12px;padding:10px;font-size:15px;font-weight:bold;margin-bottom:10px}
 #modalActKiosco .btn-gris2{display:block;width:100%;background:transparent;color:#e8f0f2;border:1px solid rgba(255,255,255,.45);border-radius:12px;padding:10px;font-size:15px}
+/* Revisar el pedido: el ticket del carrito (V1.0.1) */
+#modalTicket{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
+#modalTicket .card{background:#fff;color:#1f2937;border-radius:20px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#modalTicket h2{font-size:24px;margin-bottom:12px}
+#modalTicket .li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:17px;padding:10px 0;border-bottom:1px solid #e5e7eb}
+#modalTicket .li .nom{flex:1}
+#modalTicket .li .cant{display:flex;align-items:center;gap:8px}
+#modalTicket .li .cant button{width:38px;height:38px;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff;font-size:22px;font-weight:900}
+#modalTicket .li .cant b{min-width:24px;text-align:center}
+#modalTicket .li .sub{font-weight:800;white-space:nowrap}
+#ticketRevisarTotal{display:flex;justify-content:space-between;font-size:22px;font-weight:900;margin:14px 0}
+#modalTicket .btn-amarillo{display:block;width:100%;background:#f5b301;color:#12233a;border:0;border-radius:12px;padding:14px;font-size:18px;font-weight:bold;margin-bottom:10px}
+#modalTicket .btn-gris2{display:block;width:100%;background:transparent;color:#374151;border:1px solid #d1d5db;border-radius:12px;padding:12px;font-size:16px}
 </style>
 </head>
 <body>
@@ -48,17 +66,13 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 /* Saludo de bienvenida centrado (v171) */
 .bienvenida{text-align:center;padding:22px 20px 4px}
 .bienvenida .saludo-menu{font-size:40px;font-weight:900;color:var(--azul,#0b4a6e);line-height:1.15;margin-top:10px}
-.bienvenida .saludo-negocio-menu{font-size:18px;font-weight:800;color:#374151;margin-top:6px}
 .bienvenida .saludo-pregunta{font-size:17px;color:#6b7280;margin-top:4px}
 /* Tipo: para llevar / para comer aquí */
 .tipo{display:flex;gap:12px;padding:16px 20px 6px}
 .tipo button{flex:1;padding:18px 8px;font-size:21px;font-weight:800;border-radius:16px;border:3px solid #e5e7eb;background:#fff;color:#374151}
 .tipo button.activo{background:var(--azul,#0b4a6e);border-color:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 .tipo button small{display:block;font-size:13px;font-weight:600;margin-top:2px;opacity:.85}
-/* Buscador y filtros */
-.busqueda{display:flex;align-items:center;gap:10px;padding:10px 20px 4px}
-.busqueda input{flex:1;min-width:0;padding:15px 18px;font-size:19px;border:2px solid #e5e7eb;border-radius:14px;background:#fff;outline:none}
-.busqueda input:focus{border-color:var(--azul,#0b4a6e)}
+/* Filtros */
 .filtros{display:flex;gap:8px;padding:12px 20px 4px;overflow-x:auto;scrollbar-width:none}
 .filtros::-webkit-scrollbar{display:none}
 .filtros button{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-size:16px;font-weight:700;border-radius:999px;border:2px solid #e5e7eb;background:#fff;color:#374151}
@@ -93,7 +107,8 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
 #barra .fila{display:flex;gap:10px;align-items:center}
 #nombreCliente{flex:1;min-width:0;padding:14px 16px;font-size:18px;border-radius:12px;border:2px solid transparent;outline:none}
 #nombreCliente.error{border-color:#ef4444;background:#fef2f2}
-#totalBarra{font-size:22px;font-weight:900;white-space:nowrap}
+#totalBarra{background:transparent;color:#fff;border:0;padding:0;font-size:22px;font-weight:900;white-space:nowrap;text-decoration:underline}
+#btnLimpiarCarrito{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 12px;font-size:15px;font-weight:700;white-space:nowrap}
 #btnMandar{width:100%;margin-top:10px;padding:16px;font-size:21px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
 #btnMandar:disabled{background:#9ca3af;box-shadow:none;opacity:.7}
 #btnMandar.enviando{background:#9ca3af;box-shadow:none}
@@ -136,7 +151,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.0</div>
+  <div class="pie">Kiosco KUPO · V1.0.1</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -149,10 +164,12 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.0</div>
+  <div class="pie">Kiosco KUPO · V1.0.1</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
+  <div class="fija-superior" id="fijaSuperior">
+  <div id="bannerSinInternet" style="display:none">⚠️ Sin internet — revisa el wifi para mandar tu pedido</div>
   <header>
     <button id="btnActKiosco" type="button" onclick="mostrarAvisoActualizadorKiosco()" style="display:none">⬇️ Actualización</button>
     <div class="negocio" id="nombreNegocio">POLLOS RANCHEROS EL POLLÓN</div>
@@ -162,20 +179,20 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
   <div class="bienvenida">
     <span class="icono-3d-grande f-oro" id="iconoSaludo">☀️</span>
     <div class="saludo-menu" id="saludoMenu">¡Buenos días!</div>
-    <div class="saludo-negocio-menu" id="bienvenidaNegocio">Bienvenido a Pollos Rancheros El Pollón</div>
     <div class="saludo-pregunta">¿Qué se te antoja hoy?</div>
   </div>
   <div class="tipo">
     <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')"><span class="icono-3d-mini f-coral">🥡</span> Para llevar<small>Precio para llevar</small></button>
     <button id="btnLocal" onclick="elegirTipo('local')"><span class="icono-3d-mini f-teal">🍽️</span> Para comer aquí<small>Precio en el local</small></button>
   </div>
-  <div class="busqueda"><span class="icono-3d-mini f-gris">🔍</span><input id="inputBuscar" placeholder="Buscar pollo, refresco..." oninput="renderMenu()"></div>
   <div class="filtros" id="filtros"></div>
+  </div>
   <div id="grid"></div>
   <div id="barra">
     <div class="fila">
       <input id="nombreCliente" placeholder="Tu nombre" maxlength="30" autocomplete="off">
-      <span id="totalBarra">Total $0</span>
+      <button id="totalBarra" type="button" onclick="abrirTicket()">🧾 Total $0</button>
+      <button id="btnLimpiarCarrito" type="button" onclick="limpiarCarritoKiosco()" style="display:none">✕ Limpiar</button>
     </div>
     <button id="btnMandar" onclick="mandarPedido()" disabled>Mandar pedido</button>
     <div id="hintNombre">Escribe tu nombre para mandar el pedido 🙂</div>
@@ -208,7 +225,7 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.0</div>
+  <div class="pie">Kiosco KUPO · V1.0.1</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -226,8 +243,18 @@ header .sub{font-size:13px;opacity:.8;margin-top:2px}
     <button id="btnActKMasTarde" class="btn-gris2" type="button" onclick="cerrarAvisoActualizadorKiosco(true)">Más tarde</button>
   </div>
 </div>
+<!-- Revisar el pedido: el ticket del carrito (se abre tocando el Total) -->
+<div id="modalTicket" onclick="if(event.target===this)cerrarTicket()">
+  <div class="card">
+    <h2>Tu pedido</h2>
+    <div id="ticketRevisarItems"></div>
+    <div id="ticketRevisarTotal"><span>Total</span><span id="ticketRevisarTotalValor">$0</span></div>
+    <button class="btn-amarillo" type="button" onclick="cerrarTicket();mandarPedido()">Mandar pedido</button>
+    <button class="btn-gris2" type="button" onclick="cerrarTicket()">Seguir pidiendo</button>
+  </div>
+</div>
 <script>
-/* Kiosco KUPO v172 — menú moderno: saludo de bienvenida centrado según la hora con icono 3D (sol en la mañana, sol con nube en la tarde, luna en la noche), tarjetas de foto completa con pastilla de precio y botón + redondo, animación al toque (la tarjeta se hunde), iconos 3D del sistema en filtros, toggle y buscador, y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). */
+/* Kiosco KUPO v173 — menú moderno: saludo de bienvenida centrado según la hora con icono 3D (sol en la mañana, sol con nube en la tarde, luna en la noche), tarjetas de foto completa con pastilla de precio y botón + redondo, animación al toque (la tarjeta se hunde), iconos 3D del sistema en filtros, toggle y buscador, y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano, botón Limpiar) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -250,7 +277,7 @@ function $(id){ return document.getElementById(id); }
 function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function dinero(n){ return "$"+Math.round(Number(n)||0); }
 function saludoKiosco(){ var h=new Date().getHours(); return h>=5&&h<12?"¡Buenos días!":h>=12&&h<19?"¡Buenas tardes!":"¡Buenas noches!"; }
-function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); var sm=$("saludoMenu"); if(sm)sm.textContent=s; var bn=$("bienvenidaNegocio"); if(bn)bn.textContent="Bienvenido a "+(negocioCrudo||"nuestro negocio"); var ic=$("iconoSaludo"); if(ic){ var is=iconoSaludo(); ic.textContent=is[0]; ic.className="icono-3d-grande "+is[1]; } }
+function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); var sm=$("saludoMenu"); if(sm)sm.textContent=s; var ic=$("iconoSaludo"); if(ic){ var is=iconoSaludo(); ic.textContent=is[0]; ic.className="icono-3d-grande "+is[1]; } }
 function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); pintarSaludo(); }
 function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
 function emojiDe(p){ if(p.foto_kiosco||p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
@@ -260,6 +287,8 @@ async function init(){
   if(!sb||!navigator.onLine){ mostrar("pantallaError"); return; }
   await cargarTodo();
   revisarActualizacionKiosco();
+  pedirWakeLock();
+  pintarSinInternet();
 }
 async function cargarTodo(){
   var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
@@ -284,6 +313,7 @@ async function cargarTodo(){
   setInterval(revisarActivo,60000);
 }
 async function revisarActivo(){
+  pintarSinInternet();
   if(!$("pantallaMenu").classList.contains("activa")) return;
   _actKioscoContador++;
   if(_actKioscoContador%60===0) revisarActualizacionKiosco(); /* cada hora, mientras el menú está abierto */
@@ -301,7 +331,24 @@ function guardarLicencia(){
 }
 function cambiarLicencia(){ localStorage.removeItem("kupoPosKioscoLicencia"); licencia=""; $("inputLicencia").value=""; mostrar("pantallaSetup"); }
 function reintentar(){ init(); }
-/* Actualizador del Kiosco (V1.0.0, Lalo 2026-11-26): el Kiosco avisa solo cuando hay versión nueva.
+/* Pantalla siempre encendida + aviso de sin internet (V1.0.1): el kiosco no se
+   apaga solo mientras está abierto (el permiso se pierde al esconder la app,
+   por eso se vuelve a pedir al volver); si se cae el wifi aparece un avisito
+   arriba para que el cliente lo sepa antes de pedir. */
+var _kioscoWakeLock=null;
+async function pedirWakeLock(){
+  try{
+    if(!("wakeLock" in navigator)) return;
+    _kioscoWakeLock=await navigator.wakeLock.request("screen");
+  }catch(e){ _kioscoWakeLock=null; }
+}
+function pintarSinInternet(){
+  var b=$("bannerSinInternet"); if(!b) return;
+  b.style.display=navigator.onLine?"none":"block";
+}
+window.addEventListener("online",pintarSinInternet);
+window.addEventListener("offline",pintarSinInternet);
+/* Actualizador del Kiosco (desde V1.0.0, Lalo 2026-11-26): el Kiosco avisa solo cuando hay versión nueva.
    Lee version.json de GitHub Pages al entrar (y cada hora mientras el menú está abierto); si hay
    versión nueva del Kiosco muestra una pastillita dorada en el encabezado del menú (discreta, para
    no estorbar a los clientes) y, si el kiosco está en la pantalla de configuración (el cajero),
@@ -311,7 +358,7 @@ function reintentar(){ init(); }
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los tres pies "Kiosco KUPO · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.0";
+var VERSION_KIOSCO="V1.0.1";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -458,6 +505,13 @@ function agrupar(){
     else mapa[base].solo=p;
   });
   grupos=Object.keys(mapa).map(function(k){ return mapa[k]; });
+  /* El pollo primero (V1.0.1): lo que más se vende va hasta arriba; el resto en orden alfabético. */
+  grupos.sort(function(a,b){
+    var ca=(visibleDe(a).categoria||"").trim(), cb=(visibleDe(b).categoria||"").trim();
+    if(ca==="Pollo"&&cb!=="Pollo") return -1;
+    if(cb==="Pollo"&&ca!=="Pollo") return 1;
+    return ca<cb?-1:ca>cb?1:0;
+  });
 }
 function visibleDe(g){
   if(tipo==="llevar") return g.llevar||g.solo||g.local;
@@ -466,7 +520,7 @@ function visibleDe(g){
 function renderFiltros(){
   var cats=[];
   grupos.forEach(function(g){ var c=(visibleDe(g).categoria||"General").trim(); if(cats.indexOf(c)<0) cats.push(c); });
-  cats.sort();
+  cats.sort(function(a,b){ if(a==="Pollo") return -1; if(b==="Pollo") return 1; return a<b?-1:a>b?1:0; });
   $("filtros").innerHTML='<button class="'+(categoria==="Todos"?"activo":"")+'" onclick="elegirCat(\'Todos\')">'+ic3d("⭐","f-oro")+'Todos</button>'+cats.map(function(c){ return '<button class="'+(categoria===c?"activo":"")+'" onclick="elegirCat(\''+escHtml(c)+'\')">'+ic3d(EMOJI_CAT[c]||"📦",CLASE_CAT[c]||"f-gris")+escHtml(c)+'</button>'; }).join("");
 }
 function elegirCat(c){ categoria=c; renderFiltros(); renderMenu(); }
@@ -477,15 +531,13 @@ function elegirTipo(t){
   renderFiltros(); renderMenu();
 }
 function renderMenu(){
-  var q=($("inputBuscar").value||"").toLowerCase().trim();
   var lista=grupos.map(visibleDe).filter(function(p){
     if(!p) return false;
     if(categoria!=="Todos"&&(p.categoria||"General").trim()!==categoria) return false;
-    if(q&&baseNombre(p.nombre).toLowerCase().indexOf(q)<0&&String(p.nombre).toLowerCase().indexOf(q)<0) return false;
     return true;
   });
   var g=$("grid");
-  if(!lista.length){ g.innerHTML='<div id="sinResultados">😕 No encontramos eso.<br>Prueba con otra palabra.</div>'; return; }
+  if(!lista.length){ g.innerHTML='<div id="sinResultados">😕 No hay productos en esta categoría.</div>'; return; }
   g.innerHTML=lista.map(function(p){
     var cant=carrito[p.id]?carrito[p.id].cant:0;
     var em=emojiDe(p);
@@ -512,9 +564,12 @@ function cambiarCant(id,d){
   grupos.forEach(function(g){ var v=visibleDe(g); if(v&&v.id===id) p=v; });
   if(!p) return;
   if(!carrito[id]) carrito[id]={p:p,cant:0};
+  if(d>0&&carrito[id].cant>=20) return; /* tope 20 por producto (V1.0.1): que nadie deje un producto en 50 por tocarle mucho al + */
   carrito[id].cant+=d;
   if(carrito[id].cant<=0) delete carrito[id];
   renderMenu(); actualizarBarra();
+  var mt=$("modalTicket");
+  if(mt&&mt.style.display==="flex"){ if(!Object.keys(carrito).length) cerrarTicket(); else renderTicket(); }
 }
 function totalCarrito(){
   var t=0; Object.keys(carrito).forEach(function(k){ t+=carrito[k].p.precio*carrito[k].cant; });
@@ -522,10 +577,76 @@ function totalCarrito(){
 }
 function actualizarBarra(){
   var n=Object.keys(carrito).length;
-  $("totalBarra").textContent="Total "+dinero(totalCarrito());
-  $("btnMandar").disabled=n===0;
+  $("totalBarra").textContent="🧾 Total "+dinero(totalCarrito());
+  var bm=$("btnMandar");
+  bm.disabled=n===0;
+  bm.textContent=n===0?"Mandar pedido":"Mandar pedido · "+dinero(totalCarrito());
+  var bl=$("btnLimpiarCarrito"); if(bl) bl.style.display=n===0?"none":"";
 }
 $("nombreCliente").addEventListener("input",function(){ $("nombreCliente").classList.remove("error"); $("hintNombre").style.display="none"; });
+/* Limpieza automática del carrito (V1.0.1, Lalo 2026-11-26): el kiosco es de
+   uso público — si un cliente deja productos y se va sin mandar el pedido, el
+   siguiente cliente lo encontraba cargado (así salió el pedido al abrir, sin
+   tocar nada: la app venía con el toque de antes o un toque al despertar la
+   tablet cayó en la tarjeta). Si pasan 90 s sin tocar la pantalla y hay algo
+   en el carrito, se vacía solo y el menú queda limpio (también vuelven los
+   filtros a "Todos" y el tipo a "Para llevar", para que el siguiente cliente
+   no herede nada del anterior). También se vacía al volver a la app después
+   de más de 60 s en segundo plano. El botón "Limpiar" de la barra lo vacía
+   a mano. */
+var _kioscoInactivoMs=90000;
+var _kioscoUltimoToque=Date.now();
+var _kioscoOcultoDesde=0;
+var _kioscoTicketTimer=null;
+function resetVistaKiosco(){
+  categoria="Todos"; tipo="llevar";
+  $("btnLlevar").classList.add("activo"); $("btnLocal").classList.remove("activo");
+  renderFiltros();
+}
+function limpiarCarritoKiosco(){
+  carrito={};
+  resetVistaKiosco();
+  renderMenu(); actualizarBarra();
+}
+function tocarKiosco(){ _kioscoUltimoToque=Date.now(); }
+setInterval(function(){
+  if(!carrito||!Object.keys(carrito).length) return;
+  if(!$("pantallaMenu").classList.contains("activa")) return;
+  var mt=$("modalTicket"); if(mt&&mt.style.display==="flex") return; /* revisando el pedido, no limpiar */
+  if(Date.now()-_kioscoUltimoToque>=_kioscoInactivoMs) limpiarCarritoKiosco();
+},10000);
+["touchstart","click","input"].forEach(function(ev){ document.addEventListener(ev,tocarKiosco,{passive:true}); });
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){ _kioscoOcultoDesde=Date.now(); }
+  else{ pedirWakeLock(); if(_kioscoOcultoDesde&&Date.now()-_kioscoOcultoDesde>60000){ _kioscoOcultoDesde=0; if(carrito&&Object.keys(carrito).length) limpiarCarritoKiosco(); } }
+});
+/* Parte superior fija (V1.0.1, Lalo 2026-11-26): el encabezado, el tipo y los
+   filtros se quedan arriba al deslizar; el saludo de bienvenida se recoge para
+   no comer pantalla y vuelve al subir al inicio. */
+window.addEventListener("scroll",function(){
+  var f=$("fijaSuperior"); if(!f) return;
+  f.classList.toggle("compacta",window.scrollY>80);
+},{passive:true});
+/* Revisar el pedido (V1.0.1, Lalo 2026-11-26): tocando el Total se abre el
+   ticket del carrito para ver o cambiar lo agregado (más/menos por producto);
+   si se quita el último producto se cierra solo. */
+function renderTicket(){
+  var el=$("ticketRevisarItems"); if(!el) return;
+  var keys=Object.keys(carrito);
+  if(!keys.length){ el.innerHTML='<p style="font-size:17px;color:#6b7280">Tu pedido está vacío.</p>'; }
+  else{
+    el.innerHTML=keys.map(function(k){ var c=carrito[k]; return '<div class="li"><span class="nom">'+escHtml(baseNombre(c.p.nombre))+'</span><span class="cant"><button onclick="cambiarCant(\''+k+'\',-1)">−</button><b>'+c.cant+'</b><button onclick="cambiarCant(\''+k+'\',1)">+</button></span><span class="sub">'+dinero(c.p.precio*c.cant)+'</span></div>'; }).join("");
+  }
+  var tv=$("ticketRevisarTotalValor"); if(tv) tv.textContent=dinero(totalCarrito());
+}
+function abrirTicket(){
+  if(!Object.keys(carrito).length) return;
+  renderTicket();
+  var m=$("modalTicket"); if(m) m.style.display="flex";
+}
+function cerrarTicket(){
+  var m=$("modalTicket"); if(m) m.style.display="none";
+}
 </script>
 <script>
 async function mandarPedido(){
@@ -550,6 +671,8 @@ async function mandarPedido(){
     $("ticketItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
     $("ticketTotalValor").textContent=dinero(total);
     mostrar("pantallaTicket");
+    if(_kioscoTicketTimer) clearTimeout(_kioscoTicketTimer);
+    _kioscoTicketTimer=setTimeout(function(){ if($("pantallaTicket").classList.contains("activa")) volverMenu(); },60000); /* el ticket vuelve solo al menú al minuto si nadie toca Listo (V1.0.1) */
   }catch(e){
     mostrar("pantallaError");
   }finally{
@@ -557,11 +680,13 @@ async function mandarPedido(){
   }
 }
 function volverMenu(){
+  if(_kioscoTicketTimer){ clearTimeout(_kioscoTicketTimer); _kioscoTicketTimer=null; }
   carrito={};
   $("nombreCliente").value="";
-  $("inputBuscar").value="";
+  resetVistaKiosco();
   renderMenu(); actualizarBarra();
   mostrar("pantallaMenu");
+  window.scrollTo(0,0);
 }
 init();
 </script>

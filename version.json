@@ -15,9 +15,9 @@
   "version": "V1.19.13"
  },
  "kiosco": {
-  "notas": "V1.0.0: primera versión del Kiosco con actualizador propio: si hay versión nueva, el Kiosco muestra una pastillita dorada en el encabezado del menú y la ventana de actualización; se instala encima sin desinstalar.",
+  "notas": "V1.0.1: limpieza automática del carrito (se vacía solo tras 90 s sin tocar la pantalla, al volver de segundo plano y con el botón Limpiar) + pulido completo: sin buscador, parte superior fija al deslizar, ticket revisable tocando el Total, nombre del negocio sin duplicar, 'Pide aquí, paga en caja' más visible, pollo primero, total en el botón Mandar pedido, aviso Sin internet, tope 20 por producto y pantalla siempre encendida. V1.0.0: primera versión del Kiosco con actualizador propio: si hay versión nueva, el Kiosco muestra una pastillita dorada en el encabezado del menú y la ventana de actualización; se instala encima sin desinstalar.",
   "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-kiosco-latest/kupo-pos-kiosco.apk",
-  "version": "V1.0.0"
+  "version": "V1.0.1"
  },
  "version": "V1.20.34"
 }
