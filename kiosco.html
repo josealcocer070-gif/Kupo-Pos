@@ -69,6 +69,8 @@ header .fila-marca{display:flex;align-items:center;justify-content:space-between
 body.kiosco-generico .marca-pollon{display:none}
 body.kiosco-generico .logo-bienvenida{display:none}
 body.kiosco-generico .nombre-negocio-kiosco{display:block}
+/* v189: los pollitos (iconos de pollo de Para llevar / Para comer aquí) solo se muestran bajo El Pollón; otras licencias ven solo el texto. */
+body.kiosco-generico .icono-modo{display:none}
 header .bienvenido{font-size:24px;font-weight:700;color:#fff;margin-top:10px}
 header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:2px}
 header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
@@ -204,7 +206,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.10</div>
+  <div class="pie">Kupo Kiosko · V1.0.11</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -217,7 +219,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.10</div>
+  <div class="pie">Kupo Kiosko · V1.0.11</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -235,17 +237,17 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <img class="logo-bienvenida" src="imagenes/logo-pollon-bienvenida.jpg" alt="Pollos Rancheros El Pollón">
     <h2>¿Cómo quieres tu pedido?</h2>
     <button class="btn-bienvenida llevar" onclick="elegirTipoInicio('llevar')">
-      <img src="iconos/icono-para-llevar.png" alt="">
+      <img class="icono-modo" src="iconos/icono-para-llevar.png" alt="">
       <span>PARA LLEVAR</span>
       <small>Precio para llevar</small>
     </button>
     <button class="btn-bienvenida local" onclick="elegirTipoInicio('local')">
-      <img src="iconos/icono-para-comer-aqui.png" alt="">
+      <img class="icono-modo" src="iconos/icono-para-comer-aqui.png" alt="">
       <span>PARA COMER AQUÍ</span>
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.10</div>
+  <div class="pie">Kupo Kiosko · V1.0.11</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -262,8 +264,8 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div class="sub">Pide aquí, paga en caja 👇</div>
   </header>
   <div class="tipo">
-    <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')"><img class="icono-tipo" src="iconos/icono-para-llevar.png" alt=""><span class="tipo-txt">Para llevar<small>Precio para llevar</small></span></button>
-    <button id="btnLocal" onclick="elegirTipo('local')"><img class="icono-tipo" src="iconos/icono-para-comer-aqui.png" alt=""><span class="tipo-txt">Para comer aquí<small>Precio en el local</small></span></button>
+    <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')"><img class="icono-tipo icono-modo" src="iconos/icono-para-llevar.png" alt=""><span class="tipo-txt">Para llevar<small>Precio para llevar</small></span></button>
+    <button id="btnLocal" onclick="elegirTipo('local')"><img class="icono-tipo icono-modo" src="iconos/icono-para-comer-aqui.png" alt=""><span class="tipo-txt">Para comer aquí<small>Precio en el local</small></span></button>
   </div>
   <div class="filtros fija-chips" id="filtros"></div>
   <div id="tituloSeccion">Lo más pedido</div>
@@ -321,7 +323,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.10</div>
+  <div class="pie">Kupo Kiosko · V1.0.11</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -465,7 +467,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.10";
+var VERSION_KIOSCO="V1.0.11";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -779,7 +781,7 @@ function mostrarConfirmacion(){
   $("confirmarItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
   $("confirmarTotalValor").textContent=dinero(totalCarrito());
   $("confirmarNombre").textContent=nombre;
-  $("confirmarModo").innerHTML=tipo==="llevar"?'<img src="iconos/icono-para-llevar.png" alt=""> Para llevar':'<img src="iconos/icono-para-comer-aqui.png" alt=""> Para comer aquí'; /* v185: el modo se ve en el ticket */
+  $("confirmarModo").innerHTML=tipo==="llevar"?'<img class="icono-modo" src="iconos/icono-para-llevar.png" alt=""> Para llevar':'<img class="icono-modo" src="iconos/icono-para-comer-aqui.png" alt=""> Para comer aquí'; /* v185: el modo se ve en el ticket */
   mostrar("pantallaConfirmar");
 }
 /* v186: ticket virtual con QR — el QR abre ticket.html con la licencia y el id del pedido en la nube; el cliente ve su ticket en el celular sin instalar nada. */
@@ -811,7 +813,7 @@ async function confirmarPedido(){
     var pedidoId=(ins.data&&ins.data[0]&&ins.data[0].id)||null; /* v186: el id del pedido alimenta el QR del ticket virtual */
     $("ticketNumero").textContent=numero;
     $("ticketCliente").textContent=nombre;
-    $("ticketTipo").innerHTML=tipo==="llevar"?'<img class="icono-img" src="iconos/icono-para-llevar.png" alt=""> Para llevar':'<img class="icono-img" src="iconos/icono-para-comer-aqui.png" alt=""> Para comer aquí';
+    $("ticketTipo").innerHTML=tipo==="llevar"?'<img class="icono-img icono-modo" src="iconos/icono-para-llevar.png" alt=""> Para llevar':'<img class="icono-img icono-modo" src="iconos/icono-para-comer-aqui.png" alt=""> Para comer aquí';
     $("ticketItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
     $("ticketTotalValor").textContent=dinero(total);
     pintarQRTicket(pedidoId);
