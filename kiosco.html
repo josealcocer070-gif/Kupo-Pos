@@ -64,6 +64,11 @@ header .fila-marca{display:flex;align-items:center;justify-content:space-between
 .marca-kiosco{height:40px;width:auto;display:block}
 /* v187 (Lalo 2026-11-27): el logo de la pollería quedó diminuto a 40px y no se distinguía; sube a 72px (el de Kupo Kiosko queda en 40px). Vale para los 3 encabezados que usan .marca-pollon (bienvenida, menú y Pedido Recibido). */
 .marca-pollon{width:72px;height:72px;display:block}
+/* v188: marca por licencia — el logo redondo y la foto de bienvenida de El Pollón solo se muestran bajo su licencia; otras licencias ven el nombre del negocio (nombreNegocio / nombreNegocioBienvenida / nombreNegocio2). */
+.nombre-negocio-kiosco{display:none;font-size:22px;font-weight:900;color:#fff;text-align:right;line-height:1.15;max-width:62%}
+body.kiosco-generico .marca-pollon{display:none}
+body.kiosco-generico .logo-bienvenida{display:none}
+body.kiosco-generico .nombre-negocio-kiosco{display:block}
 header .bienvenido{font-size:24px;font-weight:700;color:#fff;margin-top:10px}
 header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:2px}
 header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
@@ -199,7 +204,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.9</div>
+  <div class="pie">Kupo Kiosko · V1.0.10</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -212,7 +217,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.9</div>
+  <div class="pie">Kupo Kiosko · V1.0.10</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -220,6 +225,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div class="fila-marca">
       <img class="marca-kiosco" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO">
       <img class="marca-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón">
+      <div id="nombreNegocioBienvenida" class="nombre-negocio-kiosco"></div>
     </div>
     <div class="bienvenido">¡Bienvenido!</div>
     <div class="saludo-menu" id="saludoBienvenida">¡Buenas noches!</div>
@@ -239,7 +245,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.9</div>
+  <div class="pie">Kupo Kiosko · V1.0.10</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -249,6 +255,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div class="fila-marca">
       <img class="marca-kiosco" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO">
       <img class="marca-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón">
+      <div id="nombreNegocio" class="nombre-negocio-kiosco"></div>
     </div>
     <div class="bienvenido">¡Bienvenido!</div>
     <div class="saludo-menu" id="saludoMenu">¡Buenas tardes!</div>
@@ -272,6 +279,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 <div id="pantallaTicket" class="pantalla">
   <header class="header-recibido">
     <img class="marca-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón">
+    <div id="nombreNegocio2" class="nombre-negocio-kiosco"></div>
     <div class="kiosco">¡PEDIDO <span>RECIBIDO!</span></div>
   </header>
   <div id="ticketCard">
@@ -313,7 +321,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.9</div>
+  <div class="pie">Kupo Kiosko · V1.0.10</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -385,6 +393,9 @@ async function init(){
   pintarSinInternet();
 }
 async function cargarTodo(){
+  /* v188: marca por licencia — el logo/foto de El Pollón solo se muestra bajo su licencia; otras licencias ven el nombre del negocio. Se limpia el menú antes de cargar para que una carga fallida nunca deje productos de otra licencia en memoria. */
+  productos=[]; grupos=[]; carrito={};
+  try{document.body.classList.toggle("kiosco-generico",licencia!=="KUPO-EJNK-JDGZ");}catch(e){}
   var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
   if(r1.error||!r1.data){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Licencia no encontrada. Revisa la clave."; mostrar("pantallaSetup"); return; }
   negocioCrudo=(r1.data.negocio||"KUPO POS");
@@ -454,7 +465,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.9";
+var VERSION_KIOSCO="V1.0.10";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
