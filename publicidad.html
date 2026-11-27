@@ -109,6 +109,12 @@ body.menu-abierto .menu-fondo{opacity:1;pointer-events:auto}
 .menu-panel .menu-sep{height:1px;background:rgba(255,255,255,.2);margin:10px 0}
 
 .funcion .pro{display:inline-block;background:#f5b800;color:#12233a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;vertical-align:middle;margin-left:6px}
+.kiosco-fotos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.kiosco-fotos .foto-galeria{margin:0}
+.pro-kiosco{display:inline-block;background:#f5b800;color:#12233a;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px;vertical-align:middle;margin-left:8px}
+.kiosco-contratar{max-width:640px;margin:26px auto 0;background:#fff7d6;border:2px solid #f5b800;border-radius:16px;padding:22px;text-align:center}
+.kiosco-contratar h3{color:#0b4a6e;font-size:19px;margin-bottom:8px}
+.kiosco-contratar p{font-size:15px;color:#44586b;margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -119,15 +125,16 @@ body.menu-abierto .menu-fondo{opacity:1;pointer-events:auto}
 <div class="menu-fondo" onclick="cerrarMenu()"></div>
 <aside class="menu-panel">
   <button class="menu-cerrar" onclick="cerrarMenu()" aria-label="Cerrar menú">✕</button>
-  <a href="#inicio" onclick="cerrarMenu()">Inicio</a>
-  <a href="#capturas" onclick="cerrarMenu()">Capturas reales</a>
-  <a href="#funciones" onclick="cerrarMenu()">Funciones</a>
-  <a href="#actualizaciones" onclick="cerrarMenu()">Se actualiza fácil</a>
-  <a href="#opera" onclick="cerrarMenu()">Ya opera en Palizada y Jonuta</a>
-  <a href="#precios" onclick="cerrarMenu()">Precios</a>
-  <a href="#solicitud" onclick="cerrarMenu()">Solicita tu licencia</a>
-  <a href="#seguridad" onclick="cerrarMenu()">Tu información, protegida</a>
-  <a href="#contacto" onclick="cerrarMenu()">Contacto</a>
+  <a href="#inicio" onclick="irA('inicio',event)">Inicio</a>
+  <a href="#capturas" onclick="irA('capturas',event)">Capturas reales</a>
+  <a href="#funciones" onclick="irA('funciones',event)">Funciones</a>
+  <a href="#kiosco" onclick="irA('kiosco',event)">Kiosco KUPO</a>
+  <a href="#actualizaciones" onclick="irA('actualizaciones',event)">Se actualiza fácil</a>
+  <a href="#opera" onclick="irA('opera',event)">Ya opera en Palizada y Jonuta</a>
+  <a href="#precios" onclick="irA('precios',event)">Precios</a>
+  <a href="#solicitud" onclick="irA('solicitud',event)">Solicita tu licencia</a>
+  <a href="#seguridad" onclick="irA('seguridad',event)">Tu información, protegida</a>
+  <a href="#contacto" onclick="irA('contacto',event)">Contacto</a>
   <div class="menu-sep"></div>
   <a class="menu-destacado" href="https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk">↓ Descargar APK para celular (Android)</a>
   <a class="menu-destacado" href="https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk">↓ Descargar APK para PC (Android)</a>
@@ -193,6 +200,31 @@ body.menu-abierto .menu-fondo{opacity:1;pointer-events:auto}
     <div class="funcion"><div class="ico">🤖</div><h3>Kupi, tu asistente <span class="pro">PRO</span></h3><p>Pregúntale a Kupi por tus ventas del día y te contesta con los datos reales de tu negocio. Solo en KUPO POS Pro.</p></div>
     <div class="funcion"><div class="ico">📶</div><h3>PC y celular, sin conexión</h3><p>Funciona en PC y en celular, y sigue vendiendo aunque se vaya el internet, según configuración.</p></div>
   </div>
+</section>
+
+<section id="kiosco">
+  <h2>Kiosco KUPO: tu cliente pide solo <span class="pro-kiosco">PRO</span></h2>
+  <p class="centro">Pon una tablet en tu local y tu cliente arma su pedido solo: elige para llevar o para comer aquí, cada uno con su precio, escoge su salsa, pone su nombre y manda el pedido. El pedido llega a la caja para cobrarlo, y el cliente sigue su ticket en su celular con un código QR. Sin segunda caja, sin imprimir, sin que tu cajero deje de atender.</p>
+  <div class="kiosco-fotos">
+    <figure class="foto-galeria">
+      <img src="imagenes/kiosco-splash.jpg" alt="Pantalla de inicio del Kiosco KUPO con el logo de la pollería">
+      <figcaption>Pantalla de inicio con el logo de tu negocio.</figcaption>
+    </figure>
+    <figure class="foto-galeria">
+      <img src="imagenes/kiosco-bienvenida.jpg" alt="El cliente elige para llevar o para comer aquí en el Kiosco KUPO">
+      <figcaption>El cliente elige para llevar o para comer aquí, cada uno con su precio.</figcaption>
+    </figure>
+    <figure class="foto-galeria">
+      <img src="imagenes/kiosco-menu.jpg" alt="Menú del Kiosco KUPO con fotos y precios">
+      <figcaption>Menú con fotos: el cliente agrega lo que quiere y manda su pedido a caja.</figcaption>
+    </figure>
+  </div>
+  <div class="kiosco-contratar">
+    <h3>¿Ya tienes KUPO POS estándar?</h3>
+    <p>El Kiosco viene incluido en <strong>KUPO POS Pro</strong>. Si ya tienes el estándar, pásate a Pro: <strong>$299 al mes</strong> (en lugar de $249) o <strong>de por vida $3,499</strong> (en lugar de $2,999) + $99/mes de soporte. Es el mismo sistema y tu misma licencia: te instalamos el Kiosco en tu tablet y listo.</p>
+    <a class="btn btn-verde" href="https://wa.me/5219519433938?text=Hola%2C%20tengo%20KUPO%20POS%20est%C3%A1ndar%20y%20quiero%20el%20Kiosco%20(Pro)">💬 Quiero el Kiosco — WhatsApp 951 943 3938</a>
+  </div>
+  <p class="nota">Capturas reales del Kiosco en Pollos Rancheros El Pollón, Jonuta.</p>
 </section>
 
 <section>
@@ -366,6 +398,8 @@ function mensajeSolicitud(d){
 <script>
 function abrirMenu(){document.body.classList.add('menu-abierto')}
 function cerrarMenu(){document.body.classList.remove('menu-abierto')}
+/* irA: al tocar un apartado del menú, cierra el menú y salta directo a su sección (Lalo 2026-11-27: en el celular, tocar el menú solo lo deslizaba y no llevaba al apartado). Se hace explícito en JS para no depender del salto del ancla del navegador; el href="#..." queda como respaldo si el JS falla. */
+function irA(id,ev){if(ev){ev.preventDefault()}cerrarMenu();var t=document.getElementById(id);if(!t){return}setTimeout(function(){t.scrollIntoView({behavior:'auto',block:'start'})},90)}
 </script>
 </body>
 </html>
