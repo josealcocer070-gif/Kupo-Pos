@@ -23,9 +23,8 @@
 .tipo-txt{flex:1;min-width:0}
 /* Pantalla inicial (v177, Lalo 2026-11-26): 2 botones grandes, lo primero que ve el cliente */
 .bienvenida-cuerpo{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:28px 24px 20px}
-.logos-juntos{display:flex;align-items:center;justify-content:center;gap:20px;margin:6px auto 20px}
-.logos-juntos .logo-pollon{width:120px;height:120px;display:block}
-.logos-juntos .logo-kupo{height:100px;width:auto;display:block}
+/* Segunda pantalla (v183): solo el logo grande de la pollería (imagen de bienvenida), adaptado a móvil y tablet; los 2 botones de abajo siguen siendo los reales y funcionando. */
+.logo-bienvenida{width:min(72vw,480px);height:auto;display:block;margin:0 auto;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .bienvenida-cuerpo h2{font-size:30px;font-weight:900;color:#12233a;text-align:center}
 .btn-bienvenida{display:flex;align-items:center;gap:18px;width:100%;padding:26px 22px;border-radius:22px;border:3px solid #e5e7eb;background:#fff;color:#374151;text-align:left;box-shadow:0 4px 0 rgba(0,0,0,.15)}
 .btn-bienvenida img{width:110px;height:110px;object-fit:contain;flex:none}
@@ -33,6 +32,8 @@
 .btn-bienvenida small{display:block;font-size:17px;font-weight:600;margin-top:6px;opacity:.8}
 .btn-bienvenida.llevar{background:var(--azul,#0b4a6e);border-color:var(--azul,#0b4a6e);color:#fff}
 .btn-bienvenida:active{transform:scale(.98)}
+/* Segunda pantalla en celular (v183): los botones se achican y el texto chico se esconde para que quepan sin desbordar; en tablet no cambia nada. */
+@media (max-width:560px){.btn-bienvenida{padding:18px 16px;gap:12px}.btn-bienvenida img{width:64px;height:64px}.btn-bienvenida span{font-size:23px}.btn-bienvenida small{display:none}.bienvenida-cuerpo h2{font-size:24px}}
 .f-oro{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#ffe082,#f5b800)}
 .f-verde{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#9be89b,#2e9e4f)}
 .f-azul{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%),linear-gradient(135deg,#8ec9ff,#2b7cd3)}
@@ -46,10 +47,14 @@ button{font-family:inherit;touch-action:manipulation;cursor:pointer}
 input{font-family:inherit}
 .pantalla{display:none;min-height:100vh}
 .pantalla.activa{display:flex;flex-direction:column}
-/* Splash con el logo del negocio al abrir (v179) */
+/* Splash por licencia (v183): la imagen de bienvenida del negocio a pantalla completa, sin recorte ni estiramiento (object-fit:contain); el fondo es un degradado con los colores de los bordes de la imagen para que las bandas se fundan. Solo El Pollón ve su imagen; los demás negocios ven la bienvenida genérica de Kupo Kiosko. */
 #pantallaSplash{background:#000;align-items:center;justify-content:center}
-#pantallaSplash .splash-pollon{width:min(62vw,420px);height:auto;display:block}
-#pantallaSplash .splash-kupo{width:min(64vw,430px);height:auto;display:block;margin-top:34px}
+#pantallaSplash .splash-foto{display:none;width:100%;height:100%;object-fit:contain}
+#pantallaSplash .splash-generico{display:flex;align-items:center;justify-content:center}
+#pantallaSplash .splash-kupo{width:min(64vw,430px);height:auto;display:block}
+#pantallaSplash.splash-negocio{background:linear-gradient(180deg,#fcebb8 0%,#7fd4c1 50%,#2789ca 100%)}
+#pantallaSplash.splash-negocio .splash-foto{display:block}
+#pantallaSplash.splash-negocio .splash-generico{display:none}
 
 /* Encabezado */
 header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2);position:relative}
@@ -68,11 +73,10 @@ header .negocio-menu{font-size:18px;font-weight:800;letter-spacing:.5px;text-tra
 header .bienvenido{font-size:24px;font-weight:700;color:#fff;margin-top:10px}
 header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:2px}
 header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
-/* Aviso sin internet + parte superior fija (V1.0.1) */
+/* Aviso sin internet (V1.0.1) */
 #bannerSinInternet{background:#f59e0b;color:#451a03;text-align:center;font-size:15px;font-weight:800;padding:10px 16px}
-.fija-superior{position:sticky;top:0;z-index:30;background:#fff8ec}
-.fija-superior.compacta .saludo-menu,.fija-superior.compacta .bienvenido{display:none}
-.fija-superior.compacta{box-shadow:0 2px 10px rgba(0,0,0,.12)}
+/* Categorías fijas al deslizar (v183): solo la fila de chips queda pegada arriba; el encabezado y los botones de modalidad se van con la página para que ninguna tarjeta se tape ni se corte al bajar. */
+.filtros.fija-chips{position:sticky;top:0;z-index:30;background:#fff8ec;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 /* Actualizador del Kiosco (V1.0.0): pastilla discreta en el encabezado + ventana oscura con borde dorado, como el POS */
 #btnActKiosco{position:absolute;right:12px;bottom:12px;background:#f5b301;color:#12233a;border:0;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 #modalActKiosco{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
@@ -83,6 +87,14 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 #modalActKiosco .btn-amarillo:disabled{opacity:.6}
 #modalActKiosco .btn-borde{display:block;width:100%;background:transparent;color:#f5b301;border:2px solid #f5b301;border-radius:12px;padding:10px;font-size:15px;font-weight:bold;margin-bottom:10px}
 #modalActKiosco .btn-gris2{display:block;width:100%;background:transparent;color:#e8f0f2;border:1px solid rgba(255,255,255,.45);border-radius:12px;padding:10px;font-size:15px}
+/* Selección de salsa (v183): ventana clara con 3 botones grandes; solo para pollo. */
+#modalSalsa{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
+#modalSalsa .card{background:#fff;border-radius:20px;padding:26px 20px;max-width:480px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.4);text-align:center}
+#modalSalsa h2{font-size:28px;font-weight:900;color:#12233a}
+#modalSalsa .salsa-producto{font-size:18px;font-weight:700;color:#6b7280;margin:6px 0 18px}
+#modalSalsa .btn-salsa{display:block;width:100%;padding:20px;font-size:24px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;margin-bottom:12px}
+#modalSalsa .btn-salsa:active{transform:scale(.98)}
+#modalSalsa .btn-cancelar{display:block;width:100%;padding:14px;font-size:17px;font-weight:800;border-radius:14px;border:2px solid #d1d5db;background:#fff;color:#374151;margin-top:4px}
 </style>
 </head>
 <body>
@@ -167,10 +179,10 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 </style>
 <body>
 <!-- Configuración inicial: clave de licencia -->
-<!-- Splash con el logo del negocio al abrir (v179): se ve desde que carga la página, mínimo 1.8 s mientras carga el menú -->
+<!-- Splash al abrir (v179, v183): la imagen del negocio a pantalla completa solo en su licencia; en otras licencias, bienvenida genérica de Kupo Kiosko. Se ve mínimo 1.8 s mientras carga el menú. -->
 <div id="pantallaSplash" class="pantalla activa">
-  <img class="splash-pollon" src="imagenes/logo-el-pollon.jpg" alt="Pollos Rancheros El Pollón">
-  <img class="splash-kupo" src="imagenes/logo-kupo-kiosco.png" alt="KUPO KIOSCO">
+  <img class="splash-foto" src="imagenes/splash-el-pollon.jpg" alt="Pollos Rancheros El Pollón">
+  <div class="splash-generico"><img class="splash-kupo" src="imagenes/logo-kupo-kiosco.png" alt="KUPO KIOSCO"></div>
 </div>
 <div id="pantallaSetup" class="pantalla">
   <div class="centro">
@@ -182,7 +194,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.6</div>
+  <div class="pie">Kupo Kiosko · V1.0.7</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -195,7 +207,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.6</div>
+  <div class="pie">Kupo Kiosko · V1.0.7</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -209,7 +221,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div class="sub">Pide aquí, paga en caja 👇</div>
   </header>
   <div class="bienvenida-cuerpo">
-    <div class="logos-juntos"><img class="logo-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón"><img class="logo-kupo" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
+    <img class="logo-bienvenida" src="imagenes/logo-pollon-bienvenida.jpg" alt="Pollos Rancheros El Pollón">
     <h2>¿Cómo quieres tu pedido?</h2>
     <button class="btn-bienvenida llevar" onclick="elegirTipoInicio('llevar')">
       <img src="iconos/icono-para-llevar.png" alt="">
@@ -222,11 +234,10 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.6</div>
+  <div class="pie">Kupo Kiosko · V1.0.7</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
-  <div class="fija-superior" id="fijaSuperior">
   <div id="bannerSinInternet" style="display:none">⚠️ Sin internet — revisa el wifi para mandar tu pedido</div>
   <header>
     <button id="btnActKiosco" type="button" onclick="mostrarAvisoActualizadorKiosco()" style="display:none">⬇️ Actualización</button>
@@ -242,8 +253,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')"><img class="icono-tipo" src="iconos/icono-para-llevar.png" alt=""><span class="tipo-txt">Para llevar<small>Precio para llevar</small></span></button>
     <button id="btnLocal" onclick="elegirTipo('local')"><img class="icono-tipo" src="iconos/icono-para-comer-aqui.png" alt=""><span class="tipo-txt">Para comer aquí<small>Precio en el local</small></span></button>
   </div>
-  <div class="filtros" id="filtros"></div>
-  </div>
+  <div class="filtros fija-chips" id="filtros"></div>
   <div id="tituloSeccion">Lo más pedido</div>
   <div id="grid"></div>
   <div id="barra">
@@ -257,7 +267,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 <div id="pantallaTicket" class="pantalla">
   <header>
     <div class="negocio" id="nombreNegocio2">POLLOS RANCHEROS EL POLLÓN</div>
-    <div class="kiosco">¡PEDIDO <span>LISTO!</span></div>
+    <div class="kiosco">¡PEDIDO <span>RECIBIDO!</span></div>
   </header>
   <div id="ticketCard">
     <div class="tu-numero">TU NÚMERO ES</div>
@@ -267,7 +277,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="ticketItems"></div>
     <div id="ticketTotal"><span>Total</span><span id="ticketTotalValor">$0</span></div>
     <div id="ticketFoto">📸 Tómale foto a tu ticket</div>
-    <p style="margin-top:8px;font-size:16px;color:#6b7280">El cajero te llamará por tu número.<br><img class="icono-img" src="iconos/icono-caja.png" alt=""> Paga en caja cuando te llamen.</p>
+    <p style="margin-top:8px;font-size:16px;color:#6b7280"><img class="icono-img" src="iconos/icono-caja.png" alt=""> Paga en caja. Te llamaremos por tu número cuando esté listo.</p>
   </div>
   <button id="btnListo" onclick="volverInicio()">✅ Listo</button>
 </div>
@@ -295,7 +305,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.6</div>
+  <div class="pie">Kupo Kiosko · V1.0.7</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -313,21 +323,34 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button id="btnActKMasTarde" class="btn-gris2" type="button" onclick="cerrarAvisoActualizadorKiosco(true)">Más tarde</button>
   </div>
 </div>
+<!-- Selección de salsa (v183): solo para productos de pollo; el cliente elige una para poder agregar. -->
+<div id="modalSalsa">
+  <div class="card">
+    <h2>¿Qué salsa prefieres?</h2>
+    <div class="salsa-producto" id="salsaProducto"></div>
+    <button class="btn-salsa" type="button" onclick="elegirSalsa('Tamarindo')">Tamarindo</button>
+    <button class="btn-salsa" type="button" onclick="elegirSalsa('Enchilado')">Enchilado</button>
+    <button class="btn-salsa" type="button" onclick="elegirSalsa('BBQ')">BBQ</button>
+    <button class="btn-cancelar" type="button" onclick="cerrarSalsa()">Cancelar</button>
+  </div>
+</div>
 <script>
-/* Kiosco KUPO v175 — menú moderno: encabezado con KIOSCO KUPO (tipografía del logo) a la izquierda + nombre del negocio a la derecha + ¡Bienvenido! + saludo según la hora + "Pide aquí, paga en caja" grande (el saludo se recoge al deslizar), tarjetas cuadradas en 2 columnas con la foto recortada a la banda del producto, nombre, precio naranja y botón AGREGAR de todo el ancho (o −/+ si ya está agregado; la tarjeta ya no suma al tocarla), barra blanca fija con nombre + MANDAR PEDIDO con total, ticket de confirmación antes de enviar, chips Todo/Pollo/Combos/Bebidas/Extras, título "Lo más pedido", y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. v174: rediseño de Lalo (mockups): tarjetas con foto recortada al producto (sin logo ni "EL POLLÓN · SUC."), AGREGAR/−/+ de todo el ancho, barra blanca con total en el botón, ticket de confirmación, encabezado solo KUPO + saludo + "Pide aquí", chips Todo/Pollo/Combos/Bebidas/Extras; el ticket revisable del Total (modal) se quitó. v175: encabezado sin pollito — KIOSCO KUPO a la izquierda con tipografía del logo (Fredoka) y nombre del negocio a la derecha, ¡Bienvenido! arriba del saludo, pastilla de actualización abajo a la derecha; fondo de tarjetas cálido (degradado radial + lighten) en vez de negro. v176: iconos sólidos+flat de Lalo (9 PNG en iconos/): bolsa y mesa en los botones Para llevar/Para comer aquí, iconos en los chips de categorías, ticket en la confirmación, caja en "Paga en caja", carrito en el botón MANDAR PEDIDO y como respaldo de producto sin foto; se quitan los emojis del menú. v177: pantalla inicial con los 2 botones grandes PARA LLEVAR y PARA COMER AQUÍ como lo primero que ve el cliente; al terminar un pedido o tras 90 s sin tocar, el kiosco vuelve a esa pantalla (volverInicio reemplaza a volverMenu). v179: splash con el logo original de El Pollón (imagenes/logo-el-pollon.jpg) al abrir la app, mínimo 1.8 s mientras carga el menú; si la carga se atora más de 15 s sale la pantalla de error para que el splash nunca se quede pegado. v180: logo KUPO KIOSCO corto (imagenes/logo-kupo-kiosco-corto.png, fondo transparente) solo en los 3 encabezados en vez del texto KIOSCO KUPO; el logo de El Pollón queda solo en el splash como en v179. v181: nombre de la app ahora Kupo Kiosko (título, splash, setup, pies y nombre del lanzador en capacitor.config.kiosco.json); el logo de imagen sigue diciendo KIOSCO con C como lo mandó Lalo. v182: logo de El Pollón y Kupo Kiosko juntos en el splash, la segunda pantalla (bienvenida) y el encabezado del menú (imagenes/logo-el-pollon-redondo.png redondo para fondo claro/naranja). */
+/* Kiosco KUPO v175 — menú moderno: encabezado con KIOSCO KUPO (tipografía del logo) a la izquierda + nombre del negocio a la derecha + ¡Bienvenido! + saludo según la hora + "Pide aquí, paga en caja" grande (el saludo se recoge al deslizar), tarjetas cuadradas en 2 columnas con la foto recortada a la banda del producto, nombre, precio naranja y botón AGREGAR de todo el ancho (o −/+ si ya está agregado; la tarjeta ya no suma al tocarla), barra blanca fija con nombre + MANDAR PEDIDO con total, ticket de confirmación antes de enviar, chips Todo/Pollo/Combos/Bebidas/Extras, título "Lo más pedido", y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. v174: rediseño de Lalo (mockups): tarjetas con foto recortada al producto (sin logo ni "EL POLLÓN · SUC."), AGREGAR/−/+ de todo el ancho, barra blanca con total en el botón, ticket de confirmación, encabezado solo KUPO + saludo + "Pide aquí", chips Todo/Pollo/Combos/Bebidas/Extras; el ticket revisable del Total (modal) se quitó. v175: encabezado sin pollito — KIOSCO KUPO a la izquierda con tipografía del logo (Fredoka) y nombre del negocio a la derecha, ¡Bienvenido! arriba del saludo, pastilla de actualización abajo a la derecha; fondo de tarjetas cálido (degradado radial + lighten) en vez de negro. v176: iconos sólidos+flat de Lalo (9 PNG en iconos/): bolsa y mesa en los botones Para llevar/Para comer aquí, iconos en los chips de categorías, ticket en la confirmación, caja en "Paga en caja", carrito en el botón MANDAR PEDIDO y como respaldo de producto sin foto; se quitan los emojis del menú. v177: pantalla inicial con los 2 botones grandes PARA LLEVAR y PARA COMER AQUÍ como lo primero que ve el cliente; al terminar un pedido o tras 90 s sin tocar, el kiosco vuelve a esa pantalla (volverInicio reemplaza a volverMenu). v179: splash con el logo original de El Pollón (imagenes/logo-el-pollon.jpg) al abrir la app, mínimo 1.8 s mientras carga el menú; si la carga se atora más de 15 s sale la pantalla de error para que el splash nunca se quede pegado. v180: logo KUPO KIOSCO corto (imagenes/logo-kupo-kiosco-corto.png, fondo transparente) solo en los 3 encabezados en vez del texto KIOSCO KUPO; el logo de El Pollón queda solo en el splash como en v179. v181: nombre de la app ahora Kupo Kiosko (título, splash, setup, pies y nombre del lanzador en capacitor.config.kiosco.json); el logo de imagen sigue diciendo KIOSCO con C como lo mandó Lalo. v182: logo de El Pollón y Kupo Kiosko juntos en el splash, la segunda pantalla (bienvenida) y el encabezado del menú (imagenes/logo-el-pollon-redondo.png redondo para fondo claro/naranja). v183: splash nuevo por licencia (imagen de bienvenida a pantalla completa solo en El Pollón, genérica de Kupo Kiosko en otros negocios), confirmación "¡PEDIDO RECIBIDO!", solo los chips de categorías fijos al deslizar, selección de salsa para el pollo (Tamarindo/Enchilado/BBQ, líneas separadas por salsa, visible en el ticket y en el pedido), y en la segunda pantalla solo el logo grande de la pollería (imagen de bienvenida recortada sin los botones dibujados, adaptada a móvil y tablet) con los 2 botones reales funcionando. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
 try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:function(url,opts){opts=opts||{};opts.cache="no-store";return fetch(url,opts);}}}); }catch(e){ sb=null; }
 var licencia="";
 var _splashInicio=Date.now(); /* el splash se ve desde que carga la página (v179) */
+/* Splash por licencia (v183): la imagen de bienvenida es solo de El Pollón (KUPO-EJNK-JDGZ); otros negocios ven la genérica de Kupo Kiosko. La clave ya está guardada en la tablet, así que se decide al instante, sin parpadeo. */
+try{ if((localStorage.getItem("kupoPosKioscoLicencia")||"").trim().toUpperCase()==="KUPO-EJNK-JDGZ"){ var _sp=$("pantallaSplash"); if(_sp) _sp.classList.add("splash-negocio"); } }catch(e){}
 setTimeout(function(){ if($("pantallaSplash")&&$("pantallaSplash").classList.contains("activa")) mostrar("pantallaError"); },15000); /* si la carga se atora, el splash nunca se queda pegado (v179) */
 var negocioNombre="POLLOS RANCHEROS EL POLLÓN";
 var productos=[];      /* crudos de la nube */
 var grupos=[];         /* agrupados por nombre base */
 var tipo="llevar";
 var categoria="Todo";
-var carrito={};        /* id del producto visible -> {p, cant} */
+var carrito={};        /* clave: id del producto (sin salsa) o id|salsa (pollo) -> {p, cant, salsa} */
 var ICONO_CAT={"Pollo":"iconos/icono-pollo.png","Refrescos":"iconos/icono-bebida.png","Complementos":"iconos/icono-papas.png","Salsas":"iconos/icono-papas.png","Agua natural":"iconos/icono-bebida.png","Agua":"iconos/icono-bebida.png"};
 /* Chips del menú (v174): las categorías reales de El Pollón son Pollo, Refrescos, Agua natural, Complementos y Salsas; se agrupan en Bebidas (Refrescos + Agua) y Extras (Complementos + Salsas). Combos aparece solo cuando David cree productos en la categoría "Combos". */
 var CHIPS_KIOSCO=["Todo","Pollo","Combos","Bebidas","Extras"];
@@ -423,7 +446,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.6";
+var VERSION_KIOSCO="V1.0.7";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -616,25 +639,54 @@ function renderMenu(){
   var g=$("grid");
   if(!lista.length){ g.innerHTML='<div id="sinResultados">😕 No hay productos en esta categoría.</div>'; return; }
   g.innerHTML=lista.map(function(p){
-    var cant=carrito[p.id]?carrito[p.id].cant:0;
+    var cant=cantEnCarrito(p.id);
     var ic=iconoDe(p);
     var fotoHtml=ic?'<div class="foto-wrap foto-icono"><img class="icono-foto" src="'+ic+'" alt=""></div>'
                    :'<div class="foto-wrap"><img class="foto-grande" src="'+escHtml(p.foto_kiosco||p.foto)+'" alt=""></div>';
-    var control=cant>0?'<div class="cant-row"><button onclick="cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="cambiarCant(\''+p.id+'\',1)">+</button></div>'
-                       :'<button class="agregar" onclick="cambiarCant(\''+p.id+'\',1)">AGREGAR</button>';
+    var control=cant>0?'<div class="cant-row"><button onclick="cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="agregarProducto(\''+p.id+'\')">+</button></div>'
+                       :'<button class="agregar" onclick="agregarProducto(\''+p.id+'\')">AGREGAR</button>';
     return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'">'+fotoHtml+
       '<div class="info"><h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
       '<div class="precio">'+dinero(p.precio)+'</div>'+control+'</div></div>';
   }).join("");
 }
+function cantEnCarrito(id){ var t=0; Object.keys(carrito).forEach(function(k){ if(carrito[k].p.id===id) t+=carrito[k].cant; }); return t; }
+function esPollo(p){ return (p.categoria||"").trim()==="Pollo"; }
+/* Agregar al carrito (v183): el pollo pide salsa primero; lo demás entra directo. */
+function agregarProducto(id){
+  var p=null;
+  grupos.forEach(function(g){ var v=visibleDe(g); if(v&&v.id===id) p=v; });
+  if(!p) return;
+  if(esPollo(p)){ _salsaPendiente=id; var t=$("salsaProducto"); if(t) t.textContent=baseNombre(p.nombre); $("modalSalsa").style.display="flex"; return; }
+  cambiarCant(id,1);
+}
+var _salsaPendiente=null;
+function elegirSalsa(salsa){
+  var id=_salsaPendiente; _salsaPendiente=null; $("modalSalsa").style.display="none";
+  if(!id) return;
+  if(cantEnCarrito(id)>=20) return; /* tope 20 por producto (V1.0.1): que nadie deje un producto en 50 por tocarle mucho al + */
+  var key=id+"|"+salsa;
+  if(!carrito[key]){ var p=null; grupos.forEach(function(g){ var v=visibleDe(g); if(v&&v.id===id) p=v; }); if(!p) return; carrito[key]={p:p,cant:0,salsa:salsa}; }
+  carrito[key].cant+=1;
+  renderMenu(); actualizarBarra();
+}
+function cerrarSalsa(){ _salsaPendiente=null; $("modalSalsa").style.display="none"; }
 function cambiarCant(id,d){
   var p=null;
   grupos.forEach(function(g){ var v=visibleDe(g); if(v&&v.id===id) p=v; });
   if(!p) return;
-  if(!carrito[id]) carrito[id]={p:p,cant:0};
-  if(d>0&&carrito[id].cant>=20) return; /* tope 20 por producto (V1.0.1): que nadie deje un producto en 50 por tocarle mucho al + */
-  carrito[id].cant+=d;
-  if(carrito[id].cant<=0) delete carrito[id];
+  if(d<0){
+    /* Quitar una porción: de la última línea agregada de ese producto (la salsa más reciente). */
+    var keys=Object.keys(carrito).filter(function(k){ return carrito[k].p.id===id; });
+    if(!keys.length) return;
+    var key=keys[keys.length-1];
+    carrito[key].cant+=d;
+    if(carrito[key].cant<=0) delete carrito[key];
+  }else{
+    if(!carrito[id]) carrito[id]={p:p,cant:0,salsa:""};
+    if(carrito[id].cant>=20) return; /* tope 20 por producto (V1.0.1) */
+    carrito[id].cant+=d;
+  }
   renderMenu(); actualizarBarra();
 }
 function totalCarrito(){
@@ -689,24 +741,22 @@ document.addEventListener("visibilitychange",function(){
   if(document.hidden){ _kioscoOcultoDesde=Date.now(); }
   else{ pedirWakeLock(); if(_kioscoOcultoDesde&&Date.now()-_kioscoOcultoDesde>60000){ _kioscoOcultoDesde=0; if(carrito&&Object.keys(carrito).length) volverInicio(); } }
 });
-/* Parte superior fija (V1.0.1, Lalo 2026-11-26): el encabezado, el tipo y los
-   filtros se quedan arriba al deslizar; el saludo de bienvenida se recoge para
-   no comer pantalla y vuelve al subir al inicio. */
-window.addEventListener("scroll",function(){
-  var f=$("fijaSuperior"); if(!f) return;
-  f.classList.toggle("compacta",window.scrollY>80);
-},{passive:true});
+/* v183: la parte superior ya no es fija (los chips quedan pegados con CSS y el resto se va con la página), así que ya no hay saludo que recoger al deslizar. */
 </script>
 <script>
 /* Ticket de confirmación antes de enviar (v174, Lalo 2026-11-26): al dar
    MANDAR PEDIDO no se envía directo; se muestra el ticket con los productos,
    el total y el nombre, con CONFIRMAR Y MANDAR PEDIDO (naranja) y EDITAR
    PEDIDO (gris, vuelve al menú sin borrar nada). */
+/* Líneas del carrito para el ticket y el pedido (v183): la salsa va en el nombre para que el cajero la vea en KUPO POS, y también como campo aparte. */
+function itemsCarrito(){
+  return Object.keys(carrito).map(function(k){ var c=carrito[k]; var s=c.salsa||""; return {id:c.p.id,nombre:baseNombre(c.p.nombre)+(s?" ("+s+")":""),precio:c.p.precio,cant:c.cant,salsa:s}; });
+}
 function mostrarConfirmacion(){
   var nombre=$("nombreCliente").value.trim();
   if(!Object.keys(carrito).length) return;
   if(!nombre){ $("nombreCliente").classList.add("error"); $("nombreCliente").focus(); return; }
-  var items=Object.keys(carrito).map(function(k){ var c=carrito[k]; return {id:c.p.id,nombre:baseNombre(c.p.nombre),precio:c.p.precio,cant:c.cant}; });
+  var items=itemsCarrito();
   $("confirmarItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
   $("confirmarTotalValor").textContent=dinero(totalCarrito());
   $("confirmarNombre").textContent=nombre;
@@ -718,7 +768,7 @@ async function confirmarPedido(){
   if(!navigator.onLine){ mostrar("pantallaError"); return; }
   var btn=$("btnConfirmar");
   btn.disabled=true; btn.textContent="Mandando...";
-  var items=Object.keys(carrito).map(function(k){ var c=carrito[k]; return {id:c.p.id,nombre:baseNombre(c.p.nombre),precio:c.p.precio,cant:c.cant}; });
+  var items=itemsCarrito();
   var total=totalCarrito();
   try{
     var hoy=new Date(); hoy.setHours(0,0,0,0);
@@ -743,6 +793,7 @@ async function confirmarPedido(){
 }
 function volverInicio(){ /* v177: fin de sesión (Listo, ticket al minuto, 90 s sin tocar, vuelta de segundo plano): carrito vacío y vuelta a la pantalla inicial, lista para el siguiente cliente */
   if(_kioscoTicketTimer){ clearTimeout(_kioscoTicketTimer); _kioscoTicketTimer=null; }
+  if($("modalSalsa")) $("modalSalsa").style.display="none"; _salsaPendiente=null; /* la ventana de salsa no se queda abierta para el siguiente cliente (v183) */
   carrito={};
   $("nombreCliente").value="";
   resetVistaKiosco();
