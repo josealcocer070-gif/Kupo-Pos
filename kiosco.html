@@ -62,7 +62,8 @@ header .kiosco span{color:#fbbf24}
 /* v184 (Lalo 2026-11-27): encabezado discreto — el logo de KUPO KIOSCO chico a la izquierda y el de la pollería a la derecha, sin el nombre del negocio en texto (el logo de la pollería lo representa). Se quitan el logo grande de 56px, el nombre y la fuente Fredoka (solo se usaba para el logo en texto). */
 header .fila-marca{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .marca-kiosco{height:40px;width:auto;display:block}
-.marca-pollon{width:40px;height:40px;display:block}
+/* v187 (Lalo 2026-11-27): el logo de la pollería quedó diminuto a 40px y no se distinguía; sube a 72px (el de Kupo Kiosko queda en 40px). Vale para los 3 encabezados que usan .marca-pollon (bienvenida, menú y Pedido Recibido). */
+.marca-pollon{width:72px;height:72px;display:block}
 header .bienvenido{font-size:24px;font-weight:700;color:#fff;margin-top:10px}
 header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:2px}
 header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
@@ -198,7 +199,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.8</div>
+  <div class="pie">Kupo Kiosko · V1.0.9</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -211,7 +212,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.8</div>
+  <div class="pie">Kupo Kiosko · V1.0.9</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -238,7 +239,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.8</div>
+  <div class="pie">Kupo Kiosko · V1.0.9</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -312,7 +313,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.8</div>
+  <div class="pie">Kupo Kiosko · V1.0.9</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -453,7 +454,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.8";
+var VERSION_KIOSCO="V1.0.9";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
