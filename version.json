@@ -1,24 +1,24 @@
 {
-  "admin": {
-    "notas": "Licencias de prueba: Duración \"Prueba — 14 días\" con plan Gratuito $0 y sistema completo; la lista muestra la pastilla PRUEBA con los días que quedan y el filtro \"Pruebas\". Nuevo apartado Avisos: manda un aviso a todas las licencias activas o a una sola, con historial.",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
-    "version": "V1.19.8"
-  },
-  "movil": {
-    "notas": "V1.20.34: El botón del menú (☰) del encabezado es más grande, igual que en PC; TOTAL y Cobrar con contraste (la barra de TOTAL vuelve a azul oscuro y el botón Cobrar lleva borde y texto azul oscuro, ya no se pierden con el naranja del sistema); esta versión es la prueba del actualizador en el celular. V1.20.33: Arreglo del actualizador: la ventana de confirmación de Android ya aparece (la llave del intent era incorrecta). V1.20.32: El color del sistema ya manda en el móvil: encabezado, pastillas, botones y panel cambian con el color elegido (por defecto sigue teal). V1.20.31: El actualizador ya no se queda colgado en 100%: si Android no responde en 60 s muestra el error y el botón queda para reintentar; la pantalla dice \"Instalando…\" cuando ya está instalando. V1.20.30: Kupi muestra la animación de escribir (3 puntitos dorados) mientras prepara la respuesta. V1.20.29: Kupi saluda con los datos del día y entiende preguntas de producto con tus palabras (precio y stock por nombre); con Sin stock no inventa faltantes. V1.20.28: el menú izquierdo ahora tiene su fila de encabezado (logo KU + KUPO POS + ✕ para cerrar). V1.20.27: entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia (sin letrero visible). Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
-    "version": "V1.20.34"
-  },
-  "pc": {
-    "notas": "V1.19.15: El aviso naranja de actualización ya no se mete detrás del chat: va por encima y arriba a la izquierda, para que nunca toque el panel del chat. V1.19.14: Recargar y Modo noche salen del encabezado al menú de Acciones rápidas, para que la campanita del kiosco no mueva todo el encabezado al aparecer. V1.19.13: El botón del menú (☰) del encabezado es más grande; esta versión es la prueba del actualizador reparado. V1.19.12: Kupi saluda con los datos del día y entiende preguntas de producto con tus palabras (precio y stock por nombre); con Sin stock no inventa faltantes. Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
-    "version": "V1.19.15"
-  },
-  "kiosco": {
-    "version": "V1.0.9",
-    "notas": "V1.0.9: El logo de la pollería en el encabezado sube de 40px a 72px para que se distinga (el de Kupo Kiosko queda en 40px). V1.0.8: Encabezado discreto (logo de Kupo Kiosko chico a la izquierda y logo de la pollería a la derecha, sin el nombre del negocio en texto); ticket de confirmación más moderno con el modo (Para llevar/Local) junto al título; pantalla de Pedido Recibido moderna con QR del ticket virtual (al escanearlo se abre el ticket en el celular, con el número, los productos y el estado del pedido). V1.0.7: splash nuevo por licencia (imagen de bienvenida a pantalla completa solo en El Pollón, genérica de Kupo Kiosko en otros negocios); segunda pantalla con el logo grande de la pollería y los 2 botones funcionando; confirmación \"¡PEDIDO RECIBIDO!\" con Paga en caja; solo los chips de categorías quedan fijos al deslizar; selección de salsa para el pollo (Tamarindo, Enchilado, BBQ) visible en el ticket y en el pedido.",
-    "fecha": "2026-11-27",
-    "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-kiosco-latest/kupo-pos-kiosco.apk"
-  },
+ "admin": {
+  "notas": "Licencias de prueba: Duración \"Prueba — 14 días\" con plan Gratuito $0 y sistema completo; la lista muestra la pastilla PRUEBA con los días que quedan y el filtro \"Pruebas\". Nuevo apartado Avisos: manda un aviso a todas las licencias activas o a una sola, con historial.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-admin-latest/kupo-pos-admin.apk",
+  "version": "V1.19.8"
+ },
+ "movil": {
+  "notas": "V1.20.34: El botón del menú (☰) del encabezado es más grande, igual que en PC; TOTAL y Cobrar con contraste (la barra de TOTAL vuelve a azul oscuro y el botón Cobrar lleva borde y texto azul oscuro, ya no se pierden con el naranja del sistema); esta versión es la prueba del actualizador en el celular. V1.20.33: Arreglo del actualizador: la ventana de confirmación de Android ya aparece (la llave del intent era incorrecta). V1.20.32: El color del sistema ya manda en el móvil: encabezado, pastillas, botones y panel cambian con el color elegido (por defecto sigue teal). V1.20.31: El actualizador ya no se queda colgado en 100%: si Android no responde en 60 s muestra el error y el botón queda para reintentar; la pantalla dice \"Instalando…\" cuando ya está instalando. V1.20.30: Kupi muestra la animación de escribir (3 puntitos dorados) mientras prepara la respuesta. V1.20.29: Kupi saluda con los datos del día y entiende preguntas de producto con tus palabras (precio y stock por nombre); con Sin stock no inventa faltantes. V1.20.28: el menú izquierdo ahora tiene su fila de encabezado (logo KU + KUPO POS + ✕ para cerrar). V1.20.27: entrada al Admin oculta en el logo de Supabase del sello de la pantalla de licencia (sin letrero visible). Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-latest/kupo-pos.apk",
   "version": "V1.20.34"
+ },
+ "pc": {
+  "notas": "V1.19.16: Los pedidos del kiosco con salsa ya se pueden cobrar: el sistema ya reconoce \"Pollo R. 1/4 (Enchilado)\" en el catálogo y la salsa sale en el ticket impreso y en el historial. V1.19.15: El aviso naranja de actualización ya no se mete detrás del chat: va por encima y arriba a la izquierda, para que nunca toque el panel del chat. V1.19.14: Recargar y Modo noche salen del encabezado al menú de Acciones rápidas, para que la campanita del kiosco no mueva todo el encabezado al aparecer. V1.19.13: El botón del menú (☰) del encabezado es más grande; esta versión es la prueba del actualizador reparado. V1.19.12: Kupi saluda con los datos del día y entiende preguntas de producto con tus palabras (precio y stock por nombre); con Sin stock no inventa faltantes. Licencia de prueba con sistema completo (Kiosco, Kupi, 4 aparatos); pastillita PRUEBA cian en el encabezado; al día 15 se bloquea sin borrar datos. Avisos de KUPO Admin: al entrar aparece el aviso con botón Entendido.",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-pc-latest/kupo-pos-pc.apk",
+  "version": "V1.19.16"
+ },
+ "kiosco": {
+  "version": "V1.0.9",
+  "notas": "V1.0.9: El logo de la pollería en el encabezado sube de 40px a 72px para que se distinga (el de Kupo Kiosko queda en 40px). V1.0.8: Encabezado discreto (logo de Kupo Kiosko chico a la izquierda y logo de la pollería a la derecha, sin el nombre del negocio en texto); ticket de confirmación más moderno con el modo (Para llevar/Local) junto al título; pantalla de Pedido Recibido moderna con QR del ticket virtual (al escanearlo se abre el ticket en el celular, con el número, los productos y el estado del pedido). V1.0.7: splash nuevo por licencia (imagen de bienvenida a pantalla completa solo en El Pollón, genérica de Kupo Kiosko en otros negocios); segunda pantalla con el logo grande de la pollería y los 2 botones funcionando; confirmación \"¡PEDIDO RECIBIDO!\" con Paga en caja; solo los chips de categorías quedan fijos al deslizar; selección de salsa para el pollo (Tamarindo, Enchilado, BBQ) visible en el ticket y en el pedido.",
+  "fecha": "2026-11-27",
+  "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-kiosco-latest/kupo-pos-kiosco.apk"
+ },
+ "version": "V1.20.34"
 }
