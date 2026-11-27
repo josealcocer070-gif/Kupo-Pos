@@ -22,6 +22,10 @@ cp "$ROOT/publicidad.html" "$ROOT/www/publicidad.html"
 # respaldo por CDN): sin este archivo en www/ el Kiosco no leería productos
 # ni mandaría pedidos. En CI el archivo está en la raíz del checkout.
 cp "$ROOT/supabase.min.js" "$ROOT/www/supabase.min.js"
+# Iconos sólidos+flat del Kiosco (v176, Lalo 2026-11-26): 9 PNG en iconos/,
+# referenciados como iconos/icono-*.png desde kiosco.html; van dentro del
+# APK para que el menú se vea bien aunque el internet falle.
+cp -r "$ROOT/iconos" "$ROOT/www/iconos"
 
 # kiosco.html no tiene enlaces href="index.html", así que no lleva el parche
 # que el script de Admin aplica a admin.html (no hay nada que redirigir).
