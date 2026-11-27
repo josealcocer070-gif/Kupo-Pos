@@ -26,6 +26,9 @@ cp "$ROOT/supabase.min.js" "$ROOT/www/supabase.min.js"
 # referenciados como iconos/icono-*.png desde kiosco.html; van dentro del
 # APK para que el menú se vea bien aunque el internet falle.
 cp -r "$ROOT/iconos" "$ROOT/www/iconos"
+# Logo original de El Pollón para el splash (v179, Lalo 2026-11-26): 1 JPG en
+# imagenes/, referenciado como imagenes/logo-el-pollon.jpg desde kiosco.html.
+cp -r "$ROOT/imagenes" "$ROOT/www/imagenes"
 
 # kiosco.html no tiene enlaces href="index.html", así que no lleva el parche
 # que el script de Admin aplica a admin.html (no hay nada que redirigir).
