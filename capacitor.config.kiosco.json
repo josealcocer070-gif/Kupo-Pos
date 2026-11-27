@@ -1,1 +1,8 @@
-{"appId":"com.grupobenitez.kupopos.kiosco","appName":"Kiosco KUPO","server":{"androidScheme":"https"},"webDir":"www"}
+{
+  "appId": "com.grupobenitez.kupopos.kiosco",
+  "appName": "Kupo Kiosko",
+  "server": {
+    "androidScheme": "https"
+  },
+  "webDir": "www"
+}

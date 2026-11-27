@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0b4a6e">
-<title>Kiosco KUPO</title>
+<title>Kupo Kiosko</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="supabase.min.js"></script>
@@ -23,6 +23,9 @@
 .tipo-txt{flex:1;min-width:0}
 /* Pantalla inicial (v177, Lalo 2026-11-26): 2 botones grandes, lo primero que ve el cliente */
 .bienvenida-cuerpo{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:28px 24px 20px}
+.logos-juntos{display:flex;align-items:center;justify-content:center;gap:20px;margin:6px auto 20px}
+.logos-juntos .logo-pollon{width:120px;height:120px;display:block}
+.logos-juntos .logo-kupo{height:100px;width:auto;display:block}
 .bienvenida-cuerpo h2{font-size:30px;font-weight:900;color:#12233a;text-align:center}
 .btn-bienvenida{display:flex;align-items:center;gap:18px;width:100%;padding:26px 22px;border-radius:22px;border:3px solid #e5e7eb;background:#fff;color:#374151;text-align:left;box-shadow:0 4px 0 rgba(0,0,0,.15)}
 .btn-bienvenida img{width:110px;height:110px;object-fit:contain;flex:none}
@@ -45,8 +48,8 @@ input{font-family:inherit}
 .pantalla.activa{display:flex;flex-direction:column}
 /* Splash con el logo del negocio al abrir (v179) */
 #pantallaSplash{background:#000;align-items:center;justify-content:center}
-#pantallaSplash img{width:min(78vw,520px);height:auto;display:block}
-#pantallaSplash .splash-pie{color:#8a8a8a;font-size:16px;font-weight:700;letter-spacing:3px;margin-top:30px}
+#pantallaSplash .splash-pollon{width:min(62vw,420px);height:auto;display:block}
+#pantallaSplash .splash-kupo{width:min(64vw,430px);height:auto;display:block;margin-top:34px}
 
 /* Encabezado */
 header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.2);position:relative}
@@ -59,6 +62,8 @@ header .kiosco-logo .kiosco-chico{display:block;font-size:22px;font-weight:600;c
 header .kiosco-logo .kiosco-grande{display:block;font-size:48px;font-weight:700}
 header .fila-marca .kiosco-logo{text-align:left}
 .kiosco-logo-img{height:56px;width:auto;display:block}
+.kiosco-logo.con-pollon{display:flex;align-items:center;gap:12px}
+.logo-pollon-mini{width:56px;height:56px;display:block}
 header .negocio-menu{font-size:18px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#fff;text-align:right;max-width:46%;line-height:1.35;padding-top:6px}
 header .bienvenido{font-size:24px;font-weight:700;color:#fff;margin-top:10px}
 header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:2px}
@@ -164,20 +169,20 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
 <!-- Configuración inicial: clave de licencia -->
 <!-- Splash con el logo del negocio al abrir (v179): se ve desde que carga la página, mínimo 1.8 s mientras carga el menú -->
 <div id="pantallaSplash" class="pantalla activa">
-  <img src="imagenes/logo-el-pollon.jpg" alt="Pollos Rancheros El Pollón">
-  <div class="splash-pie">Kiosco KUPO</div>
+  <img class="splash-pollon" src="imagenes/logo-el-pollon.jpg" alt="Pollos Rancheros El Pollón">
+  <img class="splash-kupo" src="imagenes/logo-kupo-kiosco.png" alt="KUPO KIOSCO">
 </div>
 <div id="pantallaSetup" class="pantalla">
   <div class="centro">
     <div class="icono">🏪</div>
     <div class="saludo" id="saludoSetup">¡Buenos días!</div>
-    <h1>Kiosco KUPO</h1>
+    <h1>Kupo Kiosko</h1>
     <p>Escribe la clave de licencia del negocio para activar este kiosco. Se guarda solo en esta tablet.</p>
     <input id="inputLicencia" placeholder="KUPO-XXXX-XXXX" maxlength="20" autocomplete="off">
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.5</div>
+  <div class="pie">Kupo Kiosko · V1.0.6</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -190,7 +195,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.5</div>
+  <div class="pie">Kupo Kiosko · V1.0.6</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -204,6 +209,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div class="sub">Pide aquí, paga en caja 👇</div>
   </header>
   <div class="bienvenida-cuerpo">
+    <div class="logos-juntos"><img class="logo-pollon" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón"><img class="logo-kupo" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
     <h2>¿Cómo quieres tu pedido?</h2>
     <button class="btn-bienvenida llevar" onclick="elegirTipoInicio('llevar')">
       <img src="iconos/icono-para-llevar.png" alt="">
@@ -216,7 +222,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.5</div>
+  <div class="pie">Kupo Kiosko · V1.0.6</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -225,7 +231,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
   <header>
     <button id="btnActKiosco" type="button" onclick="mostrarAvisoActualizadorKiosco()" style="display:none">⬇️ Actualización</button>
     <div class="fila-marca">
-      <div class="kiosco-logo"><img class="kiosco-logo-img" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
+      <div class="kiosco-logo con-pollon"><img class="logo-pollon-mini" src="imagenes/logo-el-pollon-redondo.png" alt="Pollos Rancheros El Pollón"><img class="kiosco-logo-img" src="imagenes/logo-kupo-kiosco-corto.png" alt="KUPO KIOSCO"></div>
       <div class="negocio-menu" id="nombreNegocio">POLLOS RANCHEROS EL POLLÓN</div>
     </div>
     <div class="bienvenido">¡Bienvenido!</div>
@@ -289,12 +295,12 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.5</div>
+  <div class="pie">Kupo Kiosko · V1.0.6</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
   <div class="card">
-    <h2 id="actKVersion">Kiosco KUPO</h2>
+    <h2 id="actKVersion">Kupo Kiosko</h2>
     <p id="actKNotas">Mejoras y correcciones.</p>
     <div id="actKProgresoWrap" style="display:none;margin:14px 0">
       <div style="height:10px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden"><div id="actKProgreso" style="height:100%;width:0%;background:#f5b301"></div></div>
@@ -308,7 +314,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
   </div>
 </div>
 <script>
-/* Kiosco KUPO v175 — menú moderno: encabezado con KIOSCO KUPO (tipografía del logo) a la izquierda + nombre del negocio a la derecha + ¡Bienvenido! + saludo según la hora + "Pide aquí, paga en caja" grande (el saludo se recoge al deslizar), tarjetas cuadradas en 2 columnas con la foto recortada a la banda del producto, nombre, precio naranja y botón AGREGAR de todo el ancho (o −/+ si ya está agregado; la tarjeta ya no suma al tocarla), barra blanca fija con nombre + MANDAR PEDIDO con total, ticket de confirmación antes de enviar, chips Todo/Pollo/Combos/Bebidas/Extras, título "Lo más pedido", y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. v174: rediseño de Lalo (mockups): tarjetas con foto recortada al producto (sin logo ni "EL POLLÓN · SUC."), AGREGAR/−/+ de todo el ancho, barra blanca con total en el botón, ticket de confirmación, encabezado solo KUPO + saludo + "Pide aquí", chips Todo/Pollo/Combos/Bebidas/Extras; el ticket revisable del Total (modal) se quitó. v175: encabezado sin pollito — KIOSCO KUPO a la izquierda con tipografía del logo (Fredoka) y nombre del negocio a la derecha, ¡Bienvenido! arriba del saludo, pastilla de actualización abajo a la derecha; fondo de tarjetas cálido (degradado radial + lighten) en vez de negro. v176: iconos sólidos+flat de Lalo (9 PNG en iconos/): bolsa y mesa en los botones Para llevar/Para comer aquí, iconos en los chips de categorías, ticket en la confirmación, caja en "Paga en caja", carrito en el botón MANDAR PEDIDO y como respaldo de producto sin foto; se quitan los emojis del menú. v177: pantalla inicial con los 2 botones grandes PARA LLEVAR y PARA COMER AQUÍ como lo primero que ve el cliente; al terminar un pedido o tras 90 s sin tocar, el kiosco vuelve a esa pantalla (volverInicio reemplaza a volverMenu). v179: splash con el logo original de El Pollón (imagenes/logo-el-pollon.jpg) al abrir la app, mínimo 1.8 s mientras carga el menú; si la carga se atora más de 15 s sale la pantalla de error para que el splash nunca se quede pegado. v180: logo KUPO KIOSCO corto (imagenes/logo-kupo-kiosco-corto.png, fondo transparente) solo en los 3 encabezados en vez del texto KIOSCO KUPO; el logo de El Pollón queda solo en el splash como en v179. */
+/* Kiosco KUPO v175 — menú moderno: encabezado con KIOSCO KUPO (tipografía del logo) a la izquierda + nombre del negocio a la derecha + ¡Bienvenido! + saludo según la hora + "Pide aquí, paga en caja" grande (el saludo se recoge al deslizar), tarjetas cuadradas en 2 columnas con la foto recortada a la banda del producto, nombre, precio naranja y botón AGREGAR de todo el ancho (o −/+ si ya está agregado; la tarjeta ya no suma al tocarla), barra blanca fija con nombre + MANDAR PEDIDO con total, ticket de confirmación antes de enviar, chips Todo/Pollo/Combos/Bebidas/Extras, título "Lo más pedido", y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. v174: rediseño de Lalo (mockups): tarjetas con foto recortada al producto (sin logo ni "EL POLLÓN · SUC."), AGREGAR/−/+ de todo el ancho, barra blanca con total en el botón, ticket de confirmación, encabezado solo KUPO + saludo + "Pide aquí", chips Todo/Pollo/Combos/Bebidas/Extras; el ticket revisable del Total (modal) se quitó. v175: encabezado sin pollito — KIOSCO KUPO a la izquierda con tipografía del logo (Fredoka) y nombre del negocio a la derecha, ¡Bienvenido! arriba del saludo, pastilla de actualización abajo a la derecha; fondo de tarjetas cálido (degradado radial + lighten) en vez de negro. v176: iconos sólidos+flat de Lalo (9 PNG en iconos/): bolsa y mesa en los botones Para llevar/Para comer aquí, iconos en los chips de categorías, ticket en la confirmación, caja en "Paga en caja", carrito en el botón MANDAR PEDIDO y como respaldo de producto sin foto; se quitan los emojis del menú. v177: pantalla inicial con los 2 botones grandes PARA LLEVAR y PARA COMER AQUÍ como lo primero que ve el cliente; al terminar un pedido o tras 90 s sin tocar, el kiosco vuelve a esa pantalla (volverInicio reemplaza a volverMenu). v179: splash con el logo original de El Pollón (imagenes/logo-el-pollon.jpg) al abrir la app, mínimo 1.8 s mientras carga el menú; si la carga se atora más de 15 s sale la pantalla de error para que el splash nunca se quede pegado. v180: logo KUPO KIOSCO corto (imagenes/logo-kupo-kiosco-corto.png, fondo transparente) solo en los 3 encabezados en vez del texto KIOSCO KUPO; el logo de El Pollón queda solo en el splash como en v179. v181: nombre de la app ahora Kupo Kiosko (título, splash, setup, pies y nombre del lanzador en capacitor.config.kiosco.json); el logo de imagen sigue diciendo KIOSCO con C como lo mandó Lalo. v182: logo de El Pollón y Kupo Kiosko juntos en el splash, la segunda pantalla (bienvenida) y el encabezado del menú (imagenes/logo-el-pollon-redondo.png redondo para fondo claro/naranja). */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -415,9 +421,9 @@ window.addEventListener("offline",pintarSinInternet);
    del POS: descarga el APK y abre el instalador de Android para instalar encima, con la misma
    firma. Sin internet no hace nada y no estorba. En el navegador (sin plugin) "Actualizar ahora"
    abre el APK en una pestaña para descargarlo a mano.
-   Al subir versión: cambiar VERSION_KIOSCO y los tres pies "Kiosco KUPO · V…" (la versión del
+   Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.5";
+var VERSION_KIOSCO="V1.0.6";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -455,7 +461,7 @@ function revisarActualizacionKiosco(){
 }
 function mostrarAvisoActualizadorKiosco(){
   var m=$("modalActKiosco"); if(!m||!_actKioscoInfo) return;
-  var v=$("actKVersion"); if(v) v.textContent="Kiosco KUPO "+_actKioscoInfo.version;
+  var v=$("actKVersion"); if(v) v.textContent="Kupo Kiosko "+_actKioscoInfo.version;
   var n=$("actKNotas"); if(n) n.textContent=_actKioscoInfo.notas||"Mejoras y correcciones.";
   var w=$("actKProgresoWrap"); if(w) w.style.display="none";
   var p=$("actKPorcentaje"); if(p) p.textContent="Descargando… 0%";
@@ -525,7 +531,7 @@ async function iniciarDescargaActualizacionKiosco(){
     var r=await plug.puedeInstalar();
     if(r&&r.puede===false){
       if(sondeo)clearInterval(sondeo); if(lento)clearInterval(lento);
-      mostrarErrorActualizacionKiosco("Primero permite que Kiosco KUPO instale apps. Toca 'Abrir ajustes', actívalo y vuelve a tocar Actualizar ahora.");
+      mostrarErrorActualizacionKiosco("Primero permite que Kupo Kiosko instale apps. Toca 'Abrir ajustes', actívalo y vuelve a tocar Actualizar ahora.");
       mostrarBotonAjustesKiosco();
       if(b){b.disabled=false;b.textContent="Actualizar ahora";}
       return;
@@ -533,7 +539,7 @@ async function iniciarDescargaActualizacionKiosco(){
     var res=await plug.descargarEInstalar({url:info.url});
     if(sondeo)clearInterval(sondeo); if(lento)clearInterval(lento);
     if(res&&res.necesitaPermiso){
-      mostrarErrorActualizacionKiosco("Primero permite que Kiosco KUPO instale apps. Toca 'Abrir ajustes', actívalo y vuelve a tocar Actualizar ahora.");
+      mostrarErrorActualizacionKiosco("Primero permite que Kupo Kiosko instale apps. Toca 'Abrir ajustes', actívalo y vuelve a tocar Actualizar ahora.");
       mostrarBotonAjustesKiosco();
       if(b){b.disabled=false;b.textContent="Actualizar ahora";}
       return;

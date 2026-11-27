@@ -15,8 +15,8 @@
     "version": "V1.19.13"
   },
   "kiosco": {
-    "version": "V1.0.5",
-    "notas": "V1.0.5: logo KUPO KIOSCO en el encabezado del menú. fondo de tarjetas negro como antes, iconos sólidos+flat y splash con el logo original de El Pollón.",
+    "version": "V1.0.6",
+    "notas": "V1.0.6: nombre de la app ahora Kupo Kiosko; logo KUPO KIOSCO junto al de El Pollón en el splash, la segunda pantalla y el encabezado del menú. fondo de tarjetas negro como antes, iconos sólidos+flat y splash con el logo original de El Pollón.",
     "fecha": "2026-11-26",
     "url": "https://github.com/josealcocer070-gif/Kupo-Pos/releases/download/apk-kiosco-latest/kupo-pos-kiosco.apk"
   },
