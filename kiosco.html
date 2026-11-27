@@ -206,7 +206,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.12</div>
+  <div class="pie">Kupo Kiosko · V1.0.13</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -219,7 +219,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.12</div>
+  <div class="pie">Kupo Kiosko · V1.0.13</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -247,7 +247,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.12</div>
+  <div class="pie">Kupo Kiosko · V1.0.13</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -323,7 +323,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.12</div>
+  <div class="pie">Kupo Kiosko · V1.0.13</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -422,7 +422,7 @@ async function cargarTodo(){
   /* v188: marca por licencia — el logo/foto de El Pollón solo se muestra bajo su licencia; otras licencias ven el nombre del negocio. Se limpia el menú antes de cargar para que una carga fallida nunca deje productos de otra licencia en memoria. */
   resetEstadoKiosco(); /* v190: resetea todo el estado de la licencia anterior antes de cargar la nueva */
   try{document.body.classList.toggle("kiosco-generico",licencia!=="KUPO-EJNK-JDGZ");}catch(e){}
-  var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
+  var r1=await sb.from("licencias").select("negocio,estado").eq("clave",licencia).maybeSingle();
   if(r1.error||!r1.data){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Licencia no encontrada. Revisa la clave."; mostrar("pantallaSetup"); return; }
   negocioCrudo=(r1.data.negocio||"KUPO POS");
   negocioNombre=negocioCrudo.toUpperCase();
@@ -430,6 +430,8 @@ async function cargarTodo(){
   var n2=$("nombreNegocio2"); if(n2) n2.textContent=negocioNombre; /* v186: el nombre ya no va en el encabezado del ticket (lo representa el logo de la pollería) */
   var nb=$("nombreNegocioBienvenida"); if(nb) nb.textContent=negocioNombre;
   $("negocioApagado").textContent=negocioNombre;
+  /* v1013: licencia no Activa (Pausada/Vencida) cierra el kiosco y muestra Apagado con "Cambiar licencia"; antes solo se revisaba kioscoActivo y una licencia pausada seguía vendiendo. */
+  if((r1.data.estado||"")!=="Activa"){ mostrar("pantallaApagado"); return; }
   var r2=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
   if(r2.error){ mostrar("pantallaError"); return; }
   var opt=(r2.data&&r2.data.opciones)||{};
@@ -447,12 +449,15 @@ async function cargarTodo(){
 }
 async function revisarActivo(){
   pintarSinInternet();
+  /* v1013: licencia pausada o kiosco apagado cierran el kiosco en cualquier pantalla (antes solo se revisaba con el menú abierto, por eso en Bienvenida nunca cerraba). */
+  var rL=await sb.from("licencias").select("estado").eq("clave",licencia).maybeSingle();
+  if(!rL.error&&rL.data&&(rL.data.estado||"")!=="Activa"){ mostrar("pantallaApagado"); return; }
+  var r=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
+  if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.kioscoActivo!==true){ mostrar("pantallaApagado"); return; }
+  if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.colorSistema)aplicarColorKiosco(r.data.opciones.colorSistema);
   if(!$("pantallaMenu").classList.contains("activa")) return;
   _actKioscoContador++;
   if(_actKioscoContador%60===0) revisarActualizacionKiosco(); /* cada hora, mientras el menú está abierto */
-  var r=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
-  if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.kioscoActivo!==true){ mostrar("pantallaApagado"); }
-  if(!r.error&&r.data&&r.data.opciones&&r.data.opciones.colorSistema)aplicarColorKiosco(r.data.opciones.colorSistema);
 }
 function guardarLicencia(){
   var v=$("inputLicencia").value.trim().toUpperCase();
@@ -491,7 +496,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.12";
+var VERSION_KIOSCO="V1.0.13";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -527,10 +532,18 @@ function revisarActualizacionKiosco(){
     if($("pantallaSetup").classList.contains("activa")&&!_actKioscoDescartada) mostrarAvisoActualizadorKiosco();
   });
 }
+/* v1013: la ventana de actualización solo muestra la nota de la versión nueva, no todo el historial. */
+function notaActualizacionReciente(notas){
+ var t=String(notas||"").trim();
+ if(!t)return "";
+ var re=/V\d+\.\d+\.\d+:/g,n=0,m,idx=-1;
+ while((m=re.exec(t))!==null){n++;if(n===2){idx=m.index;break;}}
+ return idx<0?t:t.slice(0,idx).trim();
+}
 function mostrarAvisoActualizadorKiosco(){
   var m=$("modalActKiosco"); if(!m||!_actKioscoInfo) return;
   var v=$("actKVersion"); if(v) v.textContent="Kupo Kiosko "+_actKioscoInfo.version;
-  var n=$("actKNotas"); if(n) n.textContent=_actKioscoInfo.notas||"Mejoras y correcciones.";
+  var n=$("actKNotas"); if(n) n.textContent=notaActualizacionReciente(_actKioscoInfo.notas)||"Mejoras y correcciones.";
   var w=$("actKProgresoWrap"); if(w) w.style.display="none";
   var p=$("actKPorcentaje"); if(p) p.textContent="Descargando… 0%";
   var bar=$("actKProgreso"); if(bar) bar.style.width="0%";
