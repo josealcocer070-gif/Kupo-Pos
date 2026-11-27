@@ -17,5 +17,7 @@ cp "$ROOT/manifest.json" "$ROOT/www/manifest.json"
 cp "$ROOT/manifest-movil.json" "$ROOT/www/manifest-movil.json"
 cp "$ROOT/sw.js" "$ROOT/www/sw.js"
 cp "$ROOT/publicidad.html" "$ROOT/www/publicidad.html"
+# index.html y movil.html cargan Supabase con <script src="supabase.min.js"> (relativo): sin este archivo en www/ la app depende del respaldo por CDN para crear el cliente (v214). En CI el archivo está en la raíz del checkout.
+cp "$ROOT/supabase.min.js" "$ROOT/www/supabase.min.js"
 
 echo "www/ listo: $(ls "$ROOT/www")"
