@@ -206,7 +206,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.11</div>
+  <div class="pie">Kupo Kiosko · V1.0.12</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -219,7 +219,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.11</div>
+  <div class="pie">Kupo Kiosko · V1.0.12</div>
 </div>
 <!-- Pantalla inicial: 2 botones grandes (v177, Lalo 2026-11-26) -->
 <div id="pantallaBienvenida" class="pantalla">
@@ -247,7 +247,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
       <small>Precio en el local</small>
     </button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.11</div>
+  <div class="pie">Kupo Kiosko · V1.0.12</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -323,7 +323,7 @@ header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kupo Kiosko · V1.0.11</div>
+  <div class="pie">Kupo Kiosko · V1.0.12</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -394,9 +394,33 @@ async function init(){
   pedirWakeLock();
   pintarSinInternet();
 }
+/* v190: resetea todo el estado del kiosco al cambiar de licencia (K6) para que la licencia nueva no herede nada de la anterior: menú, carrito, tipo, categoría, nombre del cliente, ticket/QR, color del sistema (vuelve al neutro #0b4a6e), clase del body, timer del ticket y modal de salsa. También cancela el intervalo de revisarActivo (K5) para que no se acumule uno nuevo en cada carga. */
+var _kioscoIntervaloActivo=null;
+function resetEstadoKiosco(){
+  try{
+    if(_kioscoIntervaloActivo){clearInterval(_kioscoIntervaloActivo);_kioscoIntervaloActivo=null;}
+    if(_kioscoTicketTimer){clearTimeout(_kioscoTicketTimer);_kioscoTicketTimer=null;}
+    productos=[];grupos=[];carrito={};
+    tipo="llevar";categoria="Todo";
+    negocioNombre="POLLOS RANCHEROS EL POLLÓN";negocioCrudo="";
+    var _nc=$("nombreCliente");if(_nc)_nc.value="";
+    var _tn=$("ticketNumero");if(_tn)_tn.textContent="";
+    var _tc=$("ticketCliente");if(_tc)_tc.textContent="";
+    var _tt=$("ticketTipo");if(_tt)_tt.textContent="";
+    var _ti=$("ticketItems");if(_ti)_ti.innerHTML="";
+    var _tv=$("ticketTotalValor");if(_tv)_tv.textContent="";
+    var _qrw=$("ticketQRWrap");if(_qrw)_qrw.style.display="none";
+    var _qri=$("ticketQR");if(_qri)_qri.removeAttribute("src");
+    if($("modalSalsa"))$("modalSalsa").style.display="none";_salsaPendiente=null;
+    try{document.body.classList.remove("kiosco-generico");}catch(e){}
+    aplicarColorKiosco("#0b4a6e");
+    try{resetVistaKiosco();}catch(e){}
+    try{actualizarBarra();}catch(e){}
+  }catch(e){}
+}
 async function cargarTodo(){
   /* v188: marca por licencia — el logo/foto de El Pollón solo se muestra bajo su licencia; otras licencias ven el nombre del negocio. Se limpia el menú antes de cargar para que una carga fallida nunca deje productos de otra licencia en memoria. */
-  productos=[]; grupos=[]; carrito={};
+  resetEstadoKiosco(); /* v190: resetea todo el estado de la licencia anterior antes de cargar la nueva */
   try{document.body.classList.toggle("kiosco-generico",licencia!=="KUPO-EJNK-JDGZ");}catch(e){}
   var r1=await sb.from("licencias").select("negocio").eq("clave",licencia).maybeSingle();
   if(r1.error||!r1.data){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Licencia no encontrada. Revisa la clave."; mostrar("pantallaSetup"); return; }
@@ -419,7 +443,7 @@ async function cargarTodo(){
   renderMenu();
   var esperaSplash=Math.max(0,1800-(Date.now()-_splashInicio)); /* el splash se ve mínimo 1.8 s (v179) */
   setTimeout(function(){ mostrar("pantallaBienvenida"); },esperaSplash);
-  setInterval(revisarActivo,60000);
+  _kioscoIntervaloActivo=setInterval(revisarActivo,60000); /* v190: se guarda el id para cancelarlo en resetEstadoKiosco (K5) */
 }
 async function revisarActivo(){
   pintarSinInternet();
@@ -438,7 +462,7 @@ function guardarLicencia(){
   $("errorSetup").style.display="none";
   cargarTodo();
 }
-function cambiarLicencia(){ localStorage.removeItem("kupoPosKioscoLicencia"); licencia=""; $("inputLicencia").value=""; mostrar("pantallaSetup"); }
+function cambiarLicencia(){ localStorage.removeItem("kupoPosKioscoLicencia"); licencia=""; resetEstadoKiosco(); /* v190: no queda estado de la licencia anterior */ $("inputLicencia").value=""; mostrar("pantallaSetup"); }
 function reintentar(){ init(); }
 /* Pantalla siempre encendida + aviso de sin internet (V1.0.1): el kiosco no se
    apaga solo mientras está abierto (el permiso se pierde al esconder la app,
@@ -467,7 +491,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los cuatro pies "Kupo Kiosko · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.11";
+var VERSION_KIOSCO="V1.0.12";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
