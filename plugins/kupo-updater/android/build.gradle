@@ -35,4 +35,8 @@ dependencies {
     // (KupoUpdaterPlugin.java) y sin esta línea Gradle no lo ve al compilar.
     // Versión igual a la de Capacitor 7 para no chocar con la del sistema.
     implementation "androidx.core:core:1.13.1"
+    // v218: getActivity() devuelve AppCompatActivity (la actividad de
+    // Capacitor) y sin esta línea el compilador no encuentra esa clase
+    // ("cannot access AppCompatActivity"). Versión igual a la de Capacitor 7.
+    implementation "androidx.appcompat:appcompat:1.7.0"
 }
