@@ -30,11 +30,13 @@ header{background:var(--azul,#0b4a6e);color:#fff;padding:18px 20px 14px;text-ali
 header .negocio{font-size:15px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;opacity:.95}
 header .kiosco{font-size:30px;font-weight:900;letter-spacing:1px;margin-top:2px}
 header .kiosco span{color:#fbbf24}
-header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
+header .kiosco-logo{font-size:46px;font-weight:900;color:#fbbf24;letter-spacing:1px;line-height:1.1}
+header .saludo-menu{font-size:30px;font-weight:900;color:#fff;margin-top:4px}
+header .sub{display:inline-block;font-size:20px;font-weight:800;margin-top:8px;background:rgba(0,0,0,.22);border-radius:999px;padding:6px 16px}
 /* Aviso sin internet + parte superior fija (V1.0.1) */
 #bannerSinInternet{background:#f59e0b;color:#451a03;text-align:center;font-size:15px;font-weight:800;padding:10px 16px}
 .fija-superior{position:sticky;top:0;z-index:30;background:#fff8ec}
-.fija-superior.compacta .bienvenida{display:none}
+.fija-superior.compacta .saludo-menu{display:none}
 .fija-superior.compacta{box-shadow:0 2px 10px rgba(0,0,0,.12)}
 /* Actualizador del Kiosco (V1.0.0): pastilla discreta en el encabezado + ventana oscura con borde dorado, como el POS */
 #btnActKiosco{position:absolute;right:12px;top:12px;background:#f5b301;color:#12233a;border:0;border-radius:999px;padding:8px 12px;font-size:14px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.35)}
@@ -46,27 +48,10 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
 #modalActKiosco .btn-amarillo:disabled{opacity:.6}
 #modalActKiosco .btn-borde{display:block;width:100%;background:transparent;color:#f5b301;border:2px solid #f5b301;border-radius:12px;padding:10px;font-size:15px;font-weight:bold;margin-bottom:10px}
 #modalActKiosco .btn-gris2{display:block;width:100%;background:transparent;color:#e8f0f2;border:1px solid rgba(255,255,255,.45);border-radius:12px;padding:10px;font-size:15px}
-/* Revisar el pedido: el ticket del carrito (V1.0.1) */
-#modalTicket{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px}
-#modalTicket .card{background:#fff;color:#1f2937;border-radius:20px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-#modalTicket h2{font-size:24px;margin-bottom:12px}
-#modalTicket .li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:17px;padding:10px 0;border-bottom:1px solid #e5e7eb}
-#modalTicket .li .nom{flex:1}
-#modalTicket .li .cant{display:flex;align-items:center;gap:8px}
-#modalTicket .li .cant button{width:38px;height:38px;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff;font-size:22px;font-weight:900}
-#modalTicket .li .cant b{min-width:24px;text-align:center}
-#modalTicket .li .sub{font-weight:800;white-space:nowrap}
-#ticketRevisarTotal{display:flex;justify-content:space-between;font-size:22px;font-weight:900;margin:14px 0}
-#modalTicket .btn-amarillo{display:block;width:100%;background:#f5b301;color:#12233a;border:0;border-radius:12px;padding:14px;font-size:18px;font-weight:bold;margin-bottom:10px}
-#modalTicket .btn-gris2{display:block;width:100%;background:transparent;color:#374151;border:1px solid #d1d5db;border-radius:12px;padding:12px;font-size:16px}
 </style>
 </head>
 <body>
 <style>
-/* Saludo de bienvenida centrado (v171) */
-.bienvenida{text-align:center;padding:22px 20px 4px}
-.bienvenida .saludo-menu{font-size:40px;font-weight:900;color:var(--azul,#0b4a6e);line-height:1.15;margin-top:10px}
-.bienvenida .saludo-pregunta{font-size:17px;color:#6b7280;margin-top:4px}
 /* Tipo: para llevar / para comer aquí */
 .tipo{display:flex;gap:12px;padding:16px 20px 6px}
 .tipo button{flex:1;padding:18px 8px;font-size:21px;font-weight:800;border-radius:16px;border:3px solid #e5e7eb;background:#fff;color:#374151}
@@ -77,42 +62,37 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
 .filtros::-webkit-scrollbar{display:none}
 .filtros button{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-size:16px;font-weight:700;border-radius:999px;border:2px solid #e5e7eb;background:#fff;color:#374151}
 .filtros button.activo{background:var(--azul,#0b4a6e);border-color:var(--azul,#0b4a6e);color:#fff}
-/* Rejilla de productos: tarjetas modernas de foto completa (v171) */
+/* Rejilla de productos: tarjetas cuadradas 2 columnas (v174): la foto se recorta a la banda del producto (las fotos traen logo arriba y "EL POLLÓN · SUC." abajo) */
+#tituloSeccion{font-size:26px;font-weight:900;color:#12233a;padding:16px 20px 0}
 #grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 20px 150px}
-.tarjeta{position:relative;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.12);border:2px solid transparent;transition:transform .15s ease,box-shadow .15s ease;cursor:pointer;aspect-ratio:1}
-.tarjeta:active{transform:scale(.96);box-shadow:0 2px 6px rgba(0,0,0,.12)}
-.tarjeta .foto-grande{width:100%;height:100%;object-fit:cover;display:block}
-.tarjeta .sombra-abajo{position:absolute;left:0;right:0;bottom:0;height:38%;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.35));pointer-events:none}
-.tarjeta .pastilla-precio{position:absolute;left:12px;bottom:12px;background:#fff;color:var(--azul,#0b4a6e);font-size:26px;font-weight:900;padding:8px 16px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-.tarjeta .btn-mas{position:absolute;right:12px;bottom:12px;width:56px;height:56px;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff;font-size:34px;font-weight:900;box-shadow:0 3px 8px rgba(0,0,0,.35);transition:transform .12s ease}
-.tarjeta .btn-mas:active{transform:scale(.88)}
-.tarjeta .pastilla-cant{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:6px;background:var(--azul,#0b4a6e);color:#fff;border-radius:999px;padding:6px 8px;box-shadow:0 3px 8px rgba(0,0,0,.35)}
-.tarjeta .pastilla-cant button{width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:26px;font-weight:900}
-.tarjeta .pastilla-cant button:active{transform:scale(.88)}
-.tarjeta .pastilla-cant b{font-size:26px;min-width:30px;text-align:center}
+.tarjeta{position:relative;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.12);border:2px solid transparent;display:flex;flex-direction:column}
+.tarjeta .foto-wrap{aspect-ratio:2.5/1;overflow:hidden;background:#000}
+.tarjeta .foto-wrap.foto-icono{display:flex;align-items:center;justify-content:center;background:#fff8ec}
+.tarjeta .foto-wrap.foto-icono .icono-3d-grande{width:72px;height:72px;font-size:40px}
+.tarjeta .foto-grande{width:100%;height:auto;display:block;margin-top:-48%}
+.tarjeta .info{padding:14px 14px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.tarjeta h3{font-size:19px;line-height:1.25;color:#12233a;text-align:center}
+.tarjeta .precio{font-size:28px;font-weight:900;color:var(--azul,#0b4a6e);text-align:center}
+.tarjeta .agregar{width:100%;padding:14px;font-size:19px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff}
+.tarjeta .agregar:active{transform:scale(.97)}
+.tarjeta .cant-row{display:flex;align-items:center;justify-content:center;gap:14px}
+.tarjeta .cant-row button{width:52px;height:52px;font-size:28px;font-weight:900;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff}
+.tarjeta .cant-row button:active{transform:scale(.9)}
+.tarjeta .cant-row b{font-size:26px;min-width:30px;text-align:center}
 .tarjeta.en-carrito{border-color:var(--azul,#0b4a6e)}
-/* Sin foto: tarjeta con icono 3D grande, nombre y precio */
-.tarjeta.sin-foto{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 14px;gap:8px}
-.tarjeta.sin-foto h3{font-size:18px;line-height:1.25;margin:4px 0 0;text-align:center}
-.tarjeta.sin-foto .precio{font-size:26px;font-weight:900;color:var(--azul,#0b4a6e)}
-.tarjeta.sin-foto .cant-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px}
-.tarjeta.sin-foto .cant-row button{width:48px;height:48px;font-size:26px;font-weight:900;border-radius:50%;border:none;background:var(--azul,#0b4a6e);color:#fff}
-.tarjeta.sin-foto .cant-row b{font-size:24px;min-width:28px;text-align:center}
-.tarjeta.sin-foto .agregar{margin-top:8px;width:100%;padding:13px;font-size:17px;font-weight:800;border-radius:12px;border:none;background:var(--azul,#0b4a6e);color:#fff}
 #sinResultados{grid-column:1/-1;text-align:center;padding:40px 10px;font-size:18px;color:#6b7280}
 </style>
 <style>
-/* Barra inferior: nombre + total + mandar pedido */
-#barra{position:fixed;left:0;right:0;bottom:0;background:var(--azul,#0b4a6e);color:#fff;padding:14px 20px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.25);z-index:10}
+/* Barra inferior fija (v174): pastilla blanca con el nombre y el botón de mandar con el total */
+#barra{position:fixed;left:0;right:0;bottom:0;background:#fff;padding:14px 16px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.18);z-index:10}
 #barra .fila{display:flex;gap:10px;align-items:center}
-#nombreCliente{flex:1;min-width:0;padding:14px 16px;font-size:18px;border-radius:12px;border:2px solid transparent;outline:none}
+#nombreCliente{flex:0 0 34%;min-width:0;padding:16px 14px;font-size:18px;border-radius:12px;border:2px solid #e5e7eb;outline:none}
+#nombreCliente:focus{border-color:var(--azul,#0b4a6e)}
 #nombreCliente.error{border-color:#ef4444;background:#fef2f2}
-#totalBarra{background:transparent;color:#fff;border:0;padding:0;font-size:22px;font-weight:900;white-space:nowrap;text-decoration:underline}
-#btnLimpiarCarrito{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:10px;padding:10px 12px;font-size:15px;font-weight:700;white-space:nowrap}
-#btnMandar{width:100%;margin-top:10px;padding:16px;font-size:21px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+#btnMandar{flex:1;min-width:0;padding:16px 10px;font-size:17px;line-height:1.25;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+#btnMandar.gris{background:#9ca3af;box-shadow:none}
 #btnMandar:disabled{background:#9ca3af;box-shadow:none;opacity:.7}
 #btnMandar.enviando{background:#9ca3af;box-shadow:none}
-#hintNombre{text-align:center;font-size:14px;color:#fca5a5;margin-top:8px;display:none}
 /* Ticket para foto */
 #ticketCard{background:#fff;border-radius:20px;margin:24px 20px;padding:28px 20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.12);flex:1}
 #ticketCard .tu-numero{font-size:20px;font-weight:800;color:#6b7280;letter-spacing:1px}
@@ -125,6 +105,18 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
 #ticketTotal{display:flex;justify-content:space-between;font-size:24px;font-weight:900;border-top:2px dashed #e5e7eb;margin-top:12px;padding-top:12px}
 #ticketFoto{font-size:19px;font-weight:800;color:var(--azul,#0b4a6e);margin-top:18px}
 #btnListo{margin:0 20px 24px;padding:18px;font-size:22px;font-weight:900;border-radius:16px;border:none;background:#16a34a;color:#fff;box-shadow:0 4px 0 #166534}
+/* Ticket de confirmación antes de enviar (v174) */
+#ticketConfirmar{background:#fff;border-radius:20px;margin:24px 20px;padding:28px 20px;box-shadow:0 4px 20px rgba(0,0,0,.12);flex:1}
+#ticketConfirmar h2{font-size:28px;font-weight:900;color:#12233a;margin-bottom:14px}
+#confirmarItems .li{display:flex;justify-content:space-between;font-size:18px;padding:7px 0}
+#confirmarItems .li b{white-space:nowrap;margin-left:10px}
+#confirmarTotal{display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:800;border-top:2px dashed #e5e7eb;margin-top:12px;padding-top:14px}
+#confirmarTotalValor{font-size:34px;font-weight:900;color:var(--azul,#0b4a6e)}
+.confirmar-nombre{margin-top:16px;font-size:16px;color:#6b7280}
+.confirmar-nombre b{display:block;font-size:22px;color:#12233a;margin-top:2px}
+#btnConfirmar{width:100%;margin-top:20px;padding:18px;font-size:20px;font-weight:900;border-radius:14px;border:none;background:var(--azul,#0b4a6e);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+#btnConfirmar:active{transform:scale(.98)}
+#btnEditar{width:100%;margin-top:12px;padding:16px;font-size:19px;font-weight:800;border-radius:14px;border:2px solid #d1d5db;background:#fff;color:#374151}
 /* Pantallas de setup / apagado / error */
 .centro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;text-align:center}
 .centro .icono{font-size:72px}
@@ -151,7 +143,7 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
     <div id="errorSetup" class="error-msg"></div>
     <button class="btn-grande" onclick="guardarLicencia()">Guardar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.1</div>
+  <div class="pie">Kiosco KUPO · V1.0.2</div>
 </div>
 <!-- Kiosco apagado -->
 <div id="pantallaApagado" class="pantalla">
@@ -164,7 +156,7 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
     <button class="btn-gris" onclick="cambiarLicencia()">Cambiar licencia</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.1</div>
+  <div class="pie">Kiosco KUPO · V1.0.2</div>
 </div>
 <!-- Menú -->
 <div id="pantallaMenu" class="pantalla">
@@ -172,30 +164,23 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
   <div id="bannerSinInternet" style="display:none">⚠️ Sin internet — revisa el wifi para mandar tu pedido</div>
   <header>
     <button id="btnActKiosco" type="button" onclick="mostrarAvisoActualizadorKiosco()" style="display:none">⬇️ Actualización</button>
-    <div class="negocio" id="nombreNegocio">POLLOS RANCHEROS EL POLLÓN</div>
-    <div class="kiosco">KIOSCO <span>KUPO</span></div>
+    <div class="kiosco-logo">🐤 KUPO</div>
+    <div class="saludo-menu" id="saludoMenu">¡Buenas tardes!</div>
     <div class="sub">Pide aquí, paga en caja 👇</div>
   </header>
-  <div class="bienvenida">
-    <span class="icono-3d-grande f-oro" id="iconoSaludo">☀️</span>
-    <div class="saludo-menu" id="saludoMenu">¡Buenos días!</div>
-    <div class="saludo-pregunta">¿Qué se te antoja hoy?</div>
-  </div>
   <div class="tipo">
     <button id="btnLlevar" class="activo" onclick="elegirTipo('llevar')"><span class="icono-3d-mini f-coral">🥡</span> Para llevar<small>Precio para llevar</small></button>
     <button id="btnLocal" onclick="elegirTipo('local')"><span class="icono-3d-mini f-teal">🍽️</span> Para comer aquí<small>Precio en el local</small></button>
   </div>
   <div class="filtros" id="filtros"></div>
   </div>
+  <div id="tituloSeccion">Lo más pedido</div>
   <div id="grid"></div>
   <div id="barra">
     <div class="fila">
       <input id="nombreCliente" placeholder="Tu nombre" maxlength="30" autocomplete="off">
-      <button id="totalBarra" type="button" onclick="abrirTicket()">🧾 Total $0</button>
-      <button id="btnLimpiarCarrito" type="button" onclick="limpiarCarritoKiosco()" style="display:none">✕ Limpiar</button>
+      <button id="btnMandar" onclick="mostrarConfirmacion()" disabled>MANDAR PEDIDO</button>
     </div>
-    <button id="btnMandar" onclick="mandarPedido()" disabled>Mandar pedido</button>
-    <div id="hintNombre">Escribe tu nombre para mandar el pedido 🙂</div>
   </div>
 </div>
 <!-- Ticket -->
@@ -216,6 +201,21 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
   </div>
   <button id="btnListo" onclick="volverMenu()">✅ Listo</button>
 </div>
+<!-- Ticket de confirmación antes de enviar -->
+<div id="pantallaConfirmar" class="pantalla">
+  <header>
+    <div class="kiosco-logo">🐤 KUPO</div>
+    <div class="sub">Pide aquí, paga en caja 👇</div>
+  </header>
+  <div id="ticketConfirmar">
+    <h2>Tu Pedido</h2>
+    <div id="confirmarItems"></div>
+    <div id="confirmarTotal"><span>Total</span><span id="confirmarTotalValor">$0</span></div>
+    <div class="confirmar-nombre"><span>Tu nombre</span><b id="confirmarNombre"></b></div>
+    <button id="btnConfirmar" type="button" onclick="confirmarPedido()">CONFIRMAR Y MANDAR PEDIDO</button>
+    <button id="btnEditar" type="button" onclick="mostrar('pantallaMenu')">EDITAR PEDIDO</button>
+  </div>
+</div>
 <!-- Sin internet -->
 <div id="pantallaError" class="pantalla">
   <div class="centro">
@@ -225,7 +225,7 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
     <p id="textoError">No se pudo conectar con la nube. Revisa el wifi de la tablet y avisa al cajero.</p>
     <button class="btn-grande" onclick="reintentar()">Reintentar</button>
   </div>
-  <div class="pie">Kiosco KUPO · V1.0.1</div>
+  <div class="pie">Kiosco KUPO · V1.0.2</div>
 </div>
 <!-- Actualizador del Kiosco: ventana de actualización (la abre la pastilla dorada del menú o aparece sola en configuración) -->
 <div id="modalActKiosco">
@@ -243,18 +243,8 @@ header .sub{display:inline-block;font-size:16px;font-weight:800;margin-top:6px;b
     <button id="btnActKMasTarde" class="btn-gris2" type="button" onclick="cerrarAvisoActualizadorKiosco(true)">Más tarde</button>
   </div>
 </div>
-<!-- Revisar el pedido: el ticket del carrito (se abre tocando el Total) -->
-<div id="modalTicket" onclick="if(event.target===this)cerrarTicket()">
-  <div class="card">
-    <h2>Tu pedido</h2>
-    <div id="ticketRevisarItems"></div>
-    <div id="ticketRevisarTotal"><span>Total</span><span id="ticketRevisarTotalValor">$0</span></div>
-    <button class="btn-amarillo" type="button" onclick="cerrarTicket();mandarPedido()">Mandar pedido</button>
-    <button class="btn-gris2" type="button" onclick="cerrarTicket()">Seguir pidiendo</button>
-  </div>
-</div>
 <script>
-/* Kiosco KUPO v173 — menú moderno: saludo de bienvenida centrado según la hora con icono 3D (sol en la mañana, sol con nube en la tarde, luna en la noche), tarjetas de foto completa con pastilla de precio y botón + redondo, animación al toque (la tarjeta se hunde), iconos 3D del sistema en filtros, toggle y buscador, y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano, botón Limpiar) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. */
+/* Kiosco KUPO v174 — menú moderno: encabezado con 🐤 KUPO + saludo según la hora + "Pide aquí, paga en caja" grande (el saludo se recoge al deslizar), tarjetas cuadradas en 2 columnas con la foto recortada a la banda del producto, nombre, precio naranja y botón AGREGAR de todo el ancho (o −/+ si ya está agregado; la tarjeta ya no suma al tocarla), barra blanca fija con nombre + MANDAR PEDIDO con total, ticket de confirmación antes de enviar, chips Todo/Pollo/Combos/Bebidas/Extras, título "Lo más pedido", y color del sistema (opciones.colorSistema, sube desde la app; Naranja en El Pollón). La foto del kiosco es SEPARADA de la foto del menú original: el kiosco usa foto_kiosco y si está vacía usa foto. Lee siempre como anónimo; pide el cliente, cobra el cajero. Sin inventario, sin caja. v172: actualizador propio (VERSION_KIOSCO, lee version.json, pastilla dorada en el menú + ventana de actualización). v173: limpieza automática del carrito (90 s sin tocar, al volver de segundo plano) + mejoras de Lalo: sin buscador, parte superior fija, ticket revisable, nombre sin duplicar, "Pide aquí" más visible, pollo primero, total en el botón, aviso sin internet, tope 20, pantalla encendida. v174: rediseño de Lalo (mockups): tarjetas con foto recortada al producto (sin logo ni "EL POLLÓN · SUC."), AGREGAR/−/+ de todo el ancho, barra blanca con total en el botón, ticket de confirmación, encabezado solo KUPO + saludo + "Pide aquí", chips Todo/Pollo/Combos/Bebidas/Extras; el ticket revisable del Total (modal) se quitó. */
 var SUPABASE_URL="https://zzyzvjmrsiwwjpebuggz.supabase.co";
 var SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6eXp2am1yc2l3d2pwZWJ1Z2d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MTEyMTYsImV4cCI6MjExMDA4NzIxNn0.Sqd5FgSIkEtjNSdD48dq7IsDcUc2cKk6LZveK56JooA";
 var sb=null;
@@ -264,21 +254,25 @@ var negocioNombre="POLLOS RANCHEROS EL POLLÓN";
 var productos=[];      /* crudos de la nube */
 var grupos=[];         /* agrupados por nombre base */
 var tipo="llevar";
-var categoria="Todos";
+var categoria="Todo";
 var carrito={};        /* id del producto visible -> {p, cant} */
 var EMOJI_CAT={"Pollo":"🍗","Refrescos":"🥤","Complementos":"🍚","Salsas":"🌶️","Agua natural":"💧","Agua":"💧"};
 var CLASE_CAT={"Pollo":"f-coral","Refrescos":"f-azul","Complementos":"f-verde","Salsas":"f-morado","Agua natural":"f-teal","Agua":"f-teal"};
+/* Chips del menú (v174): las categorías reales de El Pollón son Pollo, Refrescos, Agua natural, Complementos y Salsas; se agrupan en Bebidas (Refrescos + Agua) y Extras (Complementos + Salsas). Combos aparece solo cuando David cree productos en la categoría "Combos". */
+var CHIPS_KIOSCO=["Todo","Pollo","Combos","Bebidas","Extras"];
+var MAPA_CHIP={"Pollo":["Pollo"],"Combos":["Combos"],"Bebidas":["Refrescos","Agua natural","Agua"],"Extras":["Complementos","Salsas"]};
+var EMOJI_CHIP={"Todo":"⭐","Pollo":"🍗","Combos":"🍱","Bebidas":"🥤","Extras":"🍟"};
+var CLASE_CHIP={"Todo":"f-oro","Pollo":"f-coral","Combos":"f-morado","Bebidas":"f-azul","Extras":"f-verde"};
 var negocioCrudo="";
 function ic3d(e,c){ return '<span class="icono-3d-mini '+c+'">'+e+'</span>'; }
 function claseDe(p){ return CLASE_CAT[(p.categoria||"").trim()]||"f-gris"; }
-function iconoSaludo(){ var h=new Date().getHours(); if(h>=5&&h<12)return["☀️","f-oro"]; if(h>=12&&h<19)return["🌤️","f-azul"]; return["🌙","f-morado"]; }
 function aplicarColorKiosco(hex){ if(typeof hex!=="string"||!/^#[0-9a-fA-F]{6}$/.test(hex))hex="#0b4a6e"; var r=document.documentElement; if(r&&r.style&&r.style.setProperty)r.style.setProperty("--azul",hex); var m=document.querySelector('meta[name="theme-color"]'); if(m)m.content=hex; }
 function $(id){ return document.getElementById(id); }
 function escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function dinero(n){ return "$"+Math.round(Number(n)||0); }
 function saludoKiosco(){ var h=new Date().getHours(); return h>=5&&h<12?"¡Buenos días!":h>=12&&h<19?"¡Buenas tardes!":"¡Buenas noches!"; }
-function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); var sm=$("saludoMenu"); if(sm)sm.textContent=s; var ic=$("iconoSaludo"); if(ic){ var is=iconoSaludo(); ic.textContent=is[0]; ic.className="icono-3d-grande "+is[1]; } }
-function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); pintarSaludo(); }
+function pintarSaludo(){ var s=saludoKiosco(); ["saludoSetup","saludoApagado","saludoError"].forEach(function(id){ var e=$(id); if(e)e.textContent=s; }); var sm=$("saludoMenu"); if(sm)sm.textContent=s; }
+function mostrar(id){ ["pantallaSetup","pantallaApagado","pantallaMenu","pantallaTicket","pantallaConfirmar","pantallaError"].forEach(function(x){ $(x).classList.toggle("activa",x===id); }); pintarSaludo(); }
 function baseNombre(n){ return String(n||"").replace(/\s+(llevar|local|p\/llevar)\s*$/i,"").trim(); }
 function emojiDe(p){ if(p.foto_kiosco||p.foto) return null; return EMOJI_CAT[(p.categoria||"").trim()]||"📦"; }
 async function init(){
@@ -295,7 +289,7 @@ async function cargarTodo(){
   if(r1.error||!r1.data){ $("errorSetup").style.display="block"; $("errorSetup").textContent="Licencia no encontrada. Revisa la clave."; mostrar("pantallaSetup"); return; }
   negocioCrudo=(r1.data.negocio||"KUPO POS");
   negocioNombre=negocioCrudo.toUpperCase();
-  $("nombreNegocio").textContent=negocioNombre;
+  var nn=$("nombreNegocio"); if(nn) nn.textContent=negocioNombre; /* el menú ya no muestra el nombre (v174), queda en el ticket */
   $("nombreNegocio2").textContent=negocioNombre;
   $("negocioApagado").textContent=negocioNombre;
   var r2=await sb.from("opciones_licencia").select("opciones").eq("licencia_clave",licencia).maybeSingle();
@@ -358,7 +352,7 @@ window.addEventListener("offline",pintarSinInternet);
    abre el APK en una pestaña para descargarlo a mano.
    Al subir versión: cambiar VERSION_KIOSCO y los tres pies "Kiosco KUPO · V…" (la versión del
    Kiosco vive en version.json, entrada "kiosco"). */
-var VERSION_KIOSCO="V1.0.1";
+var VERSION_KIOSCO="V1.0.2";
 var URL_VERSION_JSON="https://josealcocer070-gif.github.io/Kupo-Pos/version.json";
 var _actKioscoInfo=null;
 var _actKioscoDescartada=false;
@@ -517,11 +511,22 @@ function visibleDe(g){
   if(tipo==="llevar") return g.llevar||g.solo||g.local;
   return g.local||g.solo||g.llevar;
 }
+function enChip(p,chip){
+  if(chip==="Todo") return true;
+  if(!p) return false;
+  var c=(p.categoria||"").trim();
+  return (MAPA_CHIP[chip]||[]).indexOf(c)>=0;
+}
 function renderFiltros(){
-  var cats=[];
-  grupos.forEach(function(g){ var c=(visibleDe(g).categoria||"General").trim(); if(cats.indexOf(c)<0) cats.push(c); });
-  cats.sort(function(a,b){ if(a==="Pollo") return -1; if(b==="Pollo") return 1; return a<b?-1:a>b?1:0; });
-  $("filtros").innerHTML='<button class="'+(categoria==="Todos"?"activo":"")+'" onclick="elegirCat(\'Todos\')">'+ic3d("⭐","f-oro")+'Todos</button>'+cats.map(function(c){ return '<button class="'+(categoria===c?"activo":"")+'" onclick="elegirCat(\''+escHtml(c)+'\')">'+ic3d(EMOJI_CAT[c]||"📦",CLASE_CAT[c]||"f-gris")+escHtml(c)+'</button>'; }).join("");
+  var html="";
+  CHIPS_KIOSCO.forEach(function(chip){
+    if(chip!=="Todo"){
+      var n=grupos.filter(function(g){ return enChip(visibleDe(g),chip); }).length;
+      if(!n) return; /* Combos no sale hasta que David cree productos en esa categoría */
+    }
+    html+='<button class="'+(categoria===chip?"activo":"")+'" onclick="elegirCat(\''+chip+'\')">'+ic3d(EMOJI_CHIP[chip]||"📦",CLASE_CHIP[chip]||"f-gris")+escHtml(chip)+'</button>';
+  });
+  $("filtros").innerHTML=html;
 }
 function elegirCat(c){ categoria=c; renderFiltros(); renderMenu(); }
 function elegirTipo(t){
@@ -533,30 +538,21 @@ function elegirTipo(t){
 function renderMenu(){
   var lista=grupos.map(visibleDe).filter(function(p){
     if(!p) return false;
-    if(categoria!=="Todos"&&(p.categoria||"General").trim()!==categoria) return false;
-    return true;
+    return enChip(p,categoria);
   });
+  var ts=$("tituloSeccion"); if(ts) ts.textContent=categoria==="Todo"?"Lo más pedido":categoria;
   var g=$("grid");
   if(!lista.length){ g.innerHTML='<div id="sinResultados">😕 No hay productos en esta categoría.</div>'; return; }
   g.innerHTML=lista.map(function(p){
     var cant=carrito[p.id]?carrito[p.id].cant:0;
     var em=emojiDe(p);
-    if(em){
-      return '<div class="tarjeta sin-foto'+(cant>0?" en-carrito":"")+'" onclick="cambiarCant(\''+p.id+'\',1)">'+
-        '<span class="icono-3d-grande '+claseDe(p)+'">'+em+'</span>'+
-        '<h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
-        '<div class="precio">'+dinero(p.precio)+'</div>'+
-        (cant>0?'<div class="cant-row"><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+</button></div>'
-               :'<button class="agregar" onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+ Agregar</button>')+
-        '</div>';
-    }
-    return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'" onclick="cambiarCant(\''+p.id+'\',1)">'+
-      '<img class="foto-grande" src="'+escHtml(p.foto_kiosco||p.foto)+'" alt="">'+
-      '<div class="sombra-abajo"></div>'+
-      '<div class="pastilla-precio">'+dinero(p.precio)+'</div>'+
-      (cant>0?'<div class="pastilla-cant"><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+</button></div>'
-             :'<button class="btn-mas" onclick="event.stopPropagation();cambiarCant(\''+p.id+'\',1)">+</button>')+
-      '</div>';
+    var fotoHtml=em?'<div class="foto-wrap foto-icono"><span class="icono-3d-grande '+claseDe(p)+'">'+em+'</span></div>'
+                   :'<div class="foto-wrap"><img class="foto-grande" src="'+escHtml(p.foto_kiosco||p.foto)+'" alt=""></div>';
+    var control=cant>0?'<div class="cant-row"><button onclick="cambiarCant(\''+p.id+'\',-1)">−</button><b>'+cant+'</b><button onclick="cambiarCant(\''+p.id+'\',1)">+</button></div>'
+                       :'<button class="agregar" onclick="cambiarCant(\''+p.id+'\',1)">AGREGAR</button>';
+    return '<div class="tarjeta'+(cant>0?" en-carrito":"")+'">'+fotoHtml+
+      '<div class="info"><h3>'+escHtml(baseNombre(p.nombre))+'</h3>'+
+      '<div class="precio">'+dinero(p.precio)+'</div>'+control+'</div></div>';
   }).join("");
 }
 function cambiarCant(id,d){
@@ -568,8 +564,6 @@ function cambiarCant(id,d){
   carrito[id].cant+=d;
   if(carrito[id].cant<=0) delete carrito[id];
   renderMenu(); actualizarBarra();
-  var mt=$("modalTicket");
-  if(mt&&mt.style.display==="flex"){ if(!Object.keys(carrito).length) cerrarTicket(); else renderTicket(); }
 }
 function totalCarrito(){
   var t=0; Object.keys(carrito).forEach(function(k){ t+=carrito[k].p.precio*carrito[k].cant; });
@@ -577,29 +571,32 @@ function totalCarrito(){
 }
 function actualizarBarra(){
   var n=Object.keys(carrito).length;
-  $("totalBarra").textContent="🧾 Total "+dinero(totalCarrito());
+  var nombre=$("nombreCliente").value.trim();
   var bm=$("btnMandar");
   bm.disabled=n===0;
-  bm.textContent=n===0?"Mandar pedido":"Mandar pedido · "+dinero(totalCarrito());
-  var bl=$("btnLimpiarCarrito"); if(bl) bl.style.display=n===0?"none":"";
+  bm.classList.toggle("gris",n>0&&!nombre);
+  if(n===0) bm.textContent="MANDAR PEDIDO";
+  else if(!nombre) bm.textContent="Escribe tu nombre para mandar pedido";
+  else bm.textContent="MANDAR PEDIDO · Total "+dinero(totalCarrito());
 }
-$("nombreCliente").addEventListener("input",function(){ $("nombreCliente").classList.remove("error"); $("hintNombre").style.display="none"; });
+$("nombreCliente").addEventListener("input",function(){ $("nombreCliente").classList.remove("error"); actualizarBarra(); });
 /* Limpieza automática del carrito (V1.0.1, Lalo 2026-11-26): el kiosco es de
    uso público — si un cliente deja productos y se va sin mandar el pedido, el
    siguiente cliente lo encontraba cargado (así salió el pedido al abrir, sin
    tocar nada: la app venía con el toque de antes o un toque al despertar la
    tablet cayó en la tarjeta). Si pasan 90 s sin tocar la pantalla y hay algo
    en el carrito, se vacía solo y el menú queda limpio (también vuelven los
-   filtros a "Todos" y el tipo a "Para llevar", para que el siguiente cliente
+   filtros a "Todo" y el tipo a "Para llevar", para que el siguiente cliente
    no herede nada del anterior). También se vacía al volver a la app después
-   de más de 60 s en segundo plano. El botón "Limpiar" de la barra lo vacía
-   a mano. */
+   de más de 60 s en segundo plano. Desde v174 ya no hay botón Limpiar en la
+   barra: el cliente quita productos con el − de cada tarjeta o en el ticket
+   de confirmación con EDITAR PEDIDO. */
 var _kioscoInactivoMs=90000;
 var _kioscoUltimoToque=Date.now();
 var _kioscoOcultoDesde=0;
 var _kioscoTicketTimer=null;
 function resetVistaKiosco(){
-  categoria="Todos"; tipo="llevar";
+  categoria="Todo"; tipo="llevar";
   $("btnLlevar").classList.add("activo"); $("btnLocal").classList.remove("activo");
   renderFiltros();
 }
@@ -611,9 +608,9 @@ function limpiarCarritoKiosco(){
 function tocarKiosco(){ _kioscoUltimoToque=Date.now(); }
 setInterval(function(){
   if(!carrito||!Object.keys(carrito).length) return;
-  if(!$("pantallaMenu").classList.contains("activa")) return;
-  var mt=$("modalTicket"); if(mt&&mt.style.display==="flex") return; /* revisando el pedido, no limpiar */
-  if(Date.now()-_kioscoUltimoToque>=_kioscoInactivoMs) limpiarCarritoKiosco();
+  if(Date.now()-_kioscoUltimoToque<_kioscoInactivoMs) return;
+  if($("pantallaMenu").classList.contains("activa")) limpiarCarritoKiosco();
+  else if($("pantallaConfirmar").classList.contains("activa")) volverMenu(); /* se quedó en el ticket de confirmación y se fue */
 },10000);
 ["touchstart","click","input"].forEach(function(ev){ document.addEventListener(ev,tocarKiosco,{passive:true}); });
 document.addEventListener("visibilitychange",function(){
@@ -627,35 +624,28 @@ window.addEventListener("scroll",function(){
   var f=$("fijaSuperior"); if(!f) return;
   f.classList.toggle("compacta",window.scrollY>80);
 },{passive:true});
-/* Revisar el pedido (V1.0.1, Lalo 2026-11-26): tocando el Total se abre el
-   ticket del carrito para ver o cambiar lo agregado (más/menos por producto);
-   si se quita el último producto se cierra solo. */
-function renderTicket(){
-  var el=$("ticketRevisarItems"); if(!el) return;
-  var keys=Object.keys(carrito);
-  if(!keys.length){ el.innerHTML='<p style="font-size:17px;color:#6b7280">Tu pedido está vacío.</p>'; }
-  else{
-    el.innerHTML=keys.map(function(k){ var c=carrito[k]; return '<div class="li"><span class="nom">'+escHtml(baseNombre(c.p.nombre))+'</span><span class="cant"><button onclick="cambiarCant(\''+k+'\',-1)">−</button><b>'+c.cant+'</b><button onclick="cambiarCant(\''+k+'\',1)">+</button></span><span class="sub">'+dinero(c.p.precio*c.cant)+'</span></div>'; }).join("");
-  }
-  var tv=$("ticketRevisarTotalValor"); if(tv) tv.textContent=dinero(totalCarrito());
-}
-function abrirTicket(){
-  if(!Object.keys(carrito).length) return;
-  renderTicket();
-  var m=$("modalTicket"); if(m) m.style.display="flex";
-}
-function cerrarTicket(){
-  var m=$("modalTicket"); if(m) m.style.display="none";
-}
 </script>
 <script>
-async function mandarPedido(){
+/* Ticket de confirmación antes de enviar (v174, Lalo 2026-11-26): al dar
+   MANDAR PEDIDO no se envía directo; se muestra el ticket con los productos,
+   el total y el nombre, con CONFIRMAR Y MANDAR PEDIDO (naranja) y EDITAR
+   PEDIDO (gris, vuelve al menú sin borrar nada). */
+function mostrarConfirmacion(){
   var nombre=$("nombreCliente").value.trim();
-  if(!nombre){ $("nombreCliente").classList.add("error"); $("hintNombre").style.display="block"; $("nombreCliente").focus(); return; }
   if(!Object.keys(carrito).length) return;
+  if(!nombre){ $("nombreCliente").classList.add("error"); $("nombreCliente").focus(); return; }
+  var items=Object.keys(carrito).map(function(k){ var c=carrito[k]; return {id:c.p.id,nombre:baseNombre(c.p.nombre),precio:c.p.precio,cant:c.cant}; });
+  $("confirmarItems").innerHTML=items.map(function(it){ return '<div class="li"><span>'+it.cant+' × '+escHtml(it.nombre)+'</span><b>'+dinero(it.precio*it.cant)+'</b></div>'; }).join("");
+  $("confirmarTotalValor").textContent=dinero(totalCarrito());
+  $("confirmarNombre").textContent=nombre;
+  mostrar("pantallaConfirmar");
+}
+async function confirmarPedido(){
+  var nombre=$("nombreCliente").value.trim();
+  if(!nombre||!Object.keys(carrito).length) return;
   if(!navigator.onLine){ mostrar("pantallaError"); return; }
-  var btn=$("btnMandar");
-  btn.disabled=true; btn.classList.add("enviando"); btn.textContent="Mandando...";
+  var btn=$("btnConfirmar");
+  btn.disabled=true; btn.textContent="Mandando...";
   var items=Object.keys(carrito).map(function(k){ var c=carrito[k]; return {id:c.p.id,nombre:baseNombre(c.p.nombre),precio:c.p.precio,cant:c.cant}; });
   var total=totalCarrito();
   try{
@@ -676,7 +666,7 @@ async function mandarPedido(){
   }catch(e){
     mostrar("pantallaError");
   }finally{
-    btn.disabled=false; btn.classList.remove("enviando"); btn.textContent="Mandar pedido";
+    btn.disabled=false; btn.textContent="CONFIRMAR Y MANDAR PEDIDO";
   }
 }
 function volverMenu(){
