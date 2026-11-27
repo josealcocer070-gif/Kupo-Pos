@@ -109,6 +109,30 @@ public class KupoUpdaterPlugin extends Plugin {
         }
     }
 
+    /* v218 (Lalo 2026-11-27): controles de ventana de KUPO POS PC (tablet).
+       Minimizar manda la app al fondo (como el botón Inicio) y Cerrar la
+       cierra por completo. Viven aquí para no crear otro plugin (el
+       actualizador ya está cableado en las 3 apps). */
+    @PluginMethod
+    public void minimizar(PluginCall call) {
+        call.resolve();
+        try {
+            getActivity().runOnUiThread(() -> getActivity().moveTaskToBack(true));
+        } catch (Exception e) {
+            // la app sigue abierta; el JS ya recibió la respuesta
+        }
+    }
+
+    @PluginMethod
+    public void cerrar(PluginCall call) {
+        call.resolve();
+        try {
+            getActivity().runOnUiThread(() -> getActivity().finishAffinity());
+        } catch (Exception e) {
+            // la app ya se está cerrando
+        }
+    }
+
     @PluginMethod
     public void obtenerProgreso(PluginCall call) {
         JSObject ret = new JSObject();

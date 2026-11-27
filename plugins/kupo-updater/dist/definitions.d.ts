@@ -9,6 +9,8 @@ export interface KupoUpdaterPlugin {
         puede: boolean;
     }>;
     abrirAjustesInstalacion(): Promise<void>;
+    minimizar(): Promise<void>;
+    cerrar(): Promise<void>;
     obtenerProgreso(): Promise<ProgresoDescarga>;
     descargarEInstalar(options: {
         url: string;
